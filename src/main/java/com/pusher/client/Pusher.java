@@ -7,7 +7,6 @@ import com.pusher.client.util.Factory;
 public class Pusher {
 
     private final Connection connection;
-    private final String apiKey;
     
     public Pusher(String apiKey) {
 	
@@ -15,8 +14,7 @@ public class Pusher {
 	    throw new IllegalArgumentException("API Key cannot be null or empty");
 	}
 	
-	this.apiKey = apiKey;
-	this.connection = Factory.newConnection();
+	this.connection = Factory.newConnection(apiKey);
     }
     
     /* Connection methods */
@@ -28,12 +26,12 @@ public class Pusher {
     
     public void connect()
     {
-	connection.connect(apiKey);
+	connection.connect();
     }
     
     public void connect(ConnectionEventListener eventListener)
     {
 	connection.setEventListener(eventListener);
-	connection.connect(apiKey);
+	connection.connect();
     }
 }

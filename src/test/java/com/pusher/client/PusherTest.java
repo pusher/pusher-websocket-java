@@ -24,9 +24,7 @@ import com.pusher.client.util.Factory;
 public class PusherTest {
 
     private static final String API_KEY = "123456";
-    
     private Pusher pusher;
-    
     private @Mock Connection mockConnection;
     private @Mock ConnectionEventListener mockConnectionEventListener;
     
@@ -34,7 +32,7 @@ public class PusherTest {
     public void setUp()
     {
 	PowerMockito.mockStatic(Factory.class);
-	when(Factory.newConnection()).thenReturn(mockConnection);
+	when(Factory.newConnection(API_KEY)).thenReturn(mockConnection);
 	
 	this.pusher = new Pusher(API_KEY);
     }
@@ -58,7 +56,7 @@ public class PusherTest {
     @Test
     public void testConnectCallIsDelegatedToUnderlyingConnection() {
 	pusher.connect();
-	verify(mockConnection).connect(API_KEY);
+	verify(mockConnection).connect();
     }
     
     @Test
@@ -67,6 +65,6 @@ public class PusherTest {
 	
 	InOrder inOrder = inOrder(mockConnection);
 	inOrder.verify(mockConnection).setEventListener(mockConnectionEventListener);
-	inOrder.verify(mockConnection).connect(API_KEY);
+	inOrder.verify(mockConnection).connect();
     }    
 }
