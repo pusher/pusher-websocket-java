@@ -78,6 +78,12 @@
 							</goals>
 							<configuration>
 								<classifier>${env.snapshotname}</classifier>
+						        <archive>                   
+						            <manifest>
+						                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+						            </manifest>
+						        </archive>								
 							</configuration>
 						</execution>
 					</executions>

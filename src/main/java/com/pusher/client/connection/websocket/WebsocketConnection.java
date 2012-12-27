@@ -18,7 +18,7 @@ public class WebsocketConnection implements Connection, WebSocketListener {
 
     private static final String CONNECTION_ESTABLISHED = "connection_established";
     private static final String URI_PREFIX = "ws://ws.pusherapp.com:80/app/";
-    private static final String URI_SUFFIX = "?client=java-client&version=0.0.1";
+    private static final String URI_SUFFIX = "?client=java-client&version=" + WebsocketConnection.class.getPackage().getImplementationVersion();
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     
     private ConnectionState state = ConnectionState.DISCONNECTED;
