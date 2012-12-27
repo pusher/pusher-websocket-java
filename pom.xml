@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.pusher</groupId>
+	<artifactId>pusher-java-client</artifactId>
+	<name>Pusher Java Client Library</name>
+	<version>0.0.1</version>
+
+	<description>
+		This is a Java client library for Pusher, targeted at core Java and Android.
+	</description>
+
+	<!-- TODO: when a license has been selected -->
+	<licenses>
+		<license>
+			<name>myname</name>
+			<url>http://www.myname/licenses/LICENSE.txt</url>
+			<distribution>http://mybuildserver:8080/my-repo/</distribution>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>Pusher</name>
+		<url>http://pusher.com</url>
+	</organization>
+
+	<issueManagement>
+		<system>Github</system>
+		<url>https://github.com/leggetter/pusher-java-client/issues</url>
+	</issueManagement>
+
+	<build>
+		<finalName>${project.artifactId}-${project.version}</finalName>
+		<outputDirectory>target/classes</outputDirectory>
+		<testOutputDirectory>target/test-classes</testOutputDirectory>
+		<directory>target</directory>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+		</testResources>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.4</version>
+					<executions>
+						<execution>
+							<id>make-assembly</id>
+							<phase>package</phase>
+							<goals>
+								<goal>single</goal>
+							</goals>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/kit.xml</descriptor>
+								</descriptors>
+								<finalName>${project.artifactId}-${project.version}</finalName>
+								<outputDirectory>target</outputDirectory>
+								<workDirectory>target/assembly/work</workDirectory>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+							<configuration>
+								<classifier>${env.snapshotname}</classifier>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>	
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.5.2</version>
+				<configuration>
+					<check>
+						<haltOnFailure>false</haltOnFailure>
+						<branchRate>80</branchRate>
+						<lineRate>80</lineRate>
+						<packageLineRate>80</packageLineRate>
+						<packageBranchRate>80</packageBranchRate>
+						<totalBranchRate>80</totalBranchRate>
+						<totalLineRate>80</totalLineRate>		
+					</check>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+						  <goal>clean</goal>
+						  <goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.8.5</version>
+		</dependency> 	
+	   <dependency>
+	      <groupId>org.powermock</groupId>
+	      <artifactId>powermock-module-junit4</artifactId>
+	      <version>1.4.11</version>
+	      <scope>test</scope>
+	   </dependency>
+	   <dependency>
+	      <groupId>org.powermock</groupId>
+	      <artifactId>powermock-api-mockito</artifactId>
+	      <version>1.4.11</version>
+	      <scope>test</scope>
+	   </dependency>
+	</dependencies>
+	
+	<repositories />
+
+	<distributionManagement />
+	
+	<reporting>
+		<outputDirectory>target/site</outputDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>2.0-beta-3</version>
+				<configuration>
+					<issueLinkTemplate />
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<instrumentation>
+						<excludes>
+							<exclude>**/Factory.class</exclude>
+						</excludes>
+					</instrumentation>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<groups>
+						<group>
+							<title>${project.groupId} ${project.artifactId}</title>
+							<packages>${project.groupId}.${project.artifactId}</packages>
+						</group>
+					</groups>
+					<linksource>true</linksource>
+					<links>
+						<link>http://download.oracle.com/javase/6/docs/api</link>
+					</links>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.1.1</version>
+				<configuration>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>	
+		</plugins>
+	</reporting>
+</project>
