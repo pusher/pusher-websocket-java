@@ -7,7 +7,8 @@ import java.util.concurrent.Executors;
 
 import org.java_websocket.client.WebSocketClient;
 
-import com.pusher.client.connection.Connection;
+import com.pusher.client.channel.PublicChannel;
+import com.pusher.client.connection.InternalConnection;
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
 import com.pusher.client.connection.websocket.WebSocketListener;
 import com.pusher.client.connection.websocket.WebsocketConnection;
@@ -16,7 +17,7 @@ public class Factory {
 
     private static ExecutorService eventQueue;
     
-    public static Connection newConnection(String apiKey) {
+    public static InternalConnection newConnection(String apiKey) {
 	try {
 	    return new WebsocketConnection(apiKey);
 	} catch (URISyntaxException e) {
@@ -33,5 +34,9 @@ public class Factory {
 	    eventQueue = Executors.newSingleThreadExecutor();
 	}
 	return eventQueue;
+    }
+
+    public static PublicChannel newPublicChannel(String channelName) {
+	return new PublicChannel(channelName);
     }
 }
