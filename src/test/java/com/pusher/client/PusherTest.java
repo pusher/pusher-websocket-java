@@ -16,6 +16,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelManager;
 import com.pusher.client.channel.PublicChannel;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -31,6 +32,7 @@ public class PusherTest {
     
     private Pusher pusher;
     private @Mock InternalConnection mockConnection;
+    private @Mock ChannelManager mockChannelManager;
     private @Mock ConnectionEventListener mockConnectionEventListener;
     private @Mock PublicChannel mockPublicChannel;
     private @Mock ChannelEventListener mockChannelEventListener;
@@ -39,7 +41,8 @@ public class PusherTest {
     public void setUp()
     {
 	PowerMockito.mockStatic(Factory.class);
-	when(Factory.newConnection(API_KEY)).thenReturn(mockConnection);
+	when(Factory.getConnection(API_KEY)).thenReturn(mockConnection);
+	when(Factory.getChannelManager(mockConnection)).thenReturn(mockChannelManager);
 	when(Factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
 	
 	this.pusher = new Pusher(API_KEY);
@@ -77,20 +80,19 @@ public class PusherTest {
     }
     
     @Test
-    public void testSubscribeCreatesPublicChannelAndPassesItToTheConnection() {
+    public void testSubscribeCreatesPublicChannelAndDelegatesCallToTheChannelManager() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
 	pusher.subscribe(PUBLIC_CHANNEL_NAME, mockChannelEventListener);
 	
-	verify(mockConnection).subscribeTo(mockPublicChannel);
+	verify(mockChannelManager).subscribeTo(mockPublicChannel, mockChannelEventListener);
     }
     
     @Test
-    public void testSubscribeWithEventNamesCreatesPublicChannelAndBindsTheListenerToTheEvents() {
+    public void testSubscribeWithEventNamesCreatesPublicChannelAndDelegatesCallToTheChannelManager() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
 	pusher.subscribe(PUBLIC_CHANNEL_NAME, mockChannelEventListener, "event1", "event2");
 	
-	verify(mockPublicChannel).bind("event1", mockChannelEventListener);
-	verify(mockPublicChannel).bind("event2", mockChannelEventListener);
+	verify(mockChannelManager).subscribeTo(mockPublicChannel, mockChannelEventListener, "event1", "event2");
     }
 
     @Test(expected=IllegalStateException.class)
@@ -105,6 +107,13 @@ public class PusherTest {
 	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
 	
 	pusher.subscribe(PUBLIC_CHANNEL_NAME, mockChannelEventListener);
+    }
+    
+    @Test
+    public void testUnsubscribeDelegatesCallToTheChannelManager() {
+	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
+	pusher.unsubscribe(PUBLIC_CHANNEL_NAME);
+	verify(mockChannelManager).unsubscribeFrom(PUBLIC_CHANNEL_NAME);
     }
     
     @Test(expected=IllegalStateException.class)

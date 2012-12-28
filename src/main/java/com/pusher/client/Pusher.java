@@ -2,6 +2,7 @@ package com.pusher.client;
 
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelManager;
 import com.pusher.client.channel.PublicChannel;
 import com.pusher.client.connection.Connection;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -12,6 +13,7 @@ import com.pusher.client.util.Factory;
 public class Pusher {
 
     private final InternalConnection connection;
+    private final ChannelManager channelManager;
     
     public Pusher(String apiKey) {
 	
@@ -19,7 +21,8 @@ public class Pusher {
 	    throw new IllegalArgumentException("API Key cannot be null or empty");
 	}
 	
-	this.connection = Factory.newConnection(apiKey);
+	this.connection = Factory.getConnection(apiKey);
+	this.channelManager = Factory.getChannelManager(connection);
     }
     
     /* Connection methods */
@@ -39,10 +42,6 @@ public class Pusher {
     
     /* Subscription methods */
     
-    public Channel subscribe(String channelName) {
-	return subscribe(channelName, null);
-    }
-    
     public Channel subscribe(String channelName, ChannelEventListener listener, String... eventNames) {
 	
 	if(connection.getState() != ConnectionState.CONNECTED) {
@@ -50,12 +49,7 @@ public class Pusher {
 	}
 	
 	PublicChannel channel = Factory.newPublicChannel(channelName);
-	
-	for(String eventName : eventNames) {
-	    channel.bind(eventName, listener);
-	}
-	
-	connection.subscribeTo(channel);
+	channelManager.subscribeTo(channel, listener, eventNames);
 	
 	return channel;
     }
@@ -66,6 +60,6 @@ public class Pusher {
 	    throw new IllegalStateException("Cannot unsubscribe from channel " + channelName + " while not connected");
 	}
 	
-	connection.unsubscribeFrom(channelName);
+	channelManager.unsubscribeFrom(channelName);
     }
 }

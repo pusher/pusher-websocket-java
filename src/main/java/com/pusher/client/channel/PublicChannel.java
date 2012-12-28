@@ -12,7 +12,8 @@ import com.pusher.client.util.Factory;
 public class PublicChannel implements InternalChannel {
 
     private final String name;
-    private final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>(); 
+    private final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
+    private ChannelState state = ChannelState.INITIAL;
 
     public PublicChannel(String channelName) {
 	
@@ -39,6 +40,10 @@ public class PublicChannel implements InternalChannel {
 	
 	if(listener == null) {
 	    throw new IllegalArgumentException("Cannot bind to channel " + name + " with a null listener");
+	}
+	
+	if(state == ChannelState.UNSUBSCRIBED) {
+	    throw new IllegalStateException("Cannot bind to events on a channel that has been unsubscribed. Call Pusher.subscribe() to resubscribe to this channel");
 	}
 	
 	Set<ChannelEventListener> listeners = eventNameToListenerMap.get(eventName);
@@ -98,15 +103,19 @@ public class PublicChannel implements InternalChannel {
     }
 
     @Override
-    public void subscribeSent() {
+    public void updateState(ChannelState state) {
 	
-	for(Set<ChannelEventListener> listeners : eventNameToListenerMap.values()) {
-	    for(final ChannelEventListener listener : listeners) {
-		Factory.getEventQueue().execute(new Runnable() {
-		    public void run() {
-			listener.onSubscriptionSucceeded(PublicChannel.this);
-		    }
-		});
+	this.state = state;
+	
+	if(state == ChannelState.SUBSCRIBE_SENT) {
+	    for(Set<ChannelEventListener> listeners : eventNameToListenerMap.values()) {
+		for(final ChannelEventListener listener : listeners) {
+		    Factory.getEventQueue().execute(new Runnable() {
+			public void run() {
+			    listener.onSubscriptionSucceeded(PublicChannel.this);
+			}
+		    });
+		}
 	    }
 	}
     }

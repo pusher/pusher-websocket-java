@@ -2,14 +2,12 @@ package com.pusher.client.connection.websocket;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import com.google.gson.Gson;
-import com.pusher.client.channel.InternalChannel;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
@@ -18,12 +16,9 @@ import com.pusher.client.util.Factory;
 
 public class WebsocketConnection implements InternalConnection, WebSocketListener {
 
-    private static final String CONNECTION_ESTABLISHED = "connection_established";
     private static final String URI_PREFIX = "ws://ws.pusherapp.com:80/app/";
     private static final String URI_SUFFIX = "?client=java-client&version=" + WebsocketConnection.class.getPackage().getImplementationVersion();
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
-    
-    private final Map<String, InternalChannel> channelNameToChannelMap = new HashMap<String, InternalChannel>();
     
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClient underlyingConnection;
@@ -68,48 +63,21 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
     }
     
     /** InternalConnection implementation detail **/
-    
-    @Override
-    public void subscribeTo(final InternalChannel channel) {
-	
-	if(channelNameToChannelMap.containsKey(channel.getName())) {
-	    throw new IllegalArgumentException("Already subscribed to channel " + channel.getName());
-	}
-	
-	Factory.getEventQueue().execute(new Runnable() {
-	    public void run() {
-		if(state == ConnectionState.CONNECTED) {
-		    
-		    channelNameToChannelMap.put(channel.getName(), channel);
-		    
-		    String subscriptionMessage = channel.toSubscribeMessage();
-		    underlyingConnection.send(subscriptionMessage);
-		    
-		    channel.subscribeSent();
-		} else {
-		    // TODO: queue the subscription for when the connection is up
-		}
-	    }
-	});
-    }
 
     @Override
-    public void unsubscribeFrom(final String channelName) {
+    public void sendMessage(final String message) {
 
-	if(!channelNameToChannelMap.containsKey(channelName)) {
-	    throw new IllegalArgumentException("Cannot unsubscribe from channel " + channelName + ", no existing subscription found");
-	}
-	
 	Factory.getEventQueue().execute(new Runnable() {
 	    public void run() {
-		if(state == ConnectionState.CONNECTED) {
-		    
-		    InternalChannel channel = channelNameToChannelMap.remove(channelName);
-		    
-		    String subscriptionMessage = channel.toUnsubscribeMessage();
-		    underlyingConnection.send(subscriptionMessage);
-		} else {
-		    // TODO: queue the unsubscribe for when the connection is up
+		
+		try {
+        		if(state == ConnectionState.CONNECTED) {
+        		    underlyingConnection.send(message);
+        		} else {
+        		    eventListener.onError("Cannot send a message while in " + state + " state", null, null);
+        		}
+		} catch(Exception e) {
+		    eventListener.onError("An exception occurred while sending message [" + message + "]", null, e);
 		}
 	    }
 	});	
@@ -129,35 +97,29 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 	if(event.startsWith(INTERNAL_EVENT_PREFIX)) {
 	    handleInternalEvent(event, wholeMessage);
 	} else {
-	    handleUserEvent(event, wholeMessage);
+	    Factory.getChannelManager(this).onMessage(event, wholeMessage);
 	}
     }
     
-    @SuppressWarnings("rawtypes")
-    private void handleUserEvent(String event, String wholeMessage) {
+    private void handleInternalEvent(String event, String wholeMessage) {
 	
-	Map json = new Gson().fromJson(wholeMessage, Map.class);
-	Object channelNameObject = json.get("channel");
-	
-	if(channelNameObject != null) {
-	    String channelName = (String) channelNameObject;
-	    
-	    InternalChannel channel = channelNameToChannelMap.get(channelName);
-	    if(channel != null) {
-		channel.onMessage(event, wholeMessage);
-	    }
+	if(event.equals("pusher:connection_established") && state == ConnectionState.CONNECTING) {
+	    updateState(ConnectionState.CONNECTED);
+	} else if(event.equals("pusher:error")) {
+	    handleError(wholeMessage);
 	}
     }
 
-    private void handleInternalEvent(String event, String wholeMessage) {
+    @SuppressWarnings({ "unchecked" })
+    private void handleError(String wholeMessage) {
+
+	Map<Object, Object> json = new Gson().fromJson(wholeMessage, Map.class);
+	Map<Object, Object> data = (Map<Object, Object>) json.get("data");
 	
-	String internalEventType = event.split(":")[1];
+	String message = (String) data.get("message");
+	String code = String.valueOf(Math.round((Double)data.get("code")));
 	
-	if(internalEventType.equals(CONNECTION_ESTABLISHED) && state == ConnectionState.CONNECTING) {
-	    updateState(ConnectionState.CONNECTED);
-	} else if(internalEventType.equals("error")) {
-	    // TODO: what do we do with these?
-	}
+	eventListener.onError(message, code, null);
     }
 
     /* WebSocketListener implementation */
@@ -185,22 +147,25 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 	
 	Factory.getEventQueue().execute(new Runnable() {
 	    public void run() {
+		
 		updateState(ConnectionState.DISCONNECTED);
 	    }
 	});
     }
 
     @Override
-    public void onError(Exception ex) {
+    public void onError(final Exception ex) {
 	
 	Factory.getEventQueue().execute(new Runnable() {
 	    public void run() {
 		updateState(ConnectionState.DISCONNECTED);
+		eventListener.onError("An exception was thrown by the websocket", null, ex);
 	    }
 	});
     }
     
     private class NullConnectionEventListener implements ConnectionEventListener {
 	public void onConnectionStateChange(ConnectionStateChange change) { /* ignore */ }
+	public void onError(String message, String code, Exception e) { /* ignore */ }
     }
 }

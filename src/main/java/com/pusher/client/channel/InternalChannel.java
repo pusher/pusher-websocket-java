@@ -8,5 +8,5 @@ public interface InternalChannel extends Channel {
 
     void onMessage(String event, String message);
     
-    void subscribeSent();
+    void updateState(ChannelState subscribeSent);
 }

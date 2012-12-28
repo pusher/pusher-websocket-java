@@ -99,4 +99,18 @@ public class PublicChannelTest {
     public void testBindWithNullListenerThrowsException() {
 	channel.bind(EVENT_NAME, null);
     }
+    
+    @Test
+    public void testUpdateStateToSubscribeSentNotifiesListenerThatSubscriptionSucceeded() {
+	channel.bind(EVENT_NAME, mockListener);
+	channel.updateState(ChannelState.SUBSCRIBE_SENT);
+	
+	verify(mockListener).onSubscriptionSucceeded(channel);
+    }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testBindWhenInUnsubscribedStateThrowsException() {
+	channel.updateState(ChannelState.UNSUBSCRIBED);
+	channel.bind(EVENT_NAME, mockListener);
+    }
 }

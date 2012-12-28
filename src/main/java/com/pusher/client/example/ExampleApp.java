@@ -52,4 +52,10 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
 	
 	System.out.println(String.format("Subscription to channel [%s] succeeded", channel.getName()));
     }
+
+    @Override
+    public void onError(String message, String code, Exception e) {
+	
+	System.out.println(String.format("An error was received with message [%s], code [%s], exception [%s]", message, code, e));
+    }
 }
