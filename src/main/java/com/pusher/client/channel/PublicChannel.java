@@ -34,17 +34,7 @@ public class PublicChannel implements InternalChannel {
     @Override
     public void bind(String eventName, ChannelEventListener listener) {
 	
-	if(eventName == null || eventName.isEmpty()) {
-	    throw new IllegalArgumentException("Cannot bind to channel " + name + " with a null or empty event name");
-	}
-	
-	if(listener == null) {
-	    throw new IllegalArgumentException("Cannot bind to channel " + name + " with a null listener");
-	}
-	
-	if(state == ChannelState.UNSUBSCRIBED) {
-	    throw new IllegalStateException("Cannot bind to events on a channel that has been unsubscribed. Call Pusher.subscribe() to resubscribe to this channel");
-	}
+	validateArguments(eventName, listener);
 	
 	Set<ChannelEventListener> listeners = eventNameToListenerMap.get(eventName);
 	if(listeners == null) {
@@ -55,6 +45,20 @@ public class PublicChannel implements InternalChannel {
 	listeners.add(listener);
     }
 
+    @Override
+    public void unbind(String eventName, ChannelEventListener listener) {
+	
+	validateArguments(eventName, listener);
+	
+	Set<ChannelEventListener> listeners = eventNameToListenerMap.get(eventName);
+	if(listeners != null) {
+	    listeners.remove(listener);
+	    if(listeners.isEmpty()) {
+		eventNameToListenerMap.remove(eventName);
+	    }
+	}
+    }
+    
     /* InternalChannel implementation */
    
     @Override
@@ -132,4 +136,18 @@ public class PublicChannel implements InternalChannel {
 	return gson.toJson(jsonObject.get("data"));
     }
 
+    private void validateArguments(String eventName, ChannelEventListener listener) {
+	
+	if(eventName == null) {
+	    throw new IllegalArgumentException("Cannot bind or unbind to channel " + name + " with a null event name");
+	}
+	
+	if(listener == null) {
+	    throw new IllegalArgumentException("Cannot bind or unbind to channel " + name + " with a null listener");
+	}
+	
+	if(state == ChannelState.UNSUBSCRIBED) {
+	    throw new IllegalStateException("Cannot bind or unbind to events on a channel that has been unsubscribed. Call Pusher.subscribe() to resubscribe to this channel");
+	}
+    }
 }

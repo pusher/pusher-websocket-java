@@ -84,6 +84,16 @@ public class PublicChannelTest {
 	
 	verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
     }    
+
+    @Test
+    public void testEventIsNotPassedOnIfListenerHasUnboundFromEvent() {
+	
+	channel.bind(EVENT_NAME, mockListener);
+	channel.unbind(EVENT_NAME, mockListener);
+	channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
+	
+	verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
+    }
     
     @Test(expected=IllegalArgumentException.class)
     public void testBindWithNullEventNameThrowsException() {
@@ -91,13 +101,26 @@ public class PublicChannelTest {
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void testBindWithEmptyEventNameThrowsException() {
-	channel.bind("", mockListener);
+    public void testBindWithNullListenerThrowsException() {
+	channel.bind(EVENT_NAME, null);
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void testBindWithNullListenerThrowsException() {
+    public void testUnbindWithNullEventNameThrowsException() {
+	channel.bind(EVENT_NAME, mockListener);
+	channel.unbind(null, mockListener);
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testUnbindWithNullListenerThrowsException() {
 	channel.bind(EVENT_NAME, null);
+	channel.unbind(EVENT_NAME, null);
+    }
+    
+    @Test
+    public void testUnbindWhenListenerIsNotBoundToEventIsIgnoredAndDoesNotThrowException() {
+	channel.bind(EVENT_NAME, mockListener);
+	channel.unbind("different event name", mockListener);
     }
     
     @Test
@@ -113,4 +136,11 @@ public class PublicChannelTest {
 	channel.updateState(ChannelState.UNSUBSCRIBED);
 	channel.bind(EVENT_NAME, mockListener);
     }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testUnbindWhenInUnsubscribedStateThrowsException() {
+	channel.bind(EVENT_NAME, mockListener);
+	channel.updateState(ChannelState.UNSUBSCRIBED);
+	channel.unbind(EVENT_NAME, mockListener);
+    }    
 }
