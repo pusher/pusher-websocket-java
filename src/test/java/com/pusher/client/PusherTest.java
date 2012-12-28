@@ -2,14 +2,14 @@ package com.pusher.client;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -65,18 +65,39 @@ public class PusherTest {
     }
     
     @Test
-    public void testConnectCallIsDelegatedToUnderlyingConnection() {
+    public void testConnectCallWithNoListenerIsDelegatedToUnderlyingConnection() {
 	pusher.connect();
 	verify(mockConnection).connect();
     }
     
     @Test
-    public void testConnectCallWithListenerIsDelegatedToUnderlyingConnection() {
+    public void testConnectCallWithListenerAndEventsBindsListenerToEventsBeforeConnecting() {
+	pusher.connect(mockConnectionEventListener, ConnectionState.CONNECTED, ConnectionState.DISCONNECTED);
+	
+	verify(mockConnection).bind(ConnectionState.CONNECTED, mockConnectionEventListener);
+	verify(mockConnection).bind(ConnectionState.DISCONNECTED, mockConnectionEventListener);
+	verify(mockConnection).connect();
+    }
+    
+    @Test
+    public void testConnectCallWithListenerAndNoEventsBindsListenerToAllEventsBeforeConnecting() {
 	pusher.connect(mockConnectionEventListener);
 	
-	InOrder inOrder = inOrder(mockConnection);
-	inOrder.verify(mockConnection).setEventListener(mockConnectionEventListener);
-	inOrder.verify(mockConnection).connect();
+	verify(mockConnection).bind(ConnectionState.ALL, mockConnectionEventListener);
+	verify(mockConnection).connect();
+    }
+    
+    @Test
+    public void testConnectCallWithNullListenerAndNoEventsJustConnectsWithoutBinding() {
+	pusher.connect(null);
+	
+	verify(mockConnection, never()).bind(any(ConnectionState.class), any(ConnectionEventListener.class));
+	verify(mockConnection).connect();
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testConnectCallWithNullListenerAndEventsThrowsException() {
+	pusher.connect(null, ConnectionState.CONNECTED);
     }
     
     @Test

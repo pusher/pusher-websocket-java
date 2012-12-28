@@ -2,7 +2,10 @@ package com.pusher.client.connection.websocket;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -20,11 +23,15 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
     private static final String URI_SUFFIX = "?client=java-client&version=" + WebsocketConnection.class.getPackage().getImplementationVersion();
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     
+    private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClient underlyingConnection;
-    private volatile ConnectionEventListener eventListener = new NullConnectionEventListener();
     
     public WebsocketConnection(String apiKey) throws URISyntaxException {
+	
+	for(ConnectionState state : ConnectionState.values()) {
+	    eventListeners.put(state, new HashSet<ConnectionEventListener>());
+	}
 	
 	this.underlyingConnection = Factory.newWebSocketClientWrapper(new URI(URI_PREFIX + apiKey + URI_SUFFIX), this);
     }
@@ -46,15 +53,8 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
     }
 
     @Override
-    public void setEventListener(ConnectionEventListener eventListener) {
-	
-	this.eventListener = eventListener;
-    }
-
-    @Override
     public void bind(ConnectionState state, ConnectionEventListener eventListener) {
-	// TODO Auto-generated method stub
-	
+	eventListeners.get(state).add(eventListener);
     }
 
     @Override
@@ -74,10 +74,10 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
         		if(state == ConnectionState.CONNECTED) {
         		    underlyingConnection.send(message);
         		} else {
-        		    eventListener.onError("Cannot send a message while in " + state + " state", null, null);
+        		    sendErrorToAllListeners("Cannot send a message while in " + state + " state", null, null);
         		}
 		} catch(Exception e) {
-		    eventListener.onError("An exception occurred while sending message [" + message + "]", null, e);
+		    sendErrorToAllListeners("An exception occurred while sending message [" + message + "]", null, e);
 		}
 	    }
 	});	
@@ -87,9 +87,21 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
     
     private void updateState(ConnectionState newState) {
 	
-	ConnectionStateChange change = new ConnectionStateChange(state, newState);
+	final ConnectionStateChange change = new ConnectionStateChange(state, newState);
 	this.state = newState;
-	this.eventListener.onConnectionStateChange(change);
+	
+	Set<ConnectionEventListener> interestedListeners = new HashSet<ConnectionEventListener>();
+	interestedListeners.addAll(eventListeners.get(ConnectionState.ALL));
+	interestedListeners.addAll(eventListeners.get(newState));
+	
+	for(final ConnectionEventListener listener : interestedListeners) {
+	    
+	    Factory.getEventQueue().execute(new Runnable() {
+		public void run() {
+		    listener.onConnectionStateChange(change);
+		}
+	    });
+	}
     }
     
     private void handleEvent(String event, String wholeMessage) {
@@ -119,8 +131,24 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 	String message = (String) data.get("message");
 	String code = String.valueOf(Math.round((Double)data.get("code")));
 	
-	eventListener.onError(message, code, null);
+	sendErrorToAllListeners(message, code, null);
     }
+    
+    private void sendErrorToAllListeners(final String message, final String code, final Exception e) {
+	
+	Set<ConnectionEventListener> allListeners = new HashSet<ConnectionEventListener>();
+	for(Set<ConnectionEventListener> listenersForState : eventListeners.values()) {
+	    allListeners.addAll(listenersForState);
+	}
+	
+	for(final ConnectionEventListener listener : allListeners) {
+	    Factory.getEventQueue().execute(new Runnable() {
+		public void run() {
+		    listener.onError(message, code, e);
+		}
+	    });
+	}
+    }    
 
     /* WebSocketListener implementation */
 
@@ -159,13 +187,8 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 	Factory.getEventQueue().execute(new Runnable() {
 	    public void run() {
 		updateState(ConnectionState.DISCONNECTED);
-		eventListener.onError("An exception was thrown by the websocket", null, ex);
+		sendErrorToAllListeners("An exception was thrown by the websocket", null, ex);
 	    }
 	});
-    }
-    
-    private class NullConnectionEventListener implements ConnectionEventListener {
-	public void onConnectionStateChange(ConnectionStateChange change) { /* ignore */ }
-	public void onError(String message, String code, Exception e) { /* ignore */ }
     }
 }

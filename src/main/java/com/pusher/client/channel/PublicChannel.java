@@ -17,8 +17,8 @@ public class PublicChannel implements InternalChannel {
 
     public PublicChannel(String channelName) {
 	
-	if(channelName == null || channelName.isEmpty()) {
-	    throw new IllegalArgumentException("Cannot subscribe to a channel with a null or empty name");
+	if(channelName == null) {
+	    throw new IllegalArgumentException("Cannot subscribe to a channel with a null name");
 	}
 	
 	this.name = channelName;

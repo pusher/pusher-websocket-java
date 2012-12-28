@@ -36,11 +36,6 @@ public class PublicChannelTest {
 	new PublicChannel(null);
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testConstructWithEmptyChannelNameThrowsException() {
-	new PublicChannel("");
-    }
-    
     @Test
     public void testGetNameReturnsName() {
 	assertEquals(CHANNEL_NAME, channel.getName());

@@ -51,7 +51,7 @@ public class WebsocketConnectionTest {
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
 	this.connection = new WebsocketConnection(API_KEY);
-	this.connection.setEventListener(mockEventListener);
+	this.connection.bind(ConnectionState.ALL, mockEventListener);
     }
     
     @Test
@@ -79,6 +79,15 @@ public class WebsocketConnectionTest {
 	
 	verify(mockUnderlyingConnection, times(1)).connect();
 	verify(mockEventListener, times(1)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
+    
+    @Test
+    public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent() throws URISyntaxException {
+	connection = new WebsocketConnection(API_KEY);
+	connection.bind(ConnectionState.CONNECTED, mockEventListener);
+	connection.connect();
+	
+	verify(mockEventListener, never()).onConnectionStateChange(any(ConnectionStateChange.class));
     }
     
     @Test
@@ -156,6 +165,16 @@ public class WebsocketConnectionTest {
 	connection.onClose(1, "reason", true);
 	verify(mockEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.DISCONNECTED));
     }
+
+    @Test
+    public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent() throws URISyntaxException {
+	connection = new WebsocketConnection(API_KEY);
+	connection.bind(ConnectionState.CONNECTED, mockEventListener);
+	
+	connection.connect();
+	connection.onClose(1, "reason", true);
+	verify(mockEventListener, never()).onConnectionStateChange(any(ConnectionStateChange.class));
+    }    
     
     @Test
     public void testOnErrorCallbackUpdatesStateToDisconnectedAndRaisesErrorEvent() {
