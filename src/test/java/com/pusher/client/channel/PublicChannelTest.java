@@ -47,8 +47,13 @@ public class PublicChannelTest {
     }
     
     @Test
-    public void testReturnsCorrectSubscriptionMessage() {
-	assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel\"}}", channel.toSubscriptionMessage());
+    public void testReturnsCorrectSubscribeMessage() {
+	assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel\"}}", channel.toSubscribeMessage());
+    }
+
+    @Test
+    public void testReturnsCorrectUnsubscribeMessage() {
+	assertEquals("{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\"my-channel\"}}", channel.toUnsubscribeMessage());
     }
     
     @Test

@@ -33,7 +33,10 @@ public class WebsocketConnectionTest {
 
     private static final String API_KEY = "123456";
     private static final String CHANNEL_NAME = "my-channel";
-    private static final String SUBSCRIBE_MESSAGE = "{\"event\":\"pusher:subscribe\"}";
+    private static final String EVENT_NAME = "my-event";
+    private static final String INCOMING_MESSAGE = "{\"event\":\"" + EVENT_NAME + "\",\"channel\":\"" + CHANNEL_NAME + "\",\"data\":{\"fish\":\"chips\"}}";
+    private static final String OUTGOING_SUBSCRIBE_MESSAGE = "{\"event\":\"pusher:subscribe\"}";
+    private static final String OUTGOING_UNSUBSCRIBE_MESSAGE = "{\"event\":\"pusher:unsubscribe\"}";
     
     private WebsocketConnection connection;
     private @Mock WebSocketClientWrapper mockUnderlyingConnection;
@@ -48,7 +51,8 @@ public class WebsocketConnectionTest {
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
 	when(mockInternalChannel.getName()).thenReturn(CHANNEL_NAME);
-	when(mockInternalChannel.toSubscriptionMessage()).thenReturn(SUBSCRIBE_MESSAGE);
+	when(mockInternalChannel.toSubscribeMessage()).thenReturn(OUTGOING_SUBSCRIBE_MESSAGE);
+	when(mockInternalChannel.toUnsubscribeMessage()).thenReturn(OUTGOING_UNSUBSCRIBE_MESSAGE);
 	
 	this.connection = new WebsocketConnection(API_KEY);
 	this.connection.setEventListener(mockEventListener);
@@ -118,7 +122,7 @@ public class WebsocketConnectionTest {
 	
 	connection.subscribeTo(mockInternalChannel);
 	
-	verify(mockUnderlyingConnection).send(SUBSCRIBE_MESSAGE);
+	verify(mockUnderlyingConnection).send(OUTGOING_SUBSCRIBE_MESSAGE);
 	verify(mockInternalChannel).subscribeSent();
     }
     
@@ -135,19 +139,45 @@ public class WebsocketConnectionTest {
 	connect();
 	
 	connection.subscribeTo(mockInternalChannel);
-	connection.onMessage("{\"event\":\"my-event\",\"channel\":\"" + CHANNEL_NAME + "\",\"data\":{\"fish\":\"chips\"}}");
+	connection.onMessage(INCOMING_MESSAGE);
 	
-	verify(mockInternalChannel).onMessage("my-event", "{\"event\":\"my-event\",\"channel\":\"" + CHANNEL_NAME + "\",\"data\":{\"fish\":\"chips\"}}");
+	verify(mockInternalChannel).onMessage(EVENT_NAME, INCOMING_MESSAGE);
     }
     
     @Test
     public void testReceiveMessageDiscardsMessageIfNoChannelCanBeFound() {
 	connect();
 	
-	connection.onMessage("{\"event\":\"my-event\",\"channel\":\"" + CHANNEL_NAME + "\",\"data\":{\"fish\":\"chips\"}}");
+	connection.onMessage(INCOMING_MESSAGE);
 	
 	verify(mockInternalChannel, never()).onMessage(anyString(), anyString());
     }    
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testUnsubscribeWhenNotSubscribedThrowsException() {
+	connect();
+	
+	connection.unsubscribeFrom(CHANNEL_NAME);
+    }
+    
+    @Test
+    public void testUnsubscribeSendsUnsubscribeMessageToPusher() {
+	connect();
+	connection.subscribeTo(mockInternalChannel);
+	connection.unsubscribeFrom(CHANNEL_NAME);
+	
+	verify(mockUnderlyingConnection).send(OUTGOING_UNSUBSCRIBE_MESSAGE);
+    }
+    
+    @Test
+    public void testReceivedMessageIsNotPassedToChannelIfItHasBeenUnsubscribed() {
+	connect();
+	connection.subscribeTo(mockInternalChannel);
+	connection.unsubscribeFrom(CHANNEL_NAME);
+	connection.onMessage(INCOMING_MESSAGE);
+	
+	verify(mockInternalChannel, never()).onMessage(anyString(), anyString());
+    }
     
     /* end of tests */
     

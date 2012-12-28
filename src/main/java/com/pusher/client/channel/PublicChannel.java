@@ -71,10 +71,23 @@ public class PublicChannel implements InternalChannel {
     }
     
     @Override
-    public String toSubscriptionMessage() {
+    public String toSubscribeMessage() {
 	
 	Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
 	jsonObject.put("event", "pusher:subscribe");
+	
+	Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
+	dataMap.put("channel", name);
+	
+	jsonObject.put("data", dataMap);
+	
+	return new Gson().toJson(jsonObject);
+    }
+    
+    @Override
+    public String toUnsubscribeMessage() {
+	Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
+	jsonObject.put("event", "pusher:unsubscribe");
 	
 	Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
 	dataMap.put("channel", name);
@@ -109,4 +122,5 @@ public class PublicChannel implements InternalChannel {
 	Map<Object, Object> jsonObject = gson.fromJson(message, Map.class);
 	return gson.toJson(jsonObject.get("data"));
     }
+
 }

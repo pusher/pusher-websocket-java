@@ -2,7 +2,9 @@ package com.pusher.client.channel;
 
 public interface InternalChannel extends Channel {
     
-    String toSubscriptionMessage();
+    String toSubscribeMessage();
+
+    String toUnsubscribeMessage();
 
     void onMessage(String event, String message);
     

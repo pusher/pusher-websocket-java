@@ -37,6 +37,12 @@ public class Pusher {
 	connection.connect();
     }
     
+    /* Subscription methods */
+    
+    public Channel subscribe(String channelName) {
+	return subscribe(channelName, null);
+    }
+    
     public Channel subscribe(String channelName, ChannelEventListener listener, String... eventNames) {
 	
 	if(connection.getState() != ConnectionState.CONNECTED) {
@@ -44,6 +50,7 @@ public class Pusher {
 	}
 	
 	PublicChannel channel = Factory.newPublicChannel(channelName);
+	
 	for(String eventName : eventNames) {
 	    channel.bind(eventName, listener);
 	}
@@ -51,5 +58,14 @@ public class Pusher {
 	connection.subscribeTo(channel);
 	
 	return channel;
+    }
+    
+    public void unsubscribe(String channelName) {
+	
+	if(connection.getState() != ConnectionState.CONNECTED) {
+	    throw new IllegalStateException("Cannot unsubscribe from channel " + channelName + " while not connected");
+	}
+	
+	connection.unsubscribeFrom(channelName);
     }
 }

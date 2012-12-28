@@ -82,7 +82,7 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 		    
 		    channelNameToChannelMap.put(channel.getName(), channel);
 		    
-		    String subscriptionMessage = channel.toSubscriptionMessage();
+		    String subscriptionMessage = channel.toSubscribeMessage();
 		    underlyingConnection.send(subscriptionMessage);
 		    
 		    channel.subscribeSent();
@@ -93,6 +93,28 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 	});
     }
 
+    @Override
+    public void unsubscribeFrom(final String channelName) {
+
+	if(!channelNameToChannelMap.containsKey(channelName)) {
+	    throw new IllegalArgumentException("Cannot unsubscribe from channel " + channelName + ", no existing subscription found");
+	}
+	
+	Factory.getEventQueue().execute(new Runnable() {
+	    public void run() {
+		if(state == ConnectionState.CONNECTED) {
+		    
+		    InternalChannel channel = channelNameToChannelMap.remove(channelName);
+		    
+		    String subscriptionMessage = channel.toUnsubscribeMessage();
+		    underlyingConnection.send(subscriptionMessage);
+		} else {
+		    // TODO: queue the unsubscribe for when the connection is up
+		}
+	    }
+	});	
+    }
+    
     /** implementation detail **/
     
     private void updateState(ConnectionState newState) {
