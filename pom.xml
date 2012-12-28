@@ -63,7 +63,7 @@
 	            </goals>
 	            <configuration>
 	              <sources>
-	                <source>submodules/Java-WebSocket/src/main/java</source>
+	                <source>Java-WebSocket/src/main/java</source>
 	              </sources>
 	            </configuration>
 	          </execution>

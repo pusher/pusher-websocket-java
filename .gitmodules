@@ -1,0 +1,3 @@
+[submodule "Java-WebSocket"]
+	path = Java-WebSocket
+	url = git://github.com/adamshone/Java-WebSocket.git
