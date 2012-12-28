@@ -36,9 +36,9 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     /* ChannelEventListener implementation */
     
     @Override
-    public void onEvent(String eventName, String data) {
+    public void onEvent(String channelName, String eventName, String data) {
 	
-	System.out.println(String.format("Received event [%s] with data [%s]", eventName, data));
+	System.out.println(String.format("Received event [%s] on channel [%s] with data [%s]", eventName, channelName, data));
     }
 
     @Override

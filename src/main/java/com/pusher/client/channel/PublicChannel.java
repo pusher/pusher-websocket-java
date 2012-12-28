@@ -63,7 +63,7 @@ public class PublicChannel implements InternalChannel {
 		
 		Factory.getEventQueue().execute(new Runnable() {
 		    public void run() {
-			listener.onEvent(event, data);
+			listener.onEvent(name, event, data);
 		    }
 		});
 	    }

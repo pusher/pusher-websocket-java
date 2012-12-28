@@ -56,7 +56,7 @@ public class PublicChannelTest {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
 	
-	verify(mockListener).onEvent(EVENT_NAME, "{\"fish\":\"chips\"}");
+	verify(mockListener).onEvent(CHANNEL_NAME, EVENT_NAME, "{\"fish\":\"chips\"}");
     }
     
     @Test
@@ -67,8 +67,8 @@ public class PublicChannelTest {
 	channel.bind(EVENT_NAME, mockListener2);
 	channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
 	
-	verify(mockListener).onEvent(EVENT_NAME, "{\"fish\":\"chips\"}");
-	verify(mockListener2).onEvent(EVENT_NAME, "{\"fish\":\"chips\"}");
+	verify(mockListener).onEvent(CHANNEL_NAME, EVENT_NAME, "{\"fish\":\"chips\"}");
+	verify(mockListener2).onEvent(CHANNEL_NAME, EVENT_NAME, "{\"fish\":\"chips\"}");
     }   
 
     @Test
@@ -77,7 +77,7 @@ public class PublicChannelTest {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.onMessage("DifferentEventName", "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
 	
-	verify(mockListener, never()).onEvent(anyString(), anyString());
+	verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
     }    
     
     @Test(expected=IllegalArgumentException.class)
