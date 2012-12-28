@@ -17,3 +17,11 @@ Assuming you are using Eclipse, execute ````mvn eclipse:clean eclipse:eclipse```
 <h3>Build</h3>
 
 From the top level directory execute ````mvn clean test```` to compile and run the unit tests or ````mvn clean install```` to build the jar. The jar will be output to the ````target```` directory.
+
+<h3>Run the Example Application</h3>
+
+After running ````mvn clean install```` change to the ````target```` directory and run ````java -jar pusher-java-client-<version>-jar-with-dependencies.jar````. This will run the example application. 
+
+By default the example will connect to a sample application and subscribe to the channel ````my-channel````, listening to events on ````my-event````. If you want to change these defaults, they can be specified on the command line:
+
+````java -jar pusher-java-client-<version>-jar-with-dependencies.jar [appKey] [channelName] [eventName]```` 

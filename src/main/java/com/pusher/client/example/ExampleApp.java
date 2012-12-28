@@ -10,14 +10,20 @@ import com.pusher.client.connection.ConnectionStateChange;
 public class ExampleApp implements ConnectionEventListener, ChannelEventListener {
 
     private final Pusher pusher;
+    private final String channelName;
+    private final String eventName;
     
     public static void main(String[] args) {
-	new ExampleApp();
+	new ExampleApp(args);
     }
     
-    public ExampleApp() {
+    public ExampleApp(String[] args) {
 	
-	pusher = new Pusher("161717a55e65825bacf1");
+	String apiKey = (args.length > 0) ? args[0] : "161717a55e65825bacf1";
+	channelName = (args.length > 1) ? args[1] : "my-channel";
+	eventName = (args.length > 2) ? args[1] : "my-event";
+	
+	pusher = new Pusher(apiKey);
 	pusher.connect(this);
     }
 
@@ -29,7 +35,7 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
 	System.out.println(String.format("Connection state changed from [%s] to [%s]", change.getPreviousState(), change.getCurrentState()));
 	
 	if(change.getCurrentState() == ConnectionState.CONNECTED) {
-	    pusher.subscribe("my-channel", this, "my-event");
+	    pusher.subscribe(channelName, this, eventName);
 	}
     }
 
