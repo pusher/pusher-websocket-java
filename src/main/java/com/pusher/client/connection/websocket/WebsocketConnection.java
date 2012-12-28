@@ -83,7 +83,6 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 		    channelNameToChannelMap.put(channel.getName(), channel);
 		    
 		    String subscriptionMessage = channel.toSubscriptionMessage();
-		    System.out.println("Sending Message:\t\t " + subscriptionMessage);
 		    underlyingConnection.send(subscriptionMessage);
 		    
 		    channel.subscribeSent();
@@ -152,8 +151,6 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 	
 	Factory.getEventQueue().execute(new Runnable() {
 	    public void run() {
-		System.out.println("Received Message:\t\t " + message);
-		
 		Map<String, String> map = new Gson().fromJson(message, Map.class);
 		String event = map.get("event");
 		handleEvent(event, message);
