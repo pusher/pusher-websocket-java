@@ -1,4 +1,4 @@
-package com.pusher.client.channel;
+package com.pusher.client.channel.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,15 +7,18 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
+import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.InternalChannel;
 import com.pusher.client.util.Factory;
 
-public class PublicChannel implements InternalChannel {
+public class ChannelImpl implements InternalChannel {
 
     private final String name;
     private final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
     private ChannelState state = ChannelState.INITIAL;
 
-    public PublicChannel(String channelName) {
+    public ChannelImpl(String channelName) {
 	
 	if(channelName == null) {
 	    throw new IllegalArgumentException("Cannot subscribe to a channel with a null name");
@@ -116,7 +119,7 @@ public class PublicChannel implements InternalChannel {
 		for(final ChannelEventListener listener : listeners) {
 		    Factory.getEventQueue().execute(new Runnable() {
 			public void run() {
-			    listener.onSubscriptionSucceeded(PublicChannel.this);
+			    listener.onSubscriptionSucceeded(ChannelImpl.this);
 			}
 		    });
 		}

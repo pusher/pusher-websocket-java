@@ -8,11 +8,11 @@ import java.util.concurrent.Executors;
 import org.java_websocket.client.WebSocketClient;
 
 import com.pusher.client.channel.ChannelManager;
-import com.pusher.client.channel.PublicChannel;
+import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.connection.InternalConnection;
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
+import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
-import com.pusher.client.connection.websocket.WebsocketConnection;
 
 /**
  * This is a lightweight way of doing dependency injection and enabling classes
@@ -43,7 +43,7 @@ public class Factory {
     public static InternalConnection getConnection(String apiKey) {
 	if (connection == null) {
 	    try {
-		connection = new WebsocketConnection(apiKey);
+		connection = new WebSocketConnection(apiKey);
 	    } catch (URISyntaxException e) {
 		throw new IllegalArgumentException(
 			"Failed to initialise connection", e);
@@ -64,8 +64,8 @@ public class Factory {
 	return eventQueue;
     }
 
-    public static PublicChannel newPublicChannel(String channelName) {
-	return new PublicChannel(channelName);
+    public static ChannelImpl newPublicChannel(String channelName) {
+	return new ChannelImpl(channelName);
     }
 
     public static ChannelManager getChannelManager(InternalConnection connection) {

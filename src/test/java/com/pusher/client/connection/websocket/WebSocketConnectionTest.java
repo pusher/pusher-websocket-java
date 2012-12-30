@@ -31,13 +31,13 @@ import com.pusher.client.util.InstantExecutor;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Factory.class})
-public class WebsocketConnectionTest {
+public class WebSocketConnectionTest {
 
     private static final String API_KEY = "123456";
     private static final String EVENT_NAME = "my-event";
     private static final String INCOMING_MESSAGE = "{\"event\":\"" + EVENT_NAME + "\",\"channel\":\"my-channel\",\"data\":{\"fish\":\"chips\"}}";
     
-    private WebsocketConnection connection;
+    private WebSocketConnection connection;
     private @Mock ChannelManager mockChannelManager;
     private @Mock WebSocketClientWrapper mockUnderlyingConnection;
     private @Mock ConnectionEventListener mockEventListener;
@@ -47,10 +47,10 @@ public class WebsocketConnectionTest {
 	
 	PowerMockito.mockStatic(Factory.class);
 	when(Factory.getChannelManager(any(InternalConnection.class))).thenReturn(mockChannelManager);
-	when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebsocketConnection.class))).thenReturn(mockUnderlyingConnection);
+	when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class))).thenReturn(mockUnderlyingConnection);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
-	this.connection = new WebsocketConnection(API_KEY);
+	this.connection = new WebSocketConnection(API_KEY);
 	this.connection.bind(ConnectionState.ALL, mockEventListener);
     }
     
@@ -83,7 +83,7 @@ public class WebsocketConnectionTest {
     
     @Test
     public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent() throws URISyntaxException {
-	connection = new WebsocketConnection(API_KEY);
+	connection = new WebSocketConnection(API_KEY);
 	connection.bind(ConnectionState.CONNECTED, mockEventListener);
 	connection.connect();
 	
@@ -168,7 +168,7 @@ public class WebsocketConnectionTest {
 
     @Test
     public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent() throws URISyntaxException {
-	connection = new WebsocketConnection(API_KEY);
+	connection = new WebSocketConnection(API_KEY);
 	connection.bind(ConnectionState.CONNECTED, mockEventListener);
 	
 	connection.connect();

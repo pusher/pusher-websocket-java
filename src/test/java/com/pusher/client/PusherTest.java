@@ -17,7 +17,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelManager;
-import com.pusher.client.channel.PublicChannel;
+import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.InternalConnection;
@@ -34,7 +34,7 @@ public class PusherTest {
     private @Mock InternalConnection mockConnection;
     private @Mock ChannelManager mockChannelManager;
     private @Mock ConnectionEventListener mockConnectionEventListener;
-    private @Mock PublicChannel mockPublicChannel;
+    private @Mock ChannelImpl mockPublicChannel;
     private @Mock ChannelEventListener mockChannelEventListener;
     
     @Before

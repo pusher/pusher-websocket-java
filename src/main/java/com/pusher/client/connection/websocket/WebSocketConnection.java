@@ -17,17 +17,17 @@ import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.InternalConnection;
 import com.pusher.client.util.Factory;
 
-public class WebsocketConnection implements InternalConnection, WebSocketListener {
+public class WebSocketConnection implements InternalConnection, WebSocketListener {
 
     private static final String URI_PREFIX = "ws://ws.pusherapp.com:80/app/";
-    private static final String URI_SUFFIX = "?client=java-client&version=" + WebsocketConnection.class.getPackage().getImplementationVersion();
+    private static final String URI_SUFFIX = "?client=java-client&version=" + WebSocketConnection.class.getPackage().getImplementationVersion();
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClient underlyingConnection;
     
-    public WebsocketConnection(String apiKey) throws URISyntaxException {
+    public WebSocketConnection(String apiKey) throws URISyntaxException {
 	
 	for(ConnectionState state : ConnectionState.values()) {
 	    eventListeners.put(state, new HashSet<ConnectionEventListener>());
@@ -45,8 +45,8 @@ public class WebsocketConnection implements InternalConnection, WebSocketListene
 
 	    public void run() {
 		if(state == ConnectionState.DISCONNECTED) {
-		    WebsocketConnection.this.updateState(ConnectionState.CONNECTING);
-		    WebsocketConnection.this.underlyingConnection.connect();
+		    WebSocketConnection.this.updateState(ConnectionState.CONNECTING);
+		    WebSocketConnection.this.underlyingConnection.connect();
 		}
 	    }
 	});

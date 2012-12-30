@@ -1,7 +1,11 @@
-package com.pusher.client.channel;
+package com.pusher.client.channel.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,16 +15,18 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Factory.class})
-public class PublicChannelTest {
+public class ChannelImplTest {
 
     private static final String CHANNEL_NAME = "my-channel";
     private static final String EVENT_NAME = "my-event";
-    private PublicChannel channel;
+    private ChannelImpl channel;
     private @Mock ChannelEventListener mockListener;
     
     @Before
@@ -28,12 +34,12 @@ public class PublicChannelTest {
 	PowerMockito.mockStatic(Factory.class);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
-	this.channel = new PublicChannel(CHANNEL_NAME);
+	this.channel = new ChannelImpl(CHANNEL_NAME);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructWithNullChannelNameThrowsException() {
-	new PublicChannel(null);
+	new ChannelImpl(null);
     }
 
     @Test

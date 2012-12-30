@@ -3,7 +3,7 @@ package com.pusher.client;
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelManager;
-import com.pusher.client.channel.PublicChannel;
+import com.pusher.client.channel.InternalChannel;
 import com.pusher.client.connection.Connection;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -111,7 +111,7 @@ public class Pusher {
 	    throw new IllegalStateException("Cannot subscribe to public channel " + channelName + " while not connected");
 	}
 	
-	PublicChannel channel = Factory.newPublicChannel(channelName);
+	InternalChannel channel = Factory.newPublicChannel(channelName);
 	channelManager.subscribeTo(channel, listener, eventNames);
 	
 	return channel;
