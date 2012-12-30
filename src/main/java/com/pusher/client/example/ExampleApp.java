@@ -21,7 +21,7 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
 	
 	String apiKey = (args.length > 0) ? args[0] : "161717a55e65825bacf1";
 	channelName = (args.length > 1) ? args[1] : "my-channel";
-	eventName = (args.length > 2) ? args[1] : "my-event";
+	eventName = (args.length > 2) ? args[2] : "my-event";
 	
 	pusher = new Pusher(apiKey);
 	pusher.connect(this);
@@ -38,6 +38,12 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
 	    pusher.subscribe(channelName, this, eventName);
 	}
     }
+    
+    @Override
+    public void onError(String message, String code, Exception e) {
+	
+	System.out.println(String.format("An error was received with message [%s], code [%s], exception [%s]", message, code, e));
+    }
 
     /* ChannelEventListener implementation */
     
@@ -51,11 +57,5 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     public void onSubscriptionSucceeded(Channel channel) {
 	
 	System.out.println(String.format("Subscription to channel [%s] succeeded", channel.getName()));
-    }
-
-    @Override
-    public void onError(String message, String code, Exception e) {
-	
-	System.out.println(String.format("An error was received with message [%s], code [%s], exception [%s]", message, code, e));
     }
 }
