@@ -1,4 +1,4 @@
-package com.pusher.client.channel;
+package com.pusher.client.channel.impl;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -13,7 +13,9 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.pusher.client.connection.InternalConnection;
+import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
+import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
 @RunWith(PowerMockRunner.class)

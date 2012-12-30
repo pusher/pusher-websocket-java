@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
-import com.pusher.client.connection.InternalConnection;
+import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
 public class WebSocketConnection implements InternalConnection, WebSocketListener {

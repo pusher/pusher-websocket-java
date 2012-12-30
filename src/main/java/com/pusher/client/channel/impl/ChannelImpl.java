@@ -9,7 +9,6 @@ import java.util.Set;
 import com.google.gson.Gson;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
-import com.pusher.client.channel.InternalChannel;
 import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {

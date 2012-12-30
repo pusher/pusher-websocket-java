@@ -2,12 +2,12 @@ package com.pusher.client;
 
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
-import com.pusher.client.channel.ChannelManager;
-import com.pusher.client.channel.InternalChannel;
+import com.pusher.client.channel.impl.ChannelManager;
+import com.pusher.client.channel.impl.InternalChannel;
 import com.pusher.client.connection.Connection;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
-import com.pusher.client.connection.InternalConnection;
+import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
 public class Pusher {

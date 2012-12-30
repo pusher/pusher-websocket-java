@@ -1,10 +1,12 @@
-package com.pusher.client.channel;
+package com.pusher.client.channel.impl;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
-import com.pusher.client.connection.InternalConnection;
+import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
+import com.pusher.client.connection.impl.InternalConnection;
 
 public class ChannelManager {
 

@@ -21,11 +21,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.pusher.client.channel.ChannelManager;
+import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
-import com.pusher.client.connection.InternalConnection;
+import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 

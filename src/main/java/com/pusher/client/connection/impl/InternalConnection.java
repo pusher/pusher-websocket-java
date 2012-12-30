@@ -1,4 +1,6 @@
-package com.pusher.client.connection;
+package com.pusher.client.connection.impl;
+
+import com.pusher.client.connection.Connection;
 
 public interface InternalConnection extends Connection {
 

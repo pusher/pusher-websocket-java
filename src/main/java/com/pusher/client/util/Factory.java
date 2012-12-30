@@ -7,9 +7,9 @@ import java.util.concurrent.Executors;
 
 import org.java_websocket.client.WebSocketClient;
 
-import com.pusher.client.channel.ChannelManager;
 import com.pusher.client.channel.impl.ChannelImpl;
-import com.pusher.client.connection.InternalConnection;
+import com.pusher.client.channel.impl.ChannelManager;
+import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
 import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
