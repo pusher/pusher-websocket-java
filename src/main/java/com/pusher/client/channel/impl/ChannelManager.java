@@ -63,9 +63,11 @@ public class ChannelManager {
 	
 	Map<Object, Object> json = new Gson().fromJson(wholeMessage, Map.class);
 	Object channelNameObject = json.get("channel");
+	
 	if(channelNameObject != null) {
 	    String channelName = (String) channelNameObject;
 	    InternalChannel channel = channelNameToChannelMap.get(channelName);
+	    
 	    if(channel != null) {
 		channel.onMessage(event, wholeMessage);
 	    }

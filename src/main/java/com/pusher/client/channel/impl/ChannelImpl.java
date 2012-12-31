@@ -13,6 +13,7 @@ import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
 
+    private static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     private final String name;
     private final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
     private ChannelState state = ChannelState.INITIAL;
@@ -71,18 +72,22 @@ public class ChannelImpl implements InternalChannel {
    
     @Override
     public void onMessage(final String event, String message) {
-	
-	Set<ChannelEventListener> listeners = eventNameToListenerMap.get(event);
-	if(listeners != null) {
-	    for(final ChannelEventListener listener : listeners) {
-		
-		final String data = extractDataFrom(message);
-		
-		Factory.getEventQueue().execute(new Runnable() {
-		    public void run() {
-			listener.onEvent(name, event, data);
-		    }
-		});
+
+	if(event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
+	    updateState(ChannelState.SUBSCRIBED);
+	} else {
+	    Set<ChannelEventListener> listeners = eventNameToListenerMap.get(event);
+	    if(listeners != null) {
+		for(final ChannelEventListener listener : listeners) {
+        		
+		    final String data = extractDataFrom(message);
+        		
+		    Factory.getEventQueue().execute(new Runnable() {
+			public void run() {
+			    listener.onEvent(name, event, data);
+			}
+		    });
+		}
 	    }
 	}
     }
@@ -119,7 +124,7 @@ public class ChannelImpl implements InternalChannel {
 	
 	this.state = state;
 	
-	if(state == ChannelState.SUBSCRIBE_SENT) {
+	if(state == ChannelState.SUBSCRIBED) {
 	    for(Set<ChannelEventListener> listeners : eventNameToListenerMap.values()) {
 		for(final ChannelEventListener listener : listeners) {
 		    Factory.getEventQueue().execute(new Runnable() {

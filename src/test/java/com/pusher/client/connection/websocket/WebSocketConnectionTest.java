@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -16,6 +17,7 @@ import java.net.URISyntaxException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -52,6 +54,16 @@ public class WebSocketConnectionTest {
 	
 	this.connection = new WebSocketConnection(API_KEY);
 	this.connection.bind(ConnectionState.ALL, mockEventListener);
+    }
+    
+    @Test
+    public void testVerifyURLIsCorrect() {
+	ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
+	
+	PowerMockito.verifyStatic();
+	Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
+	
+	assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=null", argument.getValue().toString());
     }
     
     @Test

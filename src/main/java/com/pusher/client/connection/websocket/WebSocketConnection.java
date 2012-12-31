@@ -20,7 +20,7 @@ import com.pusher.client.util.Factory;
 public class WebSocketConnection implements InternalConnection, WebSocketListener {
 
     private static final String URI_PREFIX = "ws://ws.pusherapp.com:80/app/";
-    private static final String URI_SUFFIX = "?client=java-client&version=" + WebSocketConnection.class.getPackage().getImplementationVersion();
+    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + WebSocketConnection.class.getPackage().getImplementationVersion();
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();

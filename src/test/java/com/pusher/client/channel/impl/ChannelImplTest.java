@@ -62,6 +62,22 @@ public class ChannelImplTest {
     }
     
     @Test
+    public void testInternalSubscriptionSucceededMessageIsTranslatedToASubscriptionSuccessfulCallback() {
+	channel.bind(EVENT_NAME, mockListener);
+	channel.onMessage("pusher_internal:subscription_succeeded", "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"" + getChannelName() + "\"}");
+	
+	verify(mockListener).onSubscriptionSucceeded(channel);
+    }
+    
+    @Test
+    public void testInternalSubscriptionSucceededMessageIsNeverPassedAsAnEventEvenIfYouBindToIt() {
+	channel.bind("pusher_internal:subscription_succeeded", mockListener);
+	channel.onMessage("pusher_internal:subscription_succeeded", "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"" + getChannelName() + "\"}");
+	
+	verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
+    }
+    
+    @Test
     public void testDataIsExtractedFromMessageAndPassedToSingleListener() {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
@@ -127,11 +143,20 @@ public class ChannelImplTest {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.unbind("different event name", mockListener);
     }
-    
+
     @Test
-    public void testUpdateStateToSubscribeSentNotifiesListenerThatSubscriptionSucceeded() {
+    public void testUpdateStateToSubscribeSentDoesNotNotifyListenerThatSubscriptionSucceeded() {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.updateState(ChannelState.SUBSCRIBE_SENT);
+	
+	verify(mockListener, never()).onSubscriptionSucceeded(channel);
+    }
+    
+    @Test
+    public void testUpdateStateToSubscribedNotifiesListenerThatSubscriptionSucceeded() {
+	channel.bind(EVENT_NAME, mockListener);
+	channel.updateState(ChannelState.SUBSCRIBE_SENT);
+	channel.updateState(ChannelState.SUBSCRIBED);
 	
 	verify(mockListener).onSubscriptionSucceeded(channel);
     }
