@@ -4,20 +4,54 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannel;
+import com.pusher.client.connection.ConnectionState;
+import com.pusher.client.connection.impl.InternalConnection;
 
 public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 
-    public PrivateChannelImpl(String channelName) {
+    private static final String CLIENT_EVENT_PREFIX = "client-";
+    private final InternalConnection connection;
+
+    public PrivateChannelImpl(InternalConnection connection, String channelName) {
 	super(channelName);
+	this.connection = connection;
     }
 
     /* PrivateChannel implementation */
     
     @Override
-    public boolean trigger(String eventName, String data) {
-	// TODO Auto-generated method stub
-	return false;
+    @SuppressWarnings("rawtypes")
+    public void trigger(String eventName, String data) {
+
+	if(eventName == null || !eventName.startsWith(CLIENT_EVENT_PREFIX)) {
+	    throw new IllegalArgumentException("Cannot trigger event " + eventName + ": client events must start with \"client-\"");
+	}
+	
+	if(this.state != ChannelState.SUBSCRIBED) {
+	    throw new IllegalStateException("Cannot trigger event " + eventName + " because channel " + name + " is in " + state.toString() + " state");
+	}
+	
+	if(connection.getState() != ConnectionState.CONNECTED) {
+	    throw new IllegalStateException("Cannot trigger event " + eventName + " because connection is in " + connection.getState().toString() + " state");
+	}
+	
+	try {
+	    Map userData = new Gson().fromJson(data, Map.class);
+	    
+	    Map<Object, Object> jsonPayload = new LinkedHashMap<Object, Object>();
+	    jsonPayload.put("event", eventName);
+	    jsonPayload.put("channel", name);
+	    jsonPayload.put("data", userData);
+	    
+	    String jsonMessage = new Gson().toJson(jsonPayload);
+	    connection.sendMessage(jsonMessage);
+	    
+	} catch(JsonSyntaxException e) {
+	    throw new IllegalArgumentException("Cannot trigger event " + eventName + " because \"" + data + "\" could not be parsed as valid JSON");
+	}
     }
     
     /* Base class overrides */

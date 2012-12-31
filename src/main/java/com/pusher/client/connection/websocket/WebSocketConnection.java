@@ -190,6 +190,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     @SuppressWarnings("unchecked")
     public void onMessage(final String message) {
 	
+	System.out.println(message);
+	
 	Factory.getEventQueue().execute(new Runnable() {
 	    public void run() {
 		Map<String, String> map = new Gson().fromJson(message, Map.class);

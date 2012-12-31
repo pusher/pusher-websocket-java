@@ -16,7 +16,7 @@ public class ChannelImpl implements InternalChannel {
     private static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
     private final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
-    private ChannelState state = ChannelState.INITIAL;
+    protected ChannelState state = ChannelState.INITIAL;
 
     public ChannelImpl(String channelName) {
 	

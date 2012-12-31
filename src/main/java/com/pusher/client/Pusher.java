@@ -141,7 +141,7 @@ public class Pusher {
 	    throw new IllegalStateException("Cannot subscribe to a private channel because no Authorizer has been set. Call PusherOptions.setAuthorizer() before connecting to Pusher");
 	}
 	
-	PrivateChannelImpl channel = Factory.newPrivateChannel(channelName);
+	PrivateChannelImpl channel = Factory.newPrivateChannel(connection, channelName);
 	channelManager.subscribeTo(channel, listener, eventNames);
 	
 	return channel;

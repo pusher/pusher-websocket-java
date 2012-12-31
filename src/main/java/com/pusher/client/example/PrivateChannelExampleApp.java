@@ -3,6 +3,7 @@ package com.pusher.client.example;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.Channel;
+import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -14,6 +15,8 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     private final Pusher pusher;
     private final String channelName;
     private final String eventName;
+    
+    private PrivateChannel channel;
     
     public static void main(String[] args) {
 	new PrivateChannelExampleApp(args);
@@ -40,7 +43,7 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
 	System.out.println(String.format("Connection state changed from [%s] to [%s]", change.getPreviousState(), change.getCurrentState()));
 	
 	if(change.getCurrentState() == ConnectionState.CONNECTED) {
-	    pusher.subscribe(channelName, this, eventName);
+	    channel = pusher.subscribe(channelName, this, eventName);
 	}
     }
     
@@ -62,6 +65,8 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     public void onSubscriptionSucceeded(Channel channel) {
 	
 	System.out.println(String.format("Subscription to channel [%s] succeeded", channel.getName()));
+	
+	this.channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
     }
 
     @Override

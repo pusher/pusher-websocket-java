@@ -72,8 +72,8 @@ public class Factory {
 	return new ChannelImpl(channelName);
     }
     
-    public static PrivateChannelImpl newPrivateChannel(String channelName) {
-	return new PrivateChannelImpl(channelName);
+    public static PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName) {
+	return new PrivateChannelImpl(connection, channelName);
     }
 
     public static ChannelManager getChannelManager(InternalConnection connection, PusherOptions pusherOptions) {

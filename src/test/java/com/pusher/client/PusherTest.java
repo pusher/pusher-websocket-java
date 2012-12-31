@@ -51,7 +51,7 @@ public class PusherTest {
 	when(Factory.getConnection(API_KEY)).thenReturn(mockConnection);
 	when(Factory.getChannelManager(mockConnection, mockPusherOptions)).thenReturn(mockChannelManager);
 	when(Factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
-	when(Factory.newPrivateChannel(PRIVATE_CHANNEL_NAME)).thenReturn(mockPrivateChannel);
+	when(Factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME)).thenReturn(mockPrivateChannel);
 	
 	when(mockPusherOptions.getAuthorizer()).thenReturn(mockAuthorizer);
 	
