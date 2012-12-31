@@ -27,6 +27,9 @@ public class ChannelManager {
 	this.pusherOptions = pusherOptions;
     }
     
+    /**
+     * Used for public channels.
+     */
     public void subscribeTo(InternalChannel channel, ChannelEventListener listener, String... eventNames) {
 	
 	validateArgumentsAndBindEvents(channel, listener, eventNames);
@@ -35,6 +38,9 @@ public class ChannelManager {
 	sendSubscribe(channel, message);
     }
 
+    /**
+     * Used for both private and presence channels.
+     */
     public void subscribeTo(PrivateChannelImpl channel, PrivateChannelEventListener listener, String... eventNames) {
 	
 	validateArgumentsAndBindEvents(channel, listener, eventNames);

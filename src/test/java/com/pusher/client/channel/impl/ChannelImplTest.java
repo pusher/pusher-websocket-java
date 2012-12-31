@@ -46,6 +46,11 @@ public class ChannelImplTest {
 	newInstance("private-my-channel");
     }
     
+    @Test(expected=IllegalArgumentException.class)
+    public void testConstructWithPresenceChannelNameThrowsException() {
+	newInstance("presence-my-channel");
+    }
+    
     @Test
     public void testGetNameReturnsName() {
 	assertEquals(getChannelName(), channel.getName());

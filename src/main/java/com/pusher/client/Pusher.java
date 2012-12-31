@@ -2,10 +2,13 @@ package com.pusher.client;
 
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.PresenceChannel;
+import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.InternalChannel;
+import com.pusher.client.channel.impl.PresenceChannelImpl;
 import com.pusher.client.channel.impl.PrivateChannelImpl;
 import com.pusher.client.connection.Connection;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -19,11 +22,28 @@ public class Pusher {
     private final InternalConnection connection;
     private final ChannelManager channelManager;
     
+    /**
+     * <p>Creates a new instance of Pusher.</p>
+     * 
+     * <p>Note that if you use this constructor you will not be able to subscribe to private or presence channels because
+     * no {@link Authorizer} has been set. If you want to use private or presence channels:
+     * <ul>
+     *  <li>Create an implementation of the {@link Authorizer} interface, or use the {@link com.pusher.client.util.HttpAuthorizer} provided.</li>
+     *  <li>Create an instance of {@link PusherOptions} and set the authorizer on it by calling {@link PusherOptions#setAuthorizer(Authorizer)}.</li>
+     *  <li>Use the {@link #Pusher(String, PusherOptions)} constructor to create an instance of Pusher.</li>
+     * </ul></p>
+     * @param apiKey Your Pusher API key.
+     */
     public Pusher(String apiKey) {
 	
 	this(apiKey, new PusherOptions());
     }
-    
+
+    /**
+     * Creates a new instance of Pusher.
+     * @param apiKey Your Pusher API key.
+     * @param pusherOptions Options for the Pusher client library to use.
+     */
     public Pusher(String apiKey, PusherOptions pusherOptions) {
 	if(apiKey == null || apiKey.isEmpty()) {
 	    throw new IllegalArgumentException("API Key cannot be null or empty");
@@ -122,9 +142,7 @@ public class Pusher {
      */
     public Channel subscribe(String channelName, ChannelEventListener listener, String... eventNames) {
 	
-	if(connection.getState() != ConnectionState.CONNECTED) {
-	    throw new IllegalStateException("Cannot subscribe to public channel " + channelName + " while not connected");
-	}
+	throwExceptionIfNotConnected(channelName);
 	
 	InternalChannel channel = Factory.newPublicChannel(channelName);
 	channelManager.subscribeTo(channel, listener, eventNames);
@@ -133,15 +151,22 @@ public class Pusher {
     }
     
     public PrivateChannel subscribe(String channelName, PrivateChannelEventListener listener, String... eventNames) {
-	if(connection.getState() != ConnectionState.CONNECTED) {
-	    throw new IllegalStateException("Cannot subscribe to private channel " + channelName + " while not connected");
-	}
 	
-	if(pusherOptions.getAuthorizer() == null) {
-	    throw new IllegalStateException("Cannot subscribe to a private channel because no Authorizer has been set. Call PusherOptions.setAuthorizer() before connecting to Pusher");
-	}
+	throwExceptionIfNotConnected(channelName);
+	throwExceptionIfNoAuthorizerHasBeenSet();
 	
 	PrivateChannelImpl channel = Factory.newPrivateChannel(connection, channelName);
+	channelManager.subscribeTo(channel, listener, eventNames);
+	
+	return channel;
+    }
+
+    public PresenceChannel subscribe(String channelName, PresenceChannelEventListener listener, String... eventNames) {
+	
+	throwExceptionIfNotConnected(channelName);
+	throwExceptionIfNoAuthorizerHasBeenSet();
+	
+	PresenceChannelImpl channel = Factory.newPresenceChannel(connection, channelName);
 	channelManager.subscribeTo(channel, listener, eventNames);
 	
 	return channel;
@@ -154,5 +179,19 @@ public class Pusher {
 	}
 	
 	channelManager.unsubscribeFrom(channelName);
+    }
+    
+    /* implementation detail */
+    
+    private void throwExceptionIfNotConnected(String channelName) {
+	if(connection.getState() != ConnectionState.CONNECTED) {
+	    throw new IllegalStateException("Cannot subscribe to channel " + channelName + " while not connected");
+	}
+    }
+    
+    private void throwExceptionIfNoAuthorizerHasBeenSet() {
+	if(pusherOptions.getAuthorizer() == null) {
+	    throw new IllegalStateException("Cannot subscribe to a private or presence channel because no Authorizer has been set. Call PusherOptions.setAuthorizer() before connecting to Pusher");
+	}
     }
 }

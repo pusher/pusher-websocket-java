@@ -152,6 +152,7 @@ public class ChannelImpl implements InternalChannel {
     protected String[] getDisallowedNameExpressions() {
 	return new String[] {
 		"^private-.*",
+		"^presence-.*"
 	};
     }
     

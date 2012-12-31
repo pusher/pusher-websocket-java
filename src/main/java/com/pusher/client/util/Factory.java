@@ -12,6 +12,7 @@ import org.java_websocket.client.WebSocketClient;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.channel.impl.ChannelManager;
+import com.pusher.client.channel.impl.PresenceChannelImpl;
 import com.pusher.client.channel.impl.PrivateChannelImpl;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
@@ -74,6 +75,10 @@ public class Factory {
     
     public static PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName) {
 	return new PrivateChannelImpl(connection, channelName);
+    }
+    
+    public static PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName) {
+	return new PresenceChannelImpl(connection, channelName);
     }
 
     public static ChannelManager getChannelManager(InternalConnection connection, PusherOptions pusherOptions) {
