@@ -42,7 +42,7 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
 	System.out.println(String.format("Connection state changed from [%s] to [%s]", change.getPreviousState(), change.getCurrentState()));
 	
 	if(change.getCurrentState() == ConnectionState.CONNECTED) {
-	    channel = pusher.subscribe(channelName, this, eventName);
+	    channel = pusher.subscribePresence(channelName, this, eventName);
 	}
     }
     

@@ -42,7 +42,7 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
 	System.out.println(String.format("Connection state changed from [%s] to [%s]", change.getPreviousState(), change.getCurrentState()));
 	
 	if(change.getCurrentState() == ConnectionState.CONNECTED) {
-	    channel = pusher.subscribe(channelName, this, eventName);
+	    channel = pusher.subscribePrivate(channelName, this, eventName);
 	}
     }
     

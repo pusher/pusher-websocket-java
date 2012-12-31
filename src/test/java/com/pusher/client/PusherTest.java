@@ -154,7 +154,7 @@ public class PusherTest {
     @Test
     public void testSubscribePresenceCreatesPresenceChannelAndDelegatesCallToTheChannelManager() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-	pusher.subscribe(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
+	pusher.subscribePresence(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
 	
 	verify(mockChannelManager).subscribeTo(mockPresenceChannel, mockPresenceChannelEventListener);
     }
@@ -162,7 +162,7 @@ public class PusherTest {
     @Test
     public void testSubscribePresenceWithEventNamesCreatesPresenceChannelAndDelegatesCallToTheChannelManager() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-	pusher.subscribe(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener, "event1", "event2");
+	pusher.subscribePresence(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener, "event1", "event2");
 	
 	verify(mockChannelManager).subscribeTo(mockPresenceChannel, mockPresenceChannelEventListener, "event1", "event2");
     }
@@ -172,7 +172,7 @@ public class PusherTest {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
 	pusher = new Pusher(API_KEY);
 	
-	pusher.subscribe(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
+	pusher.subscribePresence(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
     }
     
     @Test(expected=IllegalStateException.class)
@@ -181,27 +181,27 @@ public class PusherTest {
 	when(mockPusherOptions.getAuthorizer()).thenReturn(null);
 	pusher = new Pusher(API_KEY, mockPusherOptions);
 	
-	pusher.subscribe(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
+	pusher.subscribePresence(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
     }
 
     @Test(expected=IllegalStateException.class)
     public void testSubscribePresenceWhenConnectingThrowsException() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTING);
 	
-	pusher.subscribe(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
+	pusher.subscribePresence(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
     }
     
     @Test(expected=IllegalStateException.class)
     public void testSubscribePresenceWhenDisconnectedThrowsException() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
 	
-	pusher.subscribe(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
+	pusher.subscribePresence(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
     }
 
     @Test
     public void testSubscribePrivateCreatesPrivateChannelAndDelegatesCallToTheChannelManager() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
+	pusher.subscribePrivate(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
 	
 	verify(mockChannelManager).subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener);
     }
@@ -209,7 +209,7 @@ public class PusherTest {
     @Test
     public void testSubscribePrivateWithEventNamesCreatesPrivateChannelAndDelegatesCallToTheChannelManager() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener, "event1", "event2");
+	pusher.subscribePrivate(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener, "event1", "event2");
 	
 	verify(mockChannelManager).subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener, "event1", "event2");
     }
@@ -219,7 +219,7 @@ public class PusherTest {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
 	pusher = new Pusher(API_KEY);
 	
-	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
+	pusher.subscribePrivate(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
     }
     
     @Test(expected=IllegalStateException.class)
@@ -228,21 +228,21 @@ public class PusherTest {
 	when(mockPusherOptions.getAuthorizer()).thenReturn(null);
 	pusher = new Pusher(API_KEY, mockPusherOptions);
 	
-	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
+	pusher.subscribePrivate(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
     }
 
     @Test(expected=IllegalStateException.class)
     public void testSubscribePrivateWhenConnectingThrowsException() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTING);
 	
-	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
+	pusher.subscribePrivate(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
     }
     
     @Test(expected=IllegalStateException.class)
     public void testSubscribePrivateWhenDisconnectedThrowsException() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
 	
-	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
+	pusher.subscribePrivate(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
     }
     
     @Test

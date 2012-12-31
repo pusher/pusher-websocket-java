@@ -32,6 +32,9 @@ public class Pusher {
      *  <li>Create an instance of {@link PusherOptions} and set the authorizer on it by calling {@link PusherOptions#setAuthorizer(Authorizer)}.</li>
      *  <li>Use the {@link #Pusher(String, PusherOptions)} constructor to create an instance of Pusher.</li>
      * </ul></p>
+     * 
+     * <p>The {@link com.pusher.client.example.PrivateChannelExampleApp} and {@link com.pusher.client.example.PresenceChannelExampleApp} example
+     * applications show how to do this.</p>
      * @param apiKey Your Pusher API key.
      */
     public Pusher(String apiKey) {
@@ -133,7 +136,7 @@ public class Pusher {
      * <ul>
      * 	<li>The channel name is null.</li>
      *  <li>You are already subscribed to this channel.</li>
-     *  <li>The channel name starts with "private-". If you want to subscribe to a private channel, call {@link #subscribe(String, PrivateChannelEventListener, String...)}
+     *  <li>The channel name starts with "private-". If you want to subscribe to a private channel, call {@link #subscribePrivate(String, PrivateChannelEventListener, String...)}
      *  instead of this method.</li>
      *  <li>At least one of the specified event names is null.</li>
      *  <li>You have specified at least one event name and your {@link ChannelEventListener} is null.</li>
@@ -150,7 +153,11 @@ public class Pusher {
 	return channel;
     }
     
-    public PrivateChannel subscribe(String channelName, PrivateChannelEventListener listener, String... eventNames) {
+    public PrivateChannel subscribePrivate(String channelName) {
+	return subscribePrivate(channelName, null);
+    }
+    
+    public PrivateChannel subscribePrivate(String channelName, PrivateChannelEventListener listener, String... eventNames) {
 	
 	throwExceptionIfNotConnected(channelName);
 	throwExceptionIfNoAuthorizerHasBeenSet();
@@ -161,7 +168,11 @@ public class Pusher {
 	return channel;
     }
 
-    public PresenceChannel subscribe(String channelName, PresenceChannelEventListener listener, String... eventNames) {
+    public PresenceChannel subscribePresence(String channelName) {
+	return subscribePresence(channelName, null);
+    }
+    
+    public PresenceChannel subscribePresence(String channelName, PresenceChannelEventListener listener, String... eventNames) {
 	
 	throwExceptionIfNotConnected(channelName);
 	throwExceptionIfNoAuthorizerHasBeenSet();
