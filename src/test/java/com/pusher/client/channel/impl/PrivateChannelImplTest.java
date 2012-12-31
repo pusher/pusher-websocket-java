@@ -1,5 +1,6 @@
 package com.pusher.client.channel.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -30,8 +31,20 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Test
     @Override
     public void testConstructWithPrivateChannelNameThrowsException() {
-	// Overridden because this test is not valid for this class
+	// overridden because this test is not valid for this class - we don't want to throw an exception
     }    
+
+    @Test
+    @Override
+    public void testReturnsCorrectSubscribeMessage() {
+	String authResponse = "{\"auth\":\"appKey:1234567\"}";
+	assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\",\"auth\":\"appKey:1234567\"}}", channel.toSubscribeMessage(authResponse));
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testToSubscriptionMessageWithNoArgumentsThrowsException() {
+	channel.toSubscribeMessage();
+    }
     
     /* end of tests */
 

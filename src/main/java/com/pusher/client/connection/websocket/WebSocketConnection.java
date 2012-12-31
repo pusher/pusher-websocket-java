@@ -26,6 +26,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClient underlyingConnection;
+    private String socketId;
     
     public WebSocketConnection(String apiKey) throws URISyntaxException {
 	
@@ -82,6 +83,11 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 	    }
 	});	
     }
+
+    @Override
+    public String getSocketId() {
+	return socketId;
+    }
     
     /** implementation detail **/
     
@@ -109,27 +115,50 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 	if(event.startsWith(INTERNAL_EVENT_PREFIX)) {
 	    handleInternalEvent(event, wholeMessage);
 	} else {
-	    Factory.getChannelManager(this).onMessage(event, wholeMessage);
+	    Factory.getChannelManager(this, null).onMessage(event, wholeMessage);
 	}
     }
     
     private void handleInternalEvent(String event, String wholeMessage) {
 	
 	if(event.equals("pusher:connection_established") && state == ConnectionState.CONNECTING) {
-	    updateState(ConnectionState.CONNECTED);
+	    handleConnectionMessage(wholeMessage);
 	} else if(event.equals("pusher:error")) {
 	    handleError(wholeMessage);
 	}
     }
+    
+    @SuppressWarnings("rawtypes")
+    private void handleConnectionMessage(String message) {
+	
+	Map jsonObject = new Gson().fromJson(message, Map.class);
+	String dataString = (String) jsonObject.get("data");
+	Map dataMap = new Gson().fromJson(dataString, Map.class);
+	socketId = (String) dataMap.get("socket_id");
+	
+	updateState(ConnectionState.CONNECTED);
+    }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings("rawtypes")
     private void handleError(String wholeMessage) {
 
-	Map<Object, Object> json = new Gson().fromJson(wholeMessage, Map.class);
-	Map<Object, Object> data = (Map<Object, Object>) json.get("data");
+	Map json = new Gson().fromJson(wholeMessage, Map.class);
+	Object data = json.get("data");
 	
-	String message = (String) data.get("message");
-	String code = String.valueOf(Math.round((Double)data.get("code")));
+	Map dataMap;
+	if(data instanceof String) {
+	    dataMap = new Gson().fromJson(((String)data), Map.class);
+	} else {
+	    dataMap = (Map) data;
+	}
+	
+	String message = (String) dataMap.get("message");
+	
+	Object codeObject = dataMap.get("code");
+	String code = null;
+	if(codeObject != null) {
+	    code = String.valueOf(Math.round((Double)codeObject));
+	}
 	
 	sendErrorToAllListeners(message, code, null);
     }

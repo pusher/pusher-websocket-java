@@ -34,6 +34,8 @@ public class PusherTest {
     private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
     
     private Pusher pusher;
+    private @Mock PusherOptions mockPusherOptions;
+    private @Mock Authorizer mockAuthorizer;
     private @Mock InternalConnection mockConnection;
     private @Mock ChannelManager mockChannelManager;
     private @Mock ConnectionEventListener mockConnectionEventListener;
@@ -47,11 +49,13 @@ public class PusherTest {
     {
 	PowerMockito.mockStatic(Factory.class);
 	when(Factory.getConnection(API_KEY)).thenReturn(mockConnection);
-	when(Factory.getChannelManager(mockConnection)).thenReturn(mockChannelManager);
+	when(Factory.getChannelManager(mockConnection, mockPusherOptions)).thenReturn(mockChannelManager);
 	when(Factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
 	when(Factory.newPrivateChannel(PRIVATE_CHANNEL_NAME)).thenReturn(mockPrivateChannel);
 	
-	this.pusher = new Pusher(API_KEY);
+	when(mockPusherOptions.getAuthorizer()).thenReturn(mockAuthorizer);
+	
+	this.pusher = new Pusher(API_KEY, mockPusherOptions);
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -62,6 +66,11 @@ public class PusherTest {
     @Test(expected=IllegalArgumentException.class)
     public void testEmptyAPIKeyThrowsIllegalArgumentException() {
 	new Pusher("");
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testNullPusherOptionsThrowsIllegalArgumentException() {
+	new Pusher(API_KEY, null);
     }
     
     @Test
@@ -150,6 +159,23 @@ public class PusherTest {
 	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener, "event1", "event2");
 	
 	verify(mockChannelManager).subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener, "event1", "event2");
+    }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testSubscribePrivateIfNoPusherOptionsHaveBeenPassedThrowsException() {
+	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
+	pusher = new Pusher(API_KEY);
+	
+	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
+    }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testSubscribePrivateIfPusherOptionsHaveBeenPassedButNoAuthorizerHasBeenSetThrowsException() {
+	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
+	when(mockPusherOptions.getAuthorizer()).thenReturn(null);
+	pusher = new Pusher(API_KEY, mockPusherOptions);
+	
+	pusher.subscribe(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
     }
 
     @Test(expected=IllegalStateException.class)

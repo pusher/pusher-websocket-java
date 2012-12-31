@@ -14,7 +14,7 @@ import com.pusher.client.util.Factory;
 public class ChannelImpl implements InternalChannel {
 
     private static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
-    private final String name;
+    protected final String name;
     private final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
     private ChannelState state = ChannelState.INITIAL;
 
@@ -93,7 +93,7 @@ public class ChannelImpl implements InternalChannel {
     }
     
     @Override
-    public String toSubscribeMessage() {
+    public String toSubscribeMessage(String... extraArguments) {
 	
 	Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
 	jsonObject.put("event", "pusher:subscribe");

@@ -5,7 +5,7 @@ import com.pusher.client.channel.ChannelState;
 
 public interface InternalChannel extends Channel {
     
-    String toSubscribeMessage();
+    String toSubscribeMessage(String... extraArguments);
 
     String toUnsubscribeMessage();
 

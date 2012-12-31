@@ -15,17 +15,27 @@ import com.pusher.client.util.Factory;
 
 public class Pusher {
 
+    private final PusherOptions pusherOptions;
     private final InternalConnection connection;
     private final ChannelManager channelManager;
     
     public Pusher(String apiKey) {
 	
+	this(apiKey, new PusherOptions());
+    }
+    
+    public Pusher(String apiKey, PusherOptions pusherOptions) {
 	if(apiKey == null || apiKey.isEmpty()) {
 	    throw new IllegalArgumentException("API Key cannot be null or empty");
 	}
 	
+	if(pusherOptions == null) {
+	    throw new IllegalArgumentException("PusherOptions cannot be null");
+	}
+	
+	this.pusherOptions = pusherOptions;
 	this.connection = Factory.getConnection(apiKey);
-	this.channelManager = Factory.getChannelManager(connection);
+	this.channelManager = Factory.getChannelManager(connection, pusherOptions);
     }
     
     /* Connection methods */
@@ -125,6 +135,10 @@ public class Pusher {
     public PrivateChannel subscribe(String channelName, PrivateChannelEventListener listener, String... eventNames) {
 	if(connection.getState() != ConnectionState.CONNECTED) {
 	    throw new IllegalStateException("Cannot subscribe to private channel " + channelName + " while not connected");
+	}
+	
+	if(pusherOptions.getAuthorizer() == null) {
+	    throw new IllegalStateException("Cannot subscribe to a private channel because no Authorizer has been set. Call PusherOptions.setAuthorizer() before connecting to Pusher");
 	}
 	
 	PrivateChannelImpl channel = Factory.newPrivateChannel(channelName);

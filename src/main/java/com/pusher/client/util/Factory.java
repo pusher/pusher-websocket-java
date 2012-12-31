@@ -1,12 +1,15 @@
 package com.pusher.client.util;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.java_websocket.client.WebSocketClient;
 
+import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.PrivateChannelImpl;
@@ -73,10 +76,14 @@ public class Factory {
 	return new PrivateChannelImpl(channelName);
     }
 
-    public static ChannelManager getChannelManager(InternalConnection connection) {
+    public static ChannelManager getChannelManager(InternalConnection connection, PusherOptions pusherOptions) {
 	if (channelManager == null) {
-	    channelManager = new ChannelManager(connection);
+	    channelManager = new ChannelManager(connection, pusherOptions);
 	}
 	return channelManager;
+    }
+
+    public static URL newURL(String endPoint) throws MalformedURLException {
+	return new URL(endPoint);
     }
 }

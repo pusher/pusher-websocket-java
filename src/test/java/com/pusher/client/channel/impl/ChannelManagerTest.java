@@ -2,6 +2,7 @@ package com.pusher.client.channel.impl;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,8 +14,12 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.pusher.client.AuthorizationFailureException;
+import com.pusher.client.Authorizer;
+import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
@@ -23,27 +28,45 @@ import com.pusher.client.util.Factory;
 public class ChannelManagerTest {
 
     private static final String CHANNEL_NAME = "my-channel";
+    private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
     private static final String OUTGOING_SUBSCRIBE_MESSAGE = "{\"event\":\"pusher:subscribe\"}";
     private static final String OUTGOING_UNSUBSCRIBE_MESSAGE = "{\"event\":\"pusher:unsubscribe\"}";
+    private static final String SOCKET_ID = "21234.41243";
+    private static final String AUTH_RESPONSE = "{\"auth\":\"appKey:123456\"}";
+    private static final String PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE = "{\"event\":\"pusher:subscribe\", \"data\":{}}";
     
     private ChannelManager channelManager;
+    private @Mock PusherOptions mockPusherOptions;
+    private @Mock Authorizer mockAuthorizer;
     private @Mock InternalConnection mockConnection;
     private @Mock InternalChannel mockInternalChannel;
     private @Mock ChannelEventListener mockEventListener;
+    private @Mock PrivateChannelImpl mockPrivateChannel;
+    private @Mock PrivateChannelEventListener mockPrivateChannelEventListener;
     
     @Before
-    public void setUp() {
+    public void setUp() throws AuthorizationFailureException {
 	
 	when(mockInternalChannel.getName()).thenReturn(CHANNEL_NAME);
 	when(mockInternalChannel.toSubscribeMessage()).thenReturn(OUTGOING_SUBSCRIBE_MESSAGE);
 	when(mockInternalChannel.toUnsubscribeMessage()).thenReturn(OUTGOING_UNSUBSCRIBE_MESSAGE);
+	when(mockConnection.getSocketId()).thenReturn(SOCKET_ID);
+	when(mockPusherOptions.getAuthorizer()).thenReturn(mockAuthorizer);
+	when(mockPrivateChannel.getName()).thenReturn(PRIVATE_CHANNEL_NAME);
+	when(mockAuthorizer.authorize(PRIVATE_CHANNEL_NAME, SOCKET_ID)).thenReturn(AUTH_RESPONSE);
+	when(mockPrivateChannel.toSubscribeMessage(AUTH_RESPONSE)).thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
 	
-	this.channelManager = new ChannelManager(mockConnection);
+	this.channelManager = new ChannelManager(mockConnection, mockPusherOptions);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructWithNullConnectionThrowsException() {
-	new ChannelManager(null);
+	new ChannelManager(null, mockPusherOptions);
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testConstructWithNullPusherOptionsThrowsException() {
+	new ChannelManager(mockConnection, null);
     }
     
     @Test
@@ -64,6 +87,12 @@ public class ChannelManagerTest {
     }
     
     @Test
+    public void testSubscribeSetsStatusOfChannelToSubscribeSent() {
+	channelManager.subscribeTo(mockInternalChannel, mockEventListener);
+	verify(mockInternalChannel).updateState(ChannelState.SUBSCRIBE_SENT);
+    }
+    
+    @Test
     public void testSubscribeWithANullListenerAndNoEventsSubscribes() {
 	channelManager.subscribeTo(mockInternalChannel, null);
 	
@@ -80,6 +109,28 @@ public class ChannelManagerTest {
     public void testSubscribeWithADuplicateNameThrowsException() {
 	channelManager.subscribeTo(mockInternalChannel, mockEventListener);
 	channelManager.subscribeTo(mockInternalChannel, mockEventListener);
+    }
+    
+    @Test
+    public void testSubscribeToPrivateChannelAuthenticatesAndSubscribes() throws AuthorizationFailureException {
+	channelManager.subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener);
+	
+	verify(mockConnection).getSocketId();
+	verify(mockAuthorizer).authorize(PRIVATE_CHANNEL_NAME, SOCKET_ID);
+	verify(mockPrivateChannel).toSubscribeMessage(AUTH_RESPONSE);
+	verify(mockConnection).sendMessage(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
+    }
+    
+    @Test
+    public void testSubscribeToPrivateChannelWhenAuthorizerThrowsExceptionPassesItToListener() throws AuthorizationFailureException {
+	AuthorizationFailureException e = new AuthorizationFailureException();
+	doThrow(e).when(mockAuthorizer).authorize(PRIVATE_CHANNEL_NAME, SOCKET_ID);
+	
+	channelManager.subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener);
+	
+	verify(mockPrivateChannelEventListener).onAuthenticationFailure("Encountered an exception during authorization", e);
+	verify(mockPrivateChannel, never()).toSubscribeMessage(anyString());
+	verify(mockConnection, never()).sendMessage(anyString());
     }
     
     @Test
