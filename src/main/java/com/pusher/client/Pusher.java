@@ -2,8 +2,11 @@ package com.pusher.client;
 
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.PrivateChannel;
+import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.InternalChannel;
+import com.pusher.client.channel.impl.PrivateChannelImpl;
 import com.pusher.client.connection.Connection;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -100,6 +103,8 @@ public class Pusher {
      * <ul>
      * 	<li>The channel name is null.</li>
      *  <li>You are already subscribed to this channel.</li>
+     *  <li>The channel name starts with "private-". If you want to subscribe to a private channel, call {@link #subscribe(String, PrivateChannelEventListener, String...)}
+     *  instead of this method.</li>
      *  <li>At least one of the specified event names is null.</li>
      *  <li>You have specified at least one event name and your {@link ChannelEventListener} is null.</li>
      * </ul>
@@ -112,6 +117,17 @@ public class Pusher {
 	}
 	
 	InternalChannel channel = Factory.newPublicChannel(channelName);
+	channelManager.subscribeTo(channel, listener, eventNames);
+	
+	return channel;
+    }
+    
+    public PrivateChannel subscribe(String channelName, PrivateChannelEventListener listener, String... eventNames) {
+	if(connection.getState() != ConnectionState.CONNECTED) {
+	    throw new IllegalStateException("Cannot subscribe to private channel " + channelName + " while not connected");
+	}
+	
+	PrivateChannelImpl channel = Factory.newPrivateChannel(channelName);
 	channelManager.subscribeTo(channel, listener, eventNames);
 	
 	return channel;
