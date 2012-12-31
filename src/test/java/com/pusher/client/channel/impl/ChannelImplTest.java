@@ -66,7 +66,7 @@ public class ChannelImplTest {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.onMessage("pusher_internal:subscription_succeeded", "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"" + getChannelName() + "\"}");
 	
-	verify(mockListener).onSubscriptionSucceeded(channel);
+	verify(mockListener).onSubscriptionSucceeded(getChannelName());
     }
     
     @Test
@@ -149,7 +149,7 @@ public class ChannelImplTest {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.updateState(ChannelState.SUBSCRIBE_SENT);
 	
-	verify(mockListener, never()).onSubscriptionSucceeded(channel);
+	verify(mockListener, never()).onSubscriptionSucceeded(getChannelName());
     }
     
     @Test
@@ -158,7 +158,7 @@ public class ChannelImplTest {
 	channel.updateState(ChannelState.SUBSCRIBE_SENT);
 	channel.updateState(ChannelState.SUBSCRIBED);
 	
-	verify(mockListener).onSubscriptionSucceeded(channel);
+	verify(mockListener).onSubscriptionSucceeded(getChannelName());
     }
     
     @Test(expected=IllegalStateException.class)

@@ -1,7 +1,6 @@
 package com.pusher.client.example;
 
 import com.pusher.client.Pusher;
-import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -54,8 +53,8 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     }
 
     @Override
-    public void onSubscriptionSucceeded(Channel channel) {
+    public void onSubscriptionSucceeded(String channelName) {
 	
-	System.out.println(String.format("Subscription to channel [%s] succeeded", channel.getName()));
+	System.out.println(String.format("Subscription to channel [%s] succeeded", channelName));
     }
 }

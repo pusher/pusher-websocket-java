@@ -33,10 +33,8 @@ public interface ChannelEventListener {
      * the channel.</p>
      * 
      * <p>For public channels this callback will be more or less immediate, assuming that you are connected to Pusher at the time of
-     * subscription. For private channels this callback will not be fired unless you are successfully authenticated. You can receive
-     * authentication failure notifications via the {@link com.pusher.client.connection.ConnectionEventListener#onError(String, String, Exception)}
-     * callback.</p>
-     * @param channel The channel that was successfully subscribed.
+     * subscription. For private channels this callback will not be fired unless you are successfully authenticated.</p>
+     * @param channelName The name of the channel that was successfully subscribed.
      */
-    void onSubscriptionSucceeded(Channel channel);
+    void onSubscriptionSucceeded(String channelName);
 }

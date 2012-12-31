@@ -129,7 +129,7 @@ public class ChannelImpl implements InternalChannel {
 		for(final ChannelEventListener listener : listeners) {
 		    Factory.getEventQueue().execute(new Runnable() {
 			public void run() {
-			    listener.onSubscriptionSucceeded(ChannelImpl.this);
+			    listener.onSubscriptionSucceeded(ChannelImpl.this.getName());
 			}
 		    });
 		}

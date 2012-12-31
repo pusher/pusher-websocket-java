@@ -2,7 +2,6 @@ package com.pusher.client.example;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -62,11 +61,11 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     }
 
     @Override
-    public void onSubscriptionSucceeded(Channel channel) {
+    public void onSubscriptionSucceeded(String channelName) {
 	
 	System.out.println(String.format("Subscription to channel [%s] succeeded", channel.getName()));
 	
-	this.channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
+	channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
     }
 
     @Override
