@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -26,13 +25,14 @@ public class ChannelImplTest {
 
     private static final String EVENT_NAME = "my-event";
     protected ChannelImpl channel;
-    private @Mock ChannelEventListener mockListener;
+    private ChannelEventListener mockListener;
     
     @Before
     public void setUp() {
 	PowerMockito.mockStatic(Factory.class);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
+	this.mockListener = getEventListener();
 	this.channel = newInstance(getChannelName());
     }
     
@@ -92,7 +92,7 @@ public class ChannelImplTest {
     
     @Test
     public void testDataIsExtractedFromMessageAndPassedToMultipleListeners() {
-	ChannelEventListener mockListener2 = mock(ChannelEventListener.class);
+	ChannelEventListener mockListener2 = getEventListener();
 	
 	channel.bind(EVENT_NAME, mockListener);
 	channel.bind(EVENT_NAME, mockListener2);
@@ -196,5 +196,14 @@ public class ChannelImplTest {
      */
     protected String getChannelName() {
 	return "my-channel";
+    }
+    
+    /**
+     * This method is overridden to allow the private and presence channel tests to use the
+     * appropriate listener subclass.
+     */
+    protected ChannelEventListener getEventListener() {
+	ChannelEventListener listener = mock(ChannelEventListener.class);
+	return listener;
     }
 }

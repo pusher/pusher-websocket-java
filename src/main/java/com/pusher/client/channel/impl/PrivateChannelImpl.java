@@ -5,8 +5,10 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannel;
+import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
 
@@ -56,6 +58,16 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     
     /* Base class overrides */
 
+    @Override
+    public void bind(String eventName, ChannelEventListener listener) {
+	
+	if( (listener instanceof PrivateChannelEventListener) == false) {
+	    throw new IllegalArgumentException("Only instances of PrivateChannelEventListener can be bound to a private channel");
+	}
+	
+	super.bind(eventName, listener);
+    }
+    
     @Override
     @SuppressWarnings("rawtypes")
     public String toSubscribeMessage(String... extraArguments) {

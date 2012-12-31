@@ -2,14 +2,19 @@ package com.pusher.client.channel.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
@@ -132,6 +137,12 @@ public class PrivateChannelImplTest extends ChannelImplTest {
 	((PrivateChannelImpl)channel).trigger("client-myEvent", "{\"fish\":\"chips\"}");
     }
     
+    @Test(expected=IllegalArgumentException.class)
+    public void testCannotBindIfListenerIsNotAPrivateChannelEventListener() {
+	ChannelEventListener listener = mock(ChannelEventListener.class);
+	channel.bind("private-myEvent", listener);
+    }
+    
     /* end of tests */
 
     @Override
@@ -142,5 +153,10 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Override
     protected String getChannelName() {
 	return "private-my-channel";
+    }
+    
+    protected ChannelEventListener getEventListener() {
+	PrivateChannelEventListener listener = mock(PrivateChannelEventListener.class);
+	return listener;
     }
 }

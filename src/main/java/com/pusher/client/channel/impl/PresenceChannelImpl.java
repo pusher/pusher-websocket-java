@@ -4,7 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannel;
+import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
 
 public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceChannel {
@@ -13,9 +15,12 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	super(connection, channelName);
     }
 
+    /* Base class overrides */
+    
     @Override
     public void onMessage(String event, String message) {
 
+	// TODO: next
 	super.onMessage(event, message);
     }
     
@@ -47,6 +52,16 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	
 	return json;
     }    
+
+    @Override
+    public void bind(String eventName, ChannelEventListener listener) {
+	
+	if( (listener instanceof PresenceChannelEventListener) == false) {
+	    throw new IllegalArgumentException("Only instances of PresenceChannelEventListener can be bound to a presence channel");
+	}
+	
+	super.bind(eventName, listener);
+    }
     
     @Override
     protected String[] getDisallowedNameExpressions() {
