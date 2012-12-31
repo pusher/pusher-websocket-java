@@ -23,6 +23,12 @@ public class ChannelImpl implements InternalChannel {
 	    throw new IllegalArgumentException("Cannot subscribe to a channel with a null name");
 	}
 	
+	for(String disallowedPattern : getDisallowedNameExpressions()) {
+	    if(channelName.matches(disallowedPattern)) {
+		throw new IllegalArgumentException("Channel name " + channelName + " is invalid. Private channel names must start with \"private-\" and presence channel names must start with \"presence-\"");
+	    }
+	}
+	
 	this.name = channelName;
     }
 
@@ -138,6 +144,12 @@ public class ChannelImpl implements InternalChannel {
 	return gson.toJson(jsonObject.get("data"));
     }
 
+    protected String[] getDisallowedNameExpressions() {
+	return new String[] {
+		"^private-.*",
+	};
+    }
+    
     private void validateArguments(String eventName, ChannelEventListener listener) {
 	
 	if(eventName == null) {

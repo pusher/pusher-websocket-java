@@ -24,9 +24,8 @@ import com.pusher.client.util.InstantExecutor;
 @PrepareForTest({Factory.class})
 public class ChannelImplTest {
 
-    private static final String CHANNEL_NAME = "my-channel";
     private static final String EVENT_NAME = "my-event";
-    private ChannelImpl channel;
+    protected ChannelImpl channel;
     private @Mock ChannelEventListener mockListener;
     
     @Before
@@ -34,27 +33,32 @@ public class ChannelImplTest {
 	PowerMockito.mockStatic(Factory.class);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
-	this.channel = new ChannelImpl(CHANNEL_NAME);
+	this.channel = newInstance(getChannelName());
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructWithNullChannelNameThrowsException() {
-	new ChannelImpl(null);
+	newInstance(null);
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void testConstructWithPrivateChannelNameThrowsException() {
+	newInstance("private-my-channel");
+    }
+    
     @Test
     public void testGetNameReturnsName() {
-	assertEquals(CHANNEL_NAME, channel.getName());
+	assertEquals(getChannelName(), channel.getName());
     }
     
     @Test
     public void testReturnsCorrectSubscribeMessage() {
-	assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"my-channel\"}}", channel.toSubscribeMessage());
+	assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}", channel.toSubscribeMessage());
     }
 
     @Test
     public void testReturnsCorrectUnsubscribeMessage() {
-	assertEquals("{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\"my-channel\"}}", channel.toUnsubscribeMessage());
+	assertEquals("{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}", channel.toUnsubscribeMessage());
     }
     
     @Test
@@ -62,7 +66,7 @@ public class ChannelImplTest {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
 	
-	verify(mockListener).onEvent(CHANNEL_NAME, EVENT_NAME, "{\"fish\":\"chips\"}");
+	verify(mockListener).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
     }
     
     @Test
@@ -73,8 +77,8 @@ public class ChannelImplTest {
 	channel.bind(EVENT_NAME, mockListener2);
 	channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
 	
-	verify(mockListener).onEvent(CHANNEL_NAME, EVENT_NAME, "{\"fish\":\"chips\"}");
-	verify(mockListener2).onEvent(CHANNEL_NAME, EVENT_NAME, "{\"fish\":\"chips\"}");
+	verify(mockListener).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
+	verify(mockListener2).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
     }   
 
     @Test
@@ -143,5 +147,24 @@ public class ChannelImplTest {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.updateState(ChannelState.UNSUBSCRIBED);
 	channel.unbind(EVENT_NAME, mockListener);
-    }    
+    }
+    
+    /* end of tests */
+    
+    /**
+     * This method is overridden in the test subclasses so that these tests can be run
+     * against PrivateChannelImpl and PresenceChannelImpl.
+     */
+    protected ChannelImpl newInstance(String channelName) {
+	return new ChannelImpl(channelName);
+    }
+    
+    /**
+     * This method is overridden in the test subclasses so that the private channel tests
+     * can run with a valid private channel name and the presence channel tests can run
+     * with a valid presence channel name.
+     */
+    protected String getChannelName() {
+	return "my-channel";
+    }
 }
