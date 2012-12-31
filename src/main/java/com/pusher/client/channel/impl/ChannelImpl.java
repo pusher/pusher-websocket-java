@@ -13,9 +13,9 @@ import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
 
-    private static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
+    protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
-    private final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
+    protected final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
     protected ChannelState state = ChannelState.INITIAL;
 
     public ChannelImpl(String channelName) {

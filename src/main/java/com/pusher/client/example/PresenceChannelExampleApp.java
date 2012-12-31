@@ -27,7 +27,7 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
 	channelName = (args.length > 1) ? args[1] : "presence-my-channel";
 	eventName = (args.length > 2) ? args[2] : "my-event";
 	
-	HttpAuthorizer authorizer = new HttpAuthorizer("http://www.leggetter.co.uk/pusher/pusher-examples/php/authentication/src/private_auth.php");
+	HttpAuthorizer authorizer = new HttpAuthorizer("http://www.leggetter.co.uk/pusher/pusher-examples/php/authentication/src/presence_auth.php");
 	PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
 	
 	pusher = new Pusher(apiKey, options);
