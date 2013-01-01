@@ -1,5 +1,6 @@
 package com.pusher.client.channel.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -19,11 +20,25 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     private static final String MEMBER_ADDED_EVENT = "pusher_internal:member_added";
     private static final String MEMBER_REMOVED_EVENT = "pusher_internal:member_removed";
+    private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<String, User>());
+    private String myUserID;
     
     public PresenceChannelImpl(InternalConnection connection, String channelName) {
 	super(connection, channelName);
     }
 
+    /* PresenceChannel implementation */
+    
+    @Override
+    public Set<User> getUsers() {
+	return new LinkedHashSet<User>(idToUserMap.values());
+    }
+    
+    @Override
+    public User getMe() {
+	return idToUserMap.get(myUserID);
+    }
+    
     /* Base class overrides */
     
     @Override
@@ -53,6 +68,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	Map authResponseMap = new Gson().fromJson(authResponse, Map.class);
 	String authKey = (String) authResponseMap.get("auth");
 	Object channelData = authResponseMap.get("channel_data");
+	
+	storeMyUserId(channelData);
 	
 	Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
 	jsonObject.put("event", "pusher:subscribe");
@@ -96,18 +113,17 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	Map hash = (Map) presenceMap.get("hash");
 	
 	// build the collection of Users
-	final Set<User> users = new LinkedHashSet<User>();
 	for(String id : ids) {
 	    String userData = (hash.get(id) != null) ? hash.get(id).toString() : null;
 	    User user = new User(id, userData);
-	    users.add(user);
+	    idToUserMap.put(id, user);
 	}
 	
 	// notify the event listeners
 	for(final ChannelEventListener eventListener : getAllEventListeners()) {
 	    Factory.getEventQueue().execute(new Runnable() {
 		public void run() {
-		    ((PresenceChannelEventListener)eventListener).onUserInformationReceived(name, users);
+		    ((PresenceChannelEventListener)eventListener).onUserInformationReceived(name, new HashSet<User>(idToUserMap.values()));
 		}
 	    });
 	}
@@ -121,11 +137,12 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	String userData = (dataMap.get("user_info") != null) ? dataMap.get("user_info").toString() : null;
 	
 	final User user = new User(id, userData);
+	idToUserMap.put(id, user);
 	
 	for(final ChannelEventListener eventListener : getAllEventListeners()) {
 	    Factory.getEventQueue().execute(new Runnable() {
 		public void run() {
-		    ((PresenceChannelEventListener)eventListener).onUserAdded(name, user);
+		    ((PresenceChannelEventListener)eventListener).userSubscribed(name, user);
 		}
 	    });
 	}
@@ -135,12 +152,14 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     private void handleMemberRemovedEvent(String message) {
 	
 	Map dataMap = extractDataMapFrom(message);
-	final String id = (String) dataMap.get("user_id");
+	String id = (String) dataMap.get("user_id");
+	
+	final User user = idToUserMap.remove(id);
 	
 	for(final ChannelEventListener eventListener : getAllEventListeners()) {
 	    Factory.getEventQueue().execute(new Runnable() {
 		public void run() {
-		    ((PresenceChannelEventListener)eventListener).onUserRemoved(name, id);
+		    ((PresenceChannelEventListener)eventListener).userUnsubscribed(name, user);
 		}
 	    });
 	}
@@ -163,6 +182,13 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	Map presenceMap = (Map) dataMap.get("presence");
 	
 	return presenceMap;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private void storeMyUserId(Object channelData) {
+	
+	Map channelDataMap = new Gson().fromJson(((String)channelData), Map.class);
+	myUserID = (String) channelDataMap.get("user_id");
     }
     
     private Set<ChannelEventListener> getAllEventListeners() {

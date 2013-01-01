@@ -5,8 +5,8 @@ import java.util.Set;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.User;
+import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
-import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
@@ -18,7 +18,7 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     private final String channelName;
     private final String eventName;
     
-    private PrivateChannel channel;
+    private PresenceChannel channel;
     
     public static void main(String[] args) {
 	new PresenceChannelExampleApp(args);
@@ -60,25 +60,25 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     @Override
     public void onUserInformationReceived(String channelName, Set<User> users) {
 	
-	StringBuilder sb = new StringBuilder("Received user information. The following users are subscribed to this channel:");
-	for(User user : users) {
-	    sb.append("\n\t");
-	    sb.append(user.toString());
-	}
+	System.out.println("Received user information");
 	
-	System.out.println(sb.toString());
+	printCurrentlySubscribedUsers();
     }
 
     @Override
-    public void onUserAdded(String channelName, User user) {
+    public void userSubscribed(String channelName, User user) {
 	
 	System.out.println(String.format("A new user has joined channel [%s]: %s", channelName, user.toString()));
+	
+	printCurrentlySubscribedUsers();
     }
 
     @Override
-    public void onUserRemoved(String channelName, String id) {
+    public void userUnsubscribed(String channelName, User user) {
 
-	System.out.println(String.format("User %s has left channel [%s]", id, channelName));
+	System.out.println(String.format("A user has left channel [%s]: %s", channelName, user));
+	
+	printCurrentlySubscribedUsers();
     }
     
     @Override
@@ -97,5 +97,19 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     public void onAuthenticationFailure(String message, Exception e) {
 	
 	System.out.println(String.format("Authentication failure due to [%s], exception was [%s]", message, e));
+    }
+    
+    private void printCurrentlySubscribedUsers() {
+	StringBuilder sb = new StringBuilder("Users now subscribed to the channel:");
+	for(User remainingUser : channel.getUsers()) {
+	    sb.append("\n\t");
+	    sb.append(remainingUser.toString());
+	    
+	    if(remainingUser.equals(channel.getMe())) {
+		sb.append(" (me)");
+	    }
+	}
+	
+	System.out.println(sb.toString());
     }
 }

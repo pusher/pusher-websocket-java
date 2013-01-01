@@ -8,7 +8,7 @@ public interface PresenceChannelEventListener extends PrivateChannelEventListene
 
     void onUserInformationReceived(String channelName, Set<User> users);
 
-    void onUserAdded(String channelName, User user);
+    void userSubscribed(String channelName, User user);
 
-    void onUserRemoved(String channelName, String id);
+    void userUnsubscribed(String channelName, User user);
 }

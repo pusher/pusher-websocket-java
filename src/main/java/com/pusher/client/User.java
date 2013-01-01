@@ -22,4 +22,20 @@ public class User {
     public String toString() {
 	return String.format("[User id=%s, data=%s]", id, jsonData);
     }
+    
+    @Override
+    public int hashCode() {
+	return id.hashCode() + ((jsonData != null) ? jsonData.hashCode() : 0);
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+	
+	if(other instanceof User) {
+	    User otherUser = (User) other;
+	    return this.getId().equals(otherUser.getId()) && this.getJsonData().equals(otherUser.getJsonData());
+	}
+	
+	return false;
+    }
 }
