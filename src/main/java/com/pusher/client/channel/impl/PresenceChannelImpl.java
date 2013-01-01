@@ -17,6 +17,8 @@ import com.pusher.client.util.Factory;
 
 public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceChannel {
 
+    private static final String MEMBER_ADDED_EVENT = "pusher_internal:member_added";
+    
     public PresenceChannelImpl(InternalConnection connection, String channelName) {
 	super(connection, channelName);
     }
@@ -24,42 +26,17 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     /* Base class overrides */
     
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void onMessage(String event, String message) {
 
 	super.onMessage(event, message);
 	
 	if(event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
-	    
-	    Gson gson = new Gson();
-	    Map jsonObject = gson.fromJson(message, Map.class);
-	    String dataString = (String) jsonObject.get("data");
-	    
-	    Map dataMap = gson.fromJson(dataString, Map.class);
-	    Map presenceMap = (Map) dataMap.get("presence");
-
-	    List<String> ids = (List<String>) presenceMap.get("ids");
-	    
-	    Map userDataMap = (Map) presenceMap.get("hash");
-	    
-	    final Set<User> users = new LinkedHashSet<User>();
-	    for(String id : ids) {
-		String userData = (userDataMap.get(id) != null) ? userDataMap.get(id).toString() : null;
-		User user = new User(id, userData);
-		users.add(user);
-	    }
-	    
-	    for(final ChannelEventListener eventListener : getAllEventListeners()) {
-		
-		Factory.getEventQueue().execute(new Runnable() {
-		    public void run() {
-			((PresenceChannelEventListener)eventListener).onUserInformationReceived(name, users);
-		    }
-		});
-	    }
+	    handleSubscriptionSuccessfulMessage(message);
+	} else if(event.equals(MEMBER_ADDED_EVENT)) {
+	    handleMemberAddedEvent(message);
 	}
     }
-    
+
     @Override
     @SuppressWarnings("rawtypes")
     public String toSubscribeMessage(String... extraArguments) {
@@ -104,6 +81,70 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	return new String[] {
 		"^(?!presence-).*"
 	};
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void handleSubscriptionSuccessfulMessage(String message) {
+	
+	// extract data from the JSON message
+	Map presenceMap = extractPresenceMapFrom(message);
+
+	List<String> ids = (List<String>) presenceMap.get("ids");
+	Map hash = (Map) presenceMap.get("hash");
+	
+	// build the collection of Users
+	final Set<User> users = new LinkedHashSet<User>();
+	for(String id : ids) {
+	    String userData = (hash.get(id) != null) ? hash.get(id).toString() : null;
+	    User user = new User(id, userData);
+	    users.add(user);
+	}
+	
+	// notify the event listeners
+	for(final ChannelEventListener eventListener : getAllEventListeners()) {
+	    Factory.getEventQueue().execute(new Runnable() {
+		public void run() {
+		    ((PresenceChannelEventListener)eventListener).onUserInformationReceived(name, users);
+		}
+	    });
+	}
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void handleMemberAddedEvent(String message) {
+	
+	Map dataMap = extractDataMapFrom(message);
+	String id = (String) dataMap.get("user_id");
+	String userData = (dataMap.get("user_info") != null) ? dataMap.get("user_info").toString() : null;
+	
+	final User user = new User(id, userData);
+	
+	for(final ChannelEventListener eventListener : getAllEventListeners()) {
+	    Factory.getEventQueue().execute(new Runnable() {
+		public void run() {
+		    ((PresenceChannelEventListener)eventListener).onUserAdded(user);
+		}
+	    });
+	}
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private static Map extractDataMapFrom(String message) {
+	Gson gson = new Gson();
+	Map jsonObject = gson.fromJson(message, Map.class);
+	String dataString = (String) jsonObject.get("data");
+	    
+	Map dataMap = gson.fromJson(dataString, Map.class);
+	return dataMap;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private static Map extractPresenceMapFrom(String message) {
+	
+	Map dataMap = extractDataMapFrom(message);
+	Map presenceMap = (Map) dataMap.get("presence");
+	
+	return presenceMap;
     }
     
     private Set<ChannelEventListener> getAllEventListeners() {
