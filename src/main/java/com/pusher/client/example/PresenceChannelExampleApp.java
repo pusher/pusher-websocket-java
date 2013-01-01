@@ -1,7 +1,10 @@
 package com.pusher.client.example;
 
+import java.util.Set;
+
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.User;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -53,6 +56,18 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     }
 
     /* PresenceChannelEventListener implementation */
+
+    @Override
+    public void onUserInformationReceived(String channelName, Set<User> users) {
+	
+	StringBuilder sb = new StringBuilder("Received user information. The following users are subscribed to this channel:");
+	for(User user : users) {
+	    sb.append("\n\t");
+	    sb.append(user.toString());
+	}
+	
+	System.out.println(sb.toString());
+    }
     
     @Override
     public void onEvent(String channelName, String eventName, String data) {

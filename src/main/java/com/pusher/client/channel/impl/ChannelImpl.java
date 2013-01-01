@@ -13,6 +13,7 @@ import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
 
+    private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
     protected final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
@@ -164,6 +165,10 @@ public class ChannelImpl implements InternalChannel {
 	
 	if(listener == null) {
 	    throw new IllegalArgumentException("Cannot bind or unbind to channel " + name + " with a null listener");
+	}
+	
+	if(eventName.startsWith(INTERNAL_EVENT_PREFIX)) {
+	    throw new IllegalArgumentException("Cannot bind or unbind channel " + name + " with an internal event name such as " + eventName);
 	}
 	
 	if(state == ChannelState.UNSUBSCRIBED) {

@@ -1,13 +1,19 @@
 package com.pusher.client.channel.impl;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.Gson;
+import com.pusher.client.User;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.util.Factory;
 
 public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceChannel {
 
@@ -18,10 +24,40 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     /* Base class overrides */
     
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void onMessage(String event, String message) {
 
-	// TODO: next
 	super.onMessage(event, message);
+	
+	if(event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
+	    
+	    Gson gson = new Gson();
+	    Map jsonObject = gson.fromJson(message, Map.class);
+	    String dataString = (String) jsonObject.get("data");
+	    
+	    Map dataMap = gson.fromJson(dataString, Map.class);
+	    Map presenceMap = (Map) dataMap.get("presence");
+
+	    List<String> ids = (List<String>) presenceMap.get("ids");
+	    
+	    Map userDataMap = (Map) presenceMap.get("hash");
+	    
+	    final Set<User> users = new LinkedHashSet<User>();
+	    for(String id : ids) {
+		String userData = (userDataMap.get(id) != null) ? userDataMap.get(id).toString() : null;
+		User user = new User(id, userData);
+		users.add(user);
+	    }
+	    
+	    for(final ChannelEventListener eventListener : getAllEventListeners()) {
+		
+		Factory.getEventQueue().execute(new Runnable() {
+		    public void run() {
+			((PresenceChannelEventListener)eventListener).onUserInformationReceived(name, users);
+		    }
+		});
+	    }
+	}
     }
     
     @Override
@@ -68,5 +104,14 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	return new String[] {
 		"^(?!presence-).*"
 	};
+    }
+    
+    private Set<ChannelEventListener> getAllEventListeners() {
+	
+	Set<ChannelEventListener> allListeners = new HashSet<ChannelEventListener>();
+	for(Set<ChannelEventListener> x : eventNameToListenerMap.values()) {
+	    allListeners.addAll(x);
+	}
+	return allListeners;
     }
 }

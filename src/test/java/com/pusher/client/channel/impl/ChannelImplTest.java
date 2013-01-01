@@ -75,14 +75,6 @@ public class ChannelImplTest {
     }
     
     @Test
-    public void testInternalSubscriptionSucceededMessageIsNeverPassedAsAnEventEvenIfYouBindToIt() {
-	channel.bind("pusher_internal:subscription_succeeded", mockListener);
-	channel.onMessage("pusher_internal:subscription_succeeded", "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"" + getChannelName() + "\"}");
-	
-	verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
-    }
-    
-    @Test
     public void testDataIsExtractedFromMessageAndPassedToSingleListener() {
 	channel.bind(EVENT_NAME, mockListener);
 	channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
@@ -129,6 +121,11 @@ public class ChannelImplTest {
     @Test(expected=IllegalArgumentException.class)
     public void testBindWithNullListenerThrowsException() {
 	channel.bind(EVENT_NAME, null);
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testBindToInternalEventThrowsException() {
+	channel.bind("pusher_internal:subscription_succeeded", mockListener);
     }
     
     @Test(expected=IllegalArgumentException.class)
