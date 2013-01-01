@@ -18,6 +18,7 @@ import com.pusher.client.util.Factory;
 public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceChannel {
 
     private static final String MEMBER_ADDED_EVENT = "pusher_internal:member_added";
+    private static final String MEMBER_REMOVED_EVENT = "pusher_internal:member_removed";
     
     public PresenceChannelImpl(InternalConnection connection, String channelName) {
 	super(connection, channelName);
@@ -34,6 +35,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	    handleSubscriptionSuccessfulMessage(message);
 	} else if(event.equals(MEMBER_ADDED_EVENT)) {
 	    handleMemberAddedEvent(message);
+	} else if(event.equals(MEMBER_REMOVED_EVENT)) {
+	    handleMemberRemovedEvent(message);
 	}
     }
 
@@ -122,7 +125,22 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	for(final ChannelEventListener eventListener : getAllEventListeners()) {
 	    Factory.getEventQueue().execute(new Runnable() {
 		public void run() {
-		    ((PresenceChannelEventListener)eventListener).onUserAdded(user);
+		    ((PresenceChannelEventListener)eventListener).onUserAdded(name, user);
+		}
+	    });
+	}
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void handleMemberRemovedEvent(String message) {
+	
+	Map dataMap = extractDataMapFrom(message);
+	final String id = (String) dataMap.get("user_id");
+	
+	for(final ChannelEventListener eventListener : getAllEventListeners()) {
+	    Factory.getEventQueue().execute(new Runnable() {
+		public void run() {
+		    ((PresenceChannelEventListener)eventListener).onUserRemoved(name, id);
 		}
 	    });
 	}

@@ -70,8 +70,15 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     }
 
     @Override
-    public void onUserAdded(User user) {
-	System.out.println(String.format("A user has joined the channel: %s", user.toString()));
+    public void onUserAdded(String channelName, User user) {
+	
+	System.out.println(String.format("A new user has joined channel [%s]: %s", channelName, user.toString()));
+    }
+
+    @Override
+    public void onUserRemoved(String channelName, String id) {
+
+	System.out.println(String.format("User %s has left channel [%s]", id, channelName));
     }
     
     @Override
