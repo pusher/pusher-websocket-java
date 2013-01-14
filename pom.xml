@@ -10,6 +10,10 @@
 		This is a Java client library for Pusher, targeted at core Java and Android.
 	</description>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
 	<!-- TODO: when a license has been selected -->
 	<licenses>
 		<license>
@@ -45,56 +49,74 @@
 			</testResource>
 		</testResources>
 
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>2.4</version>
-					<executions>
-						<execution>
-							<id>make-assembly</id>
-							<phase>package</phase>
-							<goals>
-								<goal>single</goal>
-							</goals>
-							<configuration>
-								<descriptors>
-									<descriptor>src/main/assembly/kit.xml</descriptor>
-								</descriptors>
-								<finalName>${project.artifactId}-${project.version}</finalName>
-								<outputDirectory>target</outputDirectory>
-								<workDirectory>target/assembly/work</workDirectory>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<artifactId>maven-jar-plugin</artifactId>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-							<configuration>
-								<classifier>${env.snapshotname}</classifier>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>	
-			</plugins>
-		</pluginManagement>
-
 		<plugins>
+	      <plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>build-helper-maven-plugin</artifactId>
+	        <version>1.1</version>
+	        <executions>
+	          <execution>
+	            <id>add-source</id>
+	            <phase>generate-sources</phase>
+	            <goals>
+	              <goal>add-source</goal>
+	            </goals>
+	            <configuration>
+	              <sources>
+	                <source>Java-WebSocket/src/main/java</source>
+	              </sources>
+	            </configuration>
+	          </execution>
+	        </executions>
+	      </plugin>		
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version> 
+				<configuration>
+					<classifier>${env.snapshotname}</classifier>
+			        <archive>                   
+			            <manifest>
+			            	<addClasspath>true</addClasspath>
+			            	<packageName>com.pusher.client.example</packageName>
+			            	<mainClass>com.pusher.client.example.ExampleApp</mainClass>
+			                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+			                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+			            </manifest>
+			        </archive>								
+				</configuration>
+			</plugin>
+			  <plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-assembly-plugin</artifactId>
+			    <version>2.1</version>
+			    <configuration>
+			      <descriptorRefs>
+			        <descriptorRef>jar-with-dependencies</descriptorRef>
+			      </descriptorRefs>
+			      <archive>
+			        <manifest>
+						<packageName>com.pusher.client.example</packageName>
+			            <mainClass>com.pusher.client.example.ExampleApp</mainClass>
+			        </manifest>
+			      </archive>
+			    </configuration>
+			    <executions>
+			      <execution>
+			        <phase>package</phase>
+			        <goals>
+			          <goal>single</goal>
+			        </goals>
+			      </execution>
+			    </executions>
+			  </plugin>			
+			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
-			</plugin>
+			</plugin> <!--
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
@@ -109,6 +131,19 @@
 						<totalBranchRate>80</totalBranchRate>
 						<totalLineRate>80</totalLineRate>		
 					</check>
+					<instrumentation>
+						<ignores>
+							<ignore>com.pusher.client.util.*</ignore>
+							<ignore>org.java_websocket.*</ignore>
+							<ignore>org.java_websocket.drafts.*</ignore>
+							<ignore>org.java_websocket.framing.*</ignore>
+						</ignores>
+						<excludes>
+							<exclude>com/pusher/client/util/*.class</exclude>
+							<exclude>com/pusher/client/*.class</exclude>
+							<exclude>org/java_websocket/**/*.class</exclude>
+						</excludes>
+					</instrumentation>					
 					<formats>
 						<format>html</format>
 						<format>xml</format>
@@ -122,15 +157,21 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 		</plugins>
 	</build>
 
 	<dependencies>
 		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.2</version>
+		</dependency>	
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.8.5</version>
+			<scope>test</scope>
 		</dependency> 	
 	   <dependency>
 	      <groupId>org.powermock</groupId>
@@ -159,22 +200,6 @@
 				<version>2.0-beta-3</version>
 				<configuration>
 					<issueLinkTemplate />
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.4</version>
-				<configuration>
-					<instrumentation>
-						<excludes>
-							<exclude>**/Factory.class</exclude>
-						</excludes>
-					</instrumentation>
-					<formats>
-						<format>html</format>
-						<format>xml</format>
-					</formats>
 				</configuration>
 			</plugin>
 			<plugin>
