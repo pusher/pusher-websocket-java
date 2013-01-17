@@ -197,7 +197,7 @@ public class Example implements ChannelEventListener {
   @Override
   public void onEvent(String channelName, String eventName, String data){
     Gson gson = new Gson();
-    EventExample exampleEvent = gson.fromJson(json, EventExample.class); 
+    EventExample exampleEvent = gson.fromJson(data, EventExample.class); 
   }
 
   @Override
