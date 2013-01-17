@@ -97,7 +97,7 @@ The library provides a `HttpAuthorizer` implementation of `Authorizer` which mak
 Private channels are subscribed to as follows:
 
 ```java
-Channel privateChannel = pusher.subscribePrivate( "private-channel" );
+PrivateChannel privateChannel = pusher.subscribePrivate( "private-channel" );
 ```
 
 In addition to the events that are possible on public channels a private channel exposes an `onAuthenticationFailure`. This is called if the `Authorizer` does not successfully authenticate the subscription:
@@ -127,7 +127,7 @@ public class Example implements PrivateChannelEventListener {
 [Presence channels](http://pusher.com/docs/presence_channels) can be subscribed to as follows:
 
 ```java
-Channel presenceChannel = pusher.subscribePrivate( "presence-channel" );
+PresenceChannel presenceChannel = pusher.subscribePrivate( "presence-channel" );
 ```
 
 Presence channels provide additional events relating to users joining and leaving the presence channel. It is possible to listen to these events by implementing the `PresenceChannelEventListener`.
