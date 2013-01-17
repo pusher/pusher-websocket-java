@@ -2,6 +2,22 @@
 
 Pusher client library for Java targeting **Android** and general Java.
 
+This README covers the following topics:
+
+* The Pusher constructor
+* Connecting
+* Accessing the connection socket ID
+* Listening to connection events
+* Subscribing to channels
+  * Public
+  * Private
+  * Presence
+* Binding to events
+* Handling events
+* Unbinding events
+* Triggering events
+* Library development environment
+
 ## The Pusher constructor
 
 The standard constructor take an application key which you can get from the app's API Access section in the Pusher dashboard.
@@ -28,6 +44,14 @@ In order to send and receive messages you need to connect to Pusher.
 Pusher pusher = new Pusher( YOUR_APP_KEY );
 pusher.connect();
 ```
+
+### Accessing the connection socket ID
+
+If you are triggering events via your own server you may wish to exclude the originator of the event - the current client. You can do this by supplying a unique identifier for the current client's connection. This is known as the **socket ID**.
+
+You can access the value as follows:
+
+**TODO: How to access the socket ID**
 
 ## Listening to connection events
 
@@ -114,10 +138,10 @@ public class Example implements PrivateChannelEventListener {
 
   @Override
   public void onAuthenticationFailure(String message, Exception e) {
-	System.out.println(String.format("Authentication failure due to [%s], exception was [%s]", message, e));
+	System.out.println(
+      String.format("Authentication failure due to [%s], exception was [%s]", message, e)
+    );
   }
-
-  /* ChannelEventListener methods would follow */
 
 }
 ```
@@ -127,40 +151,75 @@ public class Example implements PrivateChannelEventListener {
 [Presence channels](http://pusher.com/docs/presence_channels) can be subscribed to as follows:
 
 ```java
-PresenceChannel presenceChannel = pusher.subscribePrivate( "presence-channel" );
+PresenceChannel presenceChannel = pusher.subscribePresence( "presence-channel" );
 ```
 
 Presence channels provide additional events relating to users joining and leaving the presence channel. It is possible to listen to these events by implementing the `PresenceChannelEventListener`.
 
 ```java
-public class Example implements PrivateChannelEventListener {
+public class Example implements PresenceChannelEventListener {
   
   public Example() {
-    Pusher pusher = new Pusher( YOUR_APP_KEY );
+    private final Pusher pusher;
+    private final PresenceChannel channel;
+
+    pusher = new Pusher( YOUR_APP_KEY );
     pusher.connect( this );
     
-    PresenceChannel channel = pusher.subscribePresence( "presence-channel", this );
+    channel = pusher.subscribePresence( "presence-channel", this );
   }
 
   @Override
   public void onUserInformationReceived(String channelName, Set<User> users) {
-	System.out.println("Received user information");
+	for(User user : users) {
+	  userSubscribed(channelName, user);	    
+	}
   }
 
   @Override
   public void userSubscribed(String channelName, User user) {
-	System.out.println(String.format("A new user has joined channel [%s]: %s", channelName, user.toString()));
+	System.out.println(
+      String.format( "A new user has joined channel [%s]: %s, %s", channelName, user.getId(), user.getInfo() )
+    );
+
+	if(remainingUser.equals(channel.getMe())) {
+	  System.out.println("me");
+	}
   }
 
   @Override
   public void userUnsubscribed(String channelName, User user) {
-    System.out.println(String.format("A user has left channel [%s]: %s", channelName, user));
+    System.out.println(
+      String.format( "A user has left channel [%s]: %s", channelName, user)
+    );
   }
-
-  /* PrivateChannelEventListener methods would follow */
 
 }
 ```
+
+#### The User object
+
+*Note: In the [Pusher documentation](http://pusher.com/docs) a User may be referred to as a **Member**.*
+
+The `User` object has two main methods.
+
+`getId` fetches a unique identifier for the user on the presence channel.
+
+```java
+String id = user.getId();
+```
+
+`getInfo` fetches a string representing arbitrary additional information about the user. The contents of this is entirely up to your application. However, it's recommended that the data is in JSON format so that it can easily be deserialized.
+
+The following example using the [Gson library](https://sites.google.com/site/gson/gson-user-guide) to handle deserialization:
+
+```java
+String jsonInfo = user.getInfo();
+Gson gson = new Gson();
+UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);  
+```
+
+For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](http://pusher.com/docs/authenticating_users#implementing_presence_endpoints) documentation.
 
 ### Binding to events
 
@@ -198,10 +257,6 @@ public class Example implements ChannelEventListener {
   public void onEvent(String channelName, String eventName, String data){
     Gson gson = new Gson();
     EventExample exampleEvent = gson.fromJson(data, EventExample.class); 
-  }
-
-  @Override
-  public void onSubscriptionSucceeded(String channelName) {
   }
 
 }
@@ -247,8 +302,6 @@ public class Example implements ChannelEventListener {
     channel.unbind( "my_other_event", this );
   }
 
-  /* ChannelEventListener methods would follow */}
-
 }
 ```
 
@@ -286,18 +339,8 @@ public class Example implements PrivateChannelEventListener {
 	channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
   }
 
-  /* Other PrivateChannelEventListener methods would follow */
-
 }
 ```
-
-### Accessing the connection socket ID
-
-If you are triggering events via your own server you may wish to exclude the originator of the event - the current client. You can do this by supplying a unique identifier for the current client's connection. This is known as the **socket ID**.
-
-You can access the value as follows:
-
-**TODO: How to access the socket ID**
 
 ## Library Development Environment
 
