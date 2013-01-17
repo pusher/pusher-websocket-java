@@ -79,6 +79,7 @@ public class Example implements ChannelEventListener {
   
   @Override
   public void onSubscriptionSucceeded(String channelName) {
+    System.out.println( "Subscribed!" );
   }
 
   @Override
@@ -97,7 +98,7 @@ The library provides a `HttpAuthorizer` implementation of `Authorizer` which mak
 Private channels are subscribed to as follows:
 
 ```java
-Channel privateChannel = pusher.subscribePrivate( "private-channel" );
+PrivateChannel privateChannel = pusher.subscribePrivate( "private-channel" );
 ```
 
 In addition to the events that are possible on public channels a private channel exposes an `onAuthenticationFailure`. This is called if the `Authorizer` does not successfully authenticate the subscription:
@@ -109,7 +110,7 @@ public class Example implements PrivateChannelEventListener {
     Pusher pusher = new Pusher( YOUR_APP_KEY );
     pusher.connect( this );
     
-    Channel channel = pusher.subscribePrivate( "private-channel", this );
+    PrivateChannel channel = pusher.subscribePrivate( "private-channel", this );
   }
 
   @Override
@@ -139,7 +140,7 @@ public class Example implements PrivateChannelEventListener {
     Pusher pusher = new Pusher( YOUR_APP_KEY );
     pusher.connect( this );
     
-    Channel channel = pusher.subscribePresence( "presence-channel", this );
+    PresenceChannel channel = pusher.subscribePresence( "presence-channel", this );
   }
 
   @Override
@@ -176,6 +177,43 @@ Or, by binding to the event on the `Channel`.
 
 ```java
 channel.bind( "my_event", new MyEventListener() );
+```
+
+### Handling events
+
+The event listener interfaces for all channel types have an `onEvent` method which is called whenever an event triggered by your application is received.
+
+The event data will be passed as the third parameter to the `onEvent` method. From there you can handle the data as you like. Since we encourage data to be in JSON here's an example that uses [Gson object deserialization](https://sites.google.com/site/gson/gson-user-guide#TOC-Object-Examples):
+
+```java
+public class Example implements ChannelEventListener {
+  
+  public Example() {
+    Pusher pusher = new Pusher( YOUR_APP_KEY );
+    pusher.connect( this );
+    
+    pusher.subscribe( "my-channel", this );
+  }
+
+  @Override
+  public void onEvent(String channelName, String eventName, String data){
+    Gson gson = new Gson();
+    EventExample exampleEvent = gson.fromJson(json, EventExample.class); 
+  }
+
+  @Override
+  public void onSubscriptionSucceeded(String channelName) {
+  }
+
+}
+
+class EventExample {
+  private int value1 = 1;
+  private String value2 = "abc";
+  private transient int value3 = 3;
+  EventExample() {
+  }
+}
 ```
 
 ### Unbinding events
