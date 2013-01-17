@@ -67,7 +67,9 @@ public class Example implements ConnectionEventListener {
 
   @Override
   public void onConnectionStateChange(ConnectionStateChange change) {
-    System.out.println( String.format("Connection state changed from [%s] to [%s]", change.getPreviousState(), change.getCurrentState()) );
+    System.out.println(
+      String.format("Connection state changed from [%s] to [%s]", change.getPreviousState(), change.getCurrentState())
+    );
   }
 
   @Override
@@ -154,7 +156,7 @@ public class Example implements PrivateChannelEventListener {
 PresenceChannel presenceChannel = pusher.subscribePresence( "presence-channel" );
 ```
 
-Presence channels provide additional events relating to users joining and leaving the presence channel. It is possible to listen to these events by implementing the `PresenceChannelEventListener`.
+Presence channels provide additional events relating to users joining (subscribing) and leaving (unsubscribing) the presence channel. It is possible to listen to these events by implementing the `PresenceChannelEventListener`.
 
 ```java
 public class Example implements PresenceChannelEventListener {
@@ -179,10 +181,11 @@ public class Example implements PresenceChannelEventListener {
   @Override
   public void userSubscribed(String channelName, User user) {
 	System.out.println(
-      String.format( "A new user has joined channel [%s]: %s, %s", channelName, user.getId(), user.getInfo() )
+      String.format( "A new user has joined channel [%s]: %s, %s", channelName, 
+        user.getId(), user.getInfo() )
     );
 
-	if(remainingUser.equals(channel.getMe())) {
+	if(user.equals(channel.getMe())) {
 	  System.out.println("me");
 	}
   }
@@ -190,7 +193,8 @@ public class Example implements PresenceChannelEventListener {
   @Override
   public void userUnsubscribed(String channelName, User user) {
     System.out.println(
-      String.format( "A user has left channel [%s]: %s", channelName, user)
+      String.format( "A user has left channel [%s]: %s %s", channelName,
+        user.getId(), user.getInfo() )
     );
   }
 
@@ -199,7 +203,7 @@ public class Example implements PresenceChannelEventListener {
 
 #### The User object
 
-*Note: In the [Pusher documentation](http://pusher.com/docs) a User may be referred to as a **Member**.*
+*Note: In the [Pusher documentation](http://pusher.com/docs) a User may be referred to as a `Member`.*
 
 The `User` object has two main methods.
 
