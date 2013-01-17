@@ -97,7 +97,7 @@ The library provides a `HttpAuthorizer` implementation of `Authorizer` which mak
 Private channels are subscribed to as follows:
 
 ```java
-PrivateChannel privateChannel = pusher.subscribePrivate( "private-channel" );
+Channel privateChannel = pusher.subscribePrivate( "private-channel" );
 ```
 
 In addition to the events that are possible on public channels a private channel exposes an `onAuthenticationFailure`. This is called if the `Authorizer` does not successfully authenticate the subscription:
