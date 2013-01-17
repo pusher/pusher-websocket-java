@@ -27,7 +27,6 @@ In order to send and receive messages you need to connect to Pusher.
 ```java
 Pusher pusher = new Pusher( YOUR_APP_KEY );
 pusher.connect();
-
 ```
 
 ## Listening to connection events
@@ -252,6 +251,53 @@ public class Example implements ChannelEventListener {
 
 }
 ```
+
+### Triggering events
+
+Once a subscription [private](http://pusher.com/docs/private_channels) or [presence](http://pusher.com/docs/presence_channels) has been authorized (see [authenticating users](http://pusher.com/docs/authenticating_users)) and the subscription has succeeded, it is possible to trigger events on those channels.
+
+```java
+channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
+```
+
+Events triggered by clients are called [client events](http://pusher.com/docs/client_events). Because they are being triggered from a client which may not be trusted there are a number of enforced rules when using them. Some of these rules include:
+
+* Event names must have a `client-` prefix
+* Rate limits
+* You can only trigger an event when the subscription has succeeded
+
+For full details see the [client events documentation](http://pusher.com/docs/client_events).
+
+```java
+public class Example implements PrivateChannelEventListener {
+  
+  private final Pusher pusher;
+  private final PrivateChannel channel;
+
+  public Example() {
+    pusher = new Pusher( YOUR_APP_KEY );
+    pusher.connect( this );
+    
+    channel = pusher.subscribePrivate( "private-channel", this );
+  }
+
+  @Override
+  public void onSubscriptionSucceeded(String channelName) {
+	channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
+  }
+
+  /* Other PrivateChannelEventListener methods would follow */
+
+}
+```
+
+### Accessing the connection socket ID
+
+If you are triggering events via your own server you may wish to exclude the originator of the event - the current client. You can do this by supplying a unique identifier for the current client's connection. This is known as the **socket ID**.
+
+You can access the value as follows:
+
+**TODO: How to access the socket ID**
 
 ## Library Development Environment
 
