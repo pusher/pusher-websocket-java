@@ -112,6 +112,10 @@ public class Pusher {
 	connection.connect();
     }
     
+		public void disconnect() {
+			connection.disconnect();
+		}
+    
     /* Subscription methods */
 
     /**

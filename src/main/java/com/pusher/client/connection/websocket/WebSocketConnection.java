@@ -52,6 +52,20 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 	    }
 	});
     }
+    
+    @Override
+    public void disconnect() {
+	
+    	Factory.getEventQueue().execute(new Runnable() {
+    		public void run() {
+    			if(state == ConnectionState.CONNECTED) {
+    				WebSocketConnection.this.updateState(ConnectionState.DISCONNECTING);
+    				WebSocketConnection.this.underlyingConnection.close();
+    			}
+    		}
+			});
+    	
+    }
 
     @Override
     public void bind(ConnectionState state, ConnectionEventListener eventListener) {

@@ -92,6 +92,14 @@ public class PusherTest {
     }
     
     @Test
+    public void testDisconnectCallIsDelegatedToUnderlyingConnection() {
+    	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
+    	
+    	pusher.disconnect();
+    	verify(mockConnection).disconnect();
+    }
+    
+    @Test
     public void testConnectCallWithListenerAndEventsBindsListenerToEventsBeforeConnecting() {
 	pusher.connect(mockConnectionEventListener, ConnectionState.CONNECTED, ConnectionState.DISCONNECTED);
 	
