@@ -6,8 +6,9 @@ This README covers the following topics:
 
 * The Pusher constructor
 * Connecting
-* Accessing the connection socket ID
+* Disconnecting
 * Listening to connection events
+* Accessing the connection socket ID
 * Subscribing to channels
   * Public
   * Private
@@ -43,6 +44,12 @@ In order to send and receive messages you need to connect to Pusher.
 ```java
 Pusher pusher = new Pusher( YOUR_APP_KEY );
 pusher.connect();
+```
+
+## Disconnecting
+
+```java
+pusher.disconnect();
 ```
 
 ## Listening to connection events
