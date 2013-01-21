@@ -26,15 +26,14 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClient underlyingConnection;
+    private final URI webSocketUri;
     private String socketId;
     
     public WebSocketConnection(String apiKey) throws URISyntaxException {
-	
-	for(ConnectionState state : ConnectionState.values()) {
-	    eventListeners.put(state, new HashSet<ConnectionEventListener>());
-	}
-	
-	this.underlyingConnection = Factory.newWebSocketClientWrapper(new URI(URI_PREFIX + apiKey + URI_SUFFIX), this);
+    	webSocketUri = new URI(URI_PREFIX + apiKey + URI_SUFFIX);;
+			for(ConnectionState state : ConnectionState.values()) {
+			    eventListeners.put(state, new HashSet<ConnectionEventListener>());
+			}	
     }
     
     /* Connection implementation */
@@ -42,15 +41,31 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     @Override
     public void connect() {
 	
-	Factory.getEventQueue().execute(new Runnable() {
+    	Factory.getEventQueue().execute(new Runnable() {
 
-	    public void run() {
-		if(state == ConnectionState.DISCONNECTED) {
-		    WebSocketConnection.this.updateState(ConnectionState.CONNECTING);
-		    WebSocketConnection.this.underlyingConnection.connect();
-		}
-	    }
-	});
+    		public void run() {
+    			if(state == ConnectionState.DISCONNECTED) {
+    				WebSocketConnection.this.underlyingConnection = 
+    						Factory.newWebSocketClientWrapper(WebSocketConnection.this.webSocketUri, WebSocketConnection.this);
+    				WebSocketConnection.this.updateState(ConnectionState.CONNECTING);
+    				WebSocketConnection.this.underlyingConnection.connect();
+    			}
+    		}
+			});
+    }
+    
+    @Override
+    public void disconnect() {
+	
+    	Factory.getEventQueue().execute(new Runnable() {
+    		public void run() {
+    			if(state == ConnectionState.CONNECTED) {
+    				WebSocketConnection.this.updateState(ConnectionState.DISCONNECTING);
+    				WebSocketConnection.this.underlyingConnection.close();
+    			}
+    		}
+			});
+    	
     }
 
     @Override

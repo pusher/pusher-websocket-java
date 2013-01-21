@@ -14,7 +14,7 @@ public class User {
         return id;
     }
 
-    public String getJsonData() {
+    public String getInfo() {
         return jsonData;
     }
     
@@ -33,7 +33,7 @@ public class User {
 	
 	if(other instanceof User) {
 	    User otherUser = (User) other;
-	    return this.getId().equals(otherUser.getId()) && this.getJsonData().equals(otherUser.getJsonData());
+	    return this.getId().equals(otherUser.getId()) && this.getInfo().equals(otherUser.getInfo());
 	}
 	
 	return false;

@@ -60,12 +60,13 @@ public class WebSocketConnectionTest {
     
     @Test
     public void testVerifyURLIsCorrect() {
-	ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
+    	this.connection.connect();
+    	ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
 	
-	PowerMockito.verifyStatic();
-	Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
+    	PowerMockito.verifyStatic();
+    	Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
 	
-	assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=null", argument.getValue().toString());
+    	assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=null", argument.getValue().toString());
     }
     
     @Test
@@ -209,7 +210,57 @@ public class WebSocketConnectionTest {
 	connection.onError(e);
 	verify(mockEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.DISCONNECTED));
 	verify(mockEventListener).onError("An exception was thrown by the websocket", null, e);
-    }    
+    }
+    
+    @Test
+    public void testDisonnectCallIsDelegatedToUnderlyingConnection() {
+    	connection.connect();
+    	connection.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
+    	
+    	connection.disconnect();
+    	verify(mockUnderlyingConnection).close();
+    }
+    
+    @Test
+    public void testDisconnectInConnectedStateUpdatesStateToDisconnectingAndNotifiesListener() {
+    	connection.connect();
+    	connection.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
+    	
+    	connection.disconnect();
+    	verify(mockEventListener).onConnectionStateChange(
+    			new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING)
+    		);
+    	assertEquals(ConnectionState.DISCONNECTING, connection.getState());
+    }
+    
+    @Test
+    public void testDisconnectInDisconnectedStateIsIgnored() {
+    	connection.disconnect();
+    	
+    	verify(mockUnderlyingConnection, times(0)).close();
+    	verify(mockEventListener, times(0)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
+    
+    @Test
+    public void testDisconnectInConnectingStateIsIgnored() {
+    	connection.connect();
+    	
+    	connection.disconnect();
+    	
+    	verify(mockUnderlyingConnection, times(0)).close();
+    	verify(mockEventListener, times(1)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
+    
+    @Test
+    public void testDisconnectInDisconnectingStateIsIgnored() {
+    	connection.connect();
+    	connection.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
+    	
+    	connection.disconnect();
+    	
+    	verify(mockUnderlyingConnection, times(1)).close();
+    	verify(mockEventListener, times(3)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
     
     /* end of tests */
     

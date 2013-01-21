@@ -6,8 +6,9 @@ This README covers the following topics:
 
 * The Pusher constructor
 * Connecting
-* Accessing the connection socket ID
+* Disconnecting
 * Listening to connection events
+* Accessing the connection socket ID
 * Subscribing to channels
   * Public
   * Private
@@ -45,13 +46,11 @@ Pusher pusher = new Pusher( YOUR_APP_KEY );
 pusher.connect();
 ```
 
-### Accessing the connection socket ID
+## Disconnecting
 
-If you are triggering events via your own server you may wish to exclude the originator of the event - the current client. You can do this by supplying a unique identifier for the current client's connection. This is known as the **socket ID**.
-
-You can access the value as follows:
-
-**TODO: How to access the socket ID**
+```java
+pusher.disconnect();
+```
 
 ## Listening to connection events
 
@@ -81,6 +80,36 @@ public class Example implements ConnectionEventListener {
 ```
 
 For more information see [connection states](http://pusher.com/docs/connection_states).
+
+### Accessing the connection socket ID
+
+If you are triggering events via your own server you may wish to exclude the originator of the event - the current client. You can do this by supplying a unique identifier for the current client's connection. This is known as the **socket ID**.
+
+You can access the value **once the connection has been established** as follows:
+
+```java
+Pusher pusher = new Pusher( YOUR_APP_KEY );
+String socketId = pusher.getConnection().getSocketId();
+```
+
+```java
+public class Example implements ConnectionEventListener {
+  final Pusher pusher;
+
+  public Example() {
+    pusher = new Pusher( YOUR_APP_KEY );
+    pusher.connect( this );
+  }
+
+  @Override
+  public void onConnectionStateChange(ConnectionStateChange change) {
+    if(change.getCurrentState() == ConnectionState.CONNECTED) {
+      String socketId = pusher.getConnection().getSocketId();
+    }
+  }
+
+}
+```
 
 ## Subscribing to channels
 
