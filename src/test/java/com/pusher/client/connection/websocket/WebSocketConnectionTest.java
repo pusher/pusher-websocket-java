@@ -24,8 +24,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
