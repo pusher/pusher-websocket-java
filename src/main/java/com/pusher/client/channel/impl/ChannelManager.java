@@ -90,6 +90,10 @@ public class ChannelManager {
 	}
     }
 
+    public void clear() {
+	channelNameToChannelMap.clear();
+    }
+    
     private void sendSubscribe(InternalChannel channel, String message) {
 	channelNameToChannelMap.put(channel.getName(), channel);
 	connection.sendMessage(message);

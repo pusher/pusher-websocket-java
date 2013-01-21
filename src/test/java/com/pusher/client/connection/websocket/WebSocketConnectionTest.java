@@ -66,7 +66,7 @@ public class WebSocketConnectionTest {
     	PowerMockito.verifyStatic();
     	Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
 	
-    	assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=null", argument.getValue().toString());
+    	assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=0.0.0", argument.getValue().toString());
     }
     
     @Test

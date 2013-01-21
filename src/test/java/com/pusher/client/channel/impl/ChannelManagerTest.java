@@ -188,4 +188,13 @@ public class ChannelManagerTest {
 	
 	verify(mockInternalChannel, never()).onMessage(anyString(), anyString());	
     }
+    
+    @Test
+    public void testReceiveMessageAfterClearDoesNotPassItToChannel() {
+	channelManager.subscribeTo(mockInternalChannel, mockEventListener, "my-event");
+	channelManager.clear();
+	channelManager.onMessage("my-event", "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + CHANNEL_NAME + "\"}");
+	
+	verify(mockInternalChannel, never()).onMessage(anyString(), anyString());	
+    }
 }

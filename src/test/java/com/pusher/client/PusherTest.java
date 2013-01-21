@@ -92,11 +92,39 @@ public class PusherTest {
     }
     
     @Test
-    public void testDisconnectCallIsDelegatedToUnderlyingConnection() {
+    public void testDisconnectCallIsDelegatedToUnderlyingConnectionAndClearsSubscriptions() {
     	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
     	
     	pusher.disconnect();
     	verify(mockConnection).disconnect();
+    	verify(mockChannelManager).clear();
+    }
+    
+    @Test
+    public void testDisconnectCallDoesNothingIfStateIsDisconnected() {
+    	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
+    	
+    	pusher.disconnect();
+    	verify(mockConnection, never()).disconnect();
+    	verify(mockChannelManager, never()).clear();	
+    }
+    
+    @Test
+    public void testDisconnectCallDoesNothingIfStateIsConnecting() {
+    	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTING);
+    	
+    	pusher.disconnect();
+    	verify(mockConnection, never()).disconnect();
+    	verify(mockChannelManager, never()).clear();	
+    }
+    
+    @Test
+    public void testDisconnectCallDoesNothingIfStateIsDisconnecting() {
+    	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTING);
+    	
+    	pusher.disconnect();
+    	verify(mockConnection, never()).disconnect();
+    	verify(mockChannelManager, never()).clear();	
     }
     
     @Test

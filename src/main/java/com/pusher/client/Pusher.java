@@ -113,7 +113,10 @@ public class Pusher {
     }
     
 		public void disconnect() {
+		    if(connection.getState() == ConnectionState.CONNECTED) {
+			channelManager.clear();
 			connection.disconnect();
+		    }
 		}
     
     /* Subscription methods */
