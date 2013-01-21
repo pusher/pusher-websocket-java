@@ -60,12 +60,13 @@ public class WebSocketConnectionTest {
     
     @Test
     public void testVerifyURLIsCorrect() {
-	ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
+    	this.connection.connect();
+    	ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
 	
-	PowerMockito.verifyStatic();
-	Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
+    	PowerMockito.verifyStatic();
+    	Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
 	
-	assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=null", argument.getValue().toString());
+    	assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=null", argument.getValue().toString());
     }
     
     @Test
