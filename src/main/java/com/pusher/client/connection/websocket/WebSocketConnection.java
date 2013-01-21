@@ -19,8 +19,11 @@ import com.pusher.client.util.Factory;
 
 public class WebSocketConnection implements InternalConnection, WebSocketListener {
 
+    // The version is populated from the pom.xml when running the application as a built library. However when running
+    // the source locally this will return null, so a default version of 0.0.0 will be used instead.
+    private static final String APP_VERSION = (WebSocketConnection.class.getPackage().getImplementationVersion() != null) ? WebSocketConnection.class.getPackage().getImplementationVersion() : "0.0.0";
     private static final String URI_PREFIX = "ws://ws.pusherapp.com:80/app/";
-    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + WebSocketConnection.class.getPackage().getImplementationVersion();
+    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + APP_VERSION;
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
