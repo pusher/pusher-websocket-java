@@ -128,7 +128,7 @@ public class Pusher {
      * @return The {@link Channel} object representing your subscription.
      */
     public Channel subscribe(String channelName) {
-	return subscribe(null);
+    	return subscribe(channelName, null);
     }
     
     /**
