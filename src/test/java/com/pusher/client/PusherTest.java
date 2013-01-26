@@ -156,6 +156,14 @@ public class PusherTest {
     public void testConnectCallWithNullListenerAndEventsThrowsException() {
 	pusher.connect(null, ConnectionState.CONNECTED);
     }
+
+    @Test
+    public void testSubscribeWithoutListenerCreatesPublicChannelAndDelegatesCallToTheChannelManager() {
+    	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
+			pusher.subscribe(PUBLIC_CHANNEL_NAME);
+	
+			verify(mockChannelManager).subscribeTo(mockPublicChannel, null);
+    }
     
     @Test
     public void testSubscribeCreatesPublicChannelAndDelegatesCallToTheChannelManager() {
