@@ -386,11 +386,17 @@ public class Example implements PrivateChannelEventListener {
 
 ### Eclipse Project
 
-Assuming you are using Eclipse, execute `mvn eclipse:clean eclipse:eclipse` to generate the `.project` and `.classpath` files. Then open Eclipse and import the project as normal.
+Assuming you are using Eclipse, follow these steps:
+
+* Make a note of your Eclipse workspace location, for example `C:\Users\Phil\workspace`
+* In the root of the project execute `mvn -Declipse.workspace="<your workspace location>" eclipse:configure-workspace`, for example `mvn -Declipse.workspace="C:\Users\Phil\workspace" eclipse:configure-workspace`. This will add an M2_REPO environment variable to your Eclipse workspace, which is required for the next step.
+* Still in the root of the project execute `mvn eclipse:clean eclipse:eclipse`. This will read the pom file to determine the dependencies and generate `.project` and `.classpath` files that point to those dependencies in your local Maven cache.
+
+You can now load the project in Eclipse by navigating to `Import project` and pointing it to the root directory of the project.
 
 ### Build
 
-From the top level directory execute `mvn clean test` to compile and run the unit tests or `mvn clean install` to build the jar. The jar will be output to the `target` directory.
+From the top level directory execute `mvn clean test` to compile and run the unit tests or `mvn clean package` to build the jar. The jar will be output to the `target` directory.
 
 ### Run the Example Application
 
