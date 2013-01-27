@@ -380,9 +380,8 @@ public class Example implements PrivateChannelEventListener {
 ### Cloning the project
 
 * If you don't have it already, [download Maven](http://maven.apache.org/download.cgi) and add the `mvn` executable to your path.
-* Clone the project: `git clone git@github.com:leggetter/pusher-java-client.git`
+* Clone the project: `git clone https://github.com/leggetter/pusher-java-client.git`
 * Change to the top level directory for the project: `cd pusher-java-client`
-* Switch to the development branch: `git checkout public-channel`
 * Retrieve the Java-WebSocket library: `git submodule update --init`
 
 ### Eclipse Project
