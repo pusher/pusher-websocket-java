@@ -14,10 +14,9 @@ This README covers the following topics:
   * Public
   * Private
   * Presence
-* Binding to events
-* Handling events
+* Binding to and handling events
 * Unbinding events
-* Triggering events
+* Triggering client events
 * Library development environment
 
 ## API Overview
@@ -140,6 +139,8 @@ For more information see [connection states](http://pusher.com/docs/connection_s
 
 ## Subscribing to channels
 
+Pusher uses the concept of [channels](http://pusher.com/docs/channels) as a way of subscribing to data. They are identified and subscribed to by a simple name. Events are bound to on a channels and are also identified by name. To listen to an event you need to implemented the `ChannelEventListener` interface (see **Binding to and handling events**).
+
 ### Public channels
 
 ```java
@@ -206,7 +207,9 @@ public class Example implements PrivateChannelEventListener {
 
 ### Presence channels
 
-[Presence channels](http://pusher.com/docs/presence_channels) can be subscribed to as follows:
+[Presence channels](http://pusher.com/docs/presence_channels) are private channels which provide additional events exposing who is currently subscribed to the channel. Since they extend private channels they also need to be authenticated (see [authenticating channel subscriptions](http://pusher.com/docs/authenticating_users)).
+
+Presence channels can be subscribed to as follows:
 
 ```java
 PresenceChannel presenceChannel = pusher.subscribePresence( "presence-channel" );
@@ -281,9 +284,9 @@ UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);
 
 For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](http://pusher.com/docs/authenticating_users#implementing_presence_endpoints) documentation.
 
-### Binding to events
+### Binding to and handling events
 
-Events triggered by your application are recieved by the `onEvent` method on the `ChannelEventListener` interface implementation. These events can be bound to at two different stages/
+Events triggered by your application are received by the `onEvent` method on the `ChannelEventListener` interface implementation. These events can be bound to at two different stages.
 
 At subscription:
 
@@ -296,8 +299,6 @@ Or, by binding to the event on the `Channel`.
 ```java
 channel.bind( "my_event", new MyEventListener() );
 ```
-
-### Handling events
 
 The event listener interfaces for all channel types have an `onEvent` method which is called whenever an event triggered by your application is received.
 
