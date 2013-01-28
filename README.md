@@ -284,7 +284,7 @@ UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);
 
 For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](http://pusher.com/docs/authenticating_users#implementing_presence_endpoints) documentation.
 
-### Binding to and handling events
+## Binding to and handling events
 
 Events triggered by your application are received by the `onEvent` method on the `ChannelEventListener` interface implementation. These events can be bound to at two different stages.
 
