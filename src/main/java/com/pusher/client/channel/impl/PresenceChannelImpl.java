@@ -123,7 +123,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	for(final ChannelEventListener eventListener : getAllEventListeners()) {
 	    Factory.getEventQueue().execute(new Runnable() {
 		public void run() {
-		    ((PresenceChannelEventListener)eventListener).onUserInformationReceived(name, new HashSet<User>(idToUserMap.values()));
+		    ((PresenceChannelEventListener)eventListener).onUsersInformationReceived(name, new HashSet<User>(idToUserMap.values()));
 		}
 	    });
 	}

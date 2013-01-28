@@ -58,7 +58,7 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     /* PresenceChannelEventListener implementation */
 
     @Override
-    public void onUserInformationReceived(String channelName, Set<User> users) {
+    public void onUsersInformationReceived(String channelName, Set<User> users) {
 	
 	System.out.println("Received user information");
 	
