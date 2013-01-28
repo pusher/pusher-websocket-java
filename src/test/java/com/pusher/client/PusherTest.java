@@ -53,7 +53,7 @@ public class PusherTest {
     public void setUp()
     {
 	PowerMockito.mockStatic(Factory.class);
-	when(Factory.getConnection(API_KEY)).thenReturn(mockConnection);
+	when(Factory.getConnection(API_KEY, false)).thenReturn(mockConnection);
 	when(Factory.getChannelManager(mockConnection, mockPusherOptions)).thenReturn(mockChannelManager);
 	when(Factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
 	when(Factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME)).thenReturn(mockPrivateChannel);

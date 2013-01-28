@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.SSLException;
+
 import org.java_websocket.client.WebSocketClient;
 
 import com.pusher.client.PusherOptions;
@@ -45,10 +47,10 @@ public class Factory {
     private static ChannelManager channelManager;
     private static ExecutorService eventQueue;
 
-    public static InternalConnection getConnection(String apiKey) {
+    public static InternalConnection getConnection(String apiKey, boolean encrypted) {
 	if (connection == null) {
 	    try {
-		connection = new WebSocketConnection(apiKey);
+		connection = new WebSocketConnection(apiKey, encrypted);
 	    } catch (URISyntaxException e) {
 		throw new IllegalArgumentException(
 			"Failed to initialise connection", e);
@@ -58,7 +60,7 @@ public class Factory {
     }
 
     public static WebSocketClient newWebSocketClientWrapper(URI uri,
-	    WebSocketListener proxy) {
+	    WebSocketListener proxy) throws SSLException {
 	return new WebSocketClientWrapper(uri, proxy);
     }
 

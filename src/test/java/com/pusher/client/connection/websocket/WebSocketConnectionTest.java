@@ -15,6 +15,8 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.net.ssl.SSLException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +49,7 @@ public class WebSocketConnectionTest {
     private @Mock ConnectionEventListener mockEventListener;
     
     @Before
-    public void setUp() throws URISyntaxException {
+    public void setUp() throws URISyntaxException, SSLException {
 	
 	PowerMockito.mockStatic(Factory.class);
 	when(Factory.getChannelManager(any(InternalConnection.class), any(PusherOptions.class))).thenReturn(mockChannelManager);
@@ -59,7 +61,7 @@ public class WebSocketConnectionTest {
     }
     
     @Test
-    public void testVerifyURLIsCorrect() {
+    public void testVerifyURLIsCorrect() throws SSLException {
     	this.connection.connect();
     	ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
 	
@@ -67,6 +69,19 @@ public class WebSocketConnectionTest {
     	Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
 	
     	assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=0.0.0", argument.getValue().toString());
+    }
+    
+    @Test
+    public void testVerifyEncryptedURLIsCorrect() throws URISyntaxException, SSLException {
+    	this.connection = new WebSocketConnection(API_KEY, true);
+    	
+    	this.connection.connect();
+    	ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
+	
+    	PowerMockito.verifyStatic();
+    	Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
+	
+    	assertEquals("wss://ws.pusherapp.com:443/app/" + API_KEY + "?client=java-client&protocol=5&version=0.0.0", argument.getValue().toString());
     }
     
     @Test

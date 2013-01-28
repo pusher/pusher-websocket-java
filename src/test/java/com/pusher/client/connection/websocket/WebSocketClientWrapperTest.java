@@ -5,6 +5,8 @@ import static org.mockito.Mockito.verify;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.net.ssl.SSLException;
+
 import org.java_websocket.handshake.ServerHandshake;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +22,7 @@ public class WebSocketClientWrapperTest {
     private @Mock ServerHandshake mockHandshake;
     
     @Before
-    public void setUp() throws URISyntaxException {
+    public void setUp() throws URISyntaxException, SSLException {
 	wrapper = new WebSocketClientWrapper(new URI("http://www.test.com"), mockProxy);
     }
     

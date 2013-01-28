@@ -1,6 +1,7 @@
 package com.pusher.client.example;
 
 import com.pusher.client.Pusher;
+import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -22,7 +23,9 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
 	channelName = (args.length > 1) ? args[1] : "my-channel";
 	eventName = (args.length > 2) ? args[2] : "my-event";
 	
-	pusher = new Pusher(apiKey);
+	PusherOptions options = new PusherOptions();
+	options.setEncrypted(true);
+	pusher = new Pusher(apiKey, options);
 	pusher.connect(this);
     }
 

@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.SSLException;
+
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -22,7 +24,11 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     // The version is populated from the pom.xml when running the application as a built library. However when running
     // the source locally this will return null, so a default version of 0.0.0 will be used instead.
     private static final String APP_VERSION = (WebSocketConnection.class.getPackage().getImplementationVersion() != null) ? WebSocketConnection.class.getPackage().getImplementationVersion() : "0.0.0";
-    private static final String URI_PREFIX = "ws://ws.pusherapp.com:80/app/";
+    private static final String WS_SCHEME = "ws";
+    private static final String WSS_SCHEME = "wss";
+    private static final String HOST = "ws.pusherapp.com";
+    private static final int WS_PORT = 80;
+    private static final int WSS_PORT = 443;
     private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + APP_VERSION;
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     
@@ -33,7 +39,14 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private String socketId;
     
     public WebSocketConnection(String apiKey) throws URISyntaxException {
-    	webSocketUri = new URI(URI_PREFIX + apiKey + URI_SUFFIX);;
+    	this(apiKey, false);	
+    }
+    
+    public WebSocketConnection(String apiKey, boolean encrypted) throws URISyntaxException {
+    	String url = String.format(
+    			"%s://ws.pusherapp.com:%s/app/%s%s", (encrypted? WSS_SCHEME : WS_SCHEME), (encrypted? WSS_PORT : WS_PORT), apiKey, URI_SUFFIX
+    		);
+    	webSocketUri = new URI(url);
 			for(ConnectionState state : ConnectionState.values()) {
 			    eventListeners.put(state, new HashSet<ConnectionEventListener>());
 			}	
@@ -48,10 +61,17 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     		public void run() {
     			if(state == ConnectionState.DISCONNECTED) {
-    				WebSocketConnection.this.underlyingConnection = 
-    						Factory.newWebSocketClientWrapper(WebSocketConnection.this.webSocketUri, WebSocketConnection.this);
-    				WebSocketConnection.this.updateState(ConnectionState.CONNECTING);
-    				WebSocketConnection.this.underlyingConnection.connect();
+    				try {
+							WebSocketConnection.this.underlyingConnection = 
+									Factory.newWebSocketClientWrapper(WebSocketConnection.this.webSocketUri, WebSocketConnection.this);
+							
+							WebSocketConnection.this.updateState(ConnectionState.CONNECTING);
+	    				WebSocketConnection.this.underlyingConnection.connect();
+						} catch (SSLException e) {
+							// TODO Decide how to handle this exception.
+							e.printStackTrace();
+						}
+    				
     			}
     		}
 			});
