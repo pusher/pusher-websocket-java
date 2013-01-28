@@ -50,7 +50,7 @@ channel.bind( "my-event", new ChannelEventListener() {
 
   @Override
   public void onEvent(String channel, String event, String data) {
-    // so something with the event data
+    // do something with the event data
   }
 
   @Override
