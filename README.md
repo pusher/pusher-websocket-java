@@ -14,7 +14,7 @@ This README covers the following topics:
   * Public
   * Private
   * Presence
-* Binding to and handling events
+* Binding and handling events
 * Unbinding events
 * Triggering client events
 * Library development environment
@@ -139,7 +139,7 @@ For more information see [connection states](http://pusher.com/docs/connection_s
 
 ## Subscribing to channels
 
-Pusher uses the concept of [channels](http://pusher.com/docs/channels) as a way of subscribing to data. They are identified and subscribed to by a simple name. Events are bound to on a channels and are also identified by name. To listen to an event you need to implemented the `ChannelEventListener` interface (see **Binding to and handling events**).
+Pusher uses the concept of [channels](http://pusher.com/docs/channels) as a way of subscribing to data. They are identified and subscribed to by a simple name. Events are bound to on a channels and are also identified by name. To listen to an event you need to implemented the `ChannelEventListener` interface (see **Binding and handling events**).
 
 ### Public channels
 
@@ -284,7 +284,7 @@ UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);
 
 For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](http://pusher.com/docs/authenticating_users#implementing_presence_endpoints) documentation.
 
-## Binding to and handling events
+## Binding and handling events
 
 Events triggered by your application are received by the `onEvent` method on the `ChannelEventListener` interface implementation. These events can be bound to at two different stages.
 
@@ -331,15 +331,13 @@ class EventExample {
 }
 ```
 
-### Unbinding events
+## Unbinding events
 
 You can unbind from an event:
 
 ```java
 channel.bind( "my_event", listener );
 ```
-
-### Binding/Unbinding example
 
 
 ```java
@@ -366,7 +364,7 @@ public class Example implements ChannelEventListener {
 }
 ```
 
-### Triggering events
+## Triggering events
 
 Once a subscription [private](http://pusher.com/docs/private_channels) or [presence](http://pusher.com/docs/presence_channels) has been authorized (see [authenticating users](http://pusher.com/docs/authenticating_users)) and the subscription has succeeded, it is possible to trigger events on those channels.
 
