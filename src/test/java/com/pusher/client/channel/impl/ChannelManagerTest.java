@@ -4,6 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -155,6 +156,19 @@ public class ChannelManagerTest {
 	
 	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
 	verify(mockConnection).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
+    }
+    
+    @Test
+    public void testDelayedSubscriptionsAreNotSentAgainIfASecondConnectedCallbackIsReceived() {
+	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
+	
+	channelManager.subscribeTo(mockInternalChannel, mockEventListener);
+	verify(mockConnection, never()).sendMessage(anyString());
+	
+	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
+	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED));
+	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTED));
+	verify(mockConnection, times(1)).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
     }
     
     @Test
