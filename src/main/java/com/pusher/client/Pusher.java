@@ -152,8 +152,6 @@ public class Pusher {
      */
     public Channel subscribe(String channelName, ChannelEventListener listener, String... eventNames) {
 	
-	throwExceptionIfNotConnected(channelName);
-	
 	InternalChannel channel = Factory.newPublicChannel(channelName);
 	channelManager.subscribeTo(channel, listener, eventNames);
 	
@@ -166,7 +164,6 @@ public class Pusher {
     
     public PrivateChannel subscribePrivate(String channelName, PrivateChannelEventListener listener, String... eventNames) {
 	
-	throwExceptionIfNotConnected(channelName);
 	throwExceptionIfNoAuthorizerHasBeenSet();
 	
 	PrivateChannelImpl channel = Factory.newPrivateChannel(connection, channelName);
@@ -181,7 +178,6 @@ public class Pusher {
     
     public PresenceChannel subscribePresence(String channelName, PresenceChannelEventListener listener, String... eventNames) {
 	
-	throwExceptionIfNotConnected(channelName);
 	throwExceptionIfNoAuthorizerHasBeenSet();
 	
 	PresenceChannelImpl channel = Factory.newPresenceChannel(connection, channelName);
@@ -200,12 +196,6 @@ public class Pusher {
     }
     
     /* implementation detail */
-    
-    private void throwExceptionIfNotConnected(String channelName) {
-	if(connection.getState() != ConnectionState.CONNECTED) {
-	    throw new IllegalStateException("Cannot subscribe to channel " + channelName + " while not connected");
-	}
-    }
     
     private void throwExceptionIfNoAuthorizerHasBeenSet() {
 	if(pusherOptions.getAuthorizer() == null) {

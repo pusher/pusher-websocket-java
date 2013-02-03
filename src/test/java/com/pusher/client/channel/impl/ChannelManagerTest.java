@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -20,8 +21,11 @@ import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannelEventListener;
+import com.pusher.client.connection.ConnectionState;
+import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
+import com.pusher.client.util.InstantExecutor;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Factory.class})
@@ -47,16 +51,25 @@ public class ChannelManagerTest {
     @Before
     public void setUp() throws AuthorizationFailureException {
 	
+	PowerMockito.mockStatic(Factory.class);
+	
+	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	when(mockInternalChannel.getName()).thenReturn(CHANNEL_NAME);
 	when(mockInternalChannel.toSubscribeMessage()).thenReturn(OUTGOING_SUBSCRIBE_MESSAGE);
 	when(mockInternalChannel.toUnsubscribeMessage()).thenReturn(OUTGOING_UNSUBSCRIBE_MESSAGE);
 	when(mockConnection.getSocketId()).thenReturn(SOCKET_ID);
+	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
 	when(mockPusherOptions.getAuthorizer()).thenReturn(mockAuthorizer);
 	when(mockPrivateChannel.getName()).thenReturn(PRIVATE_CHANNEL_NAME);
 	when(mockAuthorizer.authorize(PRIVATE_CHANNEL_NAME, SOCKET_ID)).thenReturn(AUTH_RESPONSE);
 	when(mockPrivateChannel.toSubscribeMessage(AUTH_RESPONSE)).thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
 	
 	this.channelManager = new ChannelManager(mockConnection, mockPusherOptions);
+    }
+    
+    @Test
+    public void testRegistersAsAConnectionListenerWhenConstructed() {
+	verify(mockConnection).bind(ConnectionState.CONNECTED, channelManager);
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -131,6 +144,17 @@ public class ChannelManagerTest {
 	verify(mockPrivateChannelEventListener).onAuthenticationFailure("Encountered an exception during authorization", e);
 	verify(mockPrivateChannel, never()).toSubscribeMessage(anyString());
 	verify(mockConnection, never()).sendMessage(anyString());
+    }
+    
+    @Test
+    public void testSubscribeWhileDisconnectedQueuesSubscriptionUntilConnectedCallbackIsReceived() {
+	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
+	
+	channelManager.subscribeTo(mockInternalChannel, mockEventListener);
+	verify(mockConnection, never()).sendMessage(anyString());
+	
+	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
+	verify(mockConnection).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
     }
     
     @Test

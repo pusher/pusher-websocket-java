@@ -2,6 +2,8 @@ package com.pusher.client.channel.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
@@ -9,11 +11,16 @@ import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannelEventListener;
+import com.pusher.client.connection.ConnectionEventListener;
+import com.pusher.client.connection.ConnectionState;
+import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.util.Factory;
 
-public class ChannelManager {
+public class ChannelManager implements ConnectionEventListener {
 
     private final Map<String, InternalChannel> channelNameToChannelMap = new HashMap<String, InternalChannel>();
+    private final Set<String> queuedSubscribeMessages = new ConcurrentSkipListSet<String>();
     private final InternalConnection connection;
     private final PusherOptions pusherOptions;
 
@@ -25,6 +32,8 @@ public class ChannelManager {
 	
 	this.connection = connection;
 	this.pusherOptions = pusherOptions;
+	
+	connection.bind(ConnectionState.CONNECTED, this);
     }
     
     /**
@@ -93,11 +102,39 @@ public class ChannelManager {
     public void clear() {
 	channelNameToChannelMap.clear();
     }
+
+    /* ConnectionEventListener implementation */
     
-    private void sendSubscribe(InternalChannel channel, String message) {
+    @Override
+    public void onConnectionStateChange(ConnectionStateChange change) {
+	if(change.getCurrentState() == ConnectionState.CONNECTED) {
+	    
+	    for(String message : queuedSubscribeMessages) {
+		connection.sendMessage(message);
+		queuedSubscribeMessages.remove(message);
+	    }
+	}
+    }
+
+    @Override
+    public void onError(String message, String code, Exception e) {
+	// ignore or log
+    }
+    
+    private void sendSubscribe(final InternalChannel channel, final String message) {
 	channelNameToChannelMap.put(channel.getName(), channel);
-	connection.sendMessage(message);
-	channel.updateState(ChannelState.SUBSCRIBE_SENT);
+	
+	Factory.getEventQueue().execute(new Runnable() {
+	    public void run() {
+
+		if(connection.getState() == ConnectionState.CONNECTED) {
+		    connection.sendMessage(message);
+		    channel.updateState(ChannelState.SUBSCRIBE_SENT);
+		} else {
+		    queuedSubscribeMessages.add(message);
+		}
+	    }
+	});
     }
     
     private void validateArgumentsAndBindEvents(InternalChannel channel, ChannelEventListener listener, String... eventNames) {
