@@ -3,7 +3,7 @@ package com.pusher.client.channel.impl;
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelState;
 
-public interface InternalChannel extends Channel {
+public interface InternalChannel extends Channel, Comparable<InternalChannel> {
     
     String toSubscribeMessage(String... extraArguments);
 
@@ -11,5 +11,5 @@ public interface InternalChannel extends Channel {
 
     void onMessage(String event, String message);
     
-    void updateState(ChannelState subscribeSent);
+    void updateState(ChannelState state);
 }

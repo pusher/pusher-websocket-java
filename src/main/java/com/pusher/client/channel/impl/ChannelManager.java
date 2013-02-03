@@ -2,8 +2,7 @@ package com.pusher.client.channel.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
@@ -20,7 +19,7 @@ import com.pusher.client.util.Factory;
 public class ChannelManager implements ConnectionEventListener {
 
     private final Map<String, InternalChannel> channelNameToChannelMap = new HashMap<String, InternalChannel>();
-    private final Set<String> queuedSubscribeMessages = new ConcurrentSkipListSet<String>();
+    private final Map<InternalChannel, String> queuedChannels = new ConcurrentSkipListMap<InternalChannel, String>();
     private final InternalConnection connection;
     private final PusherOptions pusherOptions;
 
@@ -101,6 +100,7 @@ public class ChannelManager implements ConnectionEventListener {
 
     public void clear() {
 	channelNameToChannelMap.clear();
+	queuedChannels.clear();
     }
 
     /* ConnectionEventListener implementation */
@@ -109,9 +109,11 @@ public class ChannelManager implements ConnectionEventListener {
     public void onConnectionStateChange(ConnectionStateChange change) {
 	if(change.getCurrentState() == ConnectionState.CONNECTED) {
 	    
-	    for(String message : queuedSubscribeMessages) {
-		connection.sendMessage(message);
-		queuedSubscribeMessages.remove(message);
+	    for(InternalChannel channel : queuedChannels.keySet()) {
+		String subscribeMessage = queuedChannels.get(channel);
+		connection.sendMessage(subscribeMessage);
+		queuedChannels.remove(channel);
+		channel.updateState(ChannelState.SUBSCRIBE_SENT);
 	    }
 	}
     }
@@ -131,7 +133,7 @@ public class ChannelManager implements ConnectionEventListener {
 		    connection.sendMessage(message);
 		    channel.updateState(ChannelState.SUBSCRIBE_SENT);
 		} else {
-		    queuedSubscribeMessages.add(message);
+		    queuedChannels.put(channel, message);
 		}
 	    }
 	});

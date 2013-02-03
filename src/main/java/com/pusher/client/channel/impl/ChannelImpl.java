@@ -137,6 +137,15 @@ public class ChannelImpl implements InternalChannel {
 	    }
 	}
     }
+
+    /* Comparable implementation */
+    
+    @Override
+    public int compareTo(InternalChannel other) {
+	return this.getName().compareTo(other.getName());
+    }
+    
+    /* implementation detail */
     
     @Override
     public String toString() {
