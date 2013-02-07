@@ -38,10 +38,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final URI webSocketUri;
     private String socketId;
     
-    public WebSocketConnection(String apiKey) throws URISyntaxException {
-    	this(apiKey, false);	
-    }
-    
     public WebSocketConnection(String apiKey, boolean encrypted) throws URISyntaxException {
     	String url = String.format(
     			"%s://ws.pusherapp.com:%s/app/%s%s", (encrypted? WSS_SCHEME : WS_SCHEME), (encrypted? WSS_PORT : WS_PORT), apiKey, URI_SUFFIX

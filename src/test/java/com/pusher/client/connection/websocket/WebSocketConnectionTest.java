@@ -56,7 +56,7 @@ public class WebSocketConnectionTest {
 	when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class))).thenReturn(mockUnderlyingConnection);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
-	this.connection = new WebSocketConnection(API_KEY);
+	this.connection = new WebSocketConnection(API_KEY, false);
 	this.connection.bind(ConnectionState.ALL, mockEventListener);
     }
     
@@ -113,7 +113,7 @@ public class WebSocketConnectionTest {
     
     @Test
     public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent() throws URISyntaxException {
-	connection = new WebSocketConnection(API_KEY);
+	connection = new WebSocketConnection(API_KEY, false);
 	connection.bind(ConnectionState.CONNECTED, mockEventListener);
 	connection.connect();
 	
@@ -208,7 +208,7 @@ public class WebSocketConnectionTest {
 
     @Test
     public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent() throws URISyntaxException {
-	connection = new WebSocketConnection(API_KEY);
+	connection = new WebSocketConnection(API_KEY, false);
 	connection.bind(ConnectionState.CONNECTED, mockEventListener);
 	
 	connection.connect();
