@@ -4,6 +4,7 @@ Pusher client library for Java targeting **Android** and general Java.
 
 This README covers the following topics:
 
+* API Overview
 * The Pusher constructor
 * Connecting
 * Disconnecting
@@ -13,11 +14,53 @@ This README covers the following topics:
   * Public
   * Private
   * Presence
-* Binding to events
-* Handling events
+* Binding and handling events
 * Unbinding events
-* Triggering events
+* Triggering client events
 * Library development environment
+
+## API Overview
+
+Here's the API in a nutshell.
+
+```java
+// Create a new Pusher instance
+Pusher pusher = new Pusher( "YOUR_APP_KEY" );
+
+// Connect
+pusher.connect(new ConnectionEventListener() {
+
+  @Override
+  public void onConnectionStateChange(ConnectionStateChange change) {
+    // handle connection state change
+  }
+
+  @Override
+  public void onError(String message, String code, Exception e) {
+    // handle connection error
+  }
+  
+}, ConnectionState.ALL);
+
+// Subscribe to a channel
+Channel channel = pusher.subscribe( "my-channel" );
+
+// Bind to an event and listen for events
+channel.bind( "my-event", new ChannelEventListener() {
+
+  @Override
+  public void onEvent(String channel, String event, String data) {
+    // do something with the event data
+  }
+
+  @Override
+  public void onSubscriptionSucceeded(String channel) {
+  }
+  
+});
+```
+
+More information in reference format can be found below.
 
 ## The Pusher constructor
 
@@ -45,6 +88,19 @@ In order to send and receive messages you need to connect to Pusher.
 Pusher pusher = new Pusher( YOUR_APP_KEY );
 pusher.connect();
 ```
+
+### Accessing the connection socket ID
+
+Once connected you can access a unique identifier for the current client's connection. This is known as the `socket_id`.
+
+You can access the value **once the connection has been established** as follows:
+
+```java
+Pusher pusher = new Pusher( YOUR_APP_KEY );
+String socketId = pusher.getConnection().getSocketId();
+```
+
+For more information on how and why there is a `socket_id` see the documentation on [authenticating users](http://pusher.com/docs/authenticating_users) and [excludingrecipients](http://pusher.com/docs/server_api_guide/server_excluding_recipients).
 
 ## Disconnecting
 
@@ -81,37 +137,9 @@ public class Example implements ConnectionEventListener {
 
 For more information see [connection states](http://pusher.com/docs/connection_states).
 
-### Accessing the connection socket ID
-
-If you are triggering events via your own server you may wish to exclude the originator of the event - the current client. You can do this by supplying a unique identifier for the current client's connection. This is known as the **socket ID**.
-
-You can access the value **once the connection has been established** as follows:
-
-```java
-Pusher pusher = new Pusher( YOUR_APP_KEY );
-String socketId = pusher.getConnection().getSocketId();
-```
-
-```java
-public class Example implements ConnectionEventListener {
-  final Pusher pusher;
-
-  public Example() {
-    pusher = new Pusher( YOUR_APP_KEY );
-    pusher.connect( this );
-  }
-
-  @Override
-  public void onConnectionStateChange(ConnectionStateChange change) {
-    if(change.getCurrentState() == ConnectionState.CONNECTED) {
-      String socketId = pusher.getConnection().getSocketId();
-    }
-  }
-
-}
-```
-
 ## Subscribing to channels
+
+Pusher uses the concept of [channels](http://pusher.com/docs/channels) as a way of subscribing to data. They are identified and subscribed to by a simple name. Events are bound to on a channels and are also identified by name. To listen to an event you need to implemented the `ChannelEventListener` interface (see **Binding and handling events**).
 
 ### Public channels
 
@@ -179,7 +207,9 @@ public class Example implements PrivateChannelEventListener {
 
 ### Presence channels
 
-[Presence channels](http://pusher.com/docs/presence_channels) can be subscribed to as follows:
+[Presence channels](http://pusher.com/docs/presence_channels) are private channels which provide additional events exposing who is currently subscribed to the channel. Since they extend private channels they also need to be authenticated (see [authenticating channel subscriptions](http://pusher.com/docs/authenticating_users)).
+
+Presence channels can be subscribed to as follows:
 
 ```java
 PresenceChannel presenceChannel = pusher.subscribePresence( "presence-channel" );
@@ -254,9 +284,9 @@ UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);
 
 For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](http://pusher.com/docs/authenticating_users#implementing_presence_endpoints) documentation.
 
-### Binding to events
+## Binding and handling events
 
-Events triggered by your application are recieved by the `onEvent` method on the `ChannelEventListener` interface implementation. These events can be bound to at two different stages/
+Events triggered by your application are received by the `onEvent` method on the `ChannelEventListener` interface implementation. These events can be bound to at two different stages.
 
 At subscription:
 
@@ -269,8 +299,6 @@ Or, by binding to the event on the `Channel`.
 ```java
 channel.bind( "my_event", new MyEventListener() );
 ```
-
-### Handling events
 
 The event listener interfaces for all channel types have an `onEvent` method which is called whenever an event triggered by your application is received.
 
@@ -303,15 +331,13 @@ class EventExample {
 }
 ```
 
-### Unbinding events
+## Unbinding events
 
 You can unbind from an event:
 
 ```java
 channel.bind( "my_event", listener );
 ```
-
-### Binding/Unbinding example
 
 
 ```java
@@ -338,7 +364,7 @@ public class Example implements ChannelEventListener {
 }
 ```
 
-### Triggering events
+## Triggering events
 
 Once a subscription [private](http://pusher.com/docs/private_channels) or [presence](http://pusher.com/docs/presence_channels) has been authorized (see [authenticating users](http://pusher.com/docs/authenticating_users)) and the subscription has succeeded, it is possible to trigger events on those channels.
 

@@ -53,7 +53,7 @@ public class PresenceChannelImplTest extends ChannelImplTest {
 	
 	InOrder inOrder = inOrder(mockEventListener);
 	inOrder.verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
-	inOrder.verify(mockEventListener).onUserInformationReceived(getChannelName(), argument.capture());
+	inOrder.verify(mockEventListener).onUsersInformationReceived(getChannelName(), argument.capture());
 	
 	assertEquals(1, argument.getValue().size());
     }
