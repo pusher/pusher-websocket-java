@@ -64,8 +64,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 							WebSocketConnection.this.updateState(ConnectionState.CONNECTING);
 	    				WebSocketConnection.this.underlyingConnection.connect();
 						} catch (SSLException e) {
-							// TODO Decide how to handle this exception.
-							e.printStackTrace();
+							WebSocketConnection.this.sendErrorToAllListeners("Error connecting over SSL", null, e);
 						}
     				
     			}
