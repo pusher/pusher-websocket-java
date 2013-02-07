@@ -12,7 +12,7 @@ public class PusherOptions {
      * Gets whether an encrypted (SSL) connection should be used when connecting to Pusher.
      * @return true if an encrypted connection should be used; otherwise false.
      */
-    public boolean getEncrypted() {
+    public boolean isEncrypted() {
     	return encrypted;
     }
     

@@ -23,7 +23,7 @@ public class PusherOptionsTest {
     
     @Test
     public void testEncryptedInitializedAsFalse() {
-    	assertFalse(pusherOptions.getEncrypted());
+    	assertFalse(pusherOptions.isEncrypted());
     }
     
     @Test
@@ -40,7 +40,7 @@ public class PusherOptionsTest {
     @Test
     public void testEncryptedCanBeSetToTrue() {
     	pusherOptions.setEncrypted(true);
-    	assertSame(true, pusherOptions.getEncrypted());
+    	assertSame(true, pusherOptions.isEncrypted());
     }
     
     @Test
