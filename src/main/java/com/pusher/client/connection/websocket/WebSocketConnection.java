@@ -40,7 +40,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     
     public WebSocketConnection(String apiKey, boolean encrypted) throws URISyntaxException {
     	String url = String.format(
-    			"%s://ws.pusherapp.com:%s/app/%s%s", (encrypted? WSS_SCHEME : WS_SCHEME), (encrypted? WSS_PORT : WS_PORT), apiKey, URI_SUFFIX
+    			"%s://%s:%s/app/%s%s", (encrypted? WSS_SCHEME : WS_SCHEME), HOST, (encrypted? WSS_PORT : WS_PORT), apiKey, URI_SUFFIX
     		);
     	webSocketUri = new URI(url);
 			for(ConnectionState state : ConnectionState.values()) {
