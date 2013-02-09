@@ -2,8 +2,6 @@ package com.pusher.client.channel.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
@@ -19,7 +17,6 @@ import com.pusher.client.util.Factory;
 public class ChannelManager implements ConnectionEventListener {
 
 	private final Map<String, InternalChannel> channelNameToChannelMap = new HashMap<String, InternalChannel>();
-	private final Set<InternalChannel> queuedChannels = new ConcurrentSkipListSet<InternalChannel>();
 	private final InternalConnection connection;
 
 	public ChannelManager(InternalConnection connection) {
@@ -72,7 +69,6 @@ public class ChannelManager implements ConnectionEventListener {
 
 	public void clear() {
 		channelNameToChannelMap.clear();
-		queuedChannels.clear();
 	}
 
 	/* ConnectionEventListener implementation */
@@ -82,8 +78,7 @@ public class ChannelManager implements ConnectionEventListener {
 		
 		if (change.getCurrentState() == ConnectionState.CONNECTED) {
 
-			for (InternalChannel channel : queuedChannels) {
-				queuedChannels.remove(channel);
+			for (InternalChannel channel : channelNameToChannelMap.values()) {
 				sendOrQueueSubscribeMessage(channel);
 			}
 		}
@@ -111,8 +106,6 @@ public class ChannelManager implements ConnectionEventListener {
 					} catch(AuthorizationFailureException e) {
 						clearDownSubscription(channel, e);
 					}
-				} else {
-					queuedChannels.add(channel);
 				}
 			}
 		});
@@ -121,7 +114,7 @@ public class ChannelManager implements ConnectionEventListener {
 	private void clearDownSubscription(final InternalChannel channel, final Exception e) {
 		
 		channelNameToChannelMap.remove(channel.getName());
-		channel.updateState(ChannelState.UNSUBSCRIBED);
+		channel.updateState(ChannelState.FAILED);
 		
 		if(channel.getEventListener() != null) {
 			Factory.getEventQueue().execute(new Runnable() {

@@ -150,22 +150,26 @@ public class ChannelManagerTest {
     }
     
     @Test
-    public void testDelayedSubscriptionsAreNotSentAgainIfASecondConnectedCallbackIsReceived() {
+    public void testSubscriptionsAreResubscribedEveryTimeTheConnectionIsReestablished() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
 	
+	// initially the connection is down so it should not attempt to subscribe
 	channelManager.subscribeTo(mockInternalChannel, mockEventListener);
 	verify(mockConnection, never()).sendMessage(anyString());
 	
+	// when the connection is made the first subscribe attempt should be made
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
 	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
-	
+	verify(mockConnection, times(1)).sendMessage(anyString());
+
+	// when the connection fails and comes back up the channel should be subscribed again
 	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
 	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED));
 	
 	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
 	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTED));
 	
-	verify(mockConnection, times(1)).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
+	verify(mockConnection, times(2)).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
     }
     
     @Test

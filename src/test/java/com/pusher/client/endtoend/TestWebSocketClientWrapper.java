@@ -1,12 +1,13 @@
 package com.pusher.client.endtoend;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URI;
 import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
 import com.pusher.client.connection.websocket.WebSocketListener;
@@ -20,31 +21,17 @@ public class TestWebSocketClientWrapper extends WebSocketClientWrapper {
 		super(uri, proxy);
 	}
 
-	void assertMessageSent(String msg) {
-		
-		if(!messagesSent.contains(msg)) {
-			StringBuilder sb = new StringBuilder(String.format("Outgoing message \"%s\" not found. Messages that were sent:", msg));
-			for(String sentMessage : messagesSent) {
-				sb.append("\n");
-				sb.append(sentMessage);
-			}
-			fail(sb.toString());
-		}
-	}
-	
-	void assertNoMessagesSent() {
-		if(!messagesSent.isEmpty()) {
-			StringBuilder sb = new StringBuilder("Expected no outgoing messages but found these:");
-			for(String sentMessage : messagesSent) {
-				sb.append("\n");
-				sb.append(sentMessage);
-			}
-			fail(sb.toString());
-		}		
-	}
-
 	void assertConnectCalled() {
 		assertTrue(connectCalled);
+	}
+	
+	void assertLatestMessageWas(String msg) {
+		assertFalse("No messages have been sent", messagesSent.isEmpty());
+		assertEquals(msg, messagesSent.get(messagesSent.size()-1));
+	}
+
+	void assertNumberOfMessagesSentIs(int count) {
+		assertEquals(count, messagesSent.size());
 	}
 
 	@Override
@@ -57,5 +44,4 @@ public class TestWebSocketClientWrapper extends WebSocketClientWrapper {
 	public void connect() {
 		this.connectCalled = true;
 	}
-
 }

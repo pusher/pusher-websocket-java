@@ -126,15 +126,6 @@ public class WebSocketConnectionTest {
     }
     
     @Test
-    public void testReceivePusherConnectionEstablishedMessageWhenAlreadyConnectedIsIgnored() {
-	connection.connect();
-	connection.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
-	connection.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
-	
-	verify(mockEventListener, times(2)).onConnectionStateChange(any(ConnectionStateChange.class));
-    }
-    
-    @Test
     public void testReceivePusherErrorMessageRaisesErrorEvent() {
 	connection.connect();
 	verify(mockEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
