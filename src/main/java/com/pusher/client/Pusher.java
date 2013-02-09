@@ -54,6 +54,7 @@ public class Pusher {
 	 * @param pusherOptions Options for the Pusher client library to use.
 	 */
 	public Pusher(String apiKey, PusherOptions pusherOptions) {
+		
 		if (apiKey == null || apiKey.isEmpty()) {
 			throw new IllegalArgumentException("API Key cannot be null or empty");
 		}
@@ -64,7 +65,7 @@ public class Pusher {
 
 		this.pusherOptions = pusherOptions;
 		this.connection = Factory.getConnection(apiKey);
-		this.channelManager = Factory.getChannelManager(connection, pusherOptions);
+		this.channelManager = Factory.getChannelManager(connection);
 	}
 
 	/* Connection methods */
@@ -163,7 +164,7 @@ public class Pusher {
 
 		throwExceptionIfNoAuthorizerHasBeenSet();
 
-		PrivateChannelImpl channel = Factory.newPrivateChannel(connection, channelName);
+		PrivateChannelImpl channel = Factory.newPrivateChannel(connection, channelName, pusherOptions.getAuthorizer());
 		channelManager.subscribeTo(channel, listener, eventNames);
 
 		return channel;
@@ -177,7 +178,7 @@ public class Pusher {
 
 		throwExceptionIfNoAuthorizerHasBeenSet();
 
-		PresenceChannelImpl channel = Factory.newPresenceChannel(connection, channelName);
+		PresenceChannelImpl channel = Factory.newPresenceChannel(connection, channelName, pusherOptions.getAuthorizer());
 		channelManager.subscribeTo(channel, listener, eventNames);
 
 		return channel;

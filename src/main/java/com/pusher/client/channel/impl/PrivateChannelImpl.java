@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.pusher.client.AuthorizationFailureException;
+import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannel;
@@ -16,10 +18,12 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 
     private static final String CLIENT_EVENT_PREFIX = "client-";
     private final InternalConnection connection;
+	private Authorizer authorizer;
 
-    public PrivateChannelImpl(InternalConnection connection, String channelName) {
+    public PrivateChannelImpl(InternalConnection connection, String channelName, Authorizer authorizer) {
 	super(channelName);
 	this.connection = connection;
+	this.authorizer = authorizer;
     }
 
     /* PrivateChannel implementation */
@@ -70,27 +74,28 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     
     @Override
     @SuppressWarnings("rawtypes")
-    public String toSubscribeMessage(String... extraArguments) {
+    public String toSubscribeMessage() {
 
-	if(extraArguments.length < 1) {
-	    throw new IllegalArgumentException("The auth response must be provided to build a private channel subscription message");
+    	String authResponse = getAuthResponse();
+    	
+	try {
+		Map authResponseMap = new Gson().fromJson(authResponse, Map.class);
+		String authKey = (String) authResponseMap.get("auth");
+		
+		Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
+		jsonObject.put("event", "pusher:subscribe");
+		
+		Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
+		dataMap.put("channel", name);
+		dataMap.put("auth", authKey);
+		
+		jsonObject.put("data", dataMap);
+		
+		String json = new Gson().toJson(jsonObject);
+		return json;
+	} catch(Exception e) {
+		throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
 	}
-	
-	String authResponse = extraArguments[0];
-	Map authResponseMap = new Gson().fromJson(authResponse, Map.class);
-	String authKey = (String) authResponseMap.get("auth");
-	
-	Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
-	jsonObject.put("event", "pusher:subscribe");
-	
-	Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
-	dataMap.put("channel", name);
-	dataMap.put("auth", authKey);
-	
-	jsonObject.put("data", dataMap);
-	
-	String json = new Gson().toJson(jsonObject);
-	return json;
     }
     
     @Override
@@ -98,5 +103,18 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 	return new String[] {
 		"^(?!private-).*"
 	};
+    }
+
+    /**
+     * Protected access because this is also used by PresenceChannelImpl.
+     */
+    protected String getAuthResponse() {
+    	String socketId = connection.getSocketId();
+    	return authorizer.authorize(this.getName(), socketId);
+    }
+    
+    @Override
+    public String toString() {
+	return String.format("[Private Channel: name=%s]", name);
     }
 }

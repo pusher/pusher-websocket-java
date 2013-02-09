@@ -133,7 +133,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 	if(event.startsWith(INTERNAL_EVENT_PREFIX)) {
 	    handleInternalEvent(event, wholeMessage);
 	} else {
-	    Factory.getChannelManager(this, null).onMessage(event, wholeMessage);
+	    Factory.getChannelManager(this).onMessage(event, wholeMessage);
 	}
     }
     

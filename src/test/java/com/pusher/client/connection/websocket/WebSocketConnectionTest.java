@@ -24,7 +24,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -50,7 +49,7 @@ public class WebSocketConnectionTest {
     public void setUp() throws URISyntaxException {
 	
 	PowerMockito.mockStatic(Factory.class);
-	when(Factory.getChannelManager(any(InternalConnection.class), any(PusherOptions.class))).thenReturn(mockChannelManager);
+	when(Factory.getChannelManager(any(InternalConnection.class))).thenReturn(mockChannelManager);
 	when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class))).thenReturn(mockUnderlyingConnection);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	

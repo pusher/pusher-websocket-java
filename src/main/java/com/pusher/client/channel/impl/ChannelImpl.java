@@ -18,6 +18,7 @@ public class ChannelImpl implements InternalChannel {
     protected final String name;
     protected final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
     protected ChannelState state = ChannelState.INITIAL;
+	private ChannelEventListener eventListener;
 
     public ChannelImpl(String channelName) {
 	
@@ -94,7 +95,7 @@ public class ChannelImpl implements InternalChannel {
     }
     
     @Override
-    public String toSubscribeMessage(String... extraArguments) {
+    public String toSubscribeMessage() {
 	
 	Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
 	jsonObject.put("event", "pusher:subscribe");
@@ -139,6 +140,16 @@ public class ChannelImpl implements InternalChannel {
     }
 
     /* Comparable implementation */
+
+	@Override
+	public void setEventListener(ChannelEventListener listener) {
+		this.eventListener = listener;
+	}
+
+	@Override
+	public ChannelEventListener getEventListener() {
+		return eventListener;
+	}
     
     @Override
     public int compareTo(InternalChannel other) {

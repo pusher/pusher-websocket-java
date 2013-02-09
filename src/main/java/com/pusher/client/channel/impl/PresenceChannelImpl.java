@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
+import com.pusher.client.AuthorizationFailureException;
+import com.pusher.client.Authorizer;
 import com.pusher.client.User;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannel;
@@ -23,8 +25,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<String, User>());
     private String myUserID;
     
-    public PresenceChannelImpl(InternalConnection connection, String channelName) {
-	super(connection, channelName);
+    public PresenceChannelImpl(InternalConnection connection, String channelName, Authorizer authorizer) {
+	super(connection, channelName, authorizer);
     }
 
     /* PresenceChannel implementation */
@@ -57,14 +59,11 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     @Override
     @SuppressWarnings("rawtypes")
-    public String toSubscribeMessage(String... extraArguments) {
+    public String toSubscribeMessage() {
 	
-	if(extraArguments.length < 1) {
-	    throw new IllegalArgumentException("The auth response must be provided to build a private channel subscription message");
-	}
-	
-	String authResponse = extraArguments[0];
-	
+    	String authResponse = getAuthResponse();
+    	
+    	try {
 	Map authResponseMap = new Gson().fromJson(authResponse, Map.class);
 	String authKey = (String) authResponseMap.get("auth");
 	Object channelData = authResponseMap.get("channel_data");
@@ -84,6 +83,9 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	String json = new Gson().toJson(jsonObject);
 	
 	return json;
+    	} catch(Exception e) {
+    		throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
+    	}
     }    
 
     @Override
@@ -103,6 +105,11 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	};
     }
 
+    @Override
+    public String toString() {
+	return String.format("[Presence Channel: name=%s]", name);
+    }
+    
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void handleSubscriptionSuccessfulMessage(String message) {
 	
