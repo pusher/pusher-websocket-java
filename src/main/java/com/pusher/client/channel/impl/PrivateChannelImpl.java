@@ -7,10 +7,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
-import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
+import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
 
@@ -63,7 +63,7 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     /* Base class overrides */
 
     @Override
-    public void bind(String eventName, ChannelEventListener listener) {
+    public void bind(String eventName, SubscriptionEventListener listener) {
 	
 	if( (listener instanceof PrivateChannelEventListener) == false) {
 	    throw new IllegalArgumentException("Only instances of PrivateChannelEventListener can be bound to a private channel");

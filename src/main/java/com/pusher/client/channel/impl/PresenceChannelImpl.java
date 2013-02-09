@@ -12,9 +12,9 @@ import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.User;
-import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
+import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
@@ -89,7 +89,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     }    
 
     @Override
-    public void bind(String eventName, ChannelEventListener listener) {
+    public void bind(String eventName, SubscriptionEventListener listener) {
 	
 	if( (listener instanceof PresenceChannelEventListener) == false) {
 	    throw new IllegalArgumentException("Only instances of PresenceChannelEventListener can be bound to a presence channel");
@@ -127,7 +127,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	}
 	
 	// notify the event listeners
-	for(final ChannelEventListener eventListener : getAllEventListeners()) {
+	for(final SubscriptionEventListener eventListener : getAllEventListeners()) {
 	    Factory.getEventQueue().execute(new Runnable() {
 		public void run() {
 		    ((PresenceChannelEventListener)eventListener).onUserInformationReceived(name, new HashSet<User>(idToUserMap.values()));
@@ -146,7 +146,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	final User user = new User(id, userData);
 	idToUserMap.put(id, user);
 	
-	for(final ChannelEventListener eventListener : getAllEventListeners()) {
+	for(final SubscriptionEventListener eventListener : getAllEventListeners()) {
 	    Factory.getEventQueue().execute(new Runnable() {
 		public void run() {
 		    ((PresenceChannelEventListener)eventListener).userSubscribed(name, user);
@@ -163,7 +163,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	
 	final User user = idToUserMap.remove(id);
 	
-	for(final ChannelEventListener eventListener : getAllEventListeners()) {
+	for(final SubscriptionEventListener eventListener : getAllEventListeners()) {
 	    Factory.getEventQueue().execute(new Runnable() {
 		public void run() {
 		    ((PresenceChannelEventListener)eventListener).userUnsubscribed(name, user);
@@ -198,11 +198,11 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 	myUserID = (String) channelDataMap.get("user_id");
     }
     
-    private Set<ChannelEventListener> getAllEventListeners() {
+    private Set<SubscriptionEventListener> getAllEventListeners() {
 	
-	Set<ChannelEventListener> allListeners = new HashSet<ChannelEventListener>();
-	for(Set<ChannelEventListener> x : eventNameToListenerMap.values()) {
-	    allListeners.addAll(x);
+	Set<SubscriptionEventListener> allListeners = new HashSet<SubscriptionEventListener>();
+	for(Set<SubscriptionEventListener> listenersForThisEvent : eventNameToListenerMap.values()) {
+	    allListeners.addAll(listenersForThisEvent);
 	}
 	return allListeners;
     }

@@ -6,6 +6,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
@@ -21,6 +22,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.pusher.client.User;
 import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.util.Factory;
@@ -35,6 +37,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     @Before
     public void setUp() {
     	super.setUp();
+    	channel.setEventListener(mockEventListener);
     	when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "}");
     }
     
@@ -77,6 +80,15 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     public void testCannotBindIfListenerIsNotAPresenceChannelEventListener() {
 	ChannelEventListener listener = mock(PrivateChannelEventListener.class);
 	channel.bind("private-myEvent", listener);
+    }
+    
+    @Test
+    @Override
+    public void testUpdateStateToSubscribedNotifiesListenerThatSubscriptionSucceeded() {
+	channel.updateState(ChannelState.SUBSCRIBE_SENT);
+	channel.updateState(ChannelState.SUBSCRIBED);
+	
+	verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
     }
     
     /* end of tests */
