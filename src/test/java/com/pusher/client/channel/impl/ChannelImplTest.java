@@ -34,6 +34,7 @@ public class ChannelImplTest {
 	
 	this.mockListener = getEventListener();
 	this.channel = newInstance(getChannelName());
+	this.channel.setEventListener(mockListener);
     }
     
     @Test(expected=IllegalArgumentException.class)

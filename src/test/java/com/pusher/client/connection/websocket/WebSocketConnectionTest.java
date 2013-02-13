@@ -24,7 +24,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -50,7 +49,7 @@ public class WebSocketConnectionTest {
     public void setUp() throws URISyntaxException {
 	
 	PowerMockito.mockStatic(Factory.class);
-	when(Factory.getChannelManager(any(InternalConnection.class), any(PusherOptions.class))).thenReturn(mockChannelManager);
+	when(Factory.getChannelManager(any(InternalConnection.class))).thenReturn(mockChannelManager);
 	when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class))).thenReturn(mockUnderlyingConnection);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
@@ -124,15 +123,6 @@ public class WebSocketConnectionTest {
 	connection.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
 	
 	assertEquals("21112.816204", connection.getSocketId());
-    }
-    
-    @Test
-    public void testReceivePusherConnectionEstablishedMessageWhenAlreadyConnectedIsIgnored() {
-	connection.connect();
-	connection.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
-	connection.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
-	
-	verify(mockEventListener, times(2)).onConnectionStateChange(any(ConnectionStateChange.class));
     }
     
     @Test

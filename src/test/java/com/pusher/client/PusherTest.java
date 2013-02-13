@@ -55,10 +55,10 @@ public class PusherTest {
     {
 	PowerMockito.mockStatic(Factory.class);
 	when(Factory.getConnection(API_KEY)).thenReturn(mockConnection);
-	when(Factory.getChannelManager(mockConnection, mockPusherOptions)).thenReturn(mockChannelManager);
+	when(Factory.getChannelManager(mockConnection)).thenReturn(mockChannelManager);
 	when(Factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
-	when(Factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME)).thenReturn(mockPrivateChannel);
-	when(Factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME)).thenReturn(mockPresenceChannel);
+	when(Factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, mockAuthorizer)).thenReturn(mockPrivateChannel);
+	when(Factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, mockAuthorizer)).thenReturn(mockPresenceChannel);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
 	when(mockPusherOptions.getAuthorizer()).thenReturn(mockAuthorizer);

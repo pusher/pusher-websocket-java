@@ -4,5 +4,6 @@ public enum ChannelState {
     INITIAL,
     SUBSCRIBE_SENT,
     SUBSCRIBED,
-    UNSUBSCRIBED
+    UNSUBSCRIBED,
+    FAILED
 }

@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 
 import org.java_websocket.client.WebSocketClient;
 
-import com.pusher.client.PusherOptions;
+import com.pusher.client.Authorizer;
 import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.PresenceChannelImpl;
@@ -73,17 +73,17 @@ public class Factory {
 	return new ChannelImpl(channelName);
     }
     
-    public static PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName) {
-	return new PrivateChannelImpl(connection, channelName);
+    public static PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
+	return new PrivateChannelImpl(connection, channelName, authorizer);
     }
     
-    public static PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName) {
-	return new PresenceChannelImpl(connection, channelName);
+    public static PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
+	return new PresenceChannelImpl(connection, channelName, authorizer);
     }
 
-    public static ChannelManager getChannelManager(InternalConnection connection, PusherOptions pusherOptions) {
+    public static ChannelManager getChannelManager(InternalConnection connection) {
 	if (channelManager == null) {
-	    channelManager = new ChannelManager(connection, pusherOptions);
+	    channelManager = new ChannelManager(connection);
 	}
 	return channelManager;
     }
