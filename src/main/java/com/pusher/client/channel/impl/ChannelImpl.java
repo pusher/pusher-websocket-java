@@ -9,6 +9,7 @@ import java.util.Set;
 import com.google.gson.Gson;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
@@ -16,8 +17,9 @@ public class ChannelImpl implements InternalChannel {
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
-    protected final Map<String, Set<ChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<ChannelEventListener>>();
+    protected final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected ChannelState state = ChannelState.INITIAL;
+	private ChannelEventListener eventListener;
 
     public ChannelImpl(String channelName) {
 	
@@ -42,13 +44,13 @@ public class ChannelImpl implements InternalChannel {
     }
     
     @Override
-    public void bind(String eventName, ChannelEventListener listener) {
+    public void bind(String eventName, SubscriptionEventListener listener) {
 	
 	validateArguments(eventName, listener);
 	
-	Set<ChannelEventListener> listeners = eventNameToListenerMap.get(eventName);
+	Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
 	if(listeners == null) {
-	    listeners = new HashSet<ChannelEventListener>();
+	    listeners = new HashSet<SubscriptionEventListener>();
 	    eventNameToListenerMap.put(eventName, listeners);
 	}
 	
@@ -56,11 +58,11 @@ public class ChannelImpl implements InternalChannel {
     }
 
     @Override
-    public void unbind(String eventName, ChannelEventListener listener) {
+    public void unbind(String eventName, SubscriptionEventListener listener) {
 	
 	validateArguments(eventName, listener);
 	
-	Set<ChannelEventListener> listeners = eventNameToListenerMap.get(eventName);
+	Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
 	if(listeners != null) {
 	    listeners.remove(listener);
 	    if(listeners.isEmpty()) {
@@ -77,9 +79,9 @@ public class ChannelImpl implements InternalChannel {
 	if(event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
 	    updateState(ChannelState.SUBSCRIBED);
 	} else {
-	    Set<ChannelEventListener> listeners = eventNameToListenerMap.get(event);
+	    Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(event);
 	    if(listeners != null) {
-		for(final ChannelEventListener listener : listeners) {
+		for(final SubscriptionEventListener listener : listeners) {
         		
 		    final String data = extractDataFrom(message);
         		
@@ -94,7 +96,7 @@ public class ChannelImpl implements InternalChannel {
     }
     
     @Override
-    public String toSubscribeMessage(String... extraArguments) {
+    public String toSubscribeMessage() {
 	
 	Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
 	jsonObject.put("event", "pusher:subscribe");
@@ -125,18 +127,33 @@ public class ChannelImpl implements InternalChannel {
 	
 	this.state = state;
 	
-	if(state == ChannelState.SUBSCRIBED) {
-	    for(Set<ChannelEventListener> listeners : eventNameToListenerMap.values()) {
-		for(final ChannelEventListener listener : listeners) {
-		    Factory.getEventQueue().execute(new Runnable() {
+	if(state == ChannelState.SUBSCRIBED && eventListener != null) {
+	    Factory.getEventQueue().execute(new Runnable() {
 			public void run() {
-			    listener.onSubscriptionSucceeded(ChannelImpl.this.getName());
+			    eventListener.onSubscriptionSucceeded(ChannelImpl.this.getName());
 			}
 		    });
 		}
-	    }
-	}
     }
+
+    /* Comparable implementation */
+
+	@Override
+	public void setEventListener(ChannelEventListener listener) {
+		this.eventListener = listener;
+	}
+
+	@Override
+	public ChannelEventListener getEventListener() {
+		return eventListener;
+	}
+    
+    @Override
+    public int compareTo(InternalChannel other) {
+	return this.getName().compareTo(other.getName());
+    }
+    
+    /* implementation detail */
     
     @Override
     public String toString() {
@@ -157,7 +174,7 @@ public class ChannelImpl implements InternalChannel {
 	};
     }
     
-    private void validateArguments(String eventName, ChannelEventListener listener) {
+    private void validateArguments(String eventName, SubscriptionEventListener listener) {
 	
 	if(eventName == null) {
 	    throw new IllegalArgumentException("Cannot bind or unbind to channel " + name + " with a null event name");

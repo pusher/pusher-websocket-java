@@ -14,20 +14,8 @@ package com.pusher.client.channel;
  * bind your listener to one or more events at the same time.</p>
  *
  */
-public interface ChannelEventListener {
+public interface ChannelEventListener extends SubscriptionEventListener {
 
-    /**
-     * Callback that is fired whenever an event that this {@linkplain ChannelEventListener} has been bound to is received.
-     * 
-     * @param channelName The name of the channel that the event has been received on. This is useful if your {@linkplain ChannelEventListener}
-     * has been bound to events on more than one channel.
-     * @param eventName The name of the event that has been received. This will always be one of the events that your {@linkplain ChannelEventListener}
-     * has been bound to. 
-     * @param data The JSON data that was included with the event. This can be parsed with Google's Gson library, which is a 
-     * dependency of this library, or your library of choice.
-     */
-    void onEvent(String channelName, String eventName, String data);
-    
     /**
      * <p>Callback that is fired when a subscription success acknowledgement message is received from Pusher after subscribing to
      * the channel.</p>
