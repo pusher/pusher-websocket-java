@@ -10,8 +10,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.Iterator;
-
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 
@@ -25,13 +23,12 @@ public class HttpAuthorizer implements Authorizer {
     }
     
     public HttpAuthorizer(String endPoint, HashMap<String, String>headers) {
-	
-	try {
-	    this.endPoint = Factory.newURL(endPoint);
-	    this.mHeaders = headers;
-	} catch(MalformedURLException e) {
-	    throw new IllegalArgumentException("Could not parse authentication end point into a valid URL", e);
-	}
+    	try {
+    		this.endPoint = Factory.newURL(endPoint);
+    	} catch(MalformedURLException e) {
+    		throw new IllegalArgumentException("Could not parse authentication end point into a valid URL", e);
+    	}
+    	this.mHeaders = headers;
     }
 
     @Override
