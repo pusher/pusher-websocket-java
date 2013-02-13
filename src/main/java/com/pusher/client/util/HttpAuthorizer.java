@@ -9,6 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
@@ -16,11 +18,17 @@ import com.pusher.client.Authorizer;
 public class HttpAuthorizer implements Authorizer {
 
     private final URL endPoint;
+    private final HashMap<String, String> mHeaders;
 
     public HttpAuthorizer(String endPoint) {
+    	this(endPoint, new HashMap<String, String>());
+    }
+    
+    public HttpAuthorizer(String endPoint, HashMap<String, String>headers) {
 	
 	try {
 	    this.endPoint = Factory.newURL(endPoint);
+	    this.mHeaders = headers;
 	} catch(MalformedURLException e) {
 	    throw new IllegalArgumentException("Could not parse authentication end point into a valid URL", e);
 	}
@@ -40,6 +48,13 @@ public class HttpAuthorizer implements Authorizer {
 	    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	    connection.setRequestProperty("charset", "utf-8");
 	    connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+	    
+	    // Add in the user defined headers
+	    for (String headerName : mHeaders.keySet()) {
+	    	String headerValue = mHeaders.get(headerName);
+	    	connection.setRequestProperty(headerName, headerValue);
+	    }
+	    
 	    connection.setUseCaches(false);
 
 	    // Send request
