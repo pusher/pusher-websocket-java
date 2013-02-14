@@ -22,11 +22,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.pusher.client.Authorizer;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
+import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
@@ -38,7 +40,7 @@ public class EndToEndTest {
 	private static final String API_KEY = "123456";
 	private static final String AUTH_KEY = "123456";
 	private static final String PUBLIC_CHANNEL_NAME = "my-channel";
-    private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
+  private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
 	private static final String OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE = "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
 	
 	private @Mock Authorizer mockAuthorizer;
@@ -46,12 +48,15 @@ public class EndToEndTest {
 	private @Mock ServerHandshake mockServerHandshake;
 	private Pusher pusher;
 	private PusherOptions pusherOptions;
+	private InternalConnection connection;
 	private TestWebSocketClientWrapper testWebsocket;
 	
 	@Before
 	public void setUp() throws Exception {
 		
 		PowerMockito.mockStatic(Factory.class);
+		
+		connection = new WebSocketConnection(API_KEY, false);
 		
 		when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 		when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
@@ -65,8 +70,14 @@ public class EndToEndTest {
 			}
 		});
 		
-		when(Factory.getConnection(API_KEY, false)).thenCallRealMethod();
-		when(Factory.getChannelManager(any(InternalConnection.class))).thenCallRealMethod();
+		when(Factory.getConnection(API_KEY, false)).thenReturn(connection);
+		
+		when(Factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
+			public ChannelManager answer(InvocationOnMock invocation) throws Throwable {
+				return new ChannelManager();
+			}
+		});
+		
 		when(Factory.newPresenceChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
 		when(Factory.newPrivateChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
 		when(Factory.newPublicChannel(anyString())).thenCallRealMethod();

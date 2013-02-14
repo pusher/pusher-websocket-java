@@ -59,17 +59,35 @@ public class ChannelManagerTest {
 	when(mockPrivateChannel.toSubscribeMessage()).thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
 	when(mockPrivateChannel.getEventListener()).thenReturn(mockPrivateChannelEventListener);
 	
-	this.channelManager = new ChannelManager(mockConnection);
+	this.channelManager = new ChannelManager();
+	this.channelManager.setConnection(mockConnection);
+    }   
+    
+    @Test
+    public void testSetConnectionBindsAsListener() {
+    	ChannelManager manager = new ChannelManager();
+    	InternalConnection connection = PowerMockito.mock(InternalConnection.class);
+    	
+    	manager.setConnection(connection);
+    	verify(connection).bind(ConnectionState.CONNECTED, manager);
     }
     
     @Test
-    public void testRegistersAsAConnectionListenerWhenConstructed() {
-	verify(mockConnection).bind(ConnectionState.CONNECTED, channelManager);
+    public void testSetConnectionUnbindsFromPreviousConnection() {
+    	ChannelManager manager = new ChannelManager();
+    	InternalConnection connection = PowerMockito.mock(InternalConnection.class);
+    	
+    	manager.setConnection(connection);
+    	
+    	InternalConnection secondConnection = PowerMockito.mock(InternalConnection.class);
+    	manager.setConnection(secondConnection);
+    	verify(connection).unbind(ConnectionState.CONNECTED, manager);
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void testConstructWithNullConnectionThrowsException() {
-	new ChannelManager(null);
+    public void testSetConnectionWithNullConnectionThrowsException() {
+	ChannelManager manager = new ChannelManager();
+	manager.setConnection(null);
     }
     
     @Test
@@ -241,20 +259,10 @@ public class ChannelManagerTest {
     }
     
     @Test
-    public void testReceiveMessageAfterClearDoesNotPassItToChannel() {
-	channelManager.subscribeTo(mockInternalChannel, mockEventListener, "my-event");
-	channelManager.clear();
-	channelManager.onMessage("my-event", "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + CHANNEL_NAME + "\"}");
-	
-	verify(mockInternalChannel, never()).onMessage(anyString(), anyString());	
-    }
-    
-    @Test
-    public void testQueuedSubscriptionIsNotSentIfClearIsCalledBeforeConnectedCallbackIsReceived() {
+    public void testSubscriptionIsReSubscribedFollowingDisconnectThenConnect() {
 	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
 	
 	channelManager.subscribeTo(mockInternalChannel, mockEventListener);
-	channelManager.clear();
 	channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
 	
 	verify(mockConnection, never()).sendMessage(anyString());

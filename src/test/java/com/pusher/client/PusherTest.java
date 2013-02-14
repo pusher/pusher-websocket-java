@@ -56,7 +56,7 @@ public class PusherTest {
 	PowerMockito.mockStatic(Factory.class);
 
 	when(Factory.getConnection(API_KEY, false)).thenReturn(mockConnection);
-	when(Factory.getChannelManager(mockConnection)).thenReturn(mockChannelManager);
+	when(Factory.getChannelManager()).thenReturn(mockChannelManager);
 	when(Factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
 	when(Factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, mockAuthorizer)).thenReturn(mockPrivateChannel);
 	when(Factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, mockAuthorizer)).thenReturn(mockPresenceChannel);
@@ -95,12 +95,11 @@ public class PusherTest {
     }
     
     @Test
-    public void testDisconnectCallIsDelegatedToUnderlyingConnectionAndClearsSubscriptions() {
+    public void testDisconnectCallIsDelegatedToUnderlyingConnection() {
     	when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
     	
     	pusher.disconnect();
     	verify(mockConnection).disconnect();
-    	verify(mockChannelManager).clear();
     }
     
     @Test
@@ -109,7 +108,6 @@ public class PusherTest {
     	
     	pusher.disconnect();
     	verify(mockConnection, never()).disconnect();
-    	verify(mockChannelManager, never()).clear();	
     }
     
     @Test
@@ -118,7 +116,6 @@ public class PusherTest {
     	
     	pusher.disconnect();
     	verify(mockConnection, never()).disconnect();
-    	verify(mockChannelManager, never()).clear();	
     }
     
     @Test
@@ -126,8 +123,7 @@ public class PusherTest {
     	when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTING);
     	
     	pusher.disconnect();
-    	verify(mockConnection, never()).disconnect();
-    	verify(mockChannelManager, never()).clear();	
+    	verify(mockConnection, never()).disconnect();	
     }
     
     @Test

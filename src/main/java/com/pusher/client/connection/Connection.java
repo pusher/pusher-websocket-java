@@ -6,6 +6,8 @@ public interface Connection {
 
     void bind(ConnectionState state, ConnectionEventListener eventListener);
     
+    boolean unbind(ConnectionState state, ConnectionEventListener eventListener);
+    
     ConnectionState getState();
     
     String getSocketId();

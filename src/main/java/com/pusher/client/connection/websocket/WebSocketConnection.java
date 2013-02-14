@@ -90,6 +90,11 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     public void bind(ConnectionState state, ConnectionEventListener eventListener) {
 	eventListeners.get(state).add(eventListener);
     }
+    
+    @Override
+    public boolean unbind(ConnectionState state, ConnectionEventListener eventListener) {
+    	return eventListeners.get(state).remove(eventListener);
+    }
 
     @Override
     public ConnectionState getState() {
@@ -148,7 +153,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 	if(event.startsWith(INTERNAL_EVENT_PREFIX)) {
 	    handleInternalEvent(event, wholeMessage);
 	} else {
-	    Factory.getChannelManager(this).onMessage(event, wholeMessage);
+	    Factory.getChannelManager().onMessage(event, wholeMessage);
 	}
     }
     

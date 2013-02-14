@@ -17,12 +17,18 @@ import com.pusher.client.util.Factory;
 public class ChannelManager implements ConnectionEventListener {
 
 	private final Map<String, InternalChannel> channelNameToChannelMap = new HashMap<String, InternalChannel>();
-	private final InternalConnection connection;
+	private InternalConnection connection;
 
-	public ChannelManager(InternalConnection connection) {
-
+	public ChannelManager() {
+	}
+	
+	public void setConnection(InternalConnection connection) {
 		if (connection == null) {
 			throw new IllegalArgumentException("Cannot construct ChannelManager with a null connection");
+		}
+		
+		if(this.connection != null) {
+			this.connection.unbind(ConnectionState.CONNECTED, this);
 		}
 
 		this.connection = connection;
@@ -65,10 +71,6 @@ public class ChannelManager implements ConnectionEventListener {
 				channel.onMessage(event, wholeMessage);
 			}
 		}
-	}
-
-	public void clear() {
-		channelNameToChannelMap.clear();
 	}
 
 	/* ConnectionEventListener implementation */

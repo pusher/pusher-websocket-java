@@ -51,12 +51,31 @@ public class WebSocketConnectionTest {
     public void setUp() throws URISyntaxException, SSLException {
 	
 	PowerMockito.mockStatic(Factory.class);
-	when(Factory.getChannelManager(any(InternalConnection.class))).thenReturn(mockChannelManager);
+	when(Factory.getChannelManager()).thenReturn(mockChannelManager);
 	when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class))).thenReturn(mockUnderlyingConnection);
 	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
 	this.connection = new WebSocketConnection(API_KEY, false);
 	this.connection.bind(ConnectionState.ALL, mockEventListener);
+    }
+    
+    @Test
+    public void testUnbindingWhenNotAlreadyBoundReturnsFalse() throws URISyntaxException {
+    	ConnectionEventListener listener = PowerMockito.mock(ConnectionEventListener.class);
+    	WebSocketConnection connection = new WebSocketConnection(API_KEY, false);
+    	boolean unbound = connection.unbind(ConnectionState.ALL, listener);
+    	assertEquals(false, unbound);
+    }
+    
+    @Test
+    public void testUnbindingWhenBoundReturnsTrue() throws URISyntaxException {
+    	ConnectionEventListener listener = PowerMockito.mock(ConnectionEventListener.class);
+    	WebSocketConnection connection = new WebSocketConnection(API_KEY, false);
+    	
+    	connection.bind(ConnectionState.ALL, listener);
+    	
+    	boolean unbound = connection.unbind(ConnectionState.ALL, listener);
+    	assertEquals(true, unbound);
     }
     
     @Test

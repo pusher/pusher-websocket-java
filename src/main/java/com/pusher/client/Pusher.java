@@ -65,7 +65,8 @@ public class Pusher {
 
 		this.pusherOptions = pusherOptions;
 		this.connection = Factory.getConnection(apiKey, this.pusherOptions.isEncrypted());
-		this.channelManager = Factory.getChannelManager(connection);
+		this.channelManager = Factory.getChannelManager();
+		this.channelManager.setConnection(this.connection);
 	}
 
 	/* Connection methods */
@@ -114,7 +115,6 @@ public class Pusher {
 
 	public void disconnect() {
 		if (connection.getState() == ConnectionState.CONNECTED) {
-			channelManager.clear();
 			connection.disconnect();
 		}
 	}

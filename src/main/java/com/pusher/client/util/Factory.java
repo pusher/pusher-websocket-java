@@ -83,9 +83,9 @@ public class Factory {
 	return new PresenceChannelImpl(connection, channelName, authorizer);
     }
 
-    public static ChannelManager getChannelManager(InternalConnection connection) {
+    public static ChannelManager getChannelManager() {
 	if (channelManager == null) {
-	    channelManager = new ChannelManager(connection);
+	    channelManager = new ChannelManager();
 	}
 	return channelManager;
     }
