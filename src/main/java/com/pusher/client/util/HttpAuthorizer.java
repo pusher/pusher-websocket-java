@@ -16,19 +16,18 @@ import com.pusher.client.Authorizer;
 public class HttpAuthorizer implements Authorizer {
 
 	private final URL endPoint;
-	private final HashMap<String, String> mHeaders;
+	private HashMap<String, String> mHeaders = new HashMap<String, String>();
 
 	public HttpAuthorizer(String endPoint) {
-		this(endPoint, new HashMap<String, String>());
-	}
-
-	public HttpAuthorizer(String endPoint, HashMap<String, String> headers) {
 		try {
 			this.endPoint = Factory.newURL(endPoint);
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException(
 					"Could not parse authentication end point into a valid URL", e);
 		}
+	}
+	
+	public void setHeaders(HashMap<String, String> headers) {
 		this.mHeaders = headers;
 	}
 
