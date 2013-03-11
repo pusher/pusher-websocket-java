@@ -1,0 +1,5 @@
+Pusher Java Library
+http://pusher.com/
+
+Copyright 2013, Pusher
+Released under the MIT licence.
