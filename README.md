@@ -4,6 +4,7 @@ Pusher client library for Java targeting **Android** and general Java.
 
 This README covers the following topics:
 
+* Installation
 * API Overview
 * The Pusher constructor
 * Connecting
@@ -18,6 +19,44 @@ This README covers the following topics:
 * Unbinding events
 * Triggering client events
 * Library development environment
+
+## Installation
+
+You can get the library in three ways.
+
+### Maven
+
+Define the `pusher-java-client` dependency:
+
+    <dependency>
+      <groupId>com.pusher</groupId>
+      <artifactId>pusher-java-client</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    
+Define the repository location:
+
+    <repository>
+      <id>pusher-java-client-mvn-repo</id>
+      <name>Pusher Java Client Library</name>
+      <url>https://raw.github.com/leggetter/pusher-java-client/mvn-repo/</url>
+      <!-- Update the following as required -->
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+
+### Download
+
+You can download a version of the `.jar` directly via <https://github.com/leggetter/pusher-java-client/tree/mvn-repo/com/pusher/pusher-java-client>
+
+### Source
+
+You can build the project from source. For more information see **Library development environment**.
 
 ## API Overview
 
@@ -431,3 +470,7 @@ After running `mvn clean install` change to the `target` directory and run `java
 By default the example will connect to a sample application and subscribe to the channel `my-channel`, listening to events on `my-event`. If you want to change these defaults, they can be specified on the command line:
 
 `java -jar pusher-java-client-<version>-jar-with-dependencies.jar [appKey] [channelName] [eventName]` 
+
+### Deploy
+
+The library is deployed to a Maven repository in a github branch. For more information see: <http://stackoverflow.com/a/14013645/39904>
