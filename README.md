@@ -18,6 +18,7 @@ This README covers the following topics:
 * Binding and handling events
 * Unbinding events
 * Triggering client events
+* JavaDocs
 * Library development environment
 
 ## Installation
@@ -440,6 +441,10 @@ public class Example implements PrivateChannelEventListener {
 }
 ```
 
+## JavaDocs
+
+The JavaDocs can be found here: <http://leggetter.github.com/pusher-java-client/>
+
 ## Library Development Environment
 
 ### Cloning the project
@@ -473,4 +478,9 @@ By default the example will connect to a sample application and subscribe to the
 
 ### Deploy
 
-The library is deployed to a Maven repository in a github branch. For more information see: <http://stackoverflow.com/a/14013645/39904>
+    mvn deploy
+    
+This command does two things:
+
+1. The library is deployed to a Maven repository in a github branch. For more information see: <http://stackoverflow.com/a/14013645/39904>
+2. Generated JavaDocs are deployed to <http://leggetter.github.com/pusher-java-client/>. For more information see: <https://github.com/github/maven-plugins>

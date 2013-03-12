@@ -57,22 +57,42 @@
             <artifactId>site-maven-plugin</artifactId>
             <version>0.7</version>
             <configuration>
-                <message>Maven artifacts for ${project.version}</message>  <!-- git commit message -->
-                <noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
-                <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
-                <branch>refs/heads/mvn-repo</branch>                       <!-- remote branch name -->
-                <includes><include>**/*</include></includes>
-                <repositoryName>pusher-java-client</repositoryName>      <!-- github repo name -->
+				<server>github</server>
+				<repositoryName>pusher-java-client</repositoryName>      <!-- github repo name -->
                 <repositoryOwner>leggetter</repositoryOwner>    <!-- github username  -->
-            </configuration>
+                <noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
+			</configuration>
             <executions>
+                
               <!-- run site-maven-plugin's 'site' target as part of the build's normal 'deploy' phase -->
               <execution>
+                <id>mvn-repo</id>
+                <configuration>
+                	<message>Maven artifacts for ${project.version}</message>  <!-- git commit message -->
+                	<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
+                	<branch>refs/heads/mvn-repo</branch>                       <!-- remote branch name -->
+                	<includes><include>**/*</include></includes>
+            	</configuration>
                 <goals>
                   <goal>site</goal>
                 </goals>
                 <phase>deploy</phase>
               </execution>
+              
+              <execution>
+                <id>javadoc</id>
+         		<configuration>
+                	<message>JavaDoc gh-pages for ${project.version}</message>  <!-- git commit message -->
+                	<outputDirectory>${project.build.directory}/site/apidocs</outputDirectory> <!-- matches distribution management repository url above -->
+                	<branch>refs/heads/gh-pages</branch>                       <!-- remote branch name -->
+                	<includes><include>**/*</include></includes>
+            	</configuration>                  
+                <goals>
+                  <goal>site</goal>
+                </goals>
+                <phase>deploy</phase>
+              </execution>
+              
             </executions>
           </plugin>
 		    
@@ -239,6 +259,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
+				    <stylesheetfile>${basedir}/src/site/css/styles.css</stylesheetfile>
 					<groups>
 						<group>
 							<title>${project.groupId} ${project.artifactId}</title>
@@ -254,7 +275,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.1.1</version>
+				<version>2.6</version>
 				<configuration>
 					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
 				</configuration>
