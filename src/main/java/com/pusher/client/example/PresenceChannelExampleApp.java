@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.User;
+import com.pusher.client.channel.User;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.connection.ConnectionEventListener;

@@ -11,7 +11,7 @@ import java.util.Set;
 import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
-import com.pusher.client.User;
+import com.pusher.client.channel.User;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;

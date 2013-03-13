@@ -259,7 +259,9 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
 				<configuration>
-				    <stylesheetfile>${basedir}/src/site/css/styles.css</stylesheetfile>
+				    <overview>${basedir}/src/main/javadoc/overview.html</overview>
+				    <stylesheetfile>${basedir}/src/main/javadoc/css/styles.css</stylesheetfile>
+				    <excludePackageNames>com.pusher.client.channel.impl:com.pusher.client.connection.impl:com.pusher.client.connection.websocket</excludePackageNames>
 					<groups>
 						<group>
 							<title>${project.groupId} ${project.artifactId}</title>

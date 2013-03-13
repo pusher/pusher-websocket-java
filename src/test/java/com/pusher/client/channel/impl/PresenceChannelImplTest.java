@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.pusher.client.User;
+import com.pusher.client.channel.User;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PresenceChannelEventListener;

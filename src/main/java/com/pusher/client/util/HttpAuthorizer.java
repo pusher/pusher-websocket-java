@@ -13,11 +13,23 @@ import java.util.HashMap;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 
+/**
+ * Used to authenticate a {@link com.pusher.client.channel.PrivateChannel private} or {@link com.pusher.client.channel.PresenceChannel presence}
+ * channel subscription.
+ * 
+ * <p>Makes an HTTP request to a defined HTTP endpoint. Expects an authentication token to be returned.</p>
+ * 
+ * <p>For more information see the <a href="http://pusher.com/docs/authenticating_users">Authenticating Users documentation</a>.
+ */
 public class HttpAuthorizer implements Authorizer {
 
 	private final URL endPoint;
 	private HashMap<String, String> mHeaders = new HashMap<String, String>();
 
+	/**
+	 * Creates a new authorizer.
+	 * @param endPoint The endpoint to be called when authenticating.
+	 */
 	public HttpAuthorizer(String endPoint) {
 		try {
 			this.endPoint = Factory.newURL(endPoint);
@@ -27,6 +39,10 @@ public class HttpAuthorizer implements Authorizer {
 		}
 	}
 	
+	/**
+	 * Set additional headers to be sent as part of the request.
+	 * @param headers
+	 */
 	public void setHeaders(HashMap<String, String> headers) {
 		this.mHeaders = headers;
 	}
