@@ -265,7 +265,7 @@ public class WebSocketConnectionTest {
 	}
 
 	@Test
-	public void testOnErrorCallbackUpdatesStateToDisconnectedAndRaisesErrorEvent() {
+	public void testOnErrorCallbackRaisesErrorEvent() {
 		connection.connect();
 		verify(mockEventListener).onConnectionStateChange(
 				new ConnectionStateChange(ConnectionState.DISCONNECTED,
@@ -273,9 +273,6 @@ public class WebSocketConnectionTest {
 
 		Exception e = new Exception();
 		connection.onError(e);
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.CONNECTING,
-						ConnectionState.DISCONNECTED));
 		verify(mockEventListener).onError(
 				"An exception was thrown by the websocket", null, e);
 	}

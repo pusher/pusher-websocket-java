@@ -269,7 +269,9 @@ public class WebSocketConnection implements InternalConnection,
 
 		Factory.getEventQueue().execute(new Runnable() {
 			public void run() {
-				updateState(ConnectionState.DISCONNECTED);
+				// Do not change connection state as Java_WebSocket will also call onClose.
+				// See: https://github.com/leggetter/pusher-java-client/issues/8#issuecomment-16128590
+				//updateState(ConnectionState.DISCONNECTED);
 				sendErrorToAllListeners("An exception was thrown by the websocket",
 						null, ex);
 			}
