@@ -41,7 +41,7 @@ Define the repository location:
     <repository>
       <id>pusher-java-client-mvn-repo</id>
       <name>Pusher Java Client Library</name>
-      <url>https://raw.github.com/leggetter/pusher-java-client/mvn-repo/</url>
+      <url>https://raw.github.com/pusher/pusher-java-client/mvn-repo/</url>
       <!-- Update the following as required -->
       <releases>
         <enabled>true</enabled>
@@ -53,7 +53,7 @@ Define the repository location:
 
 ### Download
 
-You can download a version of the `.jar` directly via <https://github.com/leggetter/pusher-java-client/tree/mvn-repo/com/pusher/pusher-java-client>
+You can download a version of the `.jar` directly via <https://github.com/pusher/pusher-java-client/tree/mvn-repo/com/pusher/pusher-java-client>
 
 ### Source
 
@@ -436,14 +436,14 @@ For more information on how and why there is a `socket_id` see the documentation
 
 ## JavaDocs
 
-The JavaDocs can be found here: <http://leggetter.github.com/pusher-java-client/>
+The JavaDocs can be found here: <http://pusher.github.com/pusher-java-client/>
 
 ## Library Development Environment
 
 ### Cloning the project
 
 * If you don't have it already, [download Maven](http://maven.apache.org/download.cgi) and add the `mvn` executable to your path.
-* Clone the project: `git clone https://github.com/leggetter/pusher-java-client.git`
+* Clone the project: `git clone https://github.com/pusher/pusher-java-client.git`
 * Change to the top level directory for the project: `cd pusher-java-client`
 * Retrieve the Java-WebSocket library: `git submodule update --init`
 
@@ -471,9 +471,9 @@ By default the example will connect to a sample application and subscribe to the
 
 ### Deploy
 
-    mvn deploy
+    mvn site-deploy
     
 This command does two things:
 
 1. The library is deployed to a Maven repository in a github branch. For more information see: <http://stackoverflow.com/a/14013645/39904>
-2. Generated JavaDocs are deployed to <http://leggetter.github.com/pusher-java-client/>. For more information see: <https://github.com/github/maven-plugins>
+2. Generated JavaDocs are deployed to <http://pusher.github.com/pusher-java-client/>. For more information see: <https://github.com/github/maven-plugins>
