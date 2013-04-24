@@ -10,6 +10,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+
+import javax.net.ssl.HttpsURLConnection;
+
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 
@@ -25,6 +28,8 @@ public class HttpAuthorizer implements Authorizer {
 
 	private final URL endPoint;
 	private HashMap<String, String> mHeaders = new HashMap<String, String>();
+	private HashMap<String, String> mQueryStringParameters = new HashMap<String, String>();
+	private final String ENCODING_CHARACTER_SET = "UTF-8";
 
 	/**
 	 * Creates a new authorizer.
@@ -46,18 +51,46 @@ public class HttpAuthorizer implements Authorizer {
 	public void setHeaders(HashMap<String, String> headers) {
 		this.mHeaders = headers;
 	}
+	
+	/**
+	 * Identifies if the HTTP request will be sent over HTTPS.
+	 * @return 
+	 */
+	public Boolean isSSL() {
+		return this.endPoint.getProtocol().equals("https");
+	}
 
+	/**
+	 * This methods is for passing extra parameters authentication that needs to be added to query string.
+	 * @param queryStringParameters the query parameters
+	 */
+	public void setQueryStringParameters(HashMap<String, String> queryStringParameters) {
+		this.mQueryStringParameters = queryStringParameters;
+	}
+	
 	@Override
 	public String authorize(String channelName, String socketId)
 			throws AuthorizationFailureException {
 
 		try {
-			String urlParameters = "channel_name="
-					+ URLEncoder.encode(channelName, "UTF-8") + "&socket_id="
-					+ URLEncoder.encode(socketId, "UTF-8");
+			StringBuffer urlParameters = new StringBuffer(); 
+			urlParameters.append("channel_name=").append(URLEncoder.encode(channelName, ENCODING_CHARACTER_SET));
+			urlParameters.append("&socket_id=").append(URLEncoder.encode(socketId, ENCODING_CHARACTER_SET));
+			
 
-			HttpURLConnection connection = (HttpURLConnection) endPoint
-					.openConnection();
+			// Adding extra parameters supplied to be added to query string.
+			for(String parameterName : mQueryStringParameters.keySet()){
+				urlParameters.append("&").append(parameterName).append("=");
+				urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName), ENCODING_CHARACTER_SET));
+			}
+			
+			HttpURLConnection connection = null;
+			if( this.isSSL() ) {
+				connection = (HttpsURLConnection) endPoint.openConnection();
+			}
+			else {
+				connection = (HttpURLConnection) endPoint.openConnection();
+			}
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
 			connection.setInstanceFollowRedirects(false);
@@ -66,7 +99,7 @@ public class HttpAuthorizer implements Authorizer {
 					"application/x-www-form-urlencoded");
 			connection.setRequestProperty("charset", "utf-8");
 			connection.setRequestProperty("Content-Length",
-					"" + Integer.toString(urlParameters.getBytes().length));
+					"" + Integer.toString(urlParameters.toString().getBytes().length));
 
 			// Add in the user defined headers
 			for (String headerName : mHeaders.keySet()) {
@@ -78,7 +111,7 @@ public class HttpAuthorizer implements Authorizer {
 
 			// Send request
 			DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-			wr.writeBytes(urlParameters);
+			wr.writeBytes(urlParameters.toString());
 			wr.flush();
 			wr.close();
 
