@@ -1,5 +1,8 @@
 package com.pusher.client.example;
 
+import java.util.Map;
+
+import com.google.gson.Gson;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.ChannelEventListener;
@@ -56,6 +59,11 @@ public class ExampleApp implements ConnectionEventListener,
 		System.out.println(String.format(
 				"Received event [%s] on channel [%s] with data [%s]", eventName,
 				channelName, data));
+		
+		Gson gson = new Gson();
+		@SuppressWarnings("unchecked")
+		Map<String, String> jsonObject = gson.fromJson(data, Map.class);
+		System.out.println( jsonObject );
 	}
 
 	@Override
