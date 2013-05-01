@@ -83,9 +83,10 @@ public class ChannelImplTest {
 
 	@Test
 	public void testDataIsExtractedFromMessageAndPassedToSingleListener() {
+		// {"event":"my-event","data":"{\"some\":\"data\"}","channel":"my-channel"}
 		channel.bind(EVENT_NAME, mockListener);
 		channel.onMessage(EVENT_NAME,
-				"{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
+				"{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
 		verify(mockListener).onEvent(getChannelName(), EVENT_NAME,
 				"{\"fish\":\"chips\"}");
@@ -98,7 +99,7 @@ public class ChannelImplTest {
 		channel.bind(EVENT_NAME, mockListener);
 		channel.bind(EVENT_NAME, mockListener2);
 		channel.onMessage(EVENT_NAME,
-				"{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
+				"{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
 		verify(mockListener).onEvent(getChannelName(), EVENT_NAME,
 				"{\"fish\":\"chips\"}");
@@ -123,7 +124,7 @@ public class ChannelImplTest {
 		channel.bind(EVENT_NAME, mockListener);
 		channel.unbind(EVENT_NAME, mockListener);
 		channel.onMessage(EVENT_NAME,
-				"{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
+				"{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
 		verify(mockListener, never())
 				.onEvent(anyString(), anyString(), anyString());
