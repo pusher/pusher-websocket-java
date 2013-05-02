@@ -32,7 +32,7 @@ Define the `pusher-java-client` dependency:
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.1.0-beta.1</version>
       <scope>provided</scope>
     </dependency>
     
