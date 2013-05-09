@@ -64,7 +64,7 @@ public class Pusher {
 	 */
 	public Pusher(String apiKey, PusherOptions pusherOptions) {
 		
-		if (apiKey == null || apiKey.isEmpty()) {
+		if (apiKey == null || apiKey.length() == 0) {
 			throw new IllegalArgumentException("API Key cannot be null or empty");
 		}
 
