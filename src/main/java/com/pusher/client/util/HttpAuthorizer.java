@@ -115,7 +115,7 @@ public class HttpAuthorizer implements Authorizer {
 			wr.flush();
 			wr.close();
 
-			// Read response
+			// Read response			
 			InputStream is = connection.getInputStream();
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 			String line;
@@ -124,6 +124,11 @@ public class HttpAuthorizer implements Authorizer {
 				response.append(line);
 			}
 			rd.close();
+			
+			int responseHttpStatus = connection.getResponseCode();
+			if( responseHttpStatus != 200 ) {
+				throw new AuthorizationFailureException( response.toString() );
+			}
 
 			return response.toString();
 

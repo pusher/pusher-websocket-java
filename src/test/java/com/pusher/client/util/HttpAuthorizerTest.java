@@ -4,6 +4,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.pusher.client.AuthorizationFailureException;
+
 public class HttpAuthorizerTest {
 
 	@Test(expected = IllegalArgumentException.class)
@@ -21,5 +23,11 @@ public class HttpAuthorizerTest {
 	public void testHTTPSURLIsIdentfiedAsSSL() {
 		HttpAuthorizer auth = new HttpAuthorizer("https://example.com/auth");
 		Assert.assertTrue(auth.isSSL());
+	}
+	
+	 @Test(expected = AuthorizationFailureException.class)
+	public void testNon200ResponseThrowsAuthorizationFailureException() {
+		HttpAuthorizer auth = new HttpAuthorizer("https://127.0.0.1/no-way-this-is-a-valid-url");
+		auth.authorize("private-fish", "some socket id");
 	}
 }
