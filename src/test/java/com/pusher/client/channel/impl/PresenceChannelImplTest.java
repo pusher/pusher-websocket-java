@@ -28,83 +28,96 @@ import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.util.Factory;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Factory.class})
+@PrepareForTest({ Factory.class })
 public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
 	private static final String AUTH_RESPONSE = "\"auth\":\"a87fe72c6f36272aa4b1:f9db294eae7\",\"channel_data\":\"{\\\"user_id\\\":\\\"51169fc47abac\\\",\\\"user_info\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}\"";
-    private @Mock PresenceChannelEventListener mockEventListener;
-    
-    @Before
-    public void setUp() {
-    	super.setUp();
-    	channel.setEventListener(mockEventListener);
-    	when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "}");
-    }
-    
-    @Test
-    @Override
-    public void testConstructWithPresenceChannelNameThrowsException() {
-	// overridden because this test is not valid for this class - we don't want to throw an exception
-    }
-    
-    @Test
-    @Override
-    public void testReturnsCorrectSubscribeMessage() {
-	
-	String message = channel.toSubscribeMessage();
-	assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"," + AUTH_RESPONSE +"}}", message);
-    }
+	private @Mock PresenceChannelEventListener mockEventListener;
 
-    @Test
-    @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testInternalSubscriptionSucceededMessageIsTranslatedToASubscriptionSuccessfulCallback() {
-	
-	ArgumentCaptor<Set> argument =  ArgumentCaptor.forClass(Set.class);
-	channel.bind("my-event", mockEventListener);
-	channel.onMessage("pusher_internal:subscription_succeeded", "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{\\\"presence\\\":{\\\"count\\\":1,\\\"ids\\\":[\\\"5116a4519575b\\\"],\\\"hash\\\":{\\\"5116a4519575b\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}}}\",\"channel\":\"" + getChannelName() + "\"}");                                                                              
-	
-	InOrder inOrder = inOrder(mockEventListener);
-	inOrder.verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
-	inOrder.verify(mockEventListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
-	
-	assertEquals(1, argument.getValue().size());
-	assertTrue(argument.getValue().toArray()[0] instanceof User);
-	
-	User user = (User) argument.getValue().toArray()[0];
-	assertEquals("5116a4519575b", user.getId());
-	assertEquals("{name=Phil Leggetter, twitter_id=@leggetter}", user.getInfo());
-    }
-    
-    @Test(expected=IllegalArgumentException.class)
-    public void testCannotBindIfListenerIsNotAPresenceChannelEventListener() {
-	ChannelEventListener listener = mock(PrivateChannelEventListener.class);
-	channel.bind("private-myEvent", listener);
-    }
-    
-    @Test
-    @Override
-    public void testUpdateStateToSubscribedNotifiesListenerThatSubscriptionSucceeded() {
-	channel.updateState(ChannelState.SUBSCRIBE_SENT);
-	channel.updateState(ChannelState.SUBSCRIBED);
-	
-	verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
-    }
-    
-    /* end of tests */
+	@Before
+	public void setUp() {
+		super.setUp();
+		channel.setEventListener(mockEventListener);
+		when(mockAuthorizer.authorize(eq(getChannelName()), anyString()))
+				.thenReturn("{" + AUTH_RESPONSE + "}");
+	}
 
-    @Override
-    protected ChannelImpl newInstance(String channelName) {
-	return new PresenceChannelImpl(mockConnection, channelName, mockAuthorizer);
-    }
+	@Test
+	@Override
+	public void testConstructWithPresenceChannelNameThrowsException() {
+		// overridden because this test is not valid for this class - we don't want
+		// to throw an exception
+	}
 
-    @Override
-    protected String getChannelName() {
-	return "presence-myChannel";
-    }
-    
-    protected ChannelEventListener getEventListener() {
-	PresenceChannelEventListener listener = mock(PresenceChannelEventListener.class);
-	return listener;
-    }
+	@Test
+	@Override
+	public void testReturnsCorrectSubscribeMessage() {
+
+		String message = channel.toSubscribeMessage();
+		assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\""
+				+ getChannelName() + "\"," + AUTH_RESPONSE + "}}", message);
+	}
+
+	@Test
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testInternalSubscriptionSucceededMessageIsTranslatedToASubscriptionSuccessfulCallback() {
+
+		ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
+		channel.bind("my-event", mockEventListener);
+		channel
+				.onMessage(
+						"pusher_internal:subscription_succeeded",
+						"{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{\\\"presence\\\":{\\\"count\\\":1,\\\"ids\\\":[\\\"5116a4519575b\\\"],\\\"hash\\\":{\\\"5116a4519575b\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}}}\",\"channel\":\""
+								+ getChannelName() + "\"}");
+
+		InOrder inOrder = inOrder(mockEventListener);
+		inOrder.verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
+		inOrder.verify(mockEventListener).onUsersInformationReceived(
+				eq(getChannelName()), argument.capture());
+
+		assertEquals(1, argument.getValue().size());
+		assertTrue(argument.getValue().toArray()[0] instanceof User);
+
+		User user = (User) argument.getValue().toArray()[0];
+		assertEquals("5116a4519575b", user.getId());
+		assertEquals("{name=Phil Leggetter, twitter_id=@leggetter}", user.getInfo());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testCannotBindIfListenerIsNotAPresenceChannelEventListener() {
+		ChannelEventListener listener = mock(PrivateChannelEventListener.class);
+		channel.bind("private-myEvent", listener);
+	}
+
+	@Test
+	@Override
+	public void testUpdateStateToSubscribedNotifiesListenerThatSubscriptionSucceeded() {
+		channel.updateState(ChannelState.SUBSCRIBE_SENT);
+		channel.updateState(ChannelState.SUBSCRIBED);
+
+		verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
+	}
+	
+	@Test
+	public void testListenerIsInformedOfAuthenticationFailureWhenResponseIsNotJson() {
+		
+	}
+
+	/* end of tests */
+
+	@Override
+	protected ChannelImpl newInstance(String channelName) {
+		return new PresenceChannelImpl(mockConnection, channelName, mockAuthorizer);
+	}
+
+	@Override
+	protected String getChannelName() {
+		return "presence-myChannel";
+	}
+
+	protected ChannelEventListener getEventListener() {
+		PresenceChannelEventListener listener = mock(PresenceChannelEventListener.class);
+		return listener;
+	}
 }
