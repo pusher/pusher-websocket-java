@@ -5,7 +5,7 @@ package com.pusher.client;
  */
 public class PusherOptions {
 
-		private boolean encrypted = false;
+		private boolean encrypted = true;
     private Authorizer authorizer;
     
     /**

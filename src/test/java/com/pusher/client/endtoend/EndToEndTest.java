@@ -85,7 +85,7 @@ public class EndToEndTest {
 	
 		when(mockAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
 		
-		pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer);
+		pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
 		pusher = new Pusher(API_KEY, pusherOptions);
 	}
 	

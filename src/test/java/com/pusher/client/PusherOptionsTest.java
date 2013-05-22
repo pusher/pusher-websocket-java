@@ -1,6 +1,5 @@
 package com.pusher.client;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
@@ -22,8 +21,8 @@ public class PusherOptionsTest {
     }
     
     @Test
-    public void testEncryptedInitializedAsFalse() {
-    	assertFalse(pusherOptions.isEncrypted());
+    public void testEncryptedInitializedAsTrue() {
+    	assert(pusherOptions.isEncrypted());
     }
     
     @Test
