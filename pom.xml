@@ -5,7 +5,7 @@
 	<groupId>com.pusher</groupId>
 	<artifactId>pusher-java-client</artifactId>
 	<name>Pusher Java Client Library</name>
-	<version>0.1.0-beta.1-SNAPSHOT</version>
+	<version>0.1.1-beta.1-SNAPSHOT</version>
 
 	<description>
 		This is a Java client library for Pusher, targeted at core Java and Android.
