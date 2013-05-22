@@ -11,6 +11,7 @@ import java.util.Set;
 import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
+import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.User;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
@@ -129,15 +130,10 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 			idToUserMap.put(id, user);
 		}
 
-		// notify the event listeners
-		for (final SubscriptionEventListener eventListener : getAllEventListeners()) {
-			Factory.getEventQueue().execute(new Runnable() {
-				public void run() {
-					((PresenceChannelEventListener) eventListener)
-							.onUsersInformationReceived(name,
-									new HashSet<User>(idToUserMap.values()));
-				}
-			});
+		ChannelEventListener listener = this.getEventListener();
+		if( listener != null ) {
+			PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+			presenceListener.onUsersInformationReceived(getName(), getUsers());
 		}
 	}
 

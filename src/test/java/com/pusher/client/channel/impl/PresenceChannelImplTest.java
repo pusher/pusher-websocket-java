@@ -64,7 +64,6 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 	public void testInternalSubscriptionSucceededMessageIsTranslatedToASubscriptionSuccessfulCallback() {
 
 		ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
-		channel.bind("my-event", mockEventListener);
 		channel
 				.onMessage(
 						"pusher_internal:subscription_succeeded",
