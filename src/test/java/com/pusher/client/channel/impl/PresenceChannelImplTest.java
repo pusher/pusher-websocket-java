@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.gson.Gson;
 import com.pusher.client.channel.User;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
@@ -82,6 +83,71 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 		assertEquals("5116a4519575b", user.getId());
 		assertEquals("{name=Phil Leggetter, twitter_id=@leggetter}", user.getInfo());
 	}
+	
+	@Test
+	public void testInternalMemberAddedMessageIsTranslatedToUserSubscribedCallback() {
+		ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
+		
+		String userId = "5116a4519575b";
+		addUser(userId);
+
+		InOrder inOrder = inOrder(mockEventListener);
+		inOrder.verify(mockEventListener).userSubscribed(eq(getChannelName()), argument.capture());
+
+		assertTrue(argument.getValue() instanceof User);
+
+		User user = (User) argument.getValue();
+		assertEquals(userId, user.getId());
+		assertEquals("{name=Phil Leggetter, twitter_id=@leggetter}", user.getInfo());
+	}
+	
+	private void addUser(String userId) {
+		String userInfo = "{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}";
+		String userJson = "{" + 
+													"\"user_id\":\"" + userId + "\"," +
+													"\"user_info\":" + userInfo +
+											"}";
+		userJson = new Gson().toJson(userJson);
+		
+		channel
+				.onMessage(
+						"pusher_internal:member_added",
+						"{" +
+								"\"event\":\"pusher_internal:member_added\"," +
+								"\"data\":" + userJson + "," +
+								"\"channel\":\"" + getChannelName() + "\"" +
+						"}");
+	}
+	
+	@Test
+	public void testInternalMemberRemovedMessageIsTranslatedToUserSubscribedCallback() {
+		String userId = "5116a4519575b";
+		addUser(userId);
+		
+		ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
+		String userJson = "{" + 
+													"\"user_id\":\"" + userId + "\"" +
+											"}";
+		userJson = new Gson().toJson(userJson);
+		
+		channel
+				.onMessage(
+						"pusher_internal:member_removed",
+						"{" +
+								"\"event\":\"pusher_internal:member_removed\"," +
+								"\"data\":" + userJson + "," +
+								"\"channel\":\"" + getChannelName() + "\"" +
+						"}");
+
+		InOrder inOrder = inOrder(mockEventListener);
+		inOrder.verify(mockEventListener).userUnsubscribed(eq(getChannelName()), argument.capture());
+
+		assertTrue(argument.getValue() instanceof User);
+
+		User user = (User) argument.getValue();
+		assertEquals(userId, user.getId());
+		assertEquals("{name=Phil Leggetter, twitter_id=@leggetter}", user.getInfo());
+	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testCannotBindIfListenerIsNotAPresenceChannelEventListener() {
@@ -96,11 +162,6 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 		channel.updateState(ChannelState.SUBSCRIBED);
 
 		verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
-	}
-	
-	@Test
-	public void testListenerIsInformedOfAuthenticationFailureWhenResponseIsNotJson() {
-		
 	}
 
 	/* end of tests */

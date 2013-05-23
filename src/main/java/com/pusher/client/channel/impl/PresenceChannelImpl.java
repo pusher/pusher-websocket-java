@@ -147,14 +147,11 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 
 		final User user = new User(id, userData);
 		idToUserMap.put(id, user);
-
-		for (final SubscriptionEventListener eventListener : getAllEventListeners()) {
-			Factory.getEventQueue().execute(new Runnable() {
-				public void run() {
-					((PresenceChannelEventListener) eventListener).userSubscribed(name,
-							user);
-				}
-			});
+		
+		ChannelEventListener listener = this.getEventListener();
+		if( listener != null ) {
+			PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+			presenceListener.userSubscribed(getName(), user);
 		}
 	}
 
@@ -166,13 +163,10 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 
 		final User user = idToUserMap.remove(id);
 
-		for (final SubscriptionEventListener eventListener : getAllEventListeners()) {
-			Factory.getEventQueue().execute(new Runnable() {
-				public void run() {
-					((PresenceChannelEventListener) eventListener).userUnsubscribed(name,
-							user);
-				}
-			});
+		ChannelEventListener listener = this.getEventListener();
+		if( listener != null ) {
+			PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+			presenceListener.userUnsubscribed(getName(), user);
 		}
 	}
 
