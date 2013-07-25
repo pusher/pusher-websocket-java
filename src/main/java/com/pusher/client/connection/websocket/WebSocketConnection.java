@@ -98,7 +98,12 @@ public class WebSocketConnection implements InternalConnection,
 
 	@Override
 	public void bind(ConnectionState state, ConnectionEventListener eventListener) {
-		eventListeners.get(state).add(eventListener);
+		Set<ConnectionEventListener> interestedListeners = new HashSet<ConnectionEventListener>();
+		interestedListeners.addAll(eventListeners.get(state));
+		
+		if( interestedListeners.contains(eventListener) == false ) {
+			eventListeners.get(state).add(eventListener);
+		}
 	}
 
 	@Override
