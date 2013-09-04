@@ -55,8 +55,9 @@ public class EndToEndTest {
 	public void setUp() throws Exception {
 		
 		PowerMockito.mockStatic(Factory.class);
-		
-		connection = new WebSocketConnection(API_KEY, false);
+
+        pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
+		connection = new WebSocketConnection(API_KEY, pusherOptions);
 		
 		when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 		when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
@@ -70,7 +71,7 @@ public class EndToEndTest {
 			}
 		});
 		
-		when(Factory.getConnection(API_KEY, false)).thenReturn(connection);
+		when(Factory.getConnection(API_KEY, pusherOptions)).thenReturn(connection);
 		
 		when(Factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
 			public ChannelManager answer(InvocationOnMock invocation) throws Throwable {
@@ -85,7 +86,7 @@ public class EndToEndTest {
 	
 		when(mockAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
 		
-		pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
+
 		pusher = new Pusher(API_KEY, pusherOptions);
 	}
 	

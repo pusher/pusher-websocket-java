@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 
 import javax.net.ssl.SSLException;
 
+import com.pusher.client.PusherOptions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,7 +63,7 @@ public class WebSocketConnectionTest {
 				mockUnderlyingConnection);
 		when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
 
-		this.connection = new WebSocketConnection(API_KEY, false);
+		this.connection = new WebSocketConnection(API_KEY, new PusherOptions().setEncrypted(false));
 		this.connection.bind(ConnectionState.ALL, mockEventListener);
 	}
 
@@ -71,7 +72,7 @@ public class WebSocketConnectionTest {
 			throws URISyntaxException {
 		ConnectionEventListener listener = PowerMockito
 				.mock(ConnectionEventListener.class);
-		WebSocketConnection connection = new WebSocketConnection(API_KEY, false);
+		WebSocketConnection connection = new WebSocketConnection(API_KEY, new PusherOptions().setEncrypted(false));
 		boolean unbound = connection.unbind(ConnectionState.ALL, listener);
 		assertEquals(false, unbound);
 	}
@@ -80,7 +81,7 @@ public class WebSocketConnectionTest {
 	public void testUnbindingWhenBoundReturnsTrue() throws URISyntaxException {
 		ConnectionEventListener listener = PowerMockito
 				.mock(ConnectionEventListener.class);
-		WebSocketConnection connection = new WebSocketConnection(API_KEY, false);
+		WebSocketConnection connection = new WebSocketConnection(API_KEY, new PusherOptions().setEncrypted(false));
 
 		connection.bind(ConnectionState.ALL, listener);
 
@@ -104,7 +105,7 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testVerifyEncryptedURLIsCorrect() throws URISyntaxException,
 			SSLException {
-		this.connection = new WebSocketConnection(API_KEY, true);
+		this.connection = new WebSocketConnection(API_KEY, new PusherOptions().setEncrypted(true));
 
 		this.connection.connect();
 		ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
@@ -150,7 +151,7 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent()
 			throws URISyntaxException {
-		connection = new WebSocketConnection(API_KEY, false);
+		connection = new WebSocketConnection(API_KEY, new PusherOptions().setEncrypted(false));
 		connection.bind(ConnectionState.CONNECTED, mockEventListener);
 		connection.connect();
 
@@ -255,7 +256,7 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent()
 			throws URISyntaxException {
-		connection = new WebSocketConnection(API_KEY, false);
+		connection = new WebSocketConnection(API_KEY, new PusherOptions().setEncrypted(false));
 		connection.bind(ConnectionState.CONNECTED, mockEventListener);
 
 		connection.connect();

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.net.ssl.SSLException;
 
+import com.pusher.client.PusherOptions;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -22,21 +23,7 @@ import com.pusher.client.util.Factory;
 public class WebSocketConnection implements InternalConnection,
 		WebSocketListener {
 
-	// The version is populated from the pom.xml when running the application as a
-	// built library. However when running
-	// the source locally this will return null, so a default version of 0.0.0
-	// will be used instead.
-	private static final String APP_VERSION = (WebSocketConnection.class
-			.getPackage().getImplementationVersion() != null) ? WebSocketConnection.class
-			.getPackage().getImplementationVersion() : "0.0.0";
-	private static final String WS_SCHEME = "ws";
-	private static final String WSS_SCHEME = "wss";
-	private static final String HOST = "ws.pusherapp.com";
-	private static final int WS_PORT = 80;
-	private static final int WSS_PORT = 443;
-	private static final String URI_SUFFIX = "?client=java-client&protocol=5&version="
-			+ APP_VERSION;
-	private static final String INTERNAL_EVENT_PREFIX = "pusher:";
+    private static final String INTERNAL_EVENT_PREFIX = "pusher:";
 
 	private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
 	private volatile ConnectionState state = ConnectionState.DISCONNECTED;
@@ -44,11 +31,10 @@ public class WebSocketConnection implements InternalConnection,
 	private final URI webSocketUri;
 	private String socketId;
 
-	public WebSocketConnection(String apiKey, boolean encrypted)
-			throws URISyntaxException {
-		String url = String.format("%s://%s:%s/app/%s%s", (encrypted ? WSS_SCHEME
-				: WS_SCHEME), HOST, (encrypted ? WSS_PORT : WS_PORT), apiKey,
-				URI_SUFFIX);
+	public WebSocketConnection(String apiKey, PusherOptions pusherOptions) throws URISyntaxException {
+
+        String url = pusherOptions.generateURLFor(apiKey);
+
 		webSocketUri = new URI(url);
 		for (ConnectionState state : ConnectionState.values()) {
 			eventListeners.put(state, new HashSet<ConnectionEventListener>());
@@ -185,7 +171,7 @@ public class WebSocketConnection implements InternalConnection,
 	private void handleConnectionMessage(String message) {
 
 		Map jsonObject = new Gson().fromJson(message, Map.class);
-		String dataString = (String) jsonObject.get("data");
+		String dataString = (String) jsonObject.get("data").toString();
 		Map dataMap = new Gson().fromJson(dataString, Map.class);
 		socketId = (String) dataMap.get("socket_id");
 
