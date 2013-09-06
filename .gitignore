@@ -4,5 +4,10 @@
 .project
 bin
 
+# IntelliJ files and directories
+
+.idea
+pusher-java-client.iml
+
 # Output directory
 target

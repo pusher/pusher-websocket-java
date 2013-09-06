@@ -73,7 +73,7 @@ public class Pusher {
 		}
 
 		this.pusherOptions = pusherOptions;
-		this.connection = Factory.getConnection(apiKey, this.pusherOptions.isEncrypted());
+		this.connection = Factory.getConnection(apiKey, this.pusherOptions);
 		this.channelManager = Factory.getChannelManager();
 		this.channelManager.setConnection(this.connection);
 	}

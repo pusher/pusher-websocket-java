@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLException;
 
+import com.pusher.client.PusherOptions;
 import org.java_websocket.client.WebSocketClient;
 
 import com.pusher.client.Authorizer;
@@ -47,10 +48,10 @@ public class Factory {
     private static ChannelManager channelManager;
     private static ExecutorService eventQueue;
 
-    public static InternalConnection getConnection(String apiKey, boolean encrypted) {
+    public static InternalConnection getConnection(String apiKey, PusherOptions options) {
 	if (connection == null) {
 	    try {
-		connection = new WebSocketConnection(apiKey, encrypted);
+		connection = new WebSocketConnection(apiKey, options);
 	    } catch (URISyntaxException e) {
 		throw new IllegalArgumentException(
 			"Failed to initialise connection", e);
