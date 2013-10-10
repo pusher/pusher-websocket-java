@@ -248,6 +248,15 @@ public class Pusher {
 
 		channelManager.unsubscribeFrom(channelName);
 	}
+	
+	/**
+	 * Returns whether the client is connected to a channel or not.
+	 * @param channelName the name of the channel to test for
+	 * @returns true if connected, false if not.
+	 */
+	public boolean isConnectedToChannel(String channelName) {
+		return channelManager.isConnectedToChannel(channelName);
+	}
 
 	/* implementation detail */
 

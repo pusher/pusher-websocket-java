@@ -42,6 +42,13 @@ public class ChannelManager implements ConnectionEventListener {
 		sendOrQueueSubscribeMessage(channel);
 	}
 	
+	/**
+	 * returns whether we are connected to specified channel or not
+	 */
+	public boolean isConnectedToChannel(String channelName) {
+		return channelNametoChannelMap.hasKey(channelName);
+	}
+	
 	public void unsubscribeFrom(String channelName) {
 
 		if (channelName == null) {
