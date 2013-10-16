@@ -17,7 +17,7 @@ This README covers the following topics:
 * Binding and handling events
   * Unbinding events
 * Triggering client events
-* Accessing the connection socket ID  
+* Accessing the connection socket ID
 * JavaDocs
 * Library development environment
 
@@ -32,10 +32,10 @@ Define the `pusher-java-client` dependency:
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>0.1.0-beta.1</version>
+      <version>0.1.2-beta</version>
       <scope>provided</scope>
     </dependency>
-    
+
 Define the repository location:
 
     <repository>
@@ -79,7 +79,7 @@ pusher.connect(new ConnectionEventListener() {
   public void onError(String message, String code, Exception e) {
     // handle connection error
   }
-  
+
 }, ConnectionState.ALL);
 
 // Subscribe to a channel
@@ -92,7 +92,7 @@ channel.bind( "my-event", new SubscriptionEventListener() {
   public void onEvent(String channel, String event, String data) {
     // do something with the event data
   }
-  
+
 });
 ```
 
@@ -171,7 +171,7 @@ Sometimes you may want to be informed when the subscription succeeds. You can do
 
 ```java
 Channel channel = pusher.subscribe( "my-channel", new ChannelEventListener() {
-  
+
   @Override
   public void onSubscriptionSucceeded(String channelName) {
     System.out.println( "Subscribed!" );
@@ -208,7 +208,7 @@ PrivateChannel channel = pusher.subscribePrivate( "private-channel",
         String.format("Authentication failure due to [%s], exception was [%s]", message, e)
       );
     }
-    
+
     // Other ChannelEventListener methods
   } );
 ```
@@ -232,14 +232,14 @@ PresenceChannel channel = pusher.subscribePresence( "presence-channel",
     @Override
     public void onUserInformationReceived(String channelName, Set<User> users) {
 	  for(User user : users) {
-	    userSubscribed(channelName, user);	    
+	    userSubscribed(channelName, user);
 	  }
     }
 
     @Override
     public void userSubscribed(String channelName, User user) {
 	  System.out.println(
-        String.format( "A new user has joined channel [%s]: %s, %s", channelName, 
+        String.format( "A new user has joined channel [%s]: %s, %s", channelName,
           user.getId(), user.getInfo() )
       );
 
@@ -255,8 +255,8 @@ PresenceChannel channel = pusher.subscribePresence( "presence-channel",
           user.getId(), user.getInfo() )
       );
     }
-    
-    // Other ChannelEventListener methods    
+
+    // Other ChannelEventListener methods
 
   } );
 ```
@@ -280,7 +280,7 @@ The following example using the [Gson library](https://sites.google.com/site/gso
 ```java
 String jsonInfo = user.getInfo();
 Gson gson = new Gson();
-UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);  
+UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);
 ```
 
 For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](http://pusher.com/docs/authenticating_users#implementing_presence_endpoints) documentation.
@@ -298,7 +298,7 @@ The `ChannelEventListener` is an interface that is informed of both protocol rel
 
 ```java
 Channel channel = pusher.subscribe( "my-channel", new ChannelEventListener() {
-  
+
   @Override
   public void onSubscriptionSucceeded(String channelName) {
     System.out.println( "Subscribed!" );
@@ -332,18 +332,18 @@ The event data will be passed as the third parameter to the `onEvent` method. Fr
 
 ```java
 public class Example implements ChannelEventListener {
-  
+
   public Example() {
     Pusher pusher = new Pusher( YOUR_APP_KEY );
     pusher.connect( this );
-    
+
     pusher.subscribe( "my-channel", this );
   }
 
   @Override
   public void onEvent(String channelName, String eventName, String data){
     Gson gson = new Gson();
-    EventExample exampleEvent = gson.fromJson(data, EventExample.class); 
+    EventExample exampleEvent = gson.fromJson(data, EventExample.class);
   }
 
 }
@@ -369,15 +369,15 @@ channel.unbind( "my_event", listener );
 
 ```java
 public class Example implements ChannelEventListener {
-  
+
   private final Pusher pusher;
   private final Channel channel;
 
   public Example() {
     pusher = new Pusher( YOUR_APP_KEY );
     pusher.connect( this );
-    
-    channel = pusher.subscribe( "my-channel", this, "my_event" );    
+
+    channel = pusher.subscribe( "my-channel", this, "my_event" );
   }
 
   public void listenToOtherEvent() {
@@ -463,16 +463,16 @@ From the top level directory execute `mvn clean test` to compile and run the uni
 
 ### Run the Example Application
 
-After running `mvn clean install` change to the `target` directory and run `java -jar pusher-java-client-<version>-jar-with-dependencies.jar`. This will run the example application. 
+After running `mvn clean install` change to the `target` directory and run `java -jar pusher-java-client-<version>-jar-with-dependencies.jar`. This will run the example application.
 
 By default the example will connect to a sample application and subscribe to the channel `my-channel`, listening to events on `my-event`. If you want to change these defaults, they can be specified on the command line:
 
-`java -jar pusher-java-client-<version>-jar-with-dependencies.jar [appKey] [channelName] [eventName]` 
+`java -jar pusher-java-client-<version>-jar-with-dependencies.jar [appKey] [channelName] [eventName]`
 
 ### Deploy
 
     mvn site-deploy
-    
+
 This command does two things:
 
 1. The library is deployed to a Maven repository in a github branch. For more information see: <http://stackoverflow.com/a/14013645/39904>
