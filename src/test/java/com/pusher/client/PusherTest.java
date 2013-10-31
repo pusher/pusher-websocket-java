@@ -11,9 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannelEventListener;
@@ -28,8 +26,7 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Factory.class})
+@RunWith(MockitoJUnitRunner.class)
 public class PusherTest {
 
     private static final String API_KEY = "123456";
@@ -49,22 +46,21 @@ public class PusherTest {
     private @Mock ChannelEventListener mockChannelEventListener;
     private @Mock PrivateChannelEventListener mockPrivateChannelEventListener;
     private @Mock PresenceChannelEventListener mockPresenceChannelEventListener;
+    private @Mock Factory factory;
     
     @Before
     public void setUp()
     {
-	PowerMockito.mockStatic(Factory.class);
-
-	when(Factory.getConnection(API_KEY, false)).thenReturn(mockConnection);
-	when(Factory.getChannelManager()).thenReturn(mockChannelManager);
-	when(Factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
-	when(Factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, mockAuthorizer)).thenReturn(mockPrivateChannel);
-	when(Factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, mockAuthorizer)).thenReturn(mockPresenceChannel);
-	when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
+	when(factory.getConnection(API_KEY, false)).thenReturn(mockConnection);
+	when(factory.getChannelManager()).thenReturn(mockChannelManager);
+	when(factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
+	when(factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, mockAuthorizer)).thenReturn(mockPrivateChannel);
+	when(factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, mockAuthorizer)).thenReturn(mockPresenceChannel);
+	when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 	
 	when(mockPusherOptions.getAuthorizer()).thenReturn(mockAuthorizer);
 	
-	this.pusher = new Pusher(API_KEY, mockPusherOptions);
+	this.pusher = new Pusher(API_KEY, mockPusherOptions, factory);
     }
     
     @Test(expected=IllegalArgumentException.class)

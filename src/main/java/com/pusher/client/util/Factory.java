@@ -1,9 +1,7 @@
 package com.pusher.client.util;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,9 +26,9 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  * call the factory methods in this class when they want to create instances of
  * another class.
  * 
- * When unit testing we can use PowerMock to mock out the methods in this class
- * to return mocks instead of the actual implementations. This allows us to test
- * classes in isolation.
+ * An instance of Factory is provided on construction to each class which may
+ * require it, the initial factory is instantiated in the Pusher constructor,
+ * the only constructor which a library consumer should need to call directly.
  * 
  * Conventions:
  * 
@@ -43,14 +41,14 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  */
 public class Factory {
 
-    private static InternalConnection connection;
-    private static ChannelManager channelManager;
-    private static ExecutorService eventQueue;
+    private InternalConnection connection;
+    private ChannelManager channelManager;
+    private ExecutorService eventQueue;
 
-    public static InternalConnection getConnection(String apiKey, boolean encrypted) {
+    public InternalConnection getConnection(String apiKey, boolean encrypted) {
 	if (connection == null) {
 	    try {
-		connection = new WebSocketConnection(apiKey, encrypted);
+		connection = new WebSocketConnection(apiKey, encrypted, this);
 	    } catch (URISyntaxException e) {
 		throw new IllegalArgumentException(
 			"Failed to initialise connection", e);
@@ -59,38 +57,34 @@ public class Factory {
 	return connection;
     }
 
-    public static WebSocketClient newWebSocketClientWrapper(URI uri,
+    public WebSocketClient newWebSocketClientWrapper(URI uri,
 	    WebSocketListener proxy) throws SSLException {
 	return new WebSocketClientWrapper(uri, proxy);
     }
 
-    public static ExecutorService getEventQueue() {
+    public ExecutorService getEventQueue() {
 	if (eventQueue == null) {
 	    eventQueue = Executors.newSingleThreadExecutor();
 	}
 	return eventQueue;
     }
 
-    public static ChannelImpl newPublicChannel(String channelName) {
-	return new ChannelImpl(channelName);
+    public ChannelImpl newPublicChannel(String channelName) {
+	return new ChannelImpl(channelName, this);
     }
     
-    public static PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
-	return new PrivateChannelImpl(connection, channelName, authorizer);
+    public PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
+	return new PrivateChannelImpl(connection, channelName, authorizer, this);
     }
     
-    public static PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
-	return new PresenceChannelImpl(connection, channelName, authorizer);
+    public PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
+	return new PresenceChannelImpl(connection, channelName, authorizer, this);
     }
 
-    public static ChannelManager getChannelManager() {
+    public ChannelManager getChannelManager() {
 	if (channelManager == null) {
-	    channelManager = new ChannelManager();
+	    channelManager = new ChannelManager(this);
 	}
 	return channelManager;
-    }
-
-    public static URL newURL(String endPoint) throws MalformedURLException {
-	return new URL(endPoint);
     }
 }

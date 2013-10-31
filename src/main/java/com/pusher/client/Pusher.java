@@ -30,6 +30,7 @@ public class Pusher {
 	private final PusherOptions pusherOptions;
 	private final InternalConnection connection;
 	private final ChannelManager channelManager;
+	private final Factory factory;
 
 	/**
 	 * <p>
@@ -64,6 +65,15 @@ public class Pusher {
 	 */
 	public Pusher(String apiKey, PusherOptions pusherOptions) {
 		
+		this(apiKey, pusherOptions, new Factory());
+	}
+
+	/**
+	 * Creates a new Pusher instance using the provided Factory, 
+	 * package level access for unit tests only.
+	 */
+	Pusher(String apiKey, PusherOptions pusherOptions, Factory factory) {
+
 		if (apiKey == null || apiKey.length() == 0) {
 			throw new IllegalArgumentException("API Key cannot be null or empty");
 		}
@@ -73,8 +83,9 @@ public class Pusher {
 		}
 
 		this.pusherOptions = pusherOptions;
-		this.connection = Factory.getConnection(apiKey, this.pusherOptions.isEncrypted());
-		this.channelManager = Factory.getChannelManager();
+		this.factory = factory;
+		this.connection = factory.getConnection(apiKey, this.pusherOptions.isEncrypted());
+		this.channelManager = factory.getChannelManager();
 		this.channelManager.setConnection(this.connection);
 	}
 
@@ -168,7 +179,7 @@ public class Pusher {
 	 */
 	public Channel subscribe(String channelName, ChannelEventListener listener, String... eventNames) {
 
-		InternalChannel channel = Factory.newPublicChannel(channelName);
+		InternalChannel channel = factory.newPublicChannel(channelName);
 		channelManager.subscribeTo(channel, listener, eventNames);
 
 		return channel;
@@ -198,7 +209,7 @@ public class Pusher {
 
 		throwExceptionIfNoAuthorizerHasBeenSet();
 
-		PrivateChannelImpl channel = Factory.newPrivateChannel(connection, channelName, pusherOptions.getAuthorizer());
+		PrivateChannelImpl channel = factory.newPrivateChannel(connection, channelName, pusherOptions.getAuthorizer());
 		channelManager.subscribeTo(channel, listener, eventNames);
 
 		return channel;
@@ -228,7 +239,7 @@ public class Pusher {
 
 		throwExceptionIfNoAuthorizerHasBeenSet();
 
-		PresenceChannelImpl channel = Factory.newPresenceChannel(connection, channelName, pusherOptions.getAuthorizer());
+		PresenceChannelImpl channel = factory.newPresenceChannel(connection, channelName, pusherOptions.getAuthorizer());
 		channelManager.subscribeTo(channel, listener, eventNames);
 
 		return channel;

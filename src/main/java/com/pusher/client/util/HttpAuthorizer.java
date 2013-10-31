@@ -37,7 +37,7 @@ public class HttpAuthorizer implements Authorizer {
 	 */
 	public HttpAuthorizer(String endPoint) {
 		try {
-			this.endPoint = Factory.newURL(endPoint);
+			this.endPoint = new URL(endPoint);
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException(
 					"Could not parse authentication end point into a valid URL", e);

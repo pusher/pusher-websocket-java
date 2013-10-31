@@ -17,9 +17,11 @@ import com.pusher.client.util.Factory;
 public class ChannelManager implements ConnectionEventListener {
 
 	private final Map<String, InternalChannel> channelNameToChannelMap = new HashMap<String, InternalChannel>();
+	private final Factory factory;
 	private InternalConnection connection;
 
-	public ChannelManager() {
+	public ChannelManager(Factory factory) {
+		this.factory = factory;
 	}
 	
 	public void setConnection(InternalConnection connection) {
@@ -95,7 +97,7 @@ public class ChannelManager implements ConnectionEventListener {
 	
 	private void sendOrQueueSubscribeMessage(final InternalChannel channel) {
 
-		Factory.getEventQueue().execute(new Runnable() {
+		factory.getEventQueue().execute(new Runnable() {
 
 			@Override
 			public void run() {
@@ -119,7 +121,7 @@ public class ChannelManager implements ConnectionEventListener {
 		channel.updateState(ChannelState.FAILED);
 		
 		if(channel.getEventListener() != null) {
-			Factory.getEventQueue().execute(new Runnable() {
+			factory.getEventQueue().execute(new Runnable() {
 				
 				public void run() {
 					// Note: this cast is safe because an AuthorizationFailureException will never be thrown

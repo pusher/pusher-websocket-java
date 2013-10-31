@@ -7,6 +7,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,20 +23,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
-import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Factory.class })
+@RunWith(MockitoJUnitRunner.class)
 public class WebSocketConnectionTest {
 
 	private static final String API_KEY = "123456";
@@ -50,37 +48,35 @@ public class WebSocketConnectionTest {
 	WebSocketClientWrapper mockUnderlyingConnection;
 	private @Mock
 	ConnectionEventListener mockEventListener;
+	private @Mock
+	Factory factory;
 
 	@Before
 	public void setUp() throws URISyntaxException, SSLException {
-
-		PowerMockito.mockStatic(Factory.class);
-		when(Factory.getChannelManager()).thenReturn(mockChannelManager);
+		when(factory.getChannelManager()).thenReturn(mockChannelManager);
 		when(
-				Factory.newWebSocketClientWrapper(any(URI.class),
+				factory.newWebSocketClientWrapper(any(URI.class),
 						any(WebSocketConnection.class))).thenReturn(
 				mockUnderlyingConnection);
-		when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
+		when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 
-		this.connection = new WebSocketConnection(API_KEY, false);
+		this.connection = new WebSocketConnection(API_KEY, false, factory);
 		this.connection.bind(ConnectionState.ALL, mockEventListener);
 	}
 
 	@Test
 	public void testUnbindingWhenNotAlreadyBoundReturnsFalse()
 			throws URISyntaxException {
-		ConnectionEventListener listener = PowerMockito
-				.mock(ConnectionEventListener.class);
-		WebSocketConnection connection = new WebSocketConnection(API_KEY, false);
+		ConnectionEventListener listener = mock(ConnectionEventListener.class);
+		WebSocketConnection connection = new WebSocketConnection(API_KEY, false, factory);
 		boolean unbound = connection.unbind(ConnectionState.ALL, listener);
 		assertEquals(false, unbound);
 	}
 
 	@Test
 	public void testUnbindingWhenBoundReturnsTrue() throws URISyntaxException {
-		ConnectionEventListener listener = PowerMockito
-				.mock(ConnectionEventListener.class);
-		WebSocketConnection connection = new WebSocketConnection(API_KEY, false);
+		ConnectionEventListener listener = mock(ConnectionEventListener.class);
+		WebSocketConnection connection = new WebSocketConnection(API_KEY, false, factory);
 
 		connection.bind(ConnectionState.ALL, listener);
 
@@ -93,8 +89,8 @@ public class WebSocketConnectionTest {
 		this.connection.connect();
 		ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
 
-		PowerMockito.verifyStatic();
-		Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
+		Mockito.verify(factory);
+		factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
 
 		assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY
 				+ "?client=java-client&protocol=5&version=0.0.0", argument.getValue()
@@ -104,13 +100,13 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testVerifyEncryptedURLIsCorrect() throws URISyntaxException,
 			SSLException {
-		this.connection = new WebSocketConnection(API_KEY, true);
+		this.connection = new WebSocketConnection(API_KEY, true, factory);
 
 		this.connection.connect();
 		ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
 
-		PowerMockito.verifyStatic();
-		Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
+		Mockito.verify(factory);
+		factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
 
 		assertEquals("wss://ws.pusherapp.com:443/app/" + API_KEY
 				+ "?client=java-client&protocol=5&version=0.0.0", argument.getValue()
@@ -150,7 +146,7 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent()
 			throws URISyntaxException {
-		connection = new WebSocketConnection(API_KEY, false);
+		connection = new WebSocketConnection(API_KEY, false, factory);
 		connection.bind(ConnectionState.CONNECTED, mockEventListener);
 		connection.connect();
 
@@ -255,7 +251,7 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent()
 			throws URISyntaxException {
-		connection = new WebSocketConnection(API_KEY, false);
+		connection = new WebSocketConnection(API_KEY, false, factory);
 		connection.bind(ConnectionState.CONNECTED, mockEventListener);
 
 		connection.connect();

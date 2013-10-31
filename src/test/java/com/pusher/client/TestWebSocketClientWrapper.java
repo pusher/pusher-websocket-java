@@ -1,4 +1,4 @@
-package com.pusher.client.endtoend;
+package com.pusher.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

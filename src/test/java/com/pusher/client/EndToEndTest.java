@@ -1,9 +1,12 @@
-package com.pusher.client.endtoend;
+package com.pusher.client;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.net.URI;
 
@@ -14,14 +17,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.pusher.client.Authorizer;
-import com.pusher.client.Pusher;
-import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -33,19 +31,19 @@ import com.pusher.client.connection.websocket.WebSocketListener;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Factory.class})
+@RunWith(MockitoJUnitRunner.class)
 public class EndToEndTest {
 
 	private static final String API_KEY = "123456";
 	private static final String AUTH_KEY = "123456";
 	private static final String PUBLIC_CHANNEL_NAME = "my-channel";
-  private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
+    private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
 	private static final String OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE = "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
 	
 	private @Mock Authorizer mockAuthorizer;
 	private @Mock ConnectionEventListener mockConnectionEventListener;
 	private @Mock ServerHandshake mockServerHandshake;
+	private @Mock Factory factory;
 	private Pusher pusher;
 	private PusherOptions pusherOptions;
 	private InternalConnection connection;
@@ -53,13 +51,10 @@ public class EndToEndTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		connection = new WebSocketConnection(API_KEY, false, factory);
 		
-		PowerMockito.mockStatic(Factory.class);
-		
-		connection = new WebSocketConnection(API_KEY, false);
-		
-		when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
-		when(Factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
+		when(factory.getEventQueue()).thenReturn(new InstantExecutor());
+		when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
 
 			@Override
 			public WebSocketClientWrapper answer(InvocationOnMock invocation) throws Throwable {
@@ -70,23 +65,22 @@ public class EndToEndTest {
 			}
 		});
 		
-		when(Factory.getConnection(API_KEY, false)).thenReturn(connection);
+		when(factory.getConnection(API_KEY, false)).thenReturn(connection);
 		
-		when(Factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
+		when(factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
 			public ChannelManager answer(InvocationOnMock invocation) throws Throwable {
-				return new ChannelManager();
+				return new ChannelManager(factory);
 			}
 		});
 		
-		when(Factory.newPresenceChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
-		when(Factory.newPrivateChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
-		when(Factory.newPublicChannel(anyString())).thenCallRealMethod();
-		when(Factory.newURL(anyString())).thenCallRealMethod();
+		when(factory.newPresenceChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
+		when(factory.newPrivateChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
+		when(factory.newPublicChannel(anyString())).thenCallRealMethod();
 	
 		when(mockAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
 		
 		pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
-		pusher = new Pusher(API_KEY, pusherOptions);
+		pusher = new Pusher(API_KEY, pusherOptions, factory);
 	}
 	
 	@After

@@ -2,6 +2,7 @@ package com.pusher.client.channel.impl;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,9 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.channel.ChannelEventListener;
@@ -25,8 +24,7 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Factory.class })
+@RunWith(MockitoJUnitRunner.class)
 public class ChannelManagerTest {
 
 	private static final String CHANNEL_NAME = "my-channel";
@@ -47,13 +45,12 @@ public class ChannelManagerTest {
 	PrivateChannelImpl mockPrivateChannel;
 	private @Mock
 	PrivateChannelEventListener mockPrivateChannelEventListener;
+	private @Mock Factory factory;
 
 	@Before
 	public void setUp() throws AuthorizationFailureException {
 
-		PowerMockito.mockStatic(Factory.class);
-
-		when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
+		when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 		when(mockInternalChannel.getName()).thenReturn(CHANNEL_NAME);
 		when(mockInternalChannel.toSubscribeMessage()).thenReturn(
 				OUTGOING_SUBSCRIBE_MESSAGE);
@@ -68,14 +65,14 @@ public class ChannelManagerTest {
 		when(mockPrivateChannel.getEventListener()).thenReturn(
 				mockPrivateChannelEventListener);
 
-		this.channelManager = new ChannelManager();
+		this.channelManager = new ChannelManager(factory);
 		this.channelManager.setConnection(mockConnection);
 	}
 
 	@Test
 	public void testSetConnectionBindsAsListener() {
-		ChannelManager manager = new ChannelManager();
-		InternalConnection connection = PowerMockito.mock(InternalConnection.class);
+		ChannelManager manager = new ChannelManager(factory);
+		InternalConnection connection = mock(InternalConnection.class);
 
 		manager.setConnection(connection);
 		verify(connection).bind(ConnectionState.CONNECTED, manager);
@@ -83,20 +80,19 @@ public class ChannelManagerTest {
 
 	@Test
 	public void testSetConnectionUnbindsFromPreviousConnection() {
-		ChannelManager manager = new ChannelManager();
-		InternalConnection connection = PowerMockito.mock(InternalConnection.class);
+		ChannelManager manager = new ChannelManager(factory);
+		InternalConnection connection = mock(InternalConnection.class);
 
 		manager.setConnection(connection);
 
-		InternalConnection secondConnection = PowerMockito
-				.mock(InternalConnection.class);
+		InternalConnection secondConnection = mock(InternalConnection.class);
 		manager.setConnection(secondConnection);
 		verify(connection).unbind(ConnectionState.CONNECTED, manager);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetConnectionWithNullConnectionThrowsException() {
-		ChannelManager manager = new ChannelManager();
+		ChannelManager manager = new ChannelManager(factory);
 		manager.setConnection(null);
 	}
 

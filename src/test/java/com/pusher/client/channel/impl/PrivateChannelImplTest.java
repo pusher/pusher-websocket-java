@@ -12,8 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
@@ -22,10 +21,8 @@ import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
-import com.pusher.client.util.Factory;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Factory.class})
+@RunWith(MockitoJUnitRunner.class)
 public class PrivateChannelImplTest extends ChannelImplTest {
 
 	private static final String AUTH_TOKEN = "\"auth\":\"a87fe72c6f36272aa4b1:41dce43734b18bb\"";
@@ -178,7 +175,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
 
     @Override
     protected ChannelImpl newInstance(String channelName) {
-	return new PrivateChannelImpl(mockConnection, channelName, mockAuthorizer);
+	return new PrivateChannelImpl(mockConnection, channelName, mockAuthorizer, factory);
     }
 
     @Override

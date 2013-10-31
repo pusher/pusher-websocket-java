@@ -10,27 +10,25 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Factory.class })
+@RunWith(MockitoJUnitRunner.class)
 public class ChannelImplTest {
 
 	private static final String EVENT_NAME = "my-event";
 	protected ChannelImpl channel;
-	private ChannelEventListener mockListener;
+	protected @Mock Factory factory; 
+	private @Mock ChannelEventListener mockListener;
 
 	@Before
 	public void setUp() {
-		PowerMockito.mockStatic(Factory.class);
-		when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
+		when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 
 		this.mockListener = getEventListener();
 		this.channel = newInstance(getChannelName());
@@ -200,7 +198,7 @@ public class ChannelImplTest {
 	 * run against PrivateChannelImpl and PresenceChannelImpl.
 	 */
 	protected ChannelImpl newInstance(String channelName) {
-		return new ChannelImpl(channelName);
+		return new ChannelImpl(channelName, factory);
 	}
 
 	/**

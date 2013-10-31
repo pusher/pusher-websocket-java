@@ -1,7 +1,6 @@
 package com.pusher.client.channel.impl;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,10 +11,10 @@ import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelEventListener;
-import com.pusher.client.channel.User;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
+import com.pusher.client.channel.User;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
@@ -29,8 +28,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 	private String myUserID;
 
 	public PresenceChannelImpl(InternalConnection connection, String channelName,
-			Authorizer authorizer) {
-		super(connection, channelName, authorizer);
+			Authorizer authorizer, Factory factory) {
+		super(connection, channelName, authorizer, factory);
 	}
 
 	/* PresenceChannel implementation */

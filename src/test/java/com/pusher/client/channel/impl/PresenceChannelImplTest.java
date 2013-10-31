@@ -17,19 +17,16 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.gson.Gson;
-import com.pusher.client.channel.User;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannelEventListener;
-import com.pusher.client.util.Factory;
+import com.pusher.client.channel.User;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Factory.class })
+@RunWith(MockitoJUnitRunner.class)
 public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
 	private static final String AUTH_RESPONSE = "\"auth\":\"a87fe72c6f36272aa4b1:f9db294eae7\",\"channel_data\":\"{\\\"user_id\\\":\\\"51169fc47abac\\\",\\\"user_info\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}\"";
@@ -168,7 +165,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
 	@Override
 	protected ChannelImpl newInstance(String channelName) {
-		return new PresenceChannelImpl(mockConnection, channelName, mockAuthorizer);
+		return new PresenceChannelImpl(mockConnection, channelName, mockAuthorizer, factory);
 	}
 
 	@Override

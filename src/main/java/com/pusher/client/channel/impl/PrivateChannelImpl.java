@@ -13,6 +13,7 @@ import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.util.Factory;
 
 public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 
@@ -21,8 +22,8 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 	private Authorizer authorizer;
 
 	public PrivateChannelImpl(InternalConnection connection, String channelName,
-			Authorizer authorizer) {
-		super(channelName);
+			Authorizer authorizer, Factory factory) {
+		super(channelName, factory);
 		this.connection = connection;
 		this.authorizer = authorizer;
 	}

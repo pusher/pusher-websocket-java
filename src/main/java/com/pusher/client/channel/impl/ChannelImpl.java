@@ -20,8 +20,9 @@ public class ChannelImpl implements InternalChannel {
 	protected final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
 	protected ChannelState state = ChannelState.INITIAL;
 	private ChannelEventListener eventListener;
+	private final Factory factory;
 
-	public ChannelImpl(String channelName) {
+	public ChannelImpl(String channelName, Factory factory) {
 
 		if (channelName == null) {
 			throw new IllegalArgumentException(
@@ -38,6 +39,7 @@ public class ChannelImpl implements InternalChannel {
 		}
 
 		this.name = channelName;
+		this.factory = factory;
 	}
 
 	/* Channel implementation */
@@ -92,7 +94,7 @@ public class ChannelImpl implements InternalChannel {
 
 					final String data = extractDataFrom(message);
 
-					Factory.getEventQueue().execute(new Runnable() {
+					factory.getEventQueue().execute(new Runnable() {
 						public void run() {
 							listener.onEvent(name, event, data);
 						}
@@ -135,7 +137,7 @@ public class ChannelImpl implements InternalChannel {
 		this.state = state;
 
 		if (state == ChannelState.SUBSCRIBED && eventListener != null) {
-			Factory.getEventQueue().execute(new Runnable() {
+			factory.getEventQueue().execute(new Runnable() {
 				public void run() {
 					eventListener.onSubscriptionSucceeded(ChannelImpl.this.getName());
 				}

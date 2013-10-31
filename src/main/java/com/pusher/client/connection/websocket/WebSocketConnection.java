@@ -38,13 +38,14 @@ public class WebSocketConnection implements InternalConnection,
 			+ APP_VERSION;
 	private static final String INTERNAL_EVENT_PREFIX = "pusher:";
 
+	private final Factory factory;
 	private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
 	private volatile ConnectionState state = ConnectionState.DISCONNECTED;
 	private WebSocketClient underlyingConnection;
 	private final URI webSocketUri;
 	private String socketId;
 
-	public WebSocketConnection(String apiKey, boolean encrypted)
+	public WebSocketConnection(String apiKey, boolean encrypted, Factory factory)
 			throws URISyntaxException {
 		String url = String.format("%s://%s:%s/app/%s%s", (encrypted ? WSS_SCHEME
 				: WS_SCHEME), HOST, (encrypted ? WSS_PORT : WS_PORT), apiKey,
@@ -53,6 +54,8 @@ public class WebSocketConnection implements InternalConnection,
 		for (ConnectionState state : ConnectionState.values()) {
 			eventListeners.put(state, new HashSet<ConnectionEventListener>());
 		}
+
+		this.factory = factory;
 	}
 
 	/* Connection implementation */
@@ -60,12 +63,12 @@ public class WebSocketConnection implements InternalConnection,
 	@Override
 	public void connect() {
 
-		Factory.getEventQueue().execute(new Runnable() {
+		factory.getEventQueue().execute(new Runnable() {
 
 			public void run() {
 				if (state == ConnectionState.DISCONNECTED) {
 					try {
-						WebSocketConnection.this.underlyingConnection = Factory
+						WebSocketConnection.this.underlyingConnection = factory
 								.newWebSocketClientWrapper(
 										WebSocketConnection.this.webSocketUri,
 										WebSocketConnection.this);
@@ -85,7 +88,7 @@ public class WebSocketConnection implements InternalConnection,
 	@Override
 	public void disconnect() {
 
-		Factory.getEventQueue().execute(new Runnable() {
+		factory.getEventQueue().execute(new Runnable() {
 			public void run() {
 				if (state == ConnectionState.CONNECTED) {
 					WebSocketConnection.this.updateState(ConnectionState.DISCONNECTING);
@@ -117,7 +120,7 @@ public class WebSocketConnection implements InternalConnection,
 	@Override
 	public void sendMessage(final String message) {
 
-		Factory.getEventQueue().execute(new Runnable() {
+		factory.getEventQueue().execute(new Runnable() {
 			public void run() {
 
 				try {
@@ -155,7 +158,7 @@ public class WebSocketConnection implements InternalConnection,
 
 		for (final ConnectionEventListener listener : interestedListeners) {
 
-			Factory.getEventQueue().execute(new Runnable() {
+			factory.getEventQueue().execute(new Runnable() {
 				public void run() {
 					listener.onConnectionStateChange(change);
 				}
@@ -168,7 +171,7 @@ public class WebSocketConnection implements InternalConnection,
 		if (event.startsWith(INTERNAL_EVENT_PREFIX)) {
 			handleInternalEvent(event, wholeMessage);
 		} else {
-			Factory.getChannelManager().onMessage(event, wholeMessage);
+			factory.getChannelManager().onMessage(event, wholeMessage);
 		}
 	}
 
@@ -226,7 +229,7 @@ public class WebSocketConnection implements InternalConnection,
 		}
 
 		for (final ConnectionEventListener listener : allListeners) {
-			Factory.getEventQueue().execute(new Runnable() {
+			factory.getEventQueue().execute(new Runnable() {
 				public void run() {
 					listener.onError(message, code, e);
 				}
@@ -245,7 +248,7 @@ public class WebSocketConnection implements InternalConnection,
 	@SuppressWarnings("unchecked")
 	public void onMessage(final String message) {
 
-		Factory.getEventQueue().execute(new Runnable() {
+		factory.getEventQueue().execute(new Runnable() {
 			public void run() {
 				Map<String, String> map = new Gson().fromJson(message, Map.class);
 				String event = map.get("event");
@@ -257,7 +260,7 @@ public class WebSocketConnection implements InternalConnection,
 	@Override
 	public void onClose(int code, String reason, boolean remote) {
 
-		Factory.getEventQueue().execute(new Runnable() {
+		factory.getEventQueue().execute(new Runnable() {
 			public void run() {
 				updateState(ConnectionState.DISCONNECTED);
 			}
@@ -267,7 +270,7 @@ public class WebSocketConnection implements InternalConnection,
 	@Override
 	public void onError(final Exception ex) {
 
-		Factory.getEventQueue().execute(new Runnable() {
+		factory.getEventQueue().execute(new Runnable() {
 			public void run() {
 				// Do not change connection state as Java_WebSocket will also call onClose.
 				// See: https://github.com/leggetter/pusher-java-client/issues/8#issuecomment-16128590
