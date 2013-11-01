@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -21,9 +20,7 @@ import javax.net.ssl.SSLException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pusher.client.channel.impl.ChannelManager;
@@ -36,7 +33,7 @@ import com.pusher.client.util.InstantExecutor;
 @RunWith(MockitoJUnitRunner.class)
 public class WebSocketConnectionTest {
 
-	private static final String API_KEY = "123456";
+	private static final String URL = "ws://ws.example.com/";
 	private static final String EVENT_NAME = "my-event";
 	private static final String INCOMING_MESSAGE = "{\"event\":\"" + EVENT_NAME
 			+ "\",\"channel\":\"my-channel\",\"data\":{\"fish\":\"chips\"}}";
@@ -54,13 +51,11 @@ public class WebSocketConnectionTest {
 	@Before
 	public void setUp() throws URISyntaxException, SSLException {
 		when(factory.getChannelManager()).thenReturn(mockChannelManager);
-		when(
-				factory.newWebSocketClientWrapper(any(URI.class),
-						any(WebSocketConnection.class))).thenReturn(
-				mockUnderlyingConnection);
+		when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class)))
+		        .thenReturn(mockUnderlyingConnection);
 		when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 
-		this.connection = new WebSocketConnection(API_KEY, false, factory);
+		this.connection = new WebSocketConnection(URL, factory);
 		this.connection.bind(ConnectionState.ALL, mockEventListener);
 	}
 
@@ -68,7 +63,7 @@ public class WebSocketConnectionTest {
 	public void testUnbindingWhenNotAlreadyBoundReturnsFalse()
 			throws URISyntaxException {
 		ConnectionEventListener listener = mock(ConnectionEventListener.class);
-		WebSocketConnection connection = new WebSocketConnection(API_KEY, false, factory);
+		WebSocketConnection connection = new WebSocketConnection(URL, factory);
 		boolean unbound = connection.unbind(ConnectionState.ALL, listener);
 		assertEquals(false, unbound);
 	}
@@ -76,41 +71,12 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testUnbindingWhenBoundReturnsTrue() throws URISyntaxException {
 		ConnectionEventListener listener = mock(ConnectionEventListener.class);
-		WebSocketConnection connection = new WebSocketConnection(API_KEY, false, factory);
+		WebSocketConnection connection = new WebSocketConnection(URL, factory);
 
 		connection.bind(ConnectionState.ALL, listener);
 
 		boolean unbound = connection.unbind(ConnectionState.ALL, listener);
 		assertEquals(true, unbound);
-	}
-
-	@Test
-	public void testVerifyURLIsCorrect() throws SSLException {
-		this.connection.connect();
-		ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
-
-		Mockito.verify(factory);
-		factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
-
-		assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY
-				+ "?client=java-client&protocol=5&version=0.0.0", argument.getValue()
-				.toString());
-	}
-
-	@Test
-	public void testVerifyEncryptedURLIsCorrect() throws URISyntaxException,
-			SSLException {
-		this.connection = new WebSocketConnection(API_KEY, true, factory);
-
-		this.connection.connect();
-		ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
-
-		Mockito.verify(factory);
-		factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
-
-		assertEquals("wss://ws.pusherapp.com:443/app/" + API_KEY
-				+ "?client=java-client&protocol=5&version=0.0.0", argument.getValue()
-				.toString());
 	}
 
 	@Test
@@ -146,7 +112,7 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent()
 			throws URISyntaxException {
-		connection = new WebSocketConnection(API_KEY, false, factory);
+		connection = new WebSocketConnection(URL, factory);
 		connection.bind(ConnectionState.CONNECTED, mockEventListener);
 		connection.connect();
 
@@ -251,7 +217,7 @@ public class WebSocketConnectionTest {
 	@Test
 	public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent()
 			throws URISyntaxException {
-		connection = new WebSocketConnection(API_KEY, false, factory);
+		connection = new WebSocketConnection(URL, factory);
 		connection.bind(ConnectionState.CONNECTED, mockEventListener);
 
 		connection.connect();

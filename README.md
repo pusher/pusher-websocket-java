@@ -116,6 +116,13 @@ Pusher pusher = new Pusher( YOUR_APP_KEY, options );
 
 See the documentation on [Authenticating Users](http://pusher.com/docs/authenticating_users) for more information.
 
+You can also specify the Pusher cluster you wish to connect to on the PusherOptions, e.g.
+
+```java
+PusherOptions options = new PusherOptions().setCluster("eu");
+```
+
+If you need finer control over the endpoint then the setHost, setWsPort and setWssPort methods can be employed.
 ## Connecting
 
 In order to send and receive messages you need to connect to Pusher.

@@ -19,23 +19,7 @@ import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
-public class WebSocketConnection implements InternalConnection,
-		WebSocketListener {
-
-	// The version is populated from the pom.xml when running the application as a
-	// built library. However when running
-	// the source locally this will return null, so a default version of 0.0.0
-	// will be used instead.
-	private static final String APP_VERSION = (WebSocketConnection.class
-			.getPackage().getImplementationVersion() != null) ? WebSocketConnection.class
-			.getPackage().getImplementationVersion() : "0.0.0";
-	private static final String WS_SCHEME = "ws";
-	private static final String WSS_SCHEME = "wss";
-	private static final String HOST = "ws.pusherapp.com";
-	private static final int WS_PORT = 80;
-	private static final int WSS_PORT = 443;
-	private static final String URI_SUFFIX = "?client=java-client&protocol=5&version="
-			+ APP_VERSION;
+public class WebSocketConnection implements InternalConnection, WebSocketListener {
 	private static final String INTERNAL_EVENT_PREFIX = "pusher:";
 
 	private final Factory factory;
@@ -45,17 +29,14 @@ public class WebSocketConnection implements InternalConnection,
 	private final URI webSocketUri;
 	private String socketId;
 
-	public WebSocketConnection(String apiKey, boolean encrypted, Factory factory)
-			throws URISyntaxException {
-		String url = String.format("%s://%s:%s/app/%s%s", (encrypted ? WSS_SCHEME
-				: WS_SCHEME), HOST, (encrypted ? WSS_PORT : WS_PORT), apiKey,
-				URI_SUFFIX);
-		webSocketUri = new URI(url);
+	public WebSocketConnection(String url, Factory factory) throws URISyntaxException {
+
+		this.webSocketUri = new URI(url);
+		this.factory = factory;
+
 		for (ConnectionState state : ConnectionState.values()) {
 			eventListeners.put(state, new HashSet<ConnectionEventListener>());
 		}
-
-		this.factory = factory;
 	}
 
 	/* Connection implementation */

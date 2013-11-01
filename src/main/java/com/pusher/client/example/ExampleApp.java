@@ -29,7 +29,7 @@ public class ExampleApp implements ConnectionEventListener,
 		PusherOptions options = new PusherOptions().setEncrypted(true);
 		pusher = new Pusher(apiKey, options);
 		pusher.connect(this);
-		
+
 		pusher.subscribe(channelName, this, eventName);
 	}
 
@@ -59,7 +59,7 @@ public class ExampleApp implements ConnectionEventListener,
 		System.out.println(String.format(
 				"Received event [%s] on channel [%s] with data [%s]", eventName,
 				channelName, data));
-		
+
 		Gson gson = new Gson();
 		@SuppressWarnings("unchecked")
 		Map<String, String> jsonObject = gson.fromJson(data, Map.class);

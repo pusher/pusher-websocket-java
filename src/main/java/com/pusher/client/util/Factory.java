@@ -10,6 +10,7 @@ import javax.net.ssl.SSLException;
 import org.java_websocket.client.WebSocketClient;
 
 import com.pusher.client.Authorizer;
+import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.PresenceChannelImpl;
@@ -25,17 +26,17 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  * class directly, otherwise they would be tightly coupled. Instead, they all
  * call the factory methods in this class when they want to create instances of
  * another class.
- * 
+ *
  * An instance of Factory is provided on construction to each class which may
  * require it, the initial factory is instantiated in the Pusher constructor,
  * the only constructor which a library consumer should need to call directly.
- * 
+ *
  * Conventions:
- * 
+ *
  * - any method that starts with "new", such as
  * {@link #newPublicChannel(String)} creates a new instance of that class every
  * time it is called.
- * 
+ *
  * - any method that starts with "get", such as {@link #getEventQueue()} returns
  * a singleton.
  */
@@ -45,16 +46,15 @@ public class Factory {
     private ChannelManager channelManager;
     private ExecutorService eventQueue;
 
-    public InternalConnection getConnection(String apiKey, boolean encrypted) {
-	if (connection == null) {
-	    try {
-		connection = new WebSocketConnection(apiKey, encrypted, this);
-	    } catch (URISyntaxException e) {
-		throw new IllegalArgumentException(
-			"Failed to initialise connection", e);
-	    }
-	}
-	return connection;
+    public InternalConnection getConnection(String apiKey, PusherOptions options) {
+        if (connection == null) {
+            try {
+                connection = new WebSocketConnection(options.buildUrl(apiKey), this);
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("Failed to initialise connection", e);
+            }
+        }
+        return connection;
     }
 
     public WebSocketClient newWebSocketClientWrapper(URI uri,
@@ -72,11 +72,11 @@ public class Factory {
     public ChannelImpl newPublicChannel(String channelName) {
 	return new ChannelImpl(channelName, this);
     }
-    
+
     public PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
 	return new PrivateChannelImpl(connection, channelName, authorizer, this);
     }
-    
+
     public PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
 	return new PresenceChannelImpl(connection, channelName, authorizer, this);
     }
