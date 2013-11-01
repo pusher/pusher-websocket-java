@@ -195,14 +195,4 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 		Map channelDataMap = new Gson().fromJson(((String) channelData), Map.class);
 		myUserID = (String) channelDataMap.get("user_id");
 	}
-
-	private Set<SubscriptionEventListener> getAllEventListeners() {
-
-		Set<SubscriptionEventListener> allListeners = new HashSet<SubscriptionEventListener>();
-		for (Set<SubscriptionEventListener> listenersForThisEvent : eventNameToListenerMap
-				.values()) {
-			allListeners.addAll(listenersForThisEvent);
-		}
-		return allListeners;
-	}
 }
