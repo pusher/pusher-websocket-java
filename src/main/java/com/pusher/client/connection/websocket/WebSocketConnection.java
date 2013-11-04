@@ -11,6 +11,8 @@ import javax.net.ssl.SSLException;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -20,6 +22,8 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
 public class WebSocketConnection implements InternalConnection, WebSocketListener {
+    private static final Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
+
 	private static final String INTERNAL_EVENT_PREFIX = "pusher:";
 
 	private final Factory factory;
@@ -128,6 +132,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 	/** implementation detail **/
 
 	private void updateState(ConnectionState newState) {
+
+        log.debug("State transition requested, current [" + state + "], new [" + newState + "]");
 
 		final ConnectionStateChange change = new ConnectionStateChange(state,
 				newState);
@@ -239,11 +245,16 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 	}
 
 	@Override
-	public void onClose(int code, String reason, boolean remote) {
+	public void onClose(final int code, final String reason, final boolean remote) {
 
 		factory.getEventQueue().execute(new Runnable() {
 			public void run() {
-				updateState(ConnectionState.DISCONNECTED);
+			    if (state != ConnectionState.DISCONNECTED) {
+			        updateState(ConnectionState.DISCONNECTED);
+			    } else {
+			        log.error("Received close from underlying socket when already disconnected. "
+			                + "Close code [" + code + "], Reason [" + reason + "], Remote [" + remote + "]");
+			    }
 			}
 		});
 	}
