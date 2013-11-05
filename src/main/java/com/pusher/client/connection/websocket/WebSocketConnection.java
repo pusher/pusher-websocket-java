@@ -86,7 +86,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
 	@Override
 	public void bind(ConnectionState state, ConnectionEventListener eventListener) {
-		eventListeners.get(state).add(eventListener);
+		if( eventListeners.get(state).contains(eventListener) == false ) {
+			eventListeners.get(state).add(eventListener);
+		}
+
 	}
 
 	@Override
