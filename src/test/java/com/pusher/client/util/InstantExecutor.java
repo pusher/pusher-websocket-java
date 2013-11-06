@@ -4,16 +4,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class InstantExecutor implements ExecutorService {
+public class InstantExecutor implements ScheduledExecutorService {
 
     @Override
     public void execute(Runnable command) {
-	command.run();
+        command.run();
     }
 
     @Override
@@ -51,4 +52,16 @@ public class InstantExecutor implements ExecutorService {
 
     @Override
     public <T> Future<T> submit(Runnable task, T result) { return null; }
+
+    @Override
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) { return null; }
+
+    @Override
+    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) { return null; }
+
+    @Override
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) { return null; }
+
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) { return null; }
 }

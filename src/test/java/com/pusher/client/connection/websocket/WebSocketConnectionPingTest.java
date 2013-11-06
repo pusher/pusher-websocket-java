@@ -1,0 +1,107 @@
+package com.pusher.client.connection.websocket;
+
+import static com.pusher.client.connection.websocket.WebSocketConnection.PING_EVENT_SERIALIZED;
+import static com.pusher.client.connection.websocket.WebSocketConnection.PING_LATENCY_BUFFER;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLException;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.pusher.client.channel.impl.ChannelManager;
+import com.pusher.client.connection.websocket.WebSocketConnection.PingCheck;
+import com.pusher.client.util.Factory;
+import com.pusher.client.util.InstantExecutor;
+
+@RunWith(MockitoJUnitRunner.class)
+public class WebSocketConnectionPingTest {
+
+    private static final String URL = "ws://ws.example.com/";
+    private static final String CONN_ESTABLISHED_EVENT =
+            "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}";
+
+    @Mock
+    private ChannelManager mockChannelManager;
+    @Mock
+    private WebSocketClientWrapper mockUnderlyingConnection;
+    @Mock
+    private Factory factory;
+    @Mock
+    private InstantExecutor executor;
+
+    private long now = System.currentTimeMillis();
+
+    /**
+     * Subject under test
+     */
+    private WebSocketConnection connection;
+
+
+    @Before
+    public void setUp() throws URISyntaxException, SSLException {
+        when(factory.getChannelManager()).thenReturn(mockChannelManager);
+        when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class)))
+                .thenReturn(mockUnderlyingConnection);
+        when(factory.getEventQueue()).thenReturn(executor);
+        when(factory.timeNow()).thenReturn(now);
+
+        doCallRealMethod().when(executor).execute(any(Runnable.class));
+
+        this.connection = new WebSocketConnection(URL, factory);
+    }
+
+    @Test
+    public void noPingSentOrScheduledIfNotConnectedAtCheckTime() {
+        connection.pingCheckNow();
+
+        verify(mockUnderlyingConnection, never()).send(any(String.class));
+        verify(executor, never()).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+    }
+
+    @Test
+    public void pingCheckIsScheduledOnConnect() {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+
+        verify(executor).schedule(any(PingCheck.class), eq(connection.pingPeriodMillis), eq(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void pingCheckRescheduledWhenThereHasBeenActivity() {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+        verify(executor).schedule(any(PingCheck.class), eq(connection.pingPeriodMillis), eq(TimeUnit.MILLISECONDS));
+
+        connection.lastActivity = now - 3000;
+        connection.pingCheckNow();
+
+        verify(executor).schedule(any(PingCheck.class), eq(connection.pingPeriodMillis - 3000), eq(TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void pingSentAndNextCheckScheduledIfDue() {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+        verify(executor).schedule(any(PingCheck.class), eq(connection.pingPeriodMillis), eq(TimeUnit.MILLISECONDS));
+
+        connection.lastActivity = now - connection.pingPeriodMillis - 10;
+        connection.pingCheckNow();
+
+        verify(mockUnderlyingConnection).send(PING_EVENT_SERIALIZED);
+        verify(executor).schedule(any(PingCheck.class), eq(connection.pingPeriodMillis + PING_LATENCY_BUFFER), eq(TimeUnit.MILLISECONDS));
+    }
+}

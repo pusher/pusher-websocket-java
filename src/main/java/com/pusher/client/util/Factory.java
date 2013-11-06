@@ -2,8 +2,8 @@ package com.pusher.client.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.ssl.SSLException;
 
@@ -44,7 +44,7 @@ public class Factory {
 
     private InternalConnection connection;
     private ChannelManager channelManager;
-    private ExecutorService eventQueue;
+    private ScheduledExecutorService eventQueue;
 
     public InternalConnection getConnection(String apiKey, PusherOptions options) {
         if (connection == null) {
@@ -61,9 +61,9 @@ public class Factory {
         return new WebSocketClientWrapper(uri, proxy);
     }
 
-    public ExecutorService getEventQueue() {
+    public ScheduledExecutorService getEventQueue() {
         if (eventQueue == null) {
-            eventQueue = Executors.newSingleThreadExecutor();
+            eventQueue = Executors.newSingleThreadScheduledExecutor();
         }
         return eventQueue;
     }
@@ -86,5 +86,9 @@ public class Factory {
             channelManager = new ChannelManager(this);
         }
         return channelManager;
+    }
+
+    public long timeNow() {
+        return System.currentTimeMillis();
     }
 }
