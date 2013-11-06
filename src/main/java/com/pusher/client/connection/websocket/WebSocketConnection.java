@@ -27,8 +27,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
-    static final long DEFAULT_PING_PERIOD = 30000;
-    static final long PING_LATENCY_BUFFER = 500;
+    static final long DEFAULT_PING_PERIOD = 120000;
+    static final long PONG_TIMEOUT = 30000;
 
     private final Factory factory;
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
@@ -43,6 +43,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
      */
     long pingPeriodMillis = DEFAULT_PING_PERIOD;
     long lastActivity;
+    long lastPong;
 
     public WebSocketConnection(String url, Factory factory) throws URISyntaxException {
         this.webSocketUri = new URI(url);
@@ -163,6 +164,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             handleConnectionMessage(wholeMessage);
         } else if (event.equals("pusher:error")) {
             handleError(wholeMessage);
+        } else if (event.equals("pusher:pong")) {
+            handlePong(wholeMessage);
         }
     }
 
@@ -199,6 +202,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         }
 
         sendErrorToAllListeners(message, code, null);
+    }
+
+    private void handlePong(String wholeMessage) {
+        lastPong = factory.timeNow();
     }
 
     private void sendErrorToAllListeners(final String message, final String code, final Exception e) {
@@ -279,9 +286,11 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                     log.debug("Sending ping message");
                     sendMessage(PING_EVENT_SERIALIZED);
 
+                    factory.getEventQueue().schedule(new PongCheck(timeNow), PONG_TIMEOUT, TimeUnit.MILLISECONDS);
+
                     // If we have sent a ping, reschedule for one pingPeriod, plus
                     // a small buffer within which we hope to have received the pong from the server
-                    nextCheck = pingPeriodMillis + PING_LATENCY_BUFFER;
+                    nextCheck = pingPeriodMillis + 500;
                 } else {
                     // If there's been some activity since this check was scheduled,
                     // reschedule one period after that activity occurred
@@ -291,6 +300,22 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             }
             // If we're not connected, don't ping, nor schedule further checks.
             // A new check will be scheduled if and when we reconnect.
+        }
+    }
+
+    class PongCheck implements Runnable {
+        private final long pingSent;
+
+        public PongCheck(final long pingSent) {
+            this.pingSent = pingSent;
+        }
+
+        @Override
+        public void run() {
+            if (lastPong < pingSent) {
+                log.info("Timed out awaiting pong response from server. Moving to disconnected state.");
+                disconnect();
+            }
         }
     }
 
