@@ -33,7 +33,6 @@ Define the `pusher-java-client` dependency:
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
       <version>0.1.2-beta</version>
-      <scope>provided</scope>
     </dependency>
 
 Define the repository location:
