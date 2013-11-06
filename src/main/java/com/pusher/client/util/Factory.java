@@ -57,34 +57,34 @@ public class Factory {
         return connection;
     }
 
-    public WebSocketClient newWebSocketClientWrapper(URI uri,
-	    WebSocketListener proxy) throws SSLException {
-	return new WebSocketClientWrapper(uri, proxy);
+    public WebSocketClient newWebSocketClientWrapper(URI uri, WebSocketListener proxy) throws SSLException {
+        return new WebSocketClientWrapper(uri, proxy);
     }
 
     public ExecutorService getEventQueue() {
-	if (eventQueue == null) {
-	    eventQueue = Executors.newSingleThreadExecutor();
-	}
-	return eventQueue;
+        if (eventQueue == null) {
+            eventQueue = Executors.newSingleThreadExecutor();
+        }
+        return eventQueue;
     }
 
     public ChannelImpl newPublicChannel(String channelName) {
-	return new ChannelImpl(channelName, this);
+        return new ChannelImpl(channelName, this);
     }
 
     public PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
-	return new PrivateChannelImpl(connection, channelName, authorizer, this);
+        return new PrivateChannelImpl(connection, channelName, authorizer, this);
     }
 
-    public PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
-	return new PresenceChannelImpl(connection, channelName, authorizer, this);
+    public PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName,
+            Authorizer authorizer) {
+        return new PresenceChannelImpl(connection, channelName, authorizer, this);
     }
 
     public ChannelManager getChannelManager() {
-	if (channelManager == null) {
-	    channelManager = new ChannelManager(this);
-	}
-	return channelManager;
+        if (channelManager == null) {
+            channelManager = new ChannelManager(this);
+        }
+        return channelManager;
     }
 }
