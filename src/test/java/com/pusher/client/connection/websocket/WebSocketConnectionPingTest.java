@@ -1,7 +1,6 @@
 package com.pusher.client.connection.websocket;
 
 import static com.pusher.client.connection.websocket.WebSocketConnection.PING_EVENT_SERIALIZED;
-import static com.pusher.client.connection.websocket.WebSocketConnection.PONG_TIMEOUT;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -32,6 +31,8 @@ import com.pusher.client.util.InstantExecutor;
 @RunWith(MockitoJUnitRunner.class)
 public class WebSocketConnectionPingTest {
 
+    private static final long ACTIVITY_TIMEOUT = 120000;
+    private static final long PONG_TIMEOUT = 30000;
     private static final String URL = "ws://ws.example.com/";
     private static final String CONN_ESTABLISHED_EVENT =
             "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}";
@@ -63,7 +64,7 @@ public class WebSocketConnectionPingTest {
 
         doCallRealMethod().when(executor).execute(any(Runnable.class));
 
-        this.connection = new WebSocketConnection(URL, factory);
+        this.connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
     }
 
     @Test
@@ -79,32 +80,32 @@ public class WebSocketConnectionPingTest {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-        verify(executor).schedule(isA(PingCheck.class), eq(connection.pingPeriodMillis), eq(TimeUnit.MILLISECONDS));
+        verify(executor).schedule(isA(PingCheck.class), eq(ACTIVITY_TIMEOUT), eq(TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void pingCheckRescheduledWhenThereHasBeenActivity() {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
-        verify(executor).schedule(isA(PingCheck.class), eq(connection.pingPeriodMillis), eq(TimeUnit.MILLISECONDS));
+        verify(executor).schedule(isA(PingCheck.class), eq(ACTIVITY_TIMEOUT), eq(TimeUnit.MILLISECONDS));
 
         connection.lastActivity = now - 3000;
         connection.pingCheckNow();
 
-        verify(executor).schedule(isA(PingCheck.class), eq(connection.pingPeriodMillis - 3000), eq(TimeUnit.MILLISECONDS));
+        verify(executor).schedule(isA(PingCheck.class), eq(ACTIVITY_TIMEOUT - 3000), eq(TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void pingSentNextCheckScheduledAndPongTimeoutSetIfDue() {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
-        verify(executor).schedule(isA(PingCheck.class), eq(connection.pingPeriodMillis), eq(TimeUnit.MILLISECONDS));
+        verify(executor).schedule(isA(PingCheck.class), eq(ACTIVITY_TIMEOUT), eq(TimeUnit.MILLISECONDS));
 
-        connection.lastActivity = now - connection.pingPeriodMillis - 10;
+        connection.lastActivity = now - ACTIVITY_TIMEOUT - 10;
         connection.pingCheckNow();
 
         verify(mockUnderlyingConnection).send(PING_EVENT_SERIALIZED);
-        verify(executor).schedule(isA(PingCheck.class), eq(connection.pingPeriodMillis + 500), eq(TimeUnit.MILLISECONDS));
+        verify(executor).schedule(isA(PingCheck.class), eq(ACTIVITY_TIMEOUT + 500), eq(TimeUnit.MILLISECONDS));
         verify(executor).schedule(isA(PongCheck.class), eq(PONG_TIMEOUT), eq(TimeUnit.MILLISECONDS));
     }
 }

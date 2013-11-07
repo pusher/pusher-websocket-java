@@ -27,8 +27,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
-    static final long DEFAULT_PING_PERIOD = 120000;
-    static final long PONG_TIMEOUT = 30000;
 
     private final Factory factory;
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
@@ -37,16 +35,15 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final URI webSocketUri;
     private String socketId;
 
-    /**
-     * After this many millis silence from the server we initiate a ping to keep the
-     * connection alive (or discover that it's dead).
-     */
-    long pingPeriodMillis = DEFAULT_PING_PERIOD;
+    private final long activityTimeout;
+    private final long pongTimeout;
     long lastActivity;
     long lastPong;
 
-    public WebSocketConnection(String url, Factory factory) throws URISyntaxException {
+    public WebSocketConnection(String url, long activityTimeout, long pongTimeout, Factory factory) throws URISyntaxException {
         this.webSocketUri = new URI(url);
+        this.activityTimeout = activityTimeout;
+        this.pongTimeout = pongTimeout;
         this.factory = factory;
 
         for (ConnectionState state : ConnectionState.values()) {
@@ -178,7 +175,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
         updateState(ConnectionState.CONNECTED);
 
-        factory.getEventQueue().schedule(new PingCheck(), pingPeriodMillis, TimeUnit.MILLISECONDS);
+        factory.getEventQueue().schedule(new PingCheck(), activityTimeout, TimeUnit.MILLISECONDS);
     }
 
     @SuppressWarnings("rawtypes")
@@ -282,19 +279,19 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             final long timeNow = factory.timeNow();
             if (state == ConnectionState.CONNECTED) {
                 long nextCheck;
-                if (lastActivity + pingPeriodMillis < timeNow) {
+                if (lastActivity + activityTimeout < timeNow) {
                     log.debug("Sending ping message");
                     sendMessage(PING_EVENT_SERIALIZED);
 
-                    factory.getEventQueue().schedule(new PongCheck(timeNow), PONG_TIMEOUT, TimeUnit.MILLISECONDS);
+                    factory.getEventQueue().schedule(new PongCheck(timeNow), pongTimeout, TimeUnit.MILLISECONDS);
 
-                    // If we have sent a ping, reschedule for one pingPeriod, plus
+                    // If we have sent a ping, reschedule for one ping period, plus
                     // a small buffer within which we hope to have received the pong from the server
-                    nextCheck = pingPeriodMillis + 500;
+                    nextCheck = activityTimeout + 500;
                 } else {
                     // If there's been some activity since this check was scheduled,
                     // reschedule one period after that activity occurred
-                    nextCheck = lastActivity + pingPeriodMillis - timeNow;
+                    nextCheck = lastActivity + activityTimeout - timeNow;
                 }
                 factory.getEventQueue().schedule(new PingCheck(), nextCheck, TimeUnit.MILLISECONDS);
             }

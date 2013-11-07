@@ -22,6 +22,9 @@ public class PusherOptions {
     private static final int WSS_PORT = 443;
     private static final String PUSHER_DOMAIN = "pusher.com";
 
+    private static final long DEFAULT_ACTIVITY_TIMEOUT = 120000;
+    private static final long DEFAULT_PONG_TIMEOUT = 30000;
+
     // Note that the primary cluster lives on a different domain
     // (others are subdomains of pusher.com). This is not an oversight.
     // Legacy reasons.
@@ -29,6 +32,8 @@ public class PusherOptions {
     private int wsPort = WS_PORT;
     private int wssPort = WSS_PORT;
     private boolean encrypted = true;
+    private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
+    private long pongTimeout = DEFAULT_PONG_TIMEOUT;
     private Authorizer authorizer;
 
     /**
@@ -114,6 +119,54 @@ public class PusherOptions {
         this.wsPort = WS_PORT;
         this.wssPort = WSS_PORT;
         return this;
+    }
+
+    /**
+     * The number of milliseconds of inactivity at which a "ping" will be triggered
+     * to check the connection.
+     *
+     * The default value is 120,000 (2 minutes). On some connections, where
+     * intermediate hops between the application and Pusher are aggressively
+     * culling connections they consider to be idle, a lower value may help
+     * preserve the connection.
+     *
+     * @param activityTimeout time to consider connection idle, in milliseconds
+     * @return this, for chaining
+     */
+    public PusherOptions setActivityTimeout(long activityTimeout) {
+        if (activityTimeout < 1000) {
+            throw new IllegalArgumentException("Activity timeout must be at least 1,000ms (and is recommended to be much higher)");
+        }
+
+        this.activityTimeout = activityTimeout;
+        return this;
+    }
+
+    public long getActivityTimeout() {
+        return activityTimeout;
+    }
+
+    /**
+     * The number of milliseconds after a "ping" is sent that the client will
+     * wait to receive a "pong" response from the server before considering the
+     * connection broken and triggering a transition to the disconnected state.
+     *
+     * The default value is 30,000.
+     *
+     * @param pongTimeout time to wait for pong response, in milliseconds
+     * @return this, for chaining
+     */
+    public PusherOptions setPongTimeout(long pongTimeout) {
+        if (pongTimeout < 1000) {
+            throw new IllegalArgumentException("Pong timeout must be at least 1,000ms (and is recommended to be much higher)");
+        }
+
+        this.pongTimeout = pongTimeout;
+        return this;
+    }
+
+    public long getPongTimeout() {
+        return pongTimeout;
     }
 
     /**

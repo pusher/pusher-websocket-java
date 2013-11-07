@@ -49,7 +49,10 @@ public class Factory {
     public InternalConnection getConnection(String apiKey, PusherOptions options) {
         if (connection == null) {
             try {
-                connection = new WebSocketConnection(options.buildUrl(apiKey), this);
+                connection = new WebSocketConnection(options.buildUrl(apiKey),
+                                                     options.getActivityTimeout(),
+                                                     options.getPongTimeout(),
+                                                     this);
             } catch (URISyntaxException e) {
                 throw new IllegalArgumentException("Failed to initialise connection", e);
             }

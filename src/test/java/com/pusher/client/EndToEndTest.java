@@ -39,6 +39,8 @@ public class EndToEndTest {
 	private static final String PUBLIC_CHANNEL_NAME = "my-channel";
     private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
 	private static final String OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE = "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
+	private static final long ACTIVITY_TIMEOUT = 120000;
+	private static final long PONG_TIMEOUT = 120000;
 
 	private @Mock Authorizer mockAuthorizer;
 	private @Mock ConnectionEventListener mockConnectionEventListener;
@@ -53,11 +55,10 @@ public class EndToEndTest {
 	public void setUp() throws Exception {
 	    pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
 
-	    connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), factory);
+	    connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
 
 		when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 		when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
-
 			@Override
 			public WebSocketClientWrapper answer(InvocationOnMock invocation) throws Throwable {
 				URI uri = (URI) invocation.getArguments()[0];
@@ -70,7 +71,8 @@ public class EndToEndTest {
 		when(factory.getConnection(API_KEY, pusherOptions)).thenReturn(connection);
 
 		when(factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
-			public ChannelManager answer(InvocationOnMock invocation) throws Throwable {
+			@Override
+            public ChannelManager answer(InvocationOnMock invocation) throws Throwable {
 				return new ChannelManager(factory);
 			}
 		});
