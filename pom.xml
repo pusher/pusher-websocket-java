@@ -6,6 +6,7 @@
 	<artifactId>pusher-java-client</artifactId>
 	<name>Pusher Java Client Library</name>
 	<version>0.2.0-SNAPSHOT</version>
+	<url>http://github.com/pusher/pusher-java-client</url>
 
 	<description>
 		This is a Java client library for Pusher, targeted at core
@@ -18,6 +19,12 @@
 		<github.global.server>github</github.global.server>
 	</properties>
 
+	<scm>
+	    <url>https://github.com/pusher/pusher-java-client</url>
+	    <connection>scm:git:https://github.com/pusher/pusher-java-client</connection>
+	    <developerConnection>scm:git:ssh://git@github.com/pusher/pusher-java-client</developerConnection>
+	</scm>
+	
 	<licenses>
 		<license>
 			<name>MIT</name>
@@ -36,6 +43,23 @@
 		<url>https://github.com/pusher/pusher-java-client/issues</url>
 	</issueManagement>
 
+	<developers>
+	    <developer>
+	        <id>mike</id>
+	        <name>Mike Pye</name>
+	        <email>mike@pusher.com</email>
+	        <organization>Pusher</organization>
+	        <organizationUrl>http://pusher.com</organizationUrl>
+	        <roles>
+	            <role>maintainer</role>
+	            <role>developer</role>
+	        </roles>
+	        <timezone>Europe/London</timezone>
+	    </developer>
+	</developers>
+	
+	<packaging>jar</packaging>
+	
 	<build>
 		<finalName>${project.artifactId}-${project.version}</finalName>
 		<outputDirectory>target/classes</outputDirectory>
@@ -53,7 +77,6 @@
 		</testResources>
 
 		<plugins>
-
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9</version>
@@ -94,7 +117,6 @@
 					<noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
 				</configuration>
 				<executions>
-
 					<!-- run site-maven-plugin's 'site' target as part of the build's normal 
 						'deploy' phase -->
 					<execution>
@@ -128,7 +150,6 @@
 						</goals>
 						<phase>deploy</phase>
 					</execution>
-
 				</executions>
 			</plugin>
 
