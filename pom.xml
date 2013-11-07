@@ -20,9 +20,9 @@
 	</properties>
 
 	<scm>
-	    <url>https://github.com/pusher/pusher-java-client</url>
-	    <connection>scm:git:https://github.com/pusher/pusher-java-client</connection>
-	    <developerConnection>scm:git:ssh://git@github.com/pusher/pusher-java-client</developerConnection>
+        <url>scm:git:git@github.com:pusher/pusher-java-client</url>
+	    <connection>scm:git:git@github.com:pusher/pusher-java-client</connection>
+	    <developerConnection>scm:git:https://github.com/pusher/pusher-java-client</developerConnection>
 	</scm>
 	
 	<licenses>
