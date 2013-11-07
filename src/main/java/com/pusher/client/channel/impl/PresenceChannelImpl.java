@@ -23,8 +23,9 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 
 	private static final String MEMBER_ADDED_EVENT = "pusher_internal:member_added";
 	private static final String MEMBER_REMOVED_EVENT = "pusher_internal:member_removed";
-	private final Map<String, User> idToUserMap = Collections
-			.synchronizedMap(new LinkedHashMap<String, User>());
+
+	private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<String, User>());
+
 	private String myUserID;
 
 	public PresenceChannelImpl(InternalConnection connection, String channelName,
@@ -140,13 +141,12 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 	private void handleMemberAddedEvent(String message) {
 
 		Map dataMap = extractDataMapFrom(message);
-		String id = (String) dataMap.get("user_id");
-		String userData = (dataMap.get("user_info") != null) ? dataMap.get(
-				"user_info").toString() : null;
+		String id = String.valueOf(dataMap.get("user_id"));
+		String userData = (dataMap.get("user_info") != null) ? dataMap.get("user_info").toString() : null;
 
 		final User user = new User(id, userData);
 		idToUserMap.put(id, user);
-		
+
 		ChannelEventListener listener = this.getEventListener();
 		if( listener != null ) {
 			PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
@@ -158,7 +158,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 	private void handleMemberRemovedEvent(String message) {
 
 		Map dataMap = extractDataMapFrom(message);
-		String id = (String) dataMap.get("user_id");
+		String id = String.valueOf(dataMap.get("user_id"));
 
 		final User user = idToUserMap.remove(id);
 
@@ -190,8 +190,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 
 	@SuppressWarnings("rawtypes")
 	private void storeMyUserId(Object channelData) {
-
 		Map channelDataMap = new Gson().fromJson(((String) channelData), Map.class);
-		myUserID = (String) channelDataMap.get("user_id");
+		myUserID = String.valueOf(channelDataMap.get("user_id"));
 	}
 }
