@@ -15,6 +15,7 @@ public class ExampleApp implements ConnectionEventListener,
 	private final Pusher pusher;
 	private final String channelName;
 	private final String eventName;
+	private final long startTime = System.currentTimeMillis();
 
 	public static void main(String[] args) {
 		new ExampleApp(args);
@@ -39,16 +40,16 @@ public class ExampleApp implements ConnectionEventListener,
 	public void onConnectionStateChange(ConnectionStateChange change) {
 
 		System.out.println(String.format(
-				"Connection state changed from [%s] to [%s]",
-				change.getPreviousState(), change.getCurrentState()));
+				"[%d] Connection state changed from [%s] to [%s]",
+				timestamp(), change.getPreviousState(), change.getCurrentState()));
 	}
 
 	@Override
 	public void onError(String message, String code, Exception e) {
 
 		System.out.println(String.format(
-				"An error was received with message [%s], code [%s], exception [%s]",
-				message, code, e));
+				"[%d] An error was received with message [%s], code [%s], exception [%s]",
+				timestamp(), message, code, e));
 	}
 
 	/* ChannelEventListener implementation */
@@ -57,8 +58,8 @@ public class ExampleApp implements ConnectionEventListener,
 	public void onEvent(String channelName, String eventName, String data) {
 
 		System.out.println(String.format(
-				"Received event [%s] on channel [%s] with data [%s]", eventName,
-				channelName, data));
+				"[%d] Received event [%s] on channel [%s] with data [%s]", eventName,
+				timestamp(), channelName, data));
 
 		Gson gson = new Gson();
 		@SuppressWarnings("unchecked")
@@ -69,7 +70,12 @@ public class ExampleApp implements ConnectionEventListener,
 	@Override
 	public void onSubscriptionSucceeded(String channelName) {
 
-		System.out.println(String.format("Subscription to channel [%s] succeeded",
-				channelName));
+		System.out.println(String.format(
+		        "[%d] Subscription to channel [%s] succeeded",
+				timestamp(), channelName));
+	}
+
+	private long timestamp() {
+	    return System.currentTimeMillis() - startTime;
 	}
 }
