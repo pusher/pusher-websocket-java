@@ -239,6 +239,35 @@
 				</executions>
 			</plugin>
 
+			<!-- Init submodules as part of the build process.
+
+				 Required for the release plugin when it checks out the current code to 
+				 build release artifacts.
+			     This should be removed once we have a good version of JavaWebsockets in
+			     Maven to rely on and are no longer tracking their master in a submodule -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<id>invoke build</id>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>git</executable>
+					<arguments>
+					    <argument>submodule</argument>
+					    <argument>update</argument>
+					    <argument>-i</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
