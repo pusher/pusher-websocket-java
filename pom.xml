@@ -96,7 +96,7 @@
 						<configuration>
 							<overview>${basedir}/src/main/javadoc/overview.html</overview>
 							<stylesheetfile>${basedir}/src/main/javadoc/css/styles.css</stylesheetfile>
-							<excludePackageNames>com.pusher.client.channel.impl:com.pusher.client.connection.impl:com.pusher.client.connection.websocket,org.java_websocket</excludePackageNames>
+							<excludePackageNames>com.pusher.client.channel.impl:com.pusher.client.connection.impl:com.pusher.client.connection.websocket:org.java_websocket:com.pusher.client.example</excludePackageNames>
 							<groups>
 								<group>
 									<title>${project.groupId} ${project.artifactId}</title>
