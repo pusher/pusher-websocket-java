@@ -140,22 +140,6 @@
 					<!-- run site-maven-plugin's 'site' target as part of the build's normal 
 						'deploy' phase -->
 					<execution>
-						<id>mvn-repo</id>
-						<configuration>
-							<message>Maven artifacts for ${project.version}</message>  <!-- git commit message -->
-							<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
-							<branch>refs/heads/mvn-repo</branch>                       <!-- remote branch name -->
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</configuration>
-						<goals>
-							<goal>site</goal>
-						</goals>
-						<phase>deploy</phase>
-					</execution>
-
-					<execution>
 						<id>javadoc</id>
 						<configuration>
 							<message>JavaDoc gh-pages for ${project.version}</message>  <!-- git commit message -->
