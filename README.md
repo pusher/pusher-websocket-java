@@ -27,28 +27,13 @@ You can get the library in three ways.
 
 ### Maven
 
-Define the `pusher-java-client` dependency:
+As of version 0.2.0, pusher-java-client is available in Maven Central:
 
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>0.1.2-beta</version>
+      <version>0.2.0</version>
     </dependency>
-
-Define the repository location:
-
-    <repository>
-      <id>pusher-java-client-mvn-repo</id>
-      <name>Pusher Java Client Library</name>
-      <url>https://raw.github.com/pusher/pusher-java-client/mvn-repo/</url>
-      <!-- Update the following as required -->
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
 
 ### Download
 
