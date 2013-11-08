@@ -37,7 +37,7 @@ As of version 0.2.0, pusher-java-client is available in Maven Central:
 
 ### Download
 
-You can download a version of the `.jar` directly via <https://github.com/pusher/pusher-java-client/tree/mvn-repo/com/pusher/pusher-java-client>
+You can download a version of the `.jar` directly via <http://repo1.maven.org/maven2/com/pusher/pusher-java-client/>
 
 ### Source
 
