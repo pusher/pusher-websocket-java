@@ -58,8 +58,8 @@ public class ExampleApp implements ConnectionEventListener,
 	public void onEvent(String channelName, String eventName, String data) {
 
 		System.out.println(String.format(
-				"[%d] Received event [%s] on channel [%s] with data [%s]", eventName,
-				timestamp(), channelName, data));
+				"[%d] Received event [%s] on channel [%s] with data [%s]",
+				timestamp(), eventName, channelName, data));
 
 		Gson gson = new Gson();
 		@SuppressWarnings("unchecked")
