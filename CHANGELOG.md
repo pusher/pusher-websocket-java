@@ -4,6 +4,10 @@
 2013-11-08 mdpye
  * Fix up pom for inclusion in Maven Central
 
+2013-11-07
+ * Do not choke on user_id if it is JSON encoded as a number
+   rather than a string
+
 2013-11-06
  * Initiate ping messages from client on activity timeout
    Teardown connection if no response seen from server
