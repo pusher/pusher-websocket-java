@@ -12,113 +12,113 @@ import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpAuthorizer;
 
 public class PresenceChannelExampleApp implements ConnectionEventListener,
-		PresenceChannelEventListener {
+        PresenceChannelEventListener {
 
-	private final Pusher pusher;
-	private final String channelName;
-	private final String eventName;
+    private final Pusher pusher;
+    private final String channelName;
+    private final String eventName;
 
-	private PresenceChannel channel;
+    private PresenceChannel channel;
 
-	public static void main(String[] args) {
-		new PresenceChannelExampleApp(args);
-	}
+    public static void main(String[] args) {
+        new PresenceChannelExampleApp(args);
+    }
 
-	public PresenceChannelExampleApp(String[] args) {
+    public PresenceChannelExampleApp(String[] args) {
 
-		String apiKey = (args.length > 0) ? args[0] : "a87fe72c6f36272aa4b1";
-		channelName = (args.length > 1) ? args[1] : "presence-my-channel";
-		eventName = (args.length > 2) ? args[2] : "my-event";
+        String apiKey = (args.length > 0) ? args[0] : "a87fe72c6f36272aa4b1";
+        channelName = (args.length > 1) ? args[1] : "presence-my-channel";
+        eventName = (args.length > 2) ? args[2] : "my-event";
 
-		HttpAuthorizer authorizer = new HttpAuthorizer(
-				"http://www.leggetter.co.uk/pusher/pusher-examples/php/authentication/src/presence_auth.php");
-		PusherOptions options = new PusherOptions().setAuthorizer(authorizer).setEncrypted(true);
+        HttpAuthorizer authorizer = new HttpAuthorizer(
+                "http://www.leggetter.co.uk/pusher/pusher-examples/php/authentication/src/presence_auth.php");
+        PusherOptions options = new PusherOptions().setAuthorizer(authorizer).setEncrypted(true);
 
-		pusher = new Pusher(apiKey, options);
-		pusher.connect(this);
-		
-		channel = pusher.subscribePresence(channelName, this, eventName);
-	}
+        pusher = new Pusher(apiKey, options);
+        pusher.connect(this);
 
-	/* ConnectionEventListener implementation */
+        channel = pusher.subscribePresence(channelName, this, eventName);
+    }
 
-	@Override
-	public void onConnectionStateChange(ConnectionStateChange change) {
+    /* ConnectionEventListener implementation */
 
-		System.out.println(String.format(
-				"Connection state changed from [%s] to [%s]",
-				change.getPreviousState(), change.getCurrentState()));
-	}
+    @Override
+    public void onConnectionStateChange(ConnectionStateChange change) {
 
-	@Override
-	public void onError(String message, String code, Exception e) {
+        System.out.println(String.format(
+                "Connection state changed from [%s] to [%s]",
+                change.getPreviousState(), change.getCurrentState()));
+    }
 
-		System.out.println(String.format(
-				"An error was received with message [%s], code [%s], exception [%s]",
-				message, code, e));
-	}
+    @Override
+    public void onError(String message, String code, Exception e) {
 
-	/* PresenceChannelEventListener implementation */
+        System.out.println(String.format(
+                "An error was received with message [%s], code [%s], exception [%s]",
+                message, code, e));
+    }
 
-	@Override
-	public void onUsersInformationReceived(String channelName, Set<User> users) {
+    /* PresenceChannelEventListener implementation */
 
-		System.out.println("Received user information");
+    @Override
+    public void onUsersInformationReceived(String channelName, Set<User> users) {
 
-		printCurrentlySubscribedUsers();
-	}
+        System.out.println("Received user information");
 
-	@Override
-	public void userSubscribed(String channelName, User user) {
+        printCurrentlySubscribedUsers();
+    }
 
-		System.out.println(String.format("A new user has joined channel [%s]: %s",
-				channelName, user.toString()));
+    @Override
+    public void userSubscribed(String channelName, User user) {
 
-		printCurrentlySubscribedUsers();
-	}
+        System.out.println(String.format("A new user has joined channel [%s]: %s",
+                channelName, user.toString()));
 
-	@Override
-	public void userUnsubscribed(String channelName, User user) {
+        printCurrentlySubscribedUsers();
+    }
 
-		System.out.println(String.format("A user has left channel [%s]: %s",
-				channelName, user));
+    @Override
+    public void userUnsubscribed(String channelName, User user) {
 
-		printCurrentlySubscribedUsers();
-	}
+        System.out.println(String.format("A user has left channel [%s]: %s",
+                channelName, user));
 
-	@Override
-	public void onEvent(String channelName, String eventName, String data) {
+        printCurrentlySubscribedUsers();
+    }
 
-		System.out.println(String.format(
-				"Received event [%s] on channel [%s] with data [%s]", eventName,
-				channelName, data));
-	}
+    @Override
+    public void onEvent(String channelName, String eventName, String data) {
 
-	@Override
-	public void onSubscriptionSucceeded(String channelName) {
+        System.out.println(String.format(
+                "Received event [%s] on channel [%s] with data [%s]", eventName,
+                channelName, data));
+    }
 
-		System.out.println(String.format("Subscription to channel [%s] succeeded",
-				channel.getName()));
-	}
+    @Override
+    public void onSubscriptionSucceeded(String channelName) {
 
-	@Override
-	public void onAuthenticationFailure(String message, Exception e) {
+        System.out.println(String.format("Subscription to channel [%s] succeeded",
+                channel.getName()));
+    }
 
-		System.out.println(String.format(
-				"Authentication failure due to [%s], exception was [%s]", message, e));
-	}
+    @Override
+    public void onAuthenticationFailure(String message, Exception e) {
 
-	private void printCurrentlySubscribedUsers() {
-		StringBuilder sb = new StringBuilder("Users now subscribed to the channel:");
-		for (User remainingUser : channel.getUsers()) {
-			sb.append("\n\t");
-			sb.append(remainingUser.toString());
+        System.out.println(String.format(
+                "Authentication failure due to [%s], exception was [%s]", message, e));
+    }
 
-			if (remainingUser.equals(channel.getMe())) {
-				sb.append(" (me)");
-			}
-		}
+    private void printCurrentlySubscribedUsers() {
+        StringBuilder sb = new StringBuilder("Users now subscribed to the channel:");
+        for (User remainingUser : channel.getUsers()) {
+            sb.append("\n\t");
+            sb.append(remainingUser.toString());
 
-		System.out.println(sb.toString());
-	}
+            if (remainingUser.equals(channel.getMe())) {
+                sb.append(" (me)");
+            }
+        }
+
+        System.out.println(sb.toString());
+    }
 }

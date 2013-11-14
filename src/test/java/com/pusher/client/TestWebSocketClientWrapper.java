@@ -16,34 +16,34 @@ import com.pusher.client.connection.websocket.WebSocketListener;
 
 public class TestWebSocketClientWrapper extends WebSocketClientWrapper {
 
-	private final List<String> messagesSent = new ArrayList<String>();
-	private boolean connectCalled = false;
-	
-	public TestWebSocketClientWrapper(URI uri, WebSocketListener proxy) throws SSLException {
-		super(uri, proxy);
-	}
+    private final List<String> messagesSent = new ArrayList<String>();
+    private boolean connectCalled = false;
 
-	void assertConnectCalled() {
-		assertTrue(connectCalled);
-	}
-	
-	void assertLatestMessageWas(String msg) {
-		assertFalse("No messages have been sent", messagesSent.isEmpty());
-		assertEquals(msg, messagesSent.get(messagesSent.size()-1));
-	}
+    public TestWebSocketClientWrapper(URI uri, WebSocketListener proxy) throws SSLException {
+        super(uri, proxy);
+    }
 
-	void assertNumberOfMessagesSentIs(int count) {
-		assertEquals(count, messagesSent.size());
-	}
+    void assertConnectCalled() {
+        assertTrue(connectCalled);
+    }
 
-	@Override
-	public void send(String text) throws NotYetConnectedException {
-		messagesSent.add(text);
-		super.send(text);
-	}
+    void assertLatestMessageWas(String msg) {
+        assertFalse("No messages have been sent", messagesSent.isEmpty());
+        assertEquals(msg, messagesSent.get(messagesSent.size()-1));
+    }
 
-	@Override
-	public void connect() {
-		this.connectCalled = true;
-	}
+    void assertNumberOfMessagesSentIs(int count) {
+        assertEquals(count, messagesSent.size());
+    }
+
+    @Override
+    public void send(String text) throws NotYetConnectedException {
+        messagesSent.add(text);
+        super.send(text);
+    }
+
+    @Override
+    public void connect() {
+        this.connectCalled = true;
+    }
 }

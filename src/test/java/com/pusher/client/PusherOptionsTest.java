@@ -20,39 +20,39 @@ public class PusherOptionsTest {
 
     @Before
     public void setUp() {
-    	pusherOptions = new PusherOptions();
+        pusherOptions = new PusherOptions();
     }
 
     @Test
     public void testEncryptedInitializedAsTrue() {
-    	assert(pusherOptions.isEncrypted());
+        assert(pusherOptions.isEncrypted());
     }
 
     @Test
     public void testAuthorizerIsInitiallyNull() {
-    	assertNull(pusherOptions.getAuthorizer());
+        assertNull(pusherOptions.getAuthorizer());
     }
 
     @Test
     public void testAuthorizerCanBeSet() {
-    	pusherOptions.setAuthorizer(mockAuthorizer);
-    	assertSame(mockAuthorizer, pusherOptions.getAuthorizer());
+        pusherOptions.setAuthorizer(mockAuthorizer);
+        assertSame(mockAuthorizer, pusherOptions.getAuthorizer());
     }
 
     @Test
     public void testEncryptedCanBeSetToTrue() {
-    	pusherOptions.setEncrypted(true);
-    	assertSame(true, pusherOptions.isEncrypted());
+        pusherOptions.setEncrypted(true);
+        assertSame(true, pusherOptions.isEncrypted());
     }
 
     @Test
     public void testSetAuthorizerReturnsSelf() {
-    	assertSame(pusherOptions, pusherOptions.setAuthorizer(mockAuthorizer));
+        assertSame(pusherOptions, pusherOptions.setAuthorizer(mockAuthorizer));
     }
 
     @Test
     public void testSetEncryptedReturnsSelf() {
-    	assertSame(pusherOptions, pusherOptions.setEncrypted(true));
+        assertSame(pusherOptions, pusherOptions.setEncrypted(true));
     }
 
 

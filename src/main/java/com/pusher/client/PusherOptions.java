@@ -41,7 +41,7 @@ public class PusherOptions {
      * @return true if an encrypted connection should be used; otherwise false.
      */
     public boolean isEncrypted() {
-    	return encrypted;
+        return encrypted;
     }
 
     /**
@@ -50,8 +50,8 @@ public class PusherOptions {
      * @return this, for chaining
      */
     public PusherOptions setEncrypted(boolean encrypted) {
-    	this.encrypted = encrypted;
-    	return this;
+        this.encrypted = encrypted;
+        return this;
     }
 
     /**
@@ -59,7 +59,7 @@ public class PusherOptions {
      * @return the authorizer
      */
     public Authorizer getAuthorizer() {
-    	return authorizer;
+        return authorizer;
     }
 
     /**
@@ -68,8 +68,8 @@ public class PusherOptions {
      * @return this, for chaining
      */
     public PusherOptions setAuthorizer(Authorizer authorizer) {
-    	this.authorizer = authorizer;
-    	return this;
+        this.authorizer = authorizer;
+        return this;
     }
 
     /**

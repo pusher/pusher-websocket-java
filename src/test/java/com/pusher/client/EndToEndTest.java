@@ -34,125 +34,125 @@ import com.pusher.client.util.InstantExecutor;
 @RunWith(MockitoJUnitRunner.class)
 public class EndToEndTest {
 
-	private static final String API_KEY = "123456";
-	private static final String AUTH_KEY = "123456";
-	private static final String PUBLIC_CHANNEL_NAME = "my-channel";
+    private static final String API_KEY = "123456";
+    private static final String AUTH_KEY = "123456";
+    private static final String PUBLIC_CHANNEL_NAME = "my-channel";
     private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
-	private static final String OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE = "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
-	private static final long ACTIVITY_TIMEOUT = 120000;
-	private static final long PONG_TIMEOUT = 120000;
+    private static final String OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE = "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
+    private static final long ACTIVITY_TIMEOUT = 120000;
+    private static final long PONG_TIMEOUT = 120000;
 
-	private @Mock Authorizer mockAuthorizer;
-	private @Mock ConnectionEventListener mockConnectionEventListener;
-	private @Mock ServerHandshake mockServerHandshake;
-	private @Mock Factory factory;
-	private Pusher pusher;
-	private PusherOptions pusherOptions;
-	private InternalConnection connection;
-	private TestWebSocketClientWrapper testWebsocket;
+    private @Mock Authorizer mockAuthorizer;
+    private @Mock ConnectionEventListener mockConnectionEventListener;
+    private @Mock ServerHandshake mockServerHandshake;
+    private @Mock Factory factory;
+    private Pusher pusher;
+    private PusherOptions pusherOptions;
+    private InternalConnection connection;
+    private TestWebSocketClientWrapper testWebsocket;
 
-	@Before
-	public void setUp() throws Exception {
-	    pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
+    @Before
+    public void setUp() throws Exception {
+        pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
 
-	    connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
+        connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
 
-		when(factory.getEventQueue()).thenReturn(new InstantExecutor());
-		when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
-			@Override
-			public WebSocketClientWrapper answer(InvocationOnMock invocation) throws Throwable {
-				URI uri = (URI) invocation.getArguments()[0];
-				WebSocketListener proxy = (WebSocketListener) invocation.getArguments()[1];
-				testWebsocket = new TestWebSocketClientWrapper(uri, proxy);
-				return testWebsocket;
-			}
-		});
+        when(factory.getEventQueue()).thenReturn(new InstantExecutor());
+        when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
+            @Override
+            public WebSocketClientWrapper answer(InvocationOnMock invocation) throws Throwable {
+                URI uri = (URI) invocation.getArguments()[0];
+                WebSocketListener proxy = (WebSocketListener) invocation.getArguments()[1];
+                testWebsocket = new TestWebSocketClientWrapper(uri, proxy);
+                return testWebsocket;
+            }
+        });
 
-		when(factory.getConnection(API_KEY, pusherOptions)).thenReturn(connection);
+        when(factory.getConnection(API_KEY, pusherOptions)).thenReturn(connection);
 
-		when(factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
-			@Override
+        when(factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
+            @Override
             public ChannelManager answer(InvocationOnMock invocation) throws Throwable {
-				return new ChannelManager(factory);
-			}
-		});
+                return new ChannelManager(factory);
+            }
+        });
 
-		when(factory.newPresenceChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
-		when(factory.newPrivateChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
-		when(factory.newPublicChannel(anyString())).thenCallRealMethod();
+        when(factory.newPresenceChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
+        when(factory.newPrivateChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
+        when(factory.newPublicChannel(anyString())).thenCallRealMethod();
 
-		when(mockAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
+        when(mockAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
 
-		pusher = new Pusher(API_KEY, pusherOptions, factory);
-	}
+        pusher = new Pusher(API_KEY, pusherOptions, factory);
+    }
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
 
-		pusher.disconnect();
-		testWebsocket.onClose(1, "Close", true);
-	}
+        pusher.disconnect();
+        testWebsocket.onClose(1, "Close", true);
+    }
 
-	@Test
-	public void testSubscribeToPublicChannelSendsSubscribeMessage() {
+    @Test
+    public void testSubscribeToPublicChannelSendsSubscribeMessage() {
 
-		establishConnection();
-		pusher.subscribe(PUBLIC_CHANNEL_NAME);
+        establishConnection();
+        pusher.subscribe(PUBLIC_CHANNEL_NAME);
 
-		testWebsocket.assertLatestMessageWas("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PUBLIC_CHANNEL_NAME + "\"}}");
-	}
+        testWebsocket.assertLatestMessageWas("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PUBLIC_CHANNEL_NAME + "\"}}");
+    }
 
-	@Test
-	public void testSubscribeToPrivateChannelSendsSubscribeMessage() {
+    @Test
+    public void testSubscribeToPrivateChannelSendsSubscribeMessage() {
 
-		establishConnection();
-		pusher.subscribePrivate(PRIVATE_CHANNEL_NAME);
+        establishConnection();
+        pusher.subscribePrivate(PRIVATE_CHANNEL_NAME);
 
-		testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
-	}
+        testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
+    }
 
-	@Test
-	public void testForQueuedSubscriptionsAuthorizerIsNotCalledUntilTimeToSubscribe() {
+    @Test
+    public void testForQueuedSubscriptionsAuthorizerIsNotCalledUntilTimeToSubscribe() {
 
-		pusher.subscribePrivate(PRIVATE_CHANNEL_NAME);
-		verify(mockAuthorizer, never()).authorize(anyString(), anyString());
+        pusher.subscribePrivate(PRIVATE_CHANNEL_NAME);
+        verify(mockAuthorizer, never()).authorize(anyString(), anyString());
 
-		establishConnection();
-		verify(mockAuthorizer).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
-	}
+        establishConnection();
+        verify(mockAuthorizer).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
+    }
 
-	@Test
-	public void testSubscriptionsAreResubscribedWithFreshAuthTokensEveryTimeTheConnectionComesUp() {
+    @Test
+    public void testSubscriptionsAreResubscribedWithFreshAuthTokensEveryTimeTheConnectionComesUp() {
 
-		pusher.subscribePrivate(PRIVATE_CHANNEL_NAME);
-		verify(mockAuthorizer, never()).authorize(anyString(), anyString());
+        pusher.subscribePrivate(PRIVATE_CHANNEL_NAME);
+        verify(mockAuthorizer, never()).authorize(anyString(), anyString());
 
-		establishConnection();
-		verify(mockAuthorizer).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
-		testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
-		testWebsocket.assertNumberOfMessagesSentIs(1);
+        establishConnection();
+        verify(mockAuthorizer).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
+        testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
+        testWebsocket.assertNumberOfMessagesSentIs(1);
 
-		testWebsocket.onClose(0, "No reason", true);
-		testWebsocket.onOpen(mockServerHandshake);
-		testWebsocket.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
+        testWebsocket.onClose(0, "No reason", true);
+        testWebsocket.onOpen(mockServerHandshake);
+        testWebsocket.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
 
-		verify(mockAuthorizer, times(2)).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
-		testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
-		testWebsocket.assertNumberOfMessagesSentIs(2);
-	}
+        verify(mockAuthorizer, times(2)).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
+        testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
+        testWebsocket.assertNumberOfMessagesSentIs(2);
+    }
 
-	/** end of tests **/
+    /** end of tests **/
 
-	private void establishConnection() {
+    private void establishConnection() {
 
-		pusher.connect(mockConnectionEventListener);
+        pusher.connect(mockConnectionEventListener);
 
-		testWebsocket.assertConnectCalled();
-		verify(mockConnectionEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
+        testWebsocket.assertConnectCalled();
+        verify(mockConnectionEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
 
-		testWebsocket.onOpen(mockServerHandshake);
-		testWebsocket.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
+        testWebsocket.onOpen(mockServerHandshake);
+        testWebsocket.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
 
-		verify(mockConnectionEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
-	}
+        verify(mockConnectionEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
+    }
 }
