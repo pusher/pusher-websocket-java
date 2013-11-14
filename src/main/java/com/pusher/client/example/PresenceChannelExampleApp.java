@@ -4,9 +4,9 @@ import java.util.Set;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.User;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
+import com.pusher.client.channel.User;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpAuthorizer;
@@ -38,6 +38,15 @@ public class PresenceChannelExampleApp implements ConnectionEventListener,
         pusher.connect(this);
 
         channel = pusher.subscribePresence(channelName, this, eventName);
+
+        // Keep main thread asleep while we watch for events or application will terminate
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /* ConnectionEventListener implementation */

@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 import javax.net.ssl.SSLException;
 
@@ -66,7 +67,14 @@ public class Factory {
 
     public ScheduledExecutorService getEventQueue() {
         if (eventQueue == null) {
-            eventQueue = Executors.newSingleThreadScheduledExecutor();
+            eventQueue = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r);
+                    t.setDaemon(true);
+                    return t;
+                }
+            });
         }
         return eventQueue;
     }

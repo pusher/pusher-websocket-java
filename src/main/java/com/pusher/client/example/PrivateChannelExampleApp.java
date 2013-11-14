@@ -35,6 +35,15 @@ public class PrivateChannelExampleApp implements ConnectionEventListener,
         pusher.connect(this);
 
         channel = pusher.subscribePrivate(channelName, this, eventName);
+
+        // Keep main thread asleep while we watch for events or application will terminate
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /* ConnectionEventListener implementation */
