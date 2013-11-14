@@ -72,11 +72,19 @@ public class Factory {
                 public Thread newThread(Runnable r) {
                     Thread t = new Thread(r);
                     t.setDaemon(true);
+                    t.setName("PusherClient EventQueue");
                     return t;
                 }
             });
         }
         return eventQueue;
+    }
+
+    public void shutdownEventQueue() {
+        if (eventQueue != null) {
+            eventQueue.shutdown();
+            eventQueue = null;
+        }
     }
 
     public ChannelImpl newPublicChannel(String channelName) {

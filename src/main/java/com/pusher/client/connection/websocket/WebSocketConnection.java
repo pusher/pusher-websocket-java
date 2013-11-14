@@ -250,6 +250,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             public void run() {
                 if (state != ConnectionState.DISCONNECTED) {
                     updateState(ConnectionState.DISCONNECTED);
+
+                    factory.shutdownEventQueue();
                 } else {
                     log.error("Received close from underlying socket when already disconnected. "
                             + "Close code [" + code + "], Reason [" + reason + "], Remote [" + remote + "]");
