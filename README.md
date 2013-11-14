@@ -430,10 +430,13 @@ The JavaDocs can be found here: <http://pusher.github.com/pusher-java-client/>
 
 ## Library Development Environment
 
+### Prerequisites
+
+* Apache Maven, the build system used for the project
+
 ### Cloning the project
 
-* If you don't have it already, [download Maven](http://maven.apache.org/download.cgi) and add the `mvn` executable to your path.
-* Clone the project: `git clone https://github.com/pusher/pusher-java-client.git`
+* Clone the project: `git clone https://github.com/pusher/pusher-java-client`
 * Change to the top level directory for the project: `cd pusher-java-client`
 * Retrieve the Java-WebSocket library: `git submodule update --init`
 
@@ -441,8 +444,9 @@ The JavaDocs can be found here: <http://pusher.github.com/pusher-java-client/>
 
 Assuming you are using Eclipse, follow these steps:
 
-* Make a note of your Eclipse workspace location, for example `C:\Users\Phil\workspace`
-* In the root of the project execute `mvn -Declipse.workspace="<your workspace location>" eclipse:configure-workspace`, for example `mvn -Declipse.workspace="C:\Users\Phil\workspace" eclipse:configure-workspace`. This will add an M2_REPO environment variable to your Eclipse workspace, which is required for the next step.
+* If you have not used Eclipse and Maven together before (so you don't have an M2_REPO classpath variable configured):
+  * Make a note of your Eclipse workspace location, for example `/home/user/workspace`
+  * In the root of the project execute `mvn -Declipse.workspace="<your workspace location>" eclipse:configure-workspace`. This will add an M2_REPO environment variable to your Eclipse workspace, which is required for the next step.
 * Still in the root of the project execute `mvn eclipse:clean eclipse:eclipse`. This will read the pom file to determine the dependencies and generate `.project` and `.classpath` files that point to those dependencies in your local Maven cache.
 
 You can now load the project in Eclipse by navigating to `Import project` and pointing it to the root directory of the project.
@@ -453,17 +457,8 @@ From the top level directory execute `mvn clean test` to compile and run the uni
 
 ### Run the Example Application
 
-After running `mvn clean install` change to the `target` directory and run `java -jar pusher-java-client-<version>-jar-with-dependencies.jar`. This will run the example application.
+After running `mvn clean package` change to the `target` directory and run `java -jar pusher-java-client-<version>-jar-with-dependencies.jar`. This will run the example application.
 
 By default the example will connect to a sample application and subscribe to the channel `my-channel`, listening to events on `my-event`. If you want to change these defaults, they can be specified on the command line:
 
 `java -jar pusher-java-client-<version>-jar-with-dependencies.jar [appKey] [channelName] [eventName]`
-
-### Deploy
-
-    mvn site-deploy
-
-This command does two things:
-
-1. The library is deployed to a Maven repository in a github branch. For more information see: <http://stackoverflow.com/a/14013645/39904>
-2. Generated JavaDocs are deployed to <http://pusher.github.com/pusher-java-client/>. For more information see: <https://github.com/github/maven-plugins>
