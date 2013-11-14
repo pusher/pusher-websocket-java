@@ -116,6 +116,10 @@ Pusher pusher = new Pusher( YOUR_APP_KEY );
 pusher.connect();
 ```
 
+The `connect` method is also used to re-connect in case the connection has been lost, for example if an Android
+device loses reception. Note that the state of channel subscriptions and event bindings will be preserved while
+disconnected and re-negotiated with the server once a connection is re-established.
+
 ## Disconnecting
 
 ```java
@@ -151,6 +155,8 @@ For more information see [connection states](http://pusher.com/docs/connection_s
 ## Subscribing to channels
 
 Pusher uses the concept of [channels](http://pusher.com/docs/channels) as a way of subscribing to data. They are identified and subscribed to by a simple name. Events are bound to on a channels and are also identified by name. To listen to an event you need to implemented the `ChannelEventListener` interface (see **Binding and handling events**).
+
+As mentioned above, channel subscriptions need only be registered once per `Pusher` instance. They are preserved across disconnection and re-established with the server on reconnect. They should NOT be re-registered. They may, however, be registered before the first call to `connect`.
 
 ### Public channels
 
