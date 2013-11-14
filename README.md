@@ -49,7 +49,7 @@ Here's the API in a nutshell.
 
 ```java
 // Create a new Pusher instance
-Pusher pusher = new Pusher( "YOUR_APP_KEY" );
+Pusher pusher = new Pusher(YOUR_APP_KEY);
 
 // Connect
 pusher.connect(new ConnectionEventListener() {
@@ -63,20 +63,18 @@ pusher.connect(new ConnectionEventListener() {
   public void onError(String message, String code, Exception e) {
     // handle connection error
   }
-
 }, ConnectionState.ALL);
 
 // Subscribe to a channel
-Channel channel = pusher.subscribe( "my-channel" );
+Channel channel = pusher.subscribe("my-channel");
 
 // Bind to an event and listen for events
-channel.bind( "my-event", new SubscriptionEventListener() {
+channel.bind("my-event", new SubscriptionEventListener() {
 
   @Override
   public void onEvent(String channel, String event, String data) {
     // do something with the event data
   }
-
 });
 ```
 
@@ -87,7 +85,7 @@ More information in reference format can be found below.
 The standard constructor take an application key which you can get from the app's API Access section in the Pusher dashboard.
 
 ```java
-Pusher pusher = new Pusher( YOUR_APP_KEY );
+Pusher pusher = new Pusher(YOUR_APP_KEY);
 ```
 
 If you are going to use [private](http://pusher.com/docs/private_channels) or [presence](http://pusher.com/docs/presence_channels) channels then you will need to provide an `Authorizer` to be used when authenticating subscriptions. In order to do this you need to pass in a `PusherOptions` object which has had an `Authorizer` set.
@@ -95,7 +93,7 @@ If you are going to use [private](http://pusher.com/docs/private_channels) or [p
 ```java
 HttpAuthorizer authorizer = new HttpAuthorizer("http://example.com/some_auth_endpoint");
 PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
-Pusher pusher = new Pusher( YOUR_APP_KEY, options );
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
 See the documentation on [Authenticating Users](http://pusher.com/docs/authenticating_users) for more information.
@@ -103,7 +101,7 @@ See the documentation on [Authenticating Users](http://pusher.com/docs/authentic
 You can also specify the Pusher cluster you wish to connect to on the PusherOptions, e.g.
 
 ```java
-PusherOptions options = new PusherOptions().setCluster("eu");
+options.setCluster("eu");
 ```
 
 If you need finer control over the endpoint then the setHost, setWsPort and setWssPort methods can be employed.
@@ -112,7 +110,7 @@ If you need finer control over the endpoint then the setHost, setWsPort and setW
 In order to send and receive messages you need to connect to Pusher.
 
 ```java
-Pusher pusher = new Pusher( YOUR_APP_KEY );
+Pusher pusher = new Pusher(YOUR_APP_KEY);
 pusher.connect();
 ```
 
@@ -132,8 +130,8 @@ It is possible to receive connection state change events by implementing the `Co
 
 ```java
 
-Pusher pusher = new Pusher( YOUR_APP_KEY );
-pusher.connect( new ConnectionListener() {
+Pusher pusher = new Pusher(YOUR_APP_KEY);
+pusher.connect(new ConnectionListener() {
 
   @Override
   public void onConnectionStateChange(ConnectionStateChange change) {
@@ -144,10 +142,9 @@ pusher.connect( new ConnectionListener() {
 
   @Override
   public void onError(String message, String code, Exception e) {
-    System.out.println( "Error: " + message );
+    System.out.println("Error: " + message);
   }
-
-} );
+});
 ```
 
 For more information see [connection states](http://pusher.com/docs/connection_states).
@@ -161,24 +158,24 @@ As mentioned above, channel subscriptions need only be registered once per `Push
 ### Public channels
 
 ```java
-Channel channel = pusher.subscribe( "my-channel" );
+Channel channel = pusher.subscribe("my-channel");
 ```
 
 Sometimes you may want to be informed when the subscription succeeds. You can do this by implementing the `ChannelEventListener` interface:
 
 ```java
-Channel channel = pusher.subscribe( "my-channel", new ChannelEventListener() {
+Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
 
   @Override
   public void onSubscriptionSucceeded(String channelName) {
-    System.out.println( "Subscribed!" );
+    System.out.println("Subscribed to channel: " + channelName);
   }
 
   @Override
-  public void onEvent(String channelName, String eventName, String data){
+  public void onEvent(String channelName, String eventName, String data) {
+	
   }
-
-} );
+});
 ```
 
 ### Private channels
@@ -207,7 +204,7 @@ PrivateChannel channel = pusher.subscribePrivate( "private-channel",
     }
 
     // Other ChannelEventListener methods
-  } );
+  });
 ```
 
 ### Presence channels
@@ -228,7 +225,7 @@ PresenceChannel channel = pusher.subscribePresence( "presence-channel",
 
     @Override
     public void onUserInformationReceived(String channelName, Set<User> users) {
-	  for(User user : users) {
+	  for (User user : users) {
 	    userSubscribed(channelName, user);
 	  }
     }
@@ -236,11 +233,11 @@ PresenceChannel channel = pusher.subscribePresence( "presence-channel",
     @Override
     public void userSubscribed(String channelName, User user) {
 	  System.out.println(
-        String.format( "A new user has joined channel [%s]: %s, %s", channelName,
-          user.getId(), user.getInfo() )
+        String.format("A new user has joined channel [%s]: %s, %s", channelName,
+          user.getId(), user.getInfo())
       );
 
-	  if(user.equals(channel.getMe())) {
+	  if (user.equals(channel.getMe())) {
 	    System.out.println("me");
 	  }
     }
@@ -255,7 +252,7 @@ PresenceChannel channel = pusher.subscribePresence( "presence-channel",
 
     // Other ChannelEventListener methods
 
-  } );
+  });
 ```
 
 #### The User object
@@ -265,10 +262,6 @@ PresenceChannel channel = pusher.subscribePresence( "presence-channel",
 The `User` object has two main methods.
 
 `getId` fetches a unique identifier for the user on the presence channel.
-
-```java
-String id = user.getId();
-```
 
 `getInfo` fetches a string representing arbitrary additional information about the user. The contents of this is entirely up to your application. However, it's recommended that the data is in JSON format so that it can easily be deserialized.
 
@@ -294,18 +287,19 @@ There are two types of events that occur on channel subscriptions.
 The `ChannelEventListener` is an interface that is informed of both protocol related events and application data events. A `ChannelEventListener` can be used when initially subscribing to a channel.
 
 ```java
-Channel channel = pusher.subscribe( "my-channel", new ChannelEventListener() {
+Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
 
   @Override
   public void onSubscriptionSucceeded(String channelName) {
-    System.out.println( "Subscribed!" );
+    System.out.println("Subscribed!");
   }
 
   @Override
-  public void onEvent(String channelName, String eventName, String data){
+  public void onEvent(String channelName, String eventName, String data) {
+	
   }
 
-} );
+});
 ```
 
 The `ChannelEventListener` interface extends the `SubscriptionEventListener` interface.
@@ -315,14 +309,15 @@ The `ChannelEventListener` interface extends the `SubscriptionEventListener` int
 Events triggered by your application are received by the `onEvent` method on the `SubscriptionEventListener` interface implementation. If you are only related to application events you can bind to events on `Channel` objects.
 
 ```java
-Channel channel = pusher.subscribe( "my-channel" );
-channel.bind( 'my-event', new ChannelEventListener() {
+Channel channel = pusher.subscribe("my-channel");
+channel.bind("my-event", new ChannelEventListener() {
 
   @Override
-  public void onEvent(String channelName, String eventName, String data){
+  public void onEvent(String channelName, String eventName, String data) {
+	
   }
 
-} );
+});
 ```
 
 The event data will be passed as the third parameter to the `onEvent` method. From there you can handle the data as you like. Since we encourage data to be in JSON here's an example that uses [Gson object deserialization](https://sites.google.com/site/gson/gson-user-guide#TOC-Object-Examples):
@@ -331,14 +326,14 @@ The event data will be passed as the third parameter to the `onEvent` method. Fr
 public class Example implements ChannelEventListener {
 
   public Example() {
-    Pusher pusher = new Pusher( YOUR_APP_KEY );
-    pusher.connect( this );
+    Pusher pusher = new Pusher(YOUR_APP_KEY);
+    pusher.connect();
 
-    pusher.subscribe( "my-channel", this );
+    pusher.subscribe("my-channel", this);
   }
 
   @Override
-  public void onEvent(String channelName, String eventName, String data){
+  public void onEvent(String channelName, String eventName, String data) {
     Gson gson = new Gson();
     EventExample exampleEvent = gson.fromJson(data, EventExample.class);
   }
@@ -359,7 +354,7 @@ class EventExample {
 You can unbind from an event:
 
 ```java
-channel.unbind( "my_event", listener );
+channel.unbind("my_event", listener);
 ```
 
 ### Example
@@ -371,18 +366,18 @@ public class Example implements ChannelEventListener {
   private final Channel channel;
 
   public Example() {
-    pusher = new Pusher( YOUR_APP_KEY );
-    pusher.connect( this );
+    pusher = new Pusher(YOUR_APP_KEY);
+    pusher.connect();
 
-    channel = pusher.subscribe( "my-channel", this, "my_event" );
+    channel = pusher.subscribe("my-channel", this, "my_event");
   }
 
   public void listenToOtherEvent() {
-    channel.bind( "my_other_event", this );
+    channel.bind("my_other_event", this);
   }
 
   public void stopListeningToOtherEvent() {
-    channel.unbind( "my_other_event", this );
+    channel.unbind("my_other_event", this);
   }
 
 }
@@ -405,17 +400,16 @@ Events triggered by clients are called [client events](http://pusher.com/docs/cl
 For full details see the [client events documentation](http://pusher.com/docs/client_events).
 
 ```java
-PrivateChannel channel;
-channel = pusher.subscribePrivate( "private-channel",
+PrivateChannel channel = pusher.subscribePrivate("private-channel", 
   new PrivateChannelEventListener() {
-
+	  
     @Override
     public void onSubscriptionSucceeded(String channelName) {
 	  channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
     }
 
     // Other PrivateChannelEventListener methods
-  } );
+  });
 ```
 
 ## Accessing the connection socket ID
@@ -425,7 +419,6 @@ Once connected you can access a unique identifier for the current client's conne
 You can access the value **once the connection has been established** as follows:
 
 ```java
-Pusher pusher = new Pusher( YOUR_APP_KEY );
 String socketId = pusher.getConnection().getSocketId();
 ```
 
