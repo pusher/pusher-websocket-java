@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
@@ -45,6 +46,9 @@ public class WebSocketConnectionPingTest {
     private Factory factory;
     @Mock
     private InstantExecutor executor;
+    @Mock
+    @SuppressWarnings("rawtypes")
+    private ScheduledFuture future;
 
     private long now = System.currentTimeMillis();
 
@@ -55,11 +59,13 @@ public class WebSocketConnectionPingTest {
 
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setUp() throws URISyntaxException, SSLException {
         when(factory.getChannelManager()).thenReturn(mockChannelManager);
         when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class)))
                 .thenReturn(mockUnderlyingConnection);
         when(factory.getEventQueue()).thenReturn(executor);
+        when(executor.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class))).thenReturn(future);
         when(factory.timeNow()).thenReturn(now);
 
         doCallRealMethod().when(executor).execute(any(Runnable.class));

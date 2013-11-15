@@ -1,5 +1,9 @@
 # pusher-java-client changelog
 
+## Version 0.2.1
+2013-11-14 mdpye
+ * EventQueue made a daemon thread and also shutdown on disconnect
+
 ## Version 0.2.0
 2013-11-08 mdpye
  * Fix up pom for inclusion in Maven Central

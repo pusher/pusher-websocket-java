@@ -2,10 +2,14 @@ package com.pusher.client.connection.websocket;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
@@ -35,6 +39,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final URI webSocketUri;
     private String socketId;
 
+    private List<ScheduledFuture<?>> outstandingTimeouts = new ArrayList<ScheduledFuture<?>>();
     private final long activityTimeout;
     private final long pongTimeout;
     long lastActivity;
@@ -251,6 +256,9 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 if (state != ConnectionState.DISCONNECTED) {
                     updateState(ConnectionState.DISCONNECTED);
 
+                    for (ScheduledFuture<?> timeout : outstandingTimeouts) {
+                        timeout.cancel(false);
+                    }
                     factory.shutdownEventQueue();
                 } else {
                     log.error("Received close from underlying socket when already disconnected. "
@@ -285,7 +293,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                     log.debug("Sending ping message");
                     sendMessage(PING_EVENT_SERIALIZED);
 
-                    factory.getEventQueue().schedule(new PongCheck(timeNow), pongTimeout, TimeUnit.MILLISECONDS);
+                    ScheduledFuture<?> future = factory.getEventQueue().schedule(new PongCheck(timeNow), pongTimeout, TimeUnit.MILLISECONDS);
+                    outstandingTimeouts.add(future);
 
                     // If we have sent a ping, reschedule for one ping period, plus
                     // a small buffer within which we hope to have received the pong from the server
@@ -295,10 +304,17 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                     // reschedule one period after that activity occurred
                     nextCheck = lastActivity + activityTimeout - timeNow;
                 }
-                factory.getEventQueue().schedule(new PingCheck(), nextCheck, TimeUnit.MILLISECONDS);
+                ScheduledFuture<?> future = factory.getEventQueue().schedule(new PingCheck(), nextCheck, TimeUnit.MILLISECONDS);
+                outstandingTimeouts.add(future);
             }
             // If we're not connected, don't ping, nor schedule further checks.
             // A new check will be scheduled if and when we reconnect.
+
+            // Clean outstanding timeout references
+            Iterator<ScheduledFuture<?>> it = outstandingTimeouts.iterator();
+            while (it.hasNext()) {
+                if (it.next().isDone()) it.remove();
+            }
         }
     }
 

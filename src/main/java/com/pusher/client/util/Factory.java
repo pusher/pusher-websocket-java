@@ -39,7 +39,8 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  * time it is called.
  *
  * - any method that starts with "get", such as {@link #getEventQueue()} returns
- * a singleton.
+ * a singleton. These are lazily constructed and their access methods should be
+ * synchronized for this reason.
  */
 public class Factory {
 
@@ -47,7 +48,7 @@ public class Factory {
     private ChannelManager channelManager;
     private ScheduledExecutorService eventQueue;
 
-    public InternalConnection getConnection(String apiKey, PusherOptions options) {
+    public synchronized InternalConnection getConnection(String apiKey, PusherOptions options) {
         if (connection == null) {
             try {
                 connection = new WebSocketConnection(options.buildUrl(apiKey),
@@ -65,7 +66,7 @@ public class Factory {
         return new WebSocketClientWrapper(uri, proxy);
     }
 
-    public ScheduledExecutorService getEventQueue() {
+    public synchronized ScheduledExecutorService getEventQueue() {
         if (eventQueue == null) {
             eventQueue = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
                 @Override
@@ -80,7 +81,7 @@ public class Factory {
         return eventQueue;
     }
 
-    public void shutdownEventQueue() {
+    public synchronized void shutdownEventQueue() {
         if (eventQueue != null) {
             eventQueue.shutdown();
             eventQueue = null;
@@ -100,7 +101,7 @@ public class Factory {
         return new PresenceChannelImpl(connection, channelName, authorizer, this);
     }
 
-    public ChannelManager getChannelManager() {
+    public synchronized ChannelManager getChannelManager() {
         if (channelManager == null) {
             channelManager = new ChannelManager(this);
         }
