@@ -154,6 +154,10 @@ public class Pusher {
     /**
      * Subscribes to a public {@link Channel}.
      *
+     * Note that subscriptions should be registered only once with a Pusher instance.
+     * Subscriptions are persisted over disconnection and re-registered with the server automatically on reconnection.
+     * This means that subscriptions may also be registered before connect() is called, they will be initiated on connection.
+     *
      * @param channelName The name of the {@link Channel} to subscribe to.
      * @return The {@link Channel} object representing your subscription.
      */
