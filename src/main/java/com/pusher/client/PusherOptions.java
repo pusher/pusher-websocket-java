@@ -10,11 +10,11 @@ public class PusherOptions {
     // built library. However when running
     // the source locally this will return null, so a default version of 0.0.0
     // will be used instead.
-    private static final String APP_VERSION =
+    public static final String LIB_VERSION =
             PusherOptions.class.getPackage().getImplementationVersion() != null ?
                     PusherOptions.class.getPackage().getImplementationVersion() : "0.0.0";
 
-    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + APP_VERSION;
+    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
     private static final String WSS_SCHEME = "wss";
 
