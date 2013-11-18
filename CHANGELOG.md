@@ -1,5 +1,9 @@
 # pusher-java-client changelog
 
+## Version 0.2.2
+2013-11-18 mdpye
+ * Use more robust method for finding artifact version
+
 ## Version 0.2.1
 2013-11-14 mdpye
  * EventQueue made a daemon thread and also shutdown on disconnect

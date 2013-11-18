@@ -1,18 +1,14 @@
 package com.pusher.client;
 
+import java.util.Properties;
+
 
 /**
  * Configuration for a {@link com.pusher.client.Pusher} instance.
  */
 public class PusherOptions {
 
-    // The version is populated from the pom.xml when running the application as a
-    // built library. However when running
-    // the source locally this will return null, so a default version of 0.0.0
-    // will be used instead.
-    public static final String LIB_VERSION =
-            PusherOptions.class.getPackage().getImplementationVersion() != null ?
-                    PusherOptions.class.getPackage().getImplementationVersion() : "0.0.0";
+    public static final String LIB_VERSION = readVersionFromProperties();
 
     private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
@@ -182,5 +178,21 @@ public class PusherOptions {
                 encrypted ? wssPort : wsPort,
                 apiKey,
                 URI_SUFFIX);
+    }
+
+
+    private static String readVersionFromProperties() {
+        try {
+            Properties p = new Properties();
+            p.load(PusherOptions.class.getResourceAsStream("/pusher.properties"));
+            String version = (String) p.get("version");
+            if (version != null && version.length() > 0) {
+                return version;
+            }
+        }
+        catch (Exception e) {
+            // Fall back to fixed value
+        }
+        return "0.0.0";
     }
 }
