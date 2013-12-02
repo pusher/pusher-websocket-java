@@ -110,10 +110,16 @@ public class PusherOptions {
         return this;
     }
 
-    public PusherOptions setCluster(String cluster) {
-        this.host = "ws-" + cluster + "." + PUSHER_DOMAIN;
-        this.wsPort = WS_PORT;
-        this.wssPort = WSS_PORT;
+    /**
+     * Sets host and port information using a single argument.
+     *
+     * @param cluster
+     * @return this, for chaining
+     */
+    public PusherOptions setCluster(Cluster cluster) {
+        this.host = cluster.getHost();
+        this.wsPort = cluster.getWsPort();
+        this.wssPort = cluster.getWssPort();
         return this;
     }
 

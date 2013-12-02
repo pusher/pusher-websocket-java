@@ -69,13 +69,13 @@ public class PusherOptionsTest {
 
     @Test
     public void testClusterSetURLIsCorrect() {
-        pusherOptions.setCluster("eu");
+        pusherOptions.setCluster(new Cluster("ws-eu.pusher.com", 80, 443));
         assertEquals(pusherOptions.buildUrl(API_KEY), "wss://ws-eu.pusher.com:443/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
     }
 
     @Test
     public void testClusterSetNonSSLURLIsCorrect() {
-        pusherOptions.setCluster("eu").setEncrypted(false);
+        pusherOptions.setCluster(new Cluster("ws-eu.pusher.com", 80, 443)).setEncrypted(false);
         assertEquals(pusherOptions.buildUrl(API_KEY), "ws://ws-eu.pusher.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
     }
 
