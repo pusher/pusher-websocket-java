@@ -43,7 +43,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final long activityTimeout;
     private final long pongTimeout;
     long lastActivity;
-    long lastPong;
 
     public WebSocketConnection(String url, long activityTimeout, long pongTimeout, Factory factory) throws URISyntaxException {
         this.webSocketUri = new URI(url);
@@ -166,8 +165,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             handleConnectionMessage(wholeMessage);
         } else if (event.equals("pusher:error")) {
             handleError(wholeMessage);
-        } else if (event.equals("pusher:pong")) {
-            handlePong(wholeMessage);
         }
     }
 
@@ -204,10 +201,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         }
 
         sendErrorToAllListeners(message, code, null);
-    }
-
-    private void handlePong(String wholeMessage) {
-        lastPong = factory.timeNow();
     }
 
     private void sendErrorToAllListeners(final String message, final String code, final Exception e) {
@@ -327,7 +320,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
         @Override
         public void run() {
-            if (lastPong < pingSent) {
+            if (lastActivity < pingSent) {
                 log.info("Timed out awaiting pong response from server. Moving to disconnected state.");
                 disconnect();
             }
