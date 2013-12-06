@@ -32,7 +32,7 @@ As of version 0.2.0, pusher-java-client is available in Maven Central:
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.3</version>
     </dependency>
 
 ### Download
