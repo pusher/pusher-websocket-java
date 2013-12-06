@@ -28,6 +28,7 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
 import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
+import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
@@ -58,6 +59,7 @@ public class EndToEndTest {
         connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
 
         when(factory.getEventQueue()).thenReturn(new InstantExecutor());
+        when(factory.getTimers()).thenReturn(new DoNothingExecutor());
         when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
             @Override
             public WebSocketClientWrapper answer(InvocationOnMock invocation) throws Throwable {

@@ -27,6 +27,7 @@ import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
+import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
@@ -59,6 +60,7 @@ public class WebSocketConnectionTest {
         when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class)))
                 .thenReturn(mockUnderlyingConnection);
         when(factory.getEventQueue()).thenReturn(new InstantExecutor());
+        when(factory.getTimers()).thenReturn(new DoNothingExecutor());
 
         this.connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
         this.connection.bind(ConnectionState.ALL, mockEventListener);

@@ -2,6 +2,7 @@ package com.pusher.client.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -46,7 +47,8 @@ public class Factory {
 
     private InternalConnection connection;
     private ChannelManager channelManager;
-    private ScheduledExecutorService eventQueue;
+    private ExecutorService eventQueue;
+    private ScheduledExecutorService timers;
 
     public synchronized InternalConnection getConnection(String apiKey, PusherOptions options) {
         if (connection == null) {
@@ -66,26 +68,18 @@ public class Factory {
         return new WebSocketClientWrapper(uri, proxy);
     }
 
-    public synchronized ScheduledExecutorService getEventQueue() {
+    public synchronized ExecutorService getEventQueue() {
         if (eventQueue == null) {
-            eventQueue = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r);
-                    t.setDaemon(true);
-                    t.setName("PusherClient EventQueue");
-                    return t;
-                }
-            });
+            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
         }
         return eventQueue;
     }
 
-    public synchronized void shutdownEventQueue() {
-        if (eventQueue != null) {
-            eventQueue.shutdown();
-            eventQueue = null;
+    public synchronized ScheduledExecutorService getTimers() {
+        if (timers == null) {
+            timers = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("timers"));
         }
+        return timers;
     }
 
     public ChannelImpl newPublicChannel(String channelName) {
@@ -108,7 +102,30 @@ public class Factory {
         return channelManager;
     }
 
-    public long timeNow() {
-        return System.currentTimeMillis();
+    public synchronized void shutdownThreads() {
+        if (eventQueue != null) {
+            eventQueue.shutdown();
+            eventQueue = null;
+        }
+        if (timers != null) {
+            timers.shutdown();
+            timers = null;
+        }
+    }
+
+    private static class DaemonThreadFactory implements ThreadFactory {
+        private final String name;
+
+        public DaemonThreadFactory(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            t.setName("pusher-java-client " + name);
+            return t;
+        }
     }
 }

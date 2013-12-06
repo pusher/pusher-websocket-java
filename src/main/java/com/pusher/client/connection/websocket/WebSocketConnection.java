@@ -2,14 +2,11 @@ package com.pusher.client.connection.websocket;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
@@ -33,21 +30,17 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
 
     private final Factory factory;
+    private final ActivityTimer activityTimer;
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
+    private final URI webSocketUri;
+
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClient underlyingConnection;
-    private final URI webSocketUri;
     private String socketId;
-
-    private List<ScheduledFuture<?>> outstandingTimeouts = new ArrayList<ScheduledFuture<?>>();
-    private final long activityTimeout;
-    private final long pongTimeout;
-    long lastActivity;
 
     public WebSocketConnection(String url, long activityTimeout, long pongTimeout, Factory factory) throws URISyntaxException {
         this.webSocketUri = new URI(url);
-        this.activityTimeout = activityTimeout;
-        this.pongTimeout = pongTimeout;
+        this.activityTimer = new ActivityTimer(activityTimeout, pongTimeout);
         this.factory = factory;
 
         for (ConnectionState state : ConnectionState.values()) {
@@ -176,8 +169,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         socketId = (String) dataMap.get("socket_id");
 
         updateState(ConnectionState.CONNECTED);
-
-        factory.getEventQueue().schedule(new PingCheck(), activityTimeout, TimeUnit.MILLISECONDS);
     }
 
     @SuppressWarnings("rawtypes")
@@ -229,11 +220,11 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     @Override
     @SuppressWarnings("unchecked")
     public void onMessage(final String message) {
+        activityTimer.activity();
+
         factory.getEventQueue().execute(new Runnable() {
             @Override
             public void run() {
-                lastActivity = factory.timeNow();
-
                 Map<String, String> map = new Gson().fromJson(message, Map.class);
                 String event = map.get("event");
                 handleEvent(event, message);
@@ -243,20 +234,18 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @Override
     public void onClose(final int code, final String reason, final boolean remote) {
+        activityTimer.cancelTimeouts();
+
         factory.getEventQueue().execute(new Runnable() {
             @Override
             public void run() {
                 if (state != ConnectionState.DISCONNECTED) {
                     updateState(ConnectionState.DISCONNECTED);
-
-                    for (ScheduledFuture<?> timeout : outstandingTimeouts) {
-                        timeout.cancel(false);
-                    }
-                    factory.shutdownEventQueue();
                 } else {
                     log.error("Received close from underlying socket when already disconnected. "
                             + "Close code [" + code + "], Reason [" + reason + "], Remote [" + remote + "]");
                 }
+                factory.shutdownThreads();
             }
         });
     }
@@ -274,61 +263,61 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         });
     }
 
-    /* Package private for testing */
-    class PingCheck implements Runnable {
 
-        @Override
-        public void run() {
-            final long timeNow = factory.timeNow();
-            if (state == ConnectionState.CONNECTED) {
-                long nextCheck;
-                if (lastActivity + activityTimeout < timeNow) {
-                    log.debug("Sending ping message");
+    private class ActivityTimer {
+        private final long activityTimeout;
+        private final long pongTimeout;
+
+        private Future<?> pingTimer;
+        private Future<?> pongTimer;
+
+        public ActivityTimer(final long activityTimeout, final long pongTimeout) {
+            this.activityTimeout = activityTimeout;
+            this.pongTimeout = pongTimeout;
+        }
+
+        /**
+         * On any activity from the server
+         *  - Cancel pong timeout
+         *  - Cancel currently ping timeout and re-schedule
+         */
+        public synchronized void activity() {
+            if (pongTimer != null) pongTimer.cancel(true);
+
+            if (pingTimer != null) pingTimer.cancel(false);
+            pingTimer = factory.getTimers().schedule(new Runnable() {
+                @Override
+                public void run() {
+                    log.debug("Sending ping");
                     sendMessage(PING_EVENT_SERIALIZED);
-
-                    ScheduledFuture<?> future = factory.getEventQueue().schedule(new PongCheck(timeNow), pongTimeout, TimeUnit.MILLISECONDS);
-                    outstandingTimeouts.add(future);
-
-                    // If we have sent a ping, reschedule for one ping period, plus
-                    // a small buffer within which we hope to have received the pong from the server
-                    nextCheck = activityTimeout + 500;
-                } else {
-                    // If there's been some activity since this check was scheduled,
-                    // reschedule one period after that activity occurred
-                    nextCheck = lastActivity + activityTimeout - timeNow;
+                    schedulePongCheck();
                 }
-                ScheduledFuture<?> future = factory.getEventQueue().schedule(new PingCheck(), nextCheck, TimeUnit.MILLISECONDS);
-                outstandingTimeouts.add(future);
-            }
-            // If we're not connected, don't ping, nor schedule further checks.
-            // A new check will be scheduled if and when we reconnect.
-
-            // Clean outstanding timeout references
-            Iterator<ScheduledFuture<?>> it = outstandingTimeouts.iterator();
-            while (it.hasNext()) {
-                if (it.next().isDone()) it.remove();
-            }
-        }
-    }
-
-    class PongCheck implements Runnable {
-        private final long pingSent;
-
-        public PongCheck(final long pingSent) {
-            this.pingSent = pingSent;
+            }, activityTimeout, TimeUnit.MILLISECONDS);
         }
 
-        @Override
-        public void run() {
-            if (lastActivity < pingSent) {
-                log.info("Timed out awaiting pong response from server. Moving to disconnected state.");
-                disconnect();
-            }
+        /**
+         * Cancel any pending timeouts, for example because we are disconnected.
+         */
+        public synchronized void cancelTimeouts() {
+            if (pingTimer != null) pingTimer.cancel(false);
+            if (pongTimer != null) pongTimer.cancel(false);
         }
-    }
 
-    /* For testing only */
-    void pingCheckNow() {
-        new PingCheck().run();
+        /**
+         * Called when a ping is sent to await the response
+         *  - Cancel any existing timeout
+         *  - Schedule new one
+         */
+        private synchronized void schedulePongCheck() {
+            if (pongTimer != null) pongTimer.cancel(false);
+
+            pongTimer = factory.getTimers().schedule(new Runnable() {
+                @Override
+                public void run() {
+                    log.debug("Timed out awaiting pong from server - disconnecting");
+                    disconnect();
+                }
+            }, pongTimeout, TimeUnit.MILLISECONDS);
+        }
     }
 }

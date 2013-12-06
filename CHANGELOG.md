@@ -1,5 +1,9 @@
 # pusher-java-client changelog
 
+## Version 0.2.3
+2013-12-06 mdpye
+ * Simply ping-pong by switching to a model of cancellable timers rather than scheduled checks
+
 ## Version 0.2.2
 2013-11-18 mdpye
  * Use more robust method for finding artifact version
