@@ -2,6 +2,8 @@
 
 Pusher client library for Java targeting **Android** and general Java.
 
+## TOC
+
 This README covers the following topics:
 
 * Installation
@@ -23,11 +25,11 @@ This README covers the following topics:
 
 ## Installation
 
-You can get the library in three ways.
+The compiled library is available in two ways:
 
 ### Maven
 
-As of version 0.2.0, pusher-java-client is available in Maven Central:
+The pusher-java-client is available in Maven Central:
 
     <dependency>
       <groupId>com.pusher</groupId>
@@ -37,11 +39,11 @@ As of version 0.2.0, pusher-java-client is available in Maven Central:
 
 ### Download
 
-You can download a version of the `.jar` directly via <http://repo1.maven.org/maven2/com/pusher/pusher-java-client/>
+You can download a version of the `.jar` directly from <http://repo1.maven.org/maven2/com/pusher/pusher-java-client/>
 
 ### Source
 
-You can build the project from source. For more information see **Library development environment**.
+You can build the project from the source in this repository. See **Library development environment** for more information on build environment.
 
 ## API Overview
 
@@ -51,31 +53,37 @@ Here's the API in a nutshell.
 // Create a new Pusher instance
 Pusher pusher = new Pusher(YOUR_APP_KEY);
 
-// Connect
 pusher.connect(new ConnectionEventListener() {
+    @Override
+    public void onConnectionStateChange(ConnectionStateChange change) {
+        System.out.println("State changed to " + change.getCurrentState() +
+                           " from " + change.getPreviousState());
+    }
 
-  @Override
-  public void onConnectionStateChange(ConnectionStateChange change) {
-    // handle connection state change
-  }
-
-  @Override
-  public void onError(String message, String code, Exception e) {
-    // handle connection error
-  }
+    @Override
+    public void onError(String message, String code, Exception e) {
+        System.out.println("There was a problem connecting!");
+    }
 }, ConnectionState.ALL);
 
 // Subscribe to a channel
 Channel channel = pusher.subscribe("my-channel");
 
-// Bind to an event and listen for events
+// Bind to listen for events called "my-event" sent to "my-channel"
 channel.bind("my-event", new SubscriptionEventListener() {
-
-  @Override
-  public void onEvent(String channel, String event, String data) {
-    // do something with the event data
-  }
+    @Override
+    public void onEvent(String channel, String event, String data) {
+        System.put.println("Received event with data: " + data);
+    }
 });
+
+// Disconnect from the service (or become disconnected my network conditions)
+pusher.disconnect();
+
+// Reconnect, with all channel subscriptions and event bindings automatically recreated
+pusher.connect()
+// The state change listener is notified when the connection has been re-established,
+// the subscription to "my-channel" and binding on "my-event" still exist.
 ```
 
 More information in reference format can be found below.
@@ -114,6 +122,8 @@ Pusher pusher = new Pusher(YOUR_APP_KEY);
 pusher.connect();
 ```
 
+## Reconnecting
+
 The `connect` method is also used to re-connect in case the connection has been lost, for example if an Android
 device loses reception. Note that the state of channel subscriptions and event bindings will be preserved while
 disconnected and re-negotiated with the server once a connection is re-established.
@@ -124,27 +134,33 @@ disconnected and re-negotiated with the server once a connection is re-establish
 pusher.disconnect();
 ```
 
+After disconnection the Pusher instance will release any internally allocated resources (threads and network connections)
+
 ## Listening to connection events
 
-It is possible to receive connection state change events by implementing the `ConnectionEventListener` interface.
+Implement the `ConnectionEventListener` interface to receive connection state change events:
 
 ```java
-
 Pusher pusher = new Pusher(YOUR_APP_KEY);
-pusher.connect(new ConnectionListener() {
+pusher.connect(new ConnectionEventListener() {
+    @Override
+    public void onConnectionStateChange(ConnectionStateChange change) {
+        System.out.println("State changed to " + change.getCurrentState() +
+                           " from " + change.getPreviousState());
+    }
 
-  @Override
-  public void onConnectionStateChange(ConnectionStateChange change) {
-    System.out.println(
-      String.format("Connection state changed from [%s] to [%s]", change.getPreviousState(), change.getCurrentState())
-    );
-  }
-
-  @Override
-  public void onError(String message, String code, Exception e) {
-    System.out.println("Error: " + message);
-  }
+    @Override
+    public void onError(String message, String code, Exception e) {
+        System.out.println("There was a problem connecting!");
+    }
 });
+```
+
+A series of `ConnectionState` members can be passed after the listener in this call to filter the states which will receive notification, e.g.
+
+```java
+// MyConnectionEventListener is notified only of transitions to the disconnected state
+pusher.connect(new MyConnectionEventListener(), ConnectionState.DISCONNECTED);
 ```
 
 For more information see [connection states](http://pusher.com/docs/connection_states).
@@ -153,7 +169,7 @@ For more information see [connection states](http://pusher.com/docs/connection_s
 
 Pusher uses the concept of [channels](http://pusher.com/docs/channels) as a way of subscribing to data. They are identified and subscribed to by a simple name. Events are bound to on a channels and are also identified by name. To listen to an event you need to implemented the `ChannelEventListener` interface (see **Binding and handling events**).
 
-As mentioned above, channel subscriptions need only be registered once per `Pusher` instance. They are preserved across disconnection and re-established with the server on reconnect. They should NOT be re-registered. They may, however, be registered before the first call to `connect`.
+As mentioned above, channel subscriptions need only be registered once per `Pusher` instance. They are preserved across disconnection and re-established with the server on reconnect. They should NOT be re-registered. They may, however, be registered with a `Pusher` instance before the first call to `connect` - they will be completed with the server as soon as a connection becomes available.
 
 ### Public channels
 
@@ -161,20 +177,16 @@ As mentioned above, channel subscriptions need only be registered once per `Push
 Channel channel = pusher.subscribe("my-channel");
 ```
 
-Sometimes you may want to be informed when the subscription succeeds. You can do this by implementing the `ChannelEventListener` interface:
+If you wish to be informed when the subscription succeeds, pass an implementation of the `ChannelEventListener` interface:
 
 ```java
 Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
+    @Override
+    public void onSubscriptionSucceeded(String channelName) {
+        System.out.println("Subscribed to channel: " + channelName);
+    }
 
-  @Override
-  public void onSubscriptionSucceeded(String channelName) {
-    System.out.println("Subscribed to channel: " + channelName);
-  }
-
-  @Override
-  public void onEvent(String channelName, String eventName, String data) {
-	
-  }
+    // Other ChannelEventListener methods
 });
 ```
 
@@ -193,18 +205,17 @@ PrivateChannel privateChannel = pusher.subscribePrivate( "private-channel" );
 In addition to the events that are possible on public channels a private channel exposes an `onAuthenticationFailure`. This is called if the `Authorizer` does not successfully authenticate the subscription:
 
 ```java
-PrivateChannel channel = pusher.subscribePrivate( "private-channel",
-  new PrivateChannelEventListener() {
+PrivateChannel channel = pusher.subscribePrivate("private-channel",
+    new PrivateChannelEventListener() {
+        @Override
+        public void onAuthenticationFailure(String message, Exception e) {
+            System.out.println(
+                String.format("Authentication failure due to [%s], exception was [%s]", message, e)
+            );
+        }
 
-    @Override
-    public void onAuthenticationFailure(String message, Exception e) {
-	  System.out.println(
-        String.format("Authentication failure due to [%s], exception was [%s]", message, e)
-      );
-    }
-
-    // Other ChannelEventListener methods
-  });
+        // Other ChannelEventListener methods
+    });
 ```
 
 ### Presence channels
@@ -220,39 +231,37 @@ PresenceChannel presenceChannel = pusher.subscribePresence( "presence-channel" )
 Presence channels provide additional events relating to users joining (subscribing) and leaving (unsubscribing) the presence channel. It is possible to listen to these events by implementing the `PresenceChannelEventListener`.
 
 ```java
-PresenceChannel channel = pusher.subscribePresence( "presence-channel",
-  new PresenceChannelEventListener() {
+PresenceChannel channel = pusher.subscribePresence("presence-channel",
+    new PresenceChannelEventListener() {
+        @Override
+        public void onUserInformationReceived(String channelName, Set<User> users) {
+            for (User user : users) {
+                userSubscribed(channelName, user);
+            }
+        }
 
-    @Override
-    public void onUserInformationReceived(String channelName, Set<User> users) {
-	  for (User user : users) {
-	    userSubscribed(channelName, user);
-	  }
-    }
+        @Override
+        public void userSubscribed(String channelName, User user) {
+            System.out.println(
+                String.format("A new user joined channel [%s]: %s, %s",
+                              channelName, user.getId(), user.getInfo())
+            );
 
-    @Override
-    public void userSubscribed(String channelName, User user) {
-	  System.out.println(
-        String.format("A new user has joined channel [%s]: %s, %s", channelName,
-          user.getId(), user.getInfo())
-      );
+            if (user.equals(channel.getMe())) {
+                System.out.println("me");
+            }
+        }
 
-	  if (user.equals(channel.getMe())) {
-	    System.out.println("me");
-	  }
-    }
+        @Override
+        public void userUnsubscribed(String channelName, User user) {
+            System.out.println(
+                String.format("A user left channel [%s]: %s %s",
+                              channelName, user.getId(), user.getInfo())
+            );
+        }
 
-    @Override
-    public void userUnsubscribed(String channelName, User user) {
-      System.out.println(
-        String.format( "A user has left channel [%s]: %s %s", channelName,
-          user.getId(), user.getInfo() )
-      );
-    }
-
-    // Other ChannelEventListener methods
-
-  });
+        // Other ChannelEventListener methods
+    });
 ```
 
 #### The User object
@@ -288,18 +297,16 @@ The `ChannelEventListener` is an interface that is informed of both protocol rel
 
 ```java
 Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
+    @Override
+    public void onSubscriptionSucceeded(String channelName) {
+        System.out.println("Subscribed!");
+    }
 
-  @Override
-  public void onSubscriptionSucceeded(String channelName) {
-    System.out.println("Subscribed!");
-  }
-
-  @Override
-  public void onEvent(String channelName, String eventName, String data) {
-	
-  }
-
-});
+    @Override
+    public void onEvent(String channelName, String eventName, String data) {
+        // Called for incoming events names "foo", "bar" or "baz"
+    }
+}, "foo", "bar", "baz");
 ```
 
 The `ChannelEventListener` interface extends the `SubscriptionEventListener` interface.
@@ -311,12 +318,10 @@ Events triggered by your application are received by the `onEvent` method on the
 ```java
 Channel channel = pusher.subscribe("my-channel");
 channel.bind("my-event", new ChannelEventListener() {
-
-  @Override
-  public void onEvent(String channelName, String eventName, String data) {
-	
-  }
-
+    @Override
+    public void onEvent(String channelName, String eventName, String data) {
+        // Called for incoming events named "my-event"
+    }
 });
 ```
 
@@ -324,28 +329,25 @@ The event data will be passed as the third parameter to the `onEvent` method. Fr
 
 ```java
 public class Example implements ChannelEventListener {
+    public Example() {
+        Pusher pusher = new Pusher(YOUR_APP_KEY);
+        pusher.subscribe("my-channel", this);
+        pusher.connect();
+    }
 
-  public Example() {
-    Pusher pusher = new Pusher(YOUR_APP_KEY);
-    pusher.connect();
-
-    pusher.subscribe("my-channel", this);
-  }
-
-  @Override
-  public void onEvent(String channelName, String eventName, String data) {
-    Gson gson = new Gson();
-    EventExample exampleEvent = gson.fromJson(data, EventExample.class);
-  }
-
+    @Override
+    public void onEvent(String channelName, String eventName, String data) {
+        Gson gson = new Gson();
+        EventExample exampleEvent = gson.fromJson(data, EventExample.class);
+    }
 }
 
 class EventExample {
-  private int value1 = 1;
-  private String value2 = "abc";
-  private transient int value3 = 3;
-  EventExample() {
-  }
+    private int value1 = 1;
+    private String value2 = "abc";
+    private transient int value3 = 3;
+
+    EventExample() { }
 }
 ```
 
@@ -361,25 +363,23 @@ channel.unbind("my_event", listener);
 
 ```java
 public class Example implements ChannelEventListener {
+    private final Pusher pusher;
+    private final Channel channel;
 
-  private final Pusher pusher;
-  private final Channel channel;
+    public Example() {
+        pusher = new Pusher(YOUR_APP_KEY);
+        channel = pusher.subscribe("my-channel", this, "my_event");
 
-  public Example() {
-    pusher = new Pusher(YOUR_APP_KEY);
-    pusher.connect();
+        pusher.connect();
+    }
 
-    channel = pusher.subscribe("my-channel", this, "my_event");
-  }
+    public void listenToOtherEvent() {
+        channel.bind("my_other_event", this);
+    }
 
-  public void listenToOtherEvent() {
-    channel.bind("my_other_event", this);
-  }
-
-  public void stopListeningToOtherEvent() {
-    channel.unbind("my_other_event", this);
-  }
-
+    public void stopListeningToOtherEvent() {
+        channel.unbind("my_other_event", this);
+    }
 }
 ```
 
@@ -400,16 +400,15 @@ Events triggered by clients are called [client events](http://pusher.com/docs/cl
 For full details see the [client events documentation](http://pusher.com/docs/client_events).
 
 ```java
-PrivateChannel channel = pusher.subscribePrivate("private-channel", 
-  new PrivateChannelEventListener() {
-	  
-    @Override
-    public void onSubscriptionSucceeded(String channelName) {
-	  channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
-    }
+PrivateChannel channel = pusher.subscribePrivate("private-channel",
+    new PrivateChannelEventListener() {
+        @Override
+        public void onSubscriptionSucceeded(String channelName) {
+            channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
+        }
 
-    // Other PrivateChannelEventListener methods
-  });
+        // Other PrivateChannelEventListener methods
+    });
 ```
 
 ## Accessing the connection socket ID
