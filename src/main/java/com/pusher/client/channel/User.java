@@ -31,39 +31,32 @@ public class User {
 
     /**
      * Custom additional information about a user as a String encoding a JSON hash
-     * @return
      */
     public String getInfo() {
         return jsonData;
     }
 
     /**
-     * Custom additional information about a user decoded as a new instance of the provided POJO bean type
+     * <p>Custom additional information about a user decoded as a new instance of the provided POJO bean type</p>
      *
-     * e.g. if <pre>getInfo()</pre> returns <pre>{"name":"Mr User","number":9}</pre>
+     * <p>e.g. if {@link #getInfo()} returns <code>{"name":"Mr User","number":9}</code> then you might implement as follows:</p>
      * <pre>
-       public class UserInfo {
-           private String name;
-           private Integer number;
-
-           public String getName() {
-               return name;
-           }
-           public void setName(String name) {
-               this.name = name;
-           }
-           public Integer getNumber() {
-               return number;
-           }
-           public void setNumber(Integer number) {
-               this.number = number;
-           }
-       }
-
-       UserInfo info = user.getInfo(UserInfo.class);
-       info.getName() // returns "Mr User"
-       info.getNumber() // return 9
-       </pre>
+     * public class UserInfo {
+     *     private String name;
+     *     private Integer number;
+     *
+     *     public String getName() { return name; }
+     *     public void setName(String name) { this.name = name; }
+     *
+     *     public Integer getNumber() { return number; }
+     *     public void setNumber(Integer number) { this.number = number; }
+     * }
+     *
+     * UserInfo info = user.getInfo(UserInfo.class);
+     *
+     * info.getName() // returns "Mr User"
+     * info.getNumber() // returns 9
+     * </pre>
      *
      * @param clazz the class into which the user info JSON representation should be parsed.
      * @return An instance of clazz, populated with the user info
