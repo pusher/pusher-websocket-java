@@ -1,5 +1,9 @@
 # pusher-java-client changelog
 
+## Version 0.3.0
+2013-12-13 mdpye
+ * BREAKING CHANGE User.getUserInfo() returns valid JSON encoded String rather than the encoding provided by java.util.AbstractMap.toString()
+
 ## Version 0.2.3
 2013-12-06 mdpye
  * Simply ping-pong by switching to a model of cancellable timers rather than scheduled checks

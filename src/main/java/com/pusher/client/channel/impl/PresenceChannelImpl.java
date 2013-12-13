@@ -121,11 +121,11 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
         Map presenceMap = extractPresenceMapFrom(message);
 
         List<String> ids = (List<String>) presenceMap.get("ids");
-        Map hash = (Map) presenceMap.get("hash");
+        Map<String, ?> hash = (Map<String, ?>)presenceMap.get("hash");
 
         // build the collection of Users
         for (String id : ids) {
-            String userData = (hash.get(id) != null) ? hash.get(id).toString() : null;
+            String userData = (hash.get(id) != null) ? new Gson().toJson(hash.get(id)) : null;
             User user = new User(id, userData);
             idToUserMap.put(id, user);
         }
@@ -142,7 +142,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
 
         Map dataMap = extractDataMapFrom(message);
         String id = String.valueOf(dataMap.get("user_id"));
-        String userData = (dataMap.get("user_info") != null) ? dataMap.get("user_info").toString() : null;
+        String userData = (dataMap.get("user_info") != null) ? new Gson().toJson(dataMap.get("user_info")) : null;
 
         final User user = new User(id, userData);
         idToUserMap.put(id, user);

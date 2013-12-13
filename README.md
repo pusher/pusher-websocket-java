@@ -272,7 +272,11 @@ The `User` object has two main methods.
 
 `getId` fetches a unique identifier for the user on the presence channel.
 
-`getInfo` fetches a string representing arbitrary additional information about the user. The contents of this is entirely up to your application. However, it's recommended that the data is in JSON format so that it can easily be deserialized.
+`getInfo` fetches a string representing arbitrary additional information about the user in the form of a JSON hash, e.g.
+
+```
+{"user_name":"Mr. User","user_score":1357}
+```
 
 The following example using the [Gson library](https://sites.google.com/site/gson/gson-user-guide) to handle deserialization:
 

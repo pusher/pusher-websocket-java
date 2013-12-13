@@ -9,6 +9,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -31,6 +33,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
     private static final String AUTH_RESPONSE = "\"auth\":\"a87fe72c6f36272aa4b1:f9db294eae7\",\"channel_data\":\"{\\\"user_id\\\":\\\"51169fc47abac\\\",\\\"user_info\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}\"";
     private static final String AUTH_RESPONSE_NUMERIC_ID = "\"auth\":\"a87fe72c6f36272aa4b1:f9db294eae7\",\"channel_data\":\"{\\\"user_id\\\":51169,\\\"user_info\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}\"";
+    private static final String USER_ID = "5116a4519575b";
 
     @Mock
     private PresenceChannelEventListener mockEventListener;
@@ -72,30 +75,43 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testInternalSubscriptionSucceededMessageIsTranslatedToASubscriptionSuccessfulCallback() {
 
-        ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
-        channel.onMessage(
-                "pusher_internal:subscription_succeeded",
-                "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{\\\"presence\\\":{\\\"count\\\":1,\\\"ids\\\":[\\\"5116a4519575b\\\"],\\\"hash\\\":{\\\"5116a4519575b\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}}}\",\"channel\":\""
-                        + getChannelName() + "\"}");
+        final String eventName = "pusher_internal:subscription_succeeded";
+
+        final Map<String, Object> userInfo = new LinkedHashMap<String, Object>();
+        userInfo.put("name", "Phil Leggetter");
+        userInfo.put("twitter_id", "@leggetter");
+
+        final Map<String, Object> hash = new LinkedHashMap<String, Object>();
+        hash.put(USER_ID, userInfo);
+
+        final Map<String, Object> presence = new LinkedHashMap<String, Object>();
+        presence.put("count", 1);
+        presence.put("ids", new String[] { USER_ID });
+        presence.put("hash", hash);
+
+        final Map<String, Object> data = new LinkedHashMap<String, Object>();
+        data.put("presence", presence);
+
+        channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
 
         InOrder inOrder = inOrder(mockEventListener);
         inOrder.verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
+        ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
         inOrder.verify(mockEventListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
 
         assertEquals(1, argument.getValue().size());
         assertTrue(argument.getValue().toArray()[0] instanceof User);
 
         User user = (User) argument.getValue().toArray()[0];
-        assertEquals("5116a4519575b", user.getId());
-        assertEquals("{name=Phil Leggetter, twitter_id=@leggetter}", user.getInfo());
+        assertEquals(USER_ID, user.getId());
+        assertEquals("{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}", user.getInfo());
     }
 
     @Test
     public void testInternalMemberAddedMessageIsTranslatedToUserSubscribedCallback() {
         ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
 
-        String userId = "5116a4519575b";
-        addUser(userId);
+        addUser(USER_ID);
 
         InOrder inOrder = inOrder(mockEventListener);
         inOrder.verify(mockEventListener).userSubscribed(eq(getChannelName()), argument.capture());
@@ -103,39 +119,44 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
         assertTrue(argument.getValue() instanceof User);
 
         User user = argument.getValue();
-        assertEquals(userId, user.getId());
-        assertEquals("{name=Phil Leggetter, twitter_id=@leggetter}", user.getInfo());
+        assertEquals(USER_ID, user.getId());
+        assertEquals("{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}", user.getInfo());
     }
 
-    private void addUser(String userId) {
-        String userInfo = "{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}";
-        String userJson = "{" + "\"user_id\":\"" + userId + "\"," + "\"user_info\":" + userInfo + "}";
-        userJson = new Gson().toJson(userJson);
+    private void addUser(final String userId) {
+        final Map<String, String> userInfo = new LinkedHashMap<String, String>();
+        userInfo.put("name", "Phil Leggetter");
+        userInfo.put("twitter_id", "@leggetter");
 
-        channel.onMessage("pusher_internal:member_added", "{" + "\"event\":\"pusher_internal:member_added\","
-                + "\"data\":" + userJson + "," + "\"channel\":\"" + getChannelName() + "\"" + "}");
+        final Map<String, Object> data = new LinkedHashMap<String, Object>();
+        data.put("user_id", userId);
+        data.put("user_info", userInfo);
+
+        final String eventName = "pusher_internal:member_added";
+
+        channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
     }
 
     @Test
-    public void testInternalMemberRemovedMessageIsTranslatedToUserSubscribedCallback() {
-        String userId = "5116a4519575b";
+    public void testInternalMemberRemovedMessageIsTranslatedToUserUnsubscribedCallback() {
+        String userId = USER_ID;
         addUser(userId);
 
+        final Map<String, Object> data = new LinkedHashMap<String, Object>();
+        data.put("user_id", userId);
+
+        final String eventName = "pusher_internal:member_removed";
+
+        channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
+
         ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
-        String userJson = "{" + "\"user_id\":\"" + userId + "\"" + "}";
-        userJson = new Gson().toJson(userJson);
-
-        channel.onMessage("pusher_internal:member_removed", "{" + "\"event\":\"pusher_internal:member_removed\","
-                + "\"data\":" + userJson + "," + "\"channel\":\"" + getChannelName() + "\"" + "}");
-
-        InOrder inOrder = inOrder(mockEventListener);
-        inOrder.verify(mockEventListener).userUnsubscribed(eq(getChannelName()), argument.capture());
+        verify(mockEventListener).userUnsubscribed(eq(getChannelName()), argument.capture());
 
         assertTrue(argument.getValue() instanceof User);
 
         User user = argument.getValue();
         assertEquals(userId, user.getId());
-        assertEquals("{name=Phil Leggetter, twitter_id=@leggetter}", user.getInfo());
+        assertEquals("{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}", user.getInfo());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -156,7 +177,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     /* end of tests */
 
     @Override
-    protected ChannelImpl newInstance(String channelName) {
+    protected ChannelImpl newInstance(final String channelName) {
         return new PresenceChannelImpl(mockConnection, channelName, mockAuthorizer, factory);
     }
 
@@ -168,5 +189,17 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     @Override
     protected ChannelEventListener getEventListener() {
         return mock(PresenceChannelEventListener.class);
+    }
+
+    private static String eventJson(final String eventName, final Map<?, ?> data, final String channelName) {
+        return eventJson(eventName, new Gson().toJson(data), channelName);
+    }
+
+    private static String eventJson(final String eventName, final String dataString, final String channelName) {
+        final Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("event", eventName);
+        map.put("data", dataString);
+        map.put("channel", channelName);
+        return new Gson().toJson(map);
     }
 }
