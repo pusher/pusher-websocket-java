@@ -131,7 +131,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
         }
 
         ChannelEventListener listener = this.getEventListener();
-        if( listener != null ) {
+        if (listener != null) {
             PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
             presenceListener.onUsersInformationReceived(getName(), getUsers());
         }
@@ -148,7 +148,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements
         idToUserMap.put(id, user);
 
         ChannelEventListener listener = this.getEventListener();
-        if( listener != null ) {
+        if (listener != null) {
             PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
             presenceListener.userSubscribed(getName(), user);
         }
