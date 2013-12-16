@@ -2,11 +2,11 @@
 
 ## Version 0.3.1
 2013-12-13 mdpye
- * Add a generic User.getInfo(Class<V>) which parses the user info into an instance of V.
+ * Add a generic `<V> V User.getInfo(Class<V>)` which parses the user info into an instance of `V`.
 
 ## Version 0.3.0
 2013-12-13 mdpye
- * BREAKING CHANGE User.getInfo() returns valid JSON encoded String rather than the encoding provided by java.util.AbstractMap.toString()
+ * BREAKING CHANGE `User.getInfo()` returns valid JSON encoded String rather than the encoding provided by `java.util.AbstractMap.toString()`
 
 ## Version 0.2.3
 2013-12-06 mdpye
