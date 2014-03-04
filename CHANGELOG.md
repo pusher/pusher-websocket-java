@@ -1,5 +1,9 @@
 # pusher-java-client changelog
 
+## Version 0.3.2
+2014-02-04 mdpye
+ * Make ChannelImpl.state volatile - it is potentially read from any thread in pre-send checks triggering client messages
+
 ## Version 0.3.1
 2013-12-13 mdpye
  * Add a generic `<V> V User.getInfo(Class<V>)` which parses the user info into an instance of `V`.

@@ -18,7 +18,7 @@ public class ChannelImpl implements InternalChannel {
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
     protected final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
-    protected ChannelState state = ChannelState.INITIAL;
+    protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
     private final Factory factory;
 
@@ -95,6 +95,7 @@ public class ChannelImpl implements InternalChannel {
                     final String data = extractDataFrom(message);
 
                     factory.getEventQueue().execute(new Runnable() {
+                        @Override
                         public void run() {
                             listener.onEvent(name, event, data);
                         }
@@ -138,6 +139,7 @@ public class ChannelImpl implements InternalChannel {
 
         if (state == ChannelState.SUBSCRIBED && eventListener != null) {
             factory.getEventQueue().execute(new Runnable() {
+                @Override
                 public void run() {
                     eventListener.onSubscriptionSucceeded(ChannelImpl.this.getName());
                 }
