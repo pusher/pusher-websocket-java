@@ -73,7 +73,7 @@ Channel channel = pusher.subscribe("my-channel");
 channel.bind("my-event", new SubscriptionEventListener() {
     @Override
     public void onEvent(String channel, String event, String data) {
-        System.put.println("Received event with data: " + data);
+        System.out.println("Received event with data: " + data);
     }
 });
 
@@ -81,7 +81,7 @@ channel.bind("my-event", new SubscriptionEventListener() {
 pusher.disconnect();
 
 // Reconnect, with all channel subscriptions and event bindings automatically recreated
-pusher.connect()
+pusher.connect();
 // The state change listener is notified when the connection has been re-established,
 // the subscription to "my-channel" and binding on "my-event" still exist.
 ```
