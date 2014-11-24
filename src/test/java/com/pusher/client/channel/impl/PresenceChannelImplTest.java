@@ -1,13 +1,8 @@
 package com.pusher.client.channel.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.gson.Gson;
+
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PresenceChannelEventListener;
@@ -44,13 +40,6 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
         super.setUp();
         channel.setEventListener(mockEventListener);
         when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "}");
-    }
-
-    @Test
-    @Override
-    public void testConstructWithPresenceChannelNameThrowsException() {
-        // overridden because this test is not valid for this class - we don't
-        // want to throw an exception
     }
 
     @Test
@@ -172,6 +161,24 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
         channel.updateState(ChannelState.SUBSCRIBED);
 
         verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
+    }
+
+    @Override
+    @Test(expected = IllegalArgumentException.class)
+    public void testPublicChannelName() {
+        newInstance("stuffchannel");
+    }
+
+    @Override
+    @Test(expected = IllegalArgumentException.class)
+    public void testPrivateChannelName() {
+        newInstance("private-stuffchannel");
+    }
+
+    @Override
+    @Test
+    public void testPresenceChannelName() {
+        newInstance("presence-stuffchannel");
     }
 
     /* end of tests */

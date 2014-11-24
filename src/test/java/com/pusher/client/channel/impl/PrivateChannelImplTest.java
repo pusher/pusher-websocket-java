@@ -1,12 +1,8 @@
 package com.pusher.client.channel.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,11 +50,22 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         }
     }
 
-    @Test
     @Override
-    public void testConstructWithPrivateChannelNameThrowsException() {
-        // overridden because this test is not valid for this class - we don't
-        // want to throw an exception
+    @Test(expected = IllegalArgumentException.class)
+    public void testPublicChannelName() {
+        newInstance("stuffchannel");
+    }
+
+    @Override
+    @Test(expected = IllegalArgumentException.class)
+    public void testPresenceChannelName() {
+        newInstance("presence-stuffchannel");
+    }
+
+    @Override
+    @Test
+    public void testPrivateChannelName() {
+        newInstance("private-stuffchannel");
     }
 
     @Test
