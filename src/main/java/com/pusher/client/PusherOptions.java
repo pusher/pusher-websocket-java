@@ -1,5 +1,7 @@
 package com.pusher.client;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 
@@ -182,9 +184,11 @@ public class PusherOptions {
 
 
     private static String readVersionFromProperties() {
+        InputStream inStream = null;
         try {
             Properties p = new Properties();
-            p.load(PusherOptions.class.getResourceAsStream("/pusher.properties"));
+            inStream = PusherOptions.class.getResourceAsStream("/pusher.properties");
+            p.load(inStream);
             String version = (String) p.get("version");
             if (version != null && version.length() > 0) {
                 return version;
@@ -192,6 +196,14 @@ public class PusherOptions {
         }
         catch (Exception e) {
             // Fall back to fixed value
+        }
+        finally {
+            try {
+                if (inStream != null) inStream.close();
+            }
+            catch (IOException e) {
+                // Ignore problem closing stream
+            }
         }
         return "0.0.0";
     }
