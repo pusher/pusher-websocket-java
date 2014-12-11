@@ -51,12 +51,17 @@ public class ChannelManager implements ConnectionEventListener {
         }
 
         InternalChannel channel = channelNameToChannelMap.remove(channelName);
-        if (channel != null) {
-            connection.sendMessage(channel.toUnsubscribeMessage());
-            channel.updateState(ChannelState.UNSUBSCRIBED);
-        } else {
-            throw new IllegalArgumentException("Cannot unsubscribe to channel " + channelName + ", no subscription found");
+        if (channel == null) {
+        	return;
         }
+        
+        channel.updateState(ChannelState.UNSUBSCRIBED);
+        
+        if (connection.getState() != ConnectionState.CONNECTED) {
+        	return;
+        }
+        
+    	connection.sendMessage(channel.toUnsubscribeMessage());
     }
 
     @SuppressWarnings("unchecked")
