@@ -277,11 +277,6 @@ public class ChannelManagerTest {
         channelManager.unsubscribeFrom(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testUnsubscribeWhenNotSubscribedThrowsException() {
-        channelManager.unsubscribeFrom(CHANNEL_NAME);
-    }
-
     @Test
     public void testReceiveMessageAfterUnsubscribeDoesNotPassItToChannel() {
         channelManager.subscribeTo(mockInternalChannel, mockEventListener,
