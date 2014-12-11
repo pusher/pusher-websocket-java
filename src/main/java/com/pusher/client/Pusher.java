@@ -252,14 +252,8 @@ public class Pusher {
     /**
      * Unsubscribes from a channel using via the name of the channel.
      * @param channelName the name of the channel to be unsubscribed from.
-     *
-     * @throws IllegalStateException if {@link Pusher.getConnection().getState()} is not {@link com.pusher.client.connection.ConnectionState.CONNECTED CONNECTED}
      */
     public void unsubscribe(String channelName) {
-
-        if (connection.getState() != ConnectionState.CONNECTED) {
-            throw new IllegalStateException("Cannot unsubscribe from channel " + channelName + " while not connected");
-        }
 
         channelManager.unsubscribeFrom(channelName);
     }
