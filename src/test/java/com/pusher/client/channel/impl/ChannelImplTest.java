@@ -4,17 +4,22 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.gson.Gson;
+
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.InstantExecutor;
 
+@SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
 public class ChannelImplTest {
 
@@ -104,7 +109,7 @@ public class ChannelImplTest {
     public void testEventIsNotPassedOnIfThereAreNoMatchingListeners() {
 
         channel.bind(EVENT_NAME, mockListener);
-        channel.onMessage("DifferentEventName", "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
+        channel.onMessage("DifferentEventName", "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
         verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
     }
@@ -117,6 +122,28 @@ public class ChannelImplTest {
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
         verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void testMessageIdIsPassedInSubscribe() {
+        channel.onMessage("blah-event", "{\"event\":\"event1\",\"id\":\"ab6342e9f23c34\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+
+        String subscribeMessage = channel.toSubscribeMessage();
+        Map<String, String> subscribeData = (Map<String, String>)new Gson().fromJson(subscribeMessage, Map.class).get("data");
+
+        assertEquals("ab6342e9f23c34", subscribeData.get("resume_after_id"));
+    }
+
+    @Test
+    public void testMessageIdPassedInSubscribeIsLastSeen() {
+        channel.onMessage("blah-event", "{\"event\":\"event1\",\"id\":\"az335rety45456\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.onMessage("blah-event", "{\"event\":\"event1\",\"id\":\"sdawer346rytye\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.onMessage("blah-event", "{\"event\":\"event1\",\"id\":\"ab6342e9f23c34\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+
+        String subscribeMessage = channel.toSubscribeMessage();
+        Map<String, String> subscribeData = (Map<String, String>)new Gson().fromJson(subscribeMessage, Map.class).get("data");
+
+        assertEquals("ab6342e9f23c34", subscribeData.get("resume_after_id"));
     }
 
     @Test(expected = IllegalArgumentException.class)

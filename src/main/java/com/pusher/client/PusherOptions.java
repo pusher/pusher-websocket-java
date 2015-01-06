@@ -9,9 +9,10 @@ import java.util.Properties;
  */
 public class PusherOptions {
 
+    public static final String PROTOCOL = "8";
     public static final String LIB_VERSION = readVersionFromProperties();
 
-    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
+    private static final String URI_SUFFIX = "?client=java-client&protocol=" + PROTOCOL + "&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
     private static final String WSS_SCHEME = "wss";
 

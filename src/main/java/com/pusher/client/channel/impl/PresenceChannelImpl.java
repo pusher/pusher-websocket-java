@@ -66,7 +66,6 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     @Override
     @SuppressWarnings("rawtypes")
     public String toSubscribeMessage() {
-
         final String authResponse = getAuthResponse();
 
         try {
@@ -84,11 +83,13 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
             dataMap.put("auth", authKey);
             dataMap.put("channel_data", channelData);
 
+            if (resumeAfter != null) {
+              dataMap.put("resume_after_id", resumeAfter);
+            }
+
             jsonObject.put("data", dataMap);
 
-            final String json = new Gson().toJson(jsonObject);
-
-            return json;
+            return new Gson().toJson(jsonObject);
         }
         catch (final Exception e) {
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);

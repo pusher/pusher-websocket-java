@@ -84,7 +84,6 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     @Override
     @SuppressWarnings("rawtypes")
     public String toSubscribeMessage() {
-
         final String authResponse = getAuthResponse();
 
         try {
@@ -98,10 +97,13 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
             dataMap.put("channel", name);
             dataMap.put("auth", authKey);
 
+            if (resumeAfter != null) {
+              dataMap.put("resume_after_id", resumeAfter);
+            }
+
             jsonObject.put("data", dataMap);
 
-            final String json = new Gson().toJson(jsonObject);
-            return json;
+            return new Gson().toJson(jsonObject);
         }
         catch (final Exception e) {
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
