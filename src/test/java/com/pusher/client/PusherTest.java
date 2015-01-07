@@ -306,17 +306,4 @@ public class PusherTest {
     verify(mockChannelManager).unsubscribeFrom(PUBLIC_CHANNEL_NAME);
     }
 
-    @Test(expected=IllegalStateException.class)
-    public void testUnsubscribeWhenDisconnectedThrowsException() {
-    when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
-
-    pusher.unsubscribe(PUBLIC_CHANNEL_NAME);
-    }
-
-    @Test(expected=IllegalStateException.class)
-    public void testUnsubscribeWhenConnectingThrowsException() {
-    when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTING);
-
-    pusher.unsubscribe(PUBLIC_CHANNEL_NAME);
-    }
 }
