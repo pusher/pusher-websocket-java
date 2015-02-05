@@ -136,7 +136,7 @@
             <plugin>
                 <groupId>com.github.github</groupId>
                 <artifactId>site-maven-plugin</artifactId>
-                <version>0.8</version>
+                <version>0.9</version>
                 <configuration>
                     <server>github</server>
                     <repositoryName>pusher-java-client</repositoryName>      <!-- github repo name -->
