@@ -1,5 +1,9 @@
 # pusher-java-client changelog
 
+## Version 0.3.3
+2015-02-09 mdpye
+ * REALLY remove the JavaWebsockets submodule
+
 ## Version 0.3.2
 2015-02-05 mdpye
  * Resolve dependency embedding issues, Java-Websockets is now published to clojars.org
