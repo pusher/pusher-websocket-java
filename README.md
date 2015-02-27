@@ -429,7 +429,7 @@ For more information on how and why there is a `socket_id` see the documentation
 
 ## JavaDocs
 
-The JavaDocs can be found here: <http://pusher.github.com/pusher-java-client/>
+The JavaDocs can be found here: <http://pusher.github.com/pusher-websocket-java/>
 
 ## Library Development Environment
 
