@@ -1,5 +1,8 @@
 apply plugin: 'java'
+apply plugin: 'eclipse'
 
+version = "0.3.4-SNAPSHOT"
+	
 repositories {
 	mavenCentral()
 	maven { url "http://clojars.org/repo" }
@@ -13,6 +16,13 @@ dependencies {
 	testCompile "org.mockito:mockito-all:1.8.5"
 	testCompile "org.powermock:powermock-module-junit4:1.4.11"
 	testCompile "org.powermock:powermock-api-mockito:1.4.11"
+}
+
+
+processResources {
+	filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+		version: project.version
+	] )
 }
 
 task wrapper(type: Wrapper) {
