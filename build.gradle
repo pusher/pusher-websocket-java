@@ -1,6 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+//TODO: set artifactID to 'pusher-java-client'
+group = "com.pusher"
 version = "0.3.4-SNAPSHOT"
 	
 repositories {
