@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 //TODO: set artifactID to 'pusher-java-client'
 group = "com.pusher"
 version = "0.3.4-SNAPSHOT"
-	
+
 repositories {
 	mavenCentral()
 	maven { url "http://clojars.org/repo" }
@@ -20,12 +20,24 @@ dependencies {
 	testCompile "org.powermock:powermock-api-mockito:1.4.11"
 }
 
-
 processResources {
 	filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
 		version: project.version
 	] )
 }
+
+javadoc {
+	/* info for JavaDoc options http://docs.oracle.com/javase/6/docs/technotes/tools/windows/javadoc.html#overviewcomment */
+	options.overview = file("src/main/javadoc/overview.html")
+	options.stylesheetFile = file("src/main/javadoc/css/styles.css")
+	exclude "**/com/pusher/client/channel.impl/*"
+	exclude "**/com/pusher/client/connection.impl/*"
+	exclude "**/com/pusher/client/connection.websocket/*"
+	exclude "**/org/java_websocket/*"
+	exclude "**/com/pusher/client/example/*"
+	options.linkSource = true
+}
+
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.0'
