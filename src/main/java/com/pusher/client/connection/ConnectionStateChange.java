@@ -28,7 +28,7 @@ public class ConnectionStateChange {
 
     /**
      * The previous connections state. The state the connection has transitioned from.
-     * @return
+     * @return the previous connection state
      */
     public ConnectionState getPreviousState() {
         return previousState;
@@ -36,7 +36,7 @@ public class ConnectionStateChange {
 
     /**
      * The current connection state. The state the connection has transitioned to.
-     * @return
+     * @return the current connection state
      */
     public ConnectionState getCurrentState() {
         return currentState;

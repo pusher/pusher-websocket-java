@@ -76,7 +76,7 @@ public class PusherOptions {
      * Note that if you wish to connect to a standard Pusher cluster, the convenience
      * method setCluster will set the host and ports correctly from a single argument.
      *
-     * @param hostname
+     * @param host
      * @return this, for chaining
      */
     public PusherOptions setHost(String host) {
@@ -90,7 +90,7 @@ public class PusherOptions {
      * Note that if you wish to connect to a standard Pusher cluster, the convenience
      * method setCluster will set the host and ports correctly from a single argument.
      *
-     * @param non-SSL port number
+     * @param wsPort port number
      * @return this, for chaining
      */
     public PusherOptions setWsPort(int wsPort) {
@@ -104,7 +104,7 @@ public class PusherOptions {
      * Note that if you wish to connect to a standard Pusher cluster, the convenience
      * method setCluster will set the host and ports correctly from a single argument.
      *
-     * @param SSL port number
+     * @param wssPort port number
      * @return this, for chaining
      */
     public PusherOptions setWssPort(int wssPort) {

@@ -54,7 +54,7 @@ public class HttpAuthorizer implements Authorizer {
 
     /**
      * Identifies if the HTTP request will be sent over HTTPS.
-     * @return
+     * @return true if the endpoint protocol is 'https'
      */
     public Boolean isSSL() {
         return this.endPoint.getProtocol().equals("https");
