@@ -16,6 +16,7 @@ def getProperty = { project, property ->
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.ajoberstar.github-pages'
+apply plugin: 'signing'
 
 //TODO: set artifactID to 'pusher-java-client'
 group = "com.pusher"
@@ -111,6 +112,24 @@ githubPages {
 	}
 }
 
+
+signing {
+	sign configurations.archives
+}
+
+artifacts {
+	archives jar, fatJar, sourcesJar, javadocJar
+}
+
+/*uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment {
+				MavenDeployment deployment -> signing.signPom(deployment)
+			}
+		}
+	}
+}*/
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.0'
