@@ -435,32 +435,47 @@ The JavaDocs can be found here: <http://pusher.github.com/pusher-websocket-java/
 
 ### Prerequisites
 
-* Apache Maven, the build system used for the project
+* A Java Virtual Machine.
+* Gradle, the build system used for the project, is downloaded by the Gradle Wrapper (`gradlew`) which is included in the repo.
+  * On Windows `./gradlew.bat` should be used, on Linux `./gradle`.
 
 ### Cloning the project
 
 * Clone the project: `git clone https://github.com/pusher/pusher-java-client`
 * Change to the top level directory for the project: `cd pusher-java-client`
-* Retrieve the Java-WebSocket library: `git submodule update --init`
 
 ### Eclipse Project
 
 Assuming you are using Eclipse, follow these steps:
 
-* If you have not used Eclipse and Maven together before (so you don't have an M2_REPO classpath variable configured):
-  * Make a note of your Eclipse workspace location, for example `/home/user/workspace`
-  * In the root of the project execute `mvn -Declipse.workspace="<your workspace location>" eclipse:configure-workspace`. This will add an M2_REPO environment variable to your Eclipse workspace, which is required for the next step.
-* Still in the root of the project execute `mvn eclipse:clean eclipse:eclipse`. This will read the pom file to determine the dependencies and generate `.project` and `.classpath` files that point to those dependencies in your local Maven cache.
-
-You can now load the project in Eclipse by navigating to `Import project` and pointing it to the root directory of the project.
+* Run `gradlew eclipse`. This will generate the `.classpath` and `.project` files
+* You can now load the project in Eclipse by navigating to `Import project` and pointing it to the root directory of the existing project.
 
 ### Build
 
-From the top level directory execute `mvn clean test` to compile and run the unit tests or `mvn clean package` to build the jar. The jar will be output to the `target` directory.
+From the top level directory execute:
+
+* `gradlew test` to execute the tests.
+* `gradlew javadoc` to generate the JavaDoc. The docs will be output to the `build/docs/javadoc/` directory.
+* `gradlew assemble` assemble all artifacts but does not run any tests.
+* `gradlew build` to build all jars and execute all tests & verification. The jars will be output to the `build/libs` directory.
+* `gradlew uploadArchives` to upload all artifacts. **This task requires some properties to be set, see below.**
+* `gradlew publishGhPages` to upload JavaDocs to `gh-pages`. **This task requires some properties to be set, see below.**
+
+#### Build Properties
+
+There are several build properties used for authentication. These should be set either in `~/.gradle/gradle.properties` using the format `property=value` or can be passed via command line as `-Pprop=val`.
+
+The properties used for the build are:
+
+* `maven.username` - the username used for Maven deployment authentication
+* `maven.password` - the password used for Maven deployment authentication
+* `github.username` - the username used for GitHub authentication
+* `github.password` - the password used for GitHub authentication
 
 ### Run the Example Application
 
-After running `mvn clean package` change to the `target` directory and run `java -jar pusher-java-client-<version>-jar-with-dependencies.jar`. This will run the example application.
+After running `gradlew clean assemble` change to the `build/libs` directory and run `java -jar pusher-java-client-<version>-jar-with-dependencies.jar`. This will run the example application.
 
 By default the example will connect to a sample application and subscribe to the channel `my-channel`, listening to events on `my-event`. If you want to change these defaults, they can be specified on the command line:
 

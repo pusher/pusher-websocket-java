@@ -1,17 +1,17 @@
 package com.pusher.client.channel;
 
 /**
- * <p>Client applications should implement this interface if they want to be notified when events are received on a
- * public or private channel.</p>
+ * Client applications should implement this interface if they want to be notified when events are received on a
+ * public or private channel.
  *
- * <p>To bind your implementation of this interface to a channel, either:
+ * To bind your implementation of this interface to a channel, either:
  * <ul>
  *  <li>Call {@link com.pusher.client.Pusher#subscribe(String)} to subscribe and receive an instance of {@link Channel}.</li>
- *  <li>Call {@link Channel#bind(String, ChannelEventListener)} to bind your listener to a specified event.</li>
+ *  <li>Call {@link Channel#bind(String, SubscriptionEventListener)} to bind your listener to a specified event.</li>
  * </ul>
  *
  * Or, call {@link com.pusher.client.Pusher#subscribe(String, ChannelEventListener, String...)} to subscribe to a channel and
- * bind your listener to one or more events at the same time.</p>
+ * bind your listener to one or more events at the same time.
  *
  */
 public interface ChannelEventListener extends SubscriptionEventListener {

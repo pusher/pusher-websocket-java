@@ -26,12 +26,12 @@ public interface ConnectionEventListener {
     void onConnectionStateChange(ConnectionStateChange change);
 
     /**
-     * <p>Callback that indicates either:
+     * Callback that indicates either:
      *
      * <ul>
      *  <li>An error message has been received from Pusher, or</li>
      *  <li>An error has occurred in the client library.</li>
-     * </ul></p>
+     * </ul>
      *
      * <p>All {@linkplain ConnectionEventListener}s that have been registered by calling {@link Connection#bind(ConnectionState, ConnectionEventListener)}
      * will receive this callback, even if the {@linkplain ConnectionEventListener} is only bound to specific
