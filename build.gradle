@@ -14,6 +14,7 @@ def getProperty = { property ->
 }
 
 apply plugin: 'java'
+apply plugin: 'maven'
 apply plugin: 'eclipse'
 apply plugin: 'org.ajoberstar.github-pages'
 apply plugin: 'signing'
@@ -127,14 +128,14 @@ uploadArchives { repositories { mavenDeployer {
 	}
 	repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
 		authentication(
-			userName: getProperty("maven.username"),
-			password: getProperty("maven.password")
+			userName: { getProperty("maven.username") },
+			password: { getProperty("maven.password") }
 		)
 	}
 	snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
 		authentication(
-			userName: getProperty("maven.username"),
-			password: getProperty("maven.password")
+			userName: { getProperty("maven.username") },
+			password: { getProperty("maven.password") }
 		)
 	}
 	pom.project {
