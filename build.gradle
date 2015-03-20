@@ -1,5 +1,21 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'org.ajoberstar:gradle-git:1.1.0'
+	}
+}
+def getProperty = { project, property ->
+	if (!project.hasProperty(property)) {
+		throw new GradleException("${property} property must be set")
+	}
+	return project.property(property)
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'org.ajoberstar.github-pages'
 
 //TODO: set artifactID to 'pusher-java-client'
 group = "com.pusher"
@@ -81,6 +97,20 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 	from javadoc.destinationDir
 }
 assemble.dependsOn javadocJar
+
+
+githubPages {
+	repoUri = 'https://github.com/pusher/pusher-websocket-java.git'
+	pages {
+		from javadoc.outputs.files
+	}
+	commitMessage = "JavaDoc gh-pages for ${version}"
+	credentials {
+		username = getProperty(project,"github.username")
+		password = getProperty(project,"github.password")
+	}
+}
+
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.0'
