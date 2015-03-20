@@ -13,6 +13,7 @@ def getProperty = { property ->
 	return project.property(property)
 }
 
+
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
@@ -21,20 +22,20 @@ apply plugin: 'signing'
 
 group = "com.pusher"
 version = "0.3.4-SNAPSHOT"
-
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
 ext.sharedManifest = manifest {
 	attributes(
-		"Created-By"             : 'Pusher',
-		'Implementation-Vendor'  : 'Pusher',
-		'Implementation-Title': 'Pusher Java Websocket API Example',
+		"Created-By"			: 'Pusher',
+		'Implementation-Vendor'	: 'Pusher',
+		'Implementation-Title'	: 'Pusher Java Websocket API Example',
 		'Implementation-Version': version,
-		'Package': 'com.pusher.client.example',
-		'Main-Class': 'com.pusher.client.example.ExampleApp'
+		'Package'				: 'com.pusher.client.example',
+		'Main-Class'			: 'com.pusher.client.example.ExampleApp'
 	)
 }
+
 
 repositories {
 	mavenCentral()
@@ -51,11 +52,13 @@ dependencies {
 	testCompile "org.powermock:powermock-api-mockito:1.4.11"
 }
 
+
 processResources {
 	filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
 		version: project.version
 	] )
 }
+
 
 javadoc {
 	/* info for JavaDoc options http://docs.oracle.com/javase/6/docs/technotes/tools/windows/javadoc.html#overviewcomment */
@@ -71,11 +74,13 @@ javadoc {
 	options.linkSource = true
 }
 
+
 jar {
 	manifest = project.manifest {
 		from sharedManifest
 	}
 }
+
 
 task fatJar(type: Jar, dependsOn:configurations.runtime) {
 	manifest = project.manifest {
@@ -87,11 +92,13 @@ task fatJar(type: Jar, dependsOn:configurations.runtime) {
 }
 assemble.dependsOn fatJar
 
+
 task sourcesJar(type: Jar, dependsOn: classes) {
 	classifier = 'sources'
 	from sourceSets.main.allSource
 }
 assemble.dependsOn sourcesJar
+
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
 	classifier = 'javadoc'
@@ -107,8 +114,8 @@ githubPages {
 	}
 	commitMessage = "JavaDoc gh-pages for ${version}"
 	credentials {
-		username = getProperty("github.username")
-		password = getProperty("github.password")
+		username = { getProperty("github.username") }
+		password = { getProperty("github.password") }
 	}
 }
 

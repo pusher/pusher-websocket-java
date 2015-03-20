@@ -459,8 +459,19 @@ From the top level directory execute:
 * `gradlew javadoc` to generate the JavaDoc. The docs will be output to the `build/docs/javadoc/` directory.
 * `gradlew assemble` assemble all artifacts but does not run any tests.
 * `gradlew build` to build all jars and execute all tests & verification. The jars will be output to the `build/libs` directory.
-* `gradlew uploadArchives` to upload all artifacts.
-* `gradlew publishGhPages` to upload JavaDocs to `gh-pages`.
+* `gradlew uploadArchives` to upload all artifacts. **This task requires some properties to be set, see below.**
+* `gradlew publishGhPages` to upload JavaDocs to `gh-pages`. **This task requires some properties to be set, see below.**
+
+#### Build Properties
+
+There are several build properties used for authentication. These should be set either in `~/.gradle/gradle.properties` using the format `property=value` or can be passed via command line as `-Pprop=val`.
+
+The properties used for the build are:
+
+* `maven.username` - the username used for Maven deployment authentication
+* `maven.password` - the password used for Maven deployment authentication
+* `github.username` - the username used for GitHub authentication
+* `github.password` - the password used for GitHub authentication
 
 ### Run the Example Application
 
