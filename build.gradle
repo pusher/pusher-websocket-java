@@ -8,6 +8,17 @@ version = "0.3.4-SNAPSHOT"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
+ext.sharedManifest = manifest {
+	attributes(
+		"Created-By"             : 'Pusher',
+		'Implementation-Vendor'  : 'Pusher',
+		'Implementation-Title': 'Pusher Java Websocket API Example',
+		'Implementation-Version': version,
+		'Package': 'com.pusher.client.example',
+		'Main-Class': 'com.pusher.client.example.ExampleApp'
+	)
+}
+
 repositories {
 	mavenCentral()
 	maven { url "http://clojars.org/repo" }
@@ -43,6 +54,22 @@ javadoc {
 	options.linkSource = true
 }
 
+jar {
+	manifest = project.manifest {
+		from sharedManifest
+	}
+}
+
+task fatJar(type: Jar, dependsOn:configurations.runtime) {
+	manifest = project.manifest {
+		from sharedManifest
+	}
+	baseName = project.name + '-with-dependencies'
+	from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
+	with jar
+}
+assemble.dependsOn fatJar
+uploadArchives.dependsOn fatJar
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.0'
