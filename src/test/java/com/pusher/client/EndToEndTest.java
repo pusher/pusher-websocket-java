@@ -1,12 +1,7 @@
 package com.pusher.client;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.net.URI;
 
@@ -39,7 +34,8 @@ public class EndToEndTest {
     private static final String AUTH_KEY = "123456";
     private static final String PUBLIC_CHANNEL_NAME = "my-channel";
     private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
-    private static final String OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE = "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
+    private static final String OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE = "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\""
+            + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
     private static final long ACTIVITY_TIMEOUT = 120000;
     private static final long PONG_TIMEOUT = 120000;
 
@@ -60,27 +56,30 @@ public class EndToEndTest {
 
         when(factory.getEventQueue()).thenReturn(new InstantExecutor());
         when(factory.getTimers()).thenReturn(new DoNothingExecutor());
-        when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(new Answer<WebSocketClientWrapper>() {
-            @Override
-            public WebSocketClientWrapper answer(InvocationOnMock invocation) throws Throwable {
-                URI uri = (URI) invocation.getArguments()[0];
-                WebSocketListener proxy = (WebSocketListener) invocation.getArguments()[1];
-                testWebsocket = new TestWebSocketClientWrapper(uri, proxy);
-                return testWebsocket;
-            }
-        });
+        when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(
+                new Answer<WebSocketClientWrapper>() {
+                    @Override
+                    public WebSocketClientWrapper answer(final InvocationOnMock invocation) throws Throwable {
+                        final URI uri = (URI)invocation.getArguments()[0];
+                        final WebSocketListener proxy = (WebSocketListener)invocation.getArguments()[1];
+                        testWebsocket = new TestWebSocketClientWrapper(uri, proxy);
+                        return testWebsocket;
+                    }
+                });
 
         when(factory.getConnection(API_KEY, pusherOptions)).thenReturn(connection);
 
         when(factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
             @Override
-            public ChannelManager answer(InvocationOnMock invocation) throws Throwable {
+            public ChannelManager answer(final InvocationOnMock invocation) throws Throwable {
                 return new ChannelManager(factory);
             }
         });
 
-        when(factory.newPresenceChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
-        when(factory.newPrivateChannel(any(InternalConnection.class), anyString(), any(Authorizer.class))).thenCallRealMethod();
+        when(factory.newPresenceChannel(any(InternalConnection.class), anyString(), any(Authorizer.class)))
+                .thenCallRealMethod();
+        when(factory.newPrivateChannel(any(InternalConnection.class), anyString(), any(Authorizer.class)))
+                .thenCallRealMethod();
         when(factory.newPublicChannel(anyString())).thenCallRealMethod();
 
         when(mockAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
@@ -101,7 +100,8 @@ public class EndToEndTest {
         establishConnection();
         pusher.subscribe(PUBLIC_CHANNEL_NAME);
 
-        testWebsocket.assertLatestMessageWas("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + PUBLIC_CHANNEL_NAME + "\"}}");
+        testWebsocket.assertLatestMessageWas("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\""
+                + PUBLIC_CHANNEL_NAME + "\"}}");
     }
 
     @Test
@@ -136,7 +136,8 @@ public class EndToEndTest {
 
         testWebsocket.onClose(0, "No reason", true);
         testWebsocket.onOpen(mockServerHandshake);
-        testWebsocket.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
+        testWebsocket
+                .onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
 
         verify(mockAuthorizer, times(2)).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
         testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
@@ -150,11 +151,14 @@ public class EndToEndTest {
         pusher.connect(mockConnectionEventListener);
 
         testWebsocket.assertConnectCalled();
-        verify(mockConnectionEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
+        verify(mockConnectionEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
 
         testWebsocket.onOpen(mockServerHandshake);
-        testWebsocket.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
+        testWebsocket
+                .onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
 
-        verify(mockConnectionEventListener).onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
+        verify(mockConnectionEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
     }
 }

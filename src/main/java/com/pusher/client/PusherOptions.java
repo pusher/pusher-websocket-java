@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-
 /**
  * Configuration for a {@link com.pusher.client.Pusher} instance.
  */
@@ -35,7 +34,9 @@ public class PusherOptions {
     private Authorizer authorizer;
 
     /**
-     * Gets whether an encrypted (SSL) connection should be used when connecting to Pusher.
+     * Gets whether an encrypted (SSL) connection should be used when connecting
+     * to Pusher.
+     *
      * @return true if an encrypted connection should be used; otherwise false.
      */
     public boolean isEncrypted() {
@@ -43,17 +44,21 @@ public class PusherOptions {
     }
 
     /**
-     * Sets an encrypted (SSL) connection should be used when connecting to Pusher.
+     * Sets an encrypted (SSL) connection should be used when connecting to
+     * Pusher.
+     *
      * @param encrypted
      * @return this, for chaining
      */
-    public PusherOptions setEncrypted(boolean encrypted) {
+    public PusherOptions setEncrypted(final boolean encrypted) {
         this.encrypted = encrypted;
         return this;
     }
 
     /**
-     * Gets the authorizer to be used when authenticating private and presence channels.
+     * Gets the authorizer to be used when authenticating private and presence
+     * channels.
+     *
      * @return the authorizer
      */
     public Authorizer getAuthorizer() {
@@ -61,11 +66,14 @@ public class PusherOptions {
     }
 
     /**
-     * Sets the authorizer to be used when authenticating private and presence channels.
-     * @param authorizer The authorizer to be used.
+     * Sets the authorizer to be used when authenticating private and presence
+     * channels.
+     *
+     * @param authorizer
+     *            The authorizer to be used.
      * @return this, for chaining
      */
-    public PusherOptions setAuthorizer(Authorizer authorizer) {
+    public PusherOptions setAuthorizer(final Authorizer authorizer) {
         this.authorizer = authorizer;
         return this;
     }
@@ -73,13 +81,14 @@ public class PusherOptions {
     /**
      * The host to which connections will be made.
      *
-     * Note that if you wish to connect to a standard Pusher cluster, the convenience
-     * method setCluster will set the host and ports correctly from a single argument.
+     * Note that if you wish to connect to a standard Pusher cluster, the
+     * convenience method setCluster will set the host and ports correctly from
+     * a single argument.
      *
      * @param hostname
      * @return this, for chaining
      */
-    public PusherOptions setHost(String host) {
+    public PusherOptions setHost(final String host) {
         this.host = host;
         return this;
     }
@@ -87,13 +96,15 @@ public class PusherOptions {
     /**
      * The port to which unencrypted connections will be made.
      *
-     * Note that if you wish to connect to a standard Pusher cluster, the convenience
-     * method setCluster will set the host and ports correctly from a single argument.
+     * Note that if you wish to connect to a standard Pusher cluster, the
+     * convenience method setCluster will set the host and ports correctly from
+     * a single argument.
      *
-     * @param non-SSL port number
+     * @param non
+     *            -SSL port number
      * @return this, for chaining
      */
-    public PusherOptions setWsPort(int wsPort) {
+    public PusherOptions setWsPort(final int wsPort) {
         this.wsPort = wsPort;
         return this;
     }
@@ -101,39 +112,43 @@ public class PusherOptions {
     /**
      * The port to which encrypted connections will be made.
      *
-     * Note that if you wish to connect to a standard Pusher cluster, the convenience
-     * method setCluster will set the host and ports correctly from a single argument.
+     * Note that if you wish to connect to a standard Pusher cluster, the
+     * convenience method setCluster will set the host and ports correctly from
+     * a single argument.
      *
-     * @param SSL port number
+     * @param SSL
+     *            port number
      * @return this, for chaining
      */
-    public PusherOptions setWssPort(int wssPort) {
+    public PusherOptions setWssPort(final int wssPort) {
         this.wssPort = wssPort;
         return this;
     }
 
-    public PusherOptions setCluster(String cluster) {
-        this.host = "ws-" + cluster + "." + PUSHER_DOMAIN;
-        this.wsPort = WS_PORT;
-        this.wssPort = WSS_PORT;
+    public PusherOptions setCluster(final String cluster) {
+        host = "ws-" + cluster + "." + PUSHER_DOMAIN;
+        wsPort = WS_PORT;
+        wssPort = WSS_PORT;
         return this;
     }
 
     /**
-     * The number of milliseconds of inactivity at which a "ping" will be triggered
-     * to check the connection.
+     * The number of milliseconds of inactivity at which a "ping" will be
+     * triggered to check the connection.
      *
      * The default value is 120,000 (2 minutes). On some connections, where
      * intermediate hops between the application and Pusher are aggressively
      * culling connections they consider to be idle, a lower value may help
      * preserve the connection.
      *
-     * @param activityTimeout time to consider connection idle, in milliseconds
+     * @param activityTimeout
+     *            time to consider connection idle, in milliseconds
      * @return this, for chaining
      */
-    public PusherOptions setActivityTimeout(long activityTimeout) {
+    public PusherOptions setActivityTimeout(final long activityTimeout) {
         if (activityTimeout < 1000) {
-            throw new IllegalArgumentException("Activity timeout must be at least 1,000ms (and is recommended to be much higher)");
+            throw new IllegalArgumentException(
+                    "Activity timeout must be at least 1,000ms (and is recommended to be much higher)");
         }
 
         this.activityTimeout = activityTimeout;
@@ -151,12 +166,14 @@ public class PusherOptions {
      *
      * The default value is 30,000.
      *
-     * @param pongTimeout time to wait for pong response, in milliseconds
+     * @param pongTimeout
+     *            time to wait for pong response, in milliseconds
      * @return this, for chaining
      */
-    public PusherOptions setPongTimeout(long pongTimeout) {
+    public PusherOptions setPongTimeout(final long pongTimeout) {
         if (pongTimeout < 1000) {
-            throw new IllegalArgumentException("Pong timeout must be at least 1,000ms (and is recommended to be much higher)");
+            throw new IllegalArgumentException(
+                    "Pong timeout must be at least 1,000ms (and is recommended to be much higher)");
         }
 
         this.pongTimeout = pongTimeout;
@@ -170,38 +187,36 @@ public class PusherOptions {
     /**
      * Construct the URL for the WebSocket connection based on the options
      * previous set on this object and the provided API key
+     *
      * @param apiKey
      * @return the WebSocket URL
      */
-    public String buildUrl(String apiKey) {
-        return String.format("%s://%s:%s/app/%s%s",
-                encrypted ? WSS_SCHEME : WS_SCHEME,
-                host,
-                encrypted ? wssPort : wsPort,
-                apiKey,
-                URI_SUFFIX);
+    public String buildUrl(final String apiKey) {
+        return String.format("%s://%s:%s/app/%s%s", encrypted ? WSS_SCHEME : WS_SCHEME, host, encrypted ? wssPort
+                : wsPort, apiKey, URI_SUFFIX);
     }
-
 
     private static String readVersionFromProperties() {
         InputStream inStream = null;
         try {
-            Properties p = new Properties();
+            final Properties p = new Properties();
             inStream = PusherOptions.class.getResourceAsStream("/pusher.properties");
             p.load(inStream);
-            String version = (String) p.get("version");
+            final String version = (String)p.get("version");
             if (version != null && version.length() > 0) {
                 return version;
             }
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             // Fall back to fixed value
         }
         finally {
             try {
-                if (inStream != null) inStream.close();
+                if (inStream != null) {
+                    inStream.close();
+                }
             }
-            catch (IOException e) {
+            catch (final IOException e) {
                 // Ignore problem closing stream
             }
         }

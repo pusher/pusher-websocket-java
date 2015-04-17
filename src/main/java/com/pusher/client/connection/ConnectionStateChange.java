@@ -9,12 +9,13 @@ public class ConnectionStateChange {
     private final ConnectionState currentState;
 
     /**
-     * Used within the library to create a connection state change. Not be used used as part of the API.
+     * Used within the library to create a connection state change. Not be used
+     * used as part of the API.
+     *
      * @param previousState
      * @param currentState
      */
-    public ConnectionStateChange(ConnectionState previousState,
-            ConnectionState currentState) {
+    public ConnectionStateChange(final ConnectionState previousState, final ConnectionState currentState) {
 
         if (previousState == currentState) {
             throw new IllegalArgumentException(
@@ -27,7 +28,9 @@ public class ConnectionStateChange {
     }
 
     /**
-     * The previous connections state. The state the connection has transitioned from.
+     * The previous connections state. The state the connection has transitioned
+     * from.
+     *
      * @return
      */
     public ConnectionState getPreviousState() {
@@ -35,7 +38,9 @@ public class ConnectionStateChange {
     }
 
     /**
-     * The current connection state. The state the connection has transitioned to.
+     * The current connection state. The state the connection has transitioned
+     * to.
+     *
      * @return
      */
     public ConnectionState getCurrentState() {
@@ -48,11 +53,10 @@ public class ConnectionStateChange {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj != null && obj instanceof ConnectionStateChange) {
-            ConnectionStateChange other = (ConnectionStateChange) obj;
-            return (this.currentState == other.currentState)
-                    && (this.previousState == other.previousState);
+            final ConnectionStateChange other = (ConnectionStateChange)obj;
+            return currentState == other.currentState && previousState == other.previousState;
         }
 
         return false;

@@ -45,16 +45,17 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     @Test
     @Override
     public void testReturnsCorrectSubscribeMessage() {
-        String message = channel.toSubscribeMessage();
+        final String message = channel.toSubscribeMessage();
         assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\","
                 + AUTH_RESPONSE + "}}", message);
     }
 
     @Test
     public void testReturnsCorrectSubscribeMessageWhenNumericId() {
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE_NUMERIC_ID + "}");
+        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(
+                "{" + AUTH_RESPONSE_NUMERIC_ID + "}");
 
-        String message = channel.toSubscribeMessage();
+        final String message = channel.toSubscribeMessage();
         assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\","
                 + AUTH_RESPONSE_NUMERIC_ID + "}}", message);
     }
@@ -83,31 +84,31 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
         channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
 
-        InOrder inOrder = inOrder(mockEventListener);
+        final InOrder inOrder = inOrder(mockEventListener);
         inOrder.verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
-        ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
+        final ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
         inOrder.verify(mockEventListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
 
         assertEquals(1, argument.getValue().size());
         assertTrue(argument.getValue().toArray()[0] instanceof User);
 
-        User user = (User) argument.getValue().toArray()[0];
+        final User user = (User)argument.getValue().toArray()[0];
         assertEquals(USER_ID, user.getId());
         assertEquals("{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}", user.getInfo());
     }
 
     @Test
     public void testInternalMemberAddedMessageIsTranslatedToUserSubscribedCallback() {
-        ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
+        final ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
 
         addUser(USER_ID);
 
-        InOrder inOrder = inOrder(mockEventListener);
+        final InOrder inOrder = inOrder(mockEventListener);
         inOrder.verify(mockEventListener).userSubscribed(eq(getChannelName()), argument.capture());
 
         assertTrue(argument.getValue() instanceof User);
 
-        User user = argument.getValue();
+        final User user = argument.getValue();
         assertEquals(USER_ID, user.getId());
         assertEquals("{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}", user.getInfo());
     }
@@ -128,7 +129,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
     @Test
     public void testInternalMemberRemovedMessageIsTranslatedToUserUnsubscribedCallback() {
-        String userId = USER_ID;
+        final String userId = USER_ID;
         addUser(userId);
 
         final Map<String, Object> data = new LinkedHashMap<String, Object>();
@@ -138,19 +139,19 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
         channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
 
-        ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
+        final ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
         verify(mockEventListener).userUnsubscribed(eq(getChannelName()), argument.capture());
 
         assertTrue(argument.getValue() instanceof User);
 
-        User user = argument.getValue();
+        final User user = argument.getValue();
         assertEquals(userId, user.getId());
         assertEquals("{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}", user.getInfo());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCannotBindIfListenerIsNotAPresenceChannelEventListener() {
-        ChannelEventListener listener = mock(PrivateChannelEventListener.class);
+        final ChannelEventListener listener = mock(PrivateChannelEventListener.class);
         channel.bind("private-myEvent", listener);
     }
 

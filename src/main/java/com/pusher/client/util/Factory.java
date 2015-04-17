@@ -50,21 +50,20 @@ public class Factory {
     private ExecutorService eventQueue;
     private ScheduledExecutorService timers;
 
-    public synchronized InternalConnection getConnection(String apiKey, PusherOptions options) {
+    public synchronized InternalConnection getConnection(final String apiKey, final PusherOptions options) {
         if (connection == null) {
             try {
-                connection = new WebSocketConnection(options.buildUrl(apiKey),
-                                                     options.getActivityTimeout(),
-                                                     options.getPongTimeout(),
-                                                     this);
-            } catch (URISyntaxException e) {
+                connection = new WebSocketConnection(options.buildUrl(apiKey), options.getActivityTimeout(),
+                        options.getPongTimeout(), this);
+            }
+            catch (final URISyntaxException e) {
                 throw new IllegalArgumentException("Failed to initialise connection", e);
             }
         }
         return connection;
     }
 
-    public WebSocketClient newWebSocketClientWrapper(URI uri, WebSocketListener proxy) throws SSLException {
+    public WebSocketClient newWebSocketClientWrapper(final URI uri, final WebSocketListener proxy) throws SSLException {
         return new WebSocketClientWrapper(uri, proxy);
     }
 
@@ -82,16 +81,17 @@ public class Factory {
         return timers;
     }
 
-    public ChannelImpl newPublicChannel(String channelName) {
+    public ChannelImpl newPublicChannel(final String channelName) {
         return new ChannelImpl(channelName, this);
     }
 
-    public PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
+    public PrivateChannelImpl newPrivateChannel(final InternalConnection connection, final String channelName,
+            final Authorizer authorizer) {
         return new PrivateChannelImpl(connection, channelName, authorizer, this);
     }
 
-    public PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName,
-            Authorizer authorizer) {
+    public PresenceChannelImpl newPresenceChannel(final InternalConnection connection, final String channelName,
+            final Authorizer authorizer) {
         return new PresenceChannelImpl(connection, channelName, authorizer, this);
     }
 
@@ -121,8 +121,8 @@ public class Factory {
         }
 
         @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r);
+        public Thread newThread(final Runnable r) {
+            final Thread t = new Thread(r);
             t.setDaemon(true);
             t.setName("pusher-java-client " + name);
             return t;

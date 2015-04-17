@@ -13,15 +13,15 @@ public class AuthorizationFailureException extends RuntimeException {
         super();
     }
 
-    public AuthorizationFailureException(String msg) {
+    public AuthorizationFailureException(final String msg) {
         super(msg);
     }
 
-    public AuthorizationFailureException(Exception cause) {
+    public AuthorizationFailureException(final Exception cause) {
         super(cause);
     }
 
-    public AuthorizationFailureException(String msg, Exception cause) {
+    public AuthorizationFailureException(final String msg, final Exception cause) {
         super(msg, cause);
     }
 }

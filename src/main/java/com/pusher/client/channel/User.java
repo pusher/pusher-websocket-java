@@ -12,17 +12,21 @@ public class User {
     private final String jsonData;
 
     /**
-     * Create a new user. Users should not be created within an application. Users are created within the library and represent subscriptions to presence channels.
+     * Create a new user. Users should not be created within an application.
+     * Users are created within the library and represent subscriptions to
+     * presence channels.
+     *
      * @param id
      * @param jsonData
      */
-    public User(String id, String jsonData) {
+    public User(final String id, final String jsonData) {
         this.id = id;
         this.jsonData = jsonData;
     }
 
     /**
      * A unique identifier for the user within a Pusher application.
+     *
      * @return The unique id.
      */
     public String getId() {
@@ -30,16 +34,25 @@ public class User {
     }
 
     /**
-     * Custom additional information about a user as a String encoding a JSON hash
+     * Custom additional information about a user as a String encoding a JSON
+     * hash
      */
     public String getInfo() {
         return jsonData;
     }
 
     /**
-     * <p>Custom additional information about a user decoded as a new instance of the provided POJO bean type</p>
+     * <p>
+     * Custom additional information about a user decoded as a new instance of
+     * the provided POJO bean type
+     * </p>
      *
-     * <p>e.g. if {@link #getInfo()} returns <code>{"name":"Mr User","number":9}</code> then you might implement as follows:</p>
+     * <p>
+     * e.g. if {@link #getInfo()} returns
+     * <code>{"name":"Mr User","number":9}</code> then you might implement as
+     * follows:
+     * </p>
+     *
      * <pre>
      * public class UserInfo {
      *     private String name;
@@ -58,10 +71,12 @@ public class User {
      * info.getNumber() // returns 9
      * </pre>
      *
-     * @param clazz the class into which the user info JSON representation should be parsed.
+     * @param clazz
+     *            the class into which the user info JSON representation should
+     *            be parsed.
      * @return An instance of clazz, populated with the user info
      */
-    public <V> V getInfo(Class<V> clazz) {
+    public <V> V getInfo(final Class<V> clazz) {
         return new Gson().fromJson(jsonData, clazz);
     }
 
@@ -72,16 +87,15 @@ public class User {
 
     @Override
     public int hashCode() {
-        return id.hashCode() + ((jsonData != null) ? jsonData.hashCode() : 0);
+        return id.hashCode() + (jsonData != null ? jsonData.hashCode() : 0);
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(final Object other) {
 
         if (other instanceof User) {
-            User otherUser = (User) other;
-            return this.getId().equals(otherUser.getId())
-                    && this.getInfo().equals(otherUser.getInfo());
+            final User otherUser = (User)other;
+            return getId().equals(otherUser.getId()) && this.getInfo().equals(otherUser.getInfo());
         }
 
         return false;

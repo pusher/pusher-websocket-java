@@ -13,36 +13,41 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 /**
- * A thin wrapper around the WebSocketClient class from the Java-WebSocket library. The purpose of this
- * class is to enable the WebSocketConnection class to be unit tested by swapping out an instance of
- * this wrapper for a mock version.
+ * A thin wrapper around the WebSocketClient class from the Java-WebSocket
+ * library. The purpose of this class is to enable the WebSocketConnection class
+ * to be unit tested by swapping out an instance of this wrapper for a mock
+ * version.
  */
 public class WebSocketClientWrapper extends WebSocketClient {
 
     private static final String WSS_SCHEME = "wss";
     private final WebSocketListener proxy;
 
-    public WebSocketClientWrapper(URI uri, WebSocketListener proxy)
-            throws SSLException {
+    public WebSocketClientWrapper(final URI uri, final WebSocketListener proxy) throws SSLException {
         super(uri);
 
-        if (uri.getScheme().equals( WSS_SCHEME )) {
+        if (uri.getScheme().equals(WSS_SCHEME)) {
             try {
                 SSLContext sslContext = null;
-                sslContext = SSLContext.getInstance( "TLS" );
-                sslContext.init( null, null, null ); // will use java's default key and trust store which is sufficient unless you deal with self-signed certificates
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, null, null); // will use java's default
+                                                   // key and trust store which
+                                                   // is sufficient unless you
+                                                   // deal with self-signed
+                                                   // certificates
 
-                SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory) SSLSocketFactory.getDefault();
+                final SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory)
+                                                                               // SSLSocketFactory.getDefault();
 
-                this.setSocket( factory.createSocket() );
+                setSocket(factory.createSocket());
             }
-            catch (IOException e) {
+            catch (final IOException e) {
                 throw new SSLException(e);
             }
-            catch (NoSuchAlgorithmException e) {
+            catch (final NoSuchAlgorithmException e) {
                 throw new SSLException(e);
             }
-            catch (KeyManagementException e) {
+            catch (final KeyManagementException e) {
                 throw new SSLException(e);
             }
         }
@@ -51,22 +56,22 @@ public class WebSocketClientWrapper extends WebSocketClient {
     }
 
     @Override
-    public void onOpen(ServerHandshake handshakedata) {
-    proxy.onOpen(handshakedata);
+    public void onOpen(final ServerHandshake handshakedata) {
+        proxy.onOpen(handshakedata);
     }
 
     @Override
-    public void onMessage(String message) {
-    proxy.onMessage(message);
+    public void onMessage(final String message) {
+        proxy.onMessage(message);
     }
 
     @Override
-    public void onClose(int code, String reason, boolean remote) {
-    proxy.onClose(code, reason, remote);
+    public void onClose(final int code, final String reason, final boolean remote) {
+        proxy.onClose(code, reason, remote);
     }
 
     @Override
-    public void onError(Exception ex) {
-    proxy.onError(ex);
+    public void onError(final Exception ex) {
+        proxy.onError(ex);
     }
 }

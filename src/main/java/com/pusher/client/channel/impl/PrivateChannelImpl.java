@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelState;
@@ -19,10 +20,10 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 
     private static final String CLIENT_EVENT_PREFIX = "client-";
     private final InternalConnection connection;
-    private Authorizer authorizer;
+    private final Authorizer authorizer;
 
-    public PrivateChannelImpl(InternalConnection connection, String channelName,
-            Authorizer authorizer, Factory factory) {
+    public PrivateChannelImpl(final InternalConnection connection, final String channelName,
+            final Authorizer authorizer, final Factory factory) {
         super(channelName, factory);
         this.connection = connection;
         this.authorizer = authorizer;
@@ -32,48 +33,47 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 
     @Override
     @SuppressWarnings("rawtypes")
-    public void trigger(String eventName, String data) {
+    public void trigger(final String eventName, final String data) {
 
         if (eventName == null || !eventName.startsWith(CLIENT_EVENT_PREFIX)) {
             throw new IllegalArgumentException("Cannot trigger event " + eventName
                     + ": client events must start with \"client-\"");
         }
 
-        if (this.state != ChannelState.SUBSCRIBED) {
-            throw new IllegalStateException("Cannot trigger event " + eventName
-                    + " because channel " + name + " is in " + state.toString()
-                    + " state");
+        if (state != ChannelState.SUBSCRIBED) {
+            throw new IllegalStateException("Cannot trigger event " + eventName + " because channel " + name
+                    + " is in " + state.toString() + " state");
         }
 
         if (connection.getState() != ConnectionState.CONNECTED) {
-            throw new IllegalStateException("Cannot trigger event " + eventName
-                    + " because connection is in " + connection.getState().toString()
-                    + " state");
+            throw new IllegalStateException("Cannot trigger event " + eventName + " because connection is in "
+                    + connection.getState().toString() + " state");
         }
 
         try {
-            Map userData = new Gson().fromJson(data, Map.class);
+            final Map userData = new Gson().fromJson(data, Map.class);
 
-            Map<Object, Object> jsonPayload = new LinkedHashMap<Object, Object>();
+            final Map<Object, Object> jsonPayload = new LinkedHashMap<Object, Object>();
             jsonPayload.put("event", eventName);
             jsonPayload.put("channel", name);
             jsonPayload.put("data", userData);
 
-            String jsonMessage = new Gson().toJson(jsonPayload);
+            final String jsonMessage = new Gson().toJson(jsonPayload);
             connection.sendMessage(jsonMessage);
 
-        } catch (JsonSyntaxException e) {
-            throw new IllegalArgumentException("Cannot trigger event " + eventName
-                    + " because \"" + data + "\" could not be parsed as valid JSON");
+        }
+        catch (final JsonSyntaxException e) {
+            throw new IllegalArgumentException("Cannot trigger event " + eventName + " because \"" + data
+                    + "\" could not be parsed as valid JSON");
         }
     }
 
     /* Base class overrides */
 
     @Override
-    public void bind(String eventName, SubscriptionEventListener listener) {
+    public void bind(final String eventName, final SubscriptionEventListener listener) {
 
-        if ((listener instanceof PrivateChannelEventListener) == false) {
+        if (listener instanceof PrivateChannelEventListener == false) {
             throw new IllegalArgumentException(
                     "Only instances of PrivateChannelEventListener can be bound to a private channel");
         }
@@ -85,26 +85,26 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     @SuppressWarnings("rawtypes")
     public String toSubscribeMessage() {
 
-        String authResponse = getAuthResponse();
+        final String authResponse = getAuthResponse();
 
         try {
-            Map authResponseMap = new Gson().fromJson(authResponse, Map.class);
-            String authKey = (String) authResponseMap.get("auth");
+            final Map authResponseMap = new Gson().fromJson(authResponse, Map.class);
+            final String authKey = (String)authResponseMap.get("auth");
 
-            Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
+            final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
             jsonObject.put("event", "pusher:subscribe");
 
-            Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
+            final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
             dataMap.put("channel", name);
             dataMap.put("auth", authKey);
 
             jsonObject.put("data", dataMap);
 
-            String json = new Gson().toJson(jsonObject);
+            final String json = new Gson().toJson(jsonObject);
             return json;
-        } catch (Exception e) {
-            throw new AuthorizationFailureException(
-                    "Unable to parse response from Authorizer: " + authResponse, e);
+        }
+        catch (final Exception e) {
+            throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
         }
     }
 
@@ -117,8 +117,8 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
      * Protected access because this is also used by PresenceChannelImpl.
      */
     protected String getAuthResponse() {
-        String socketId = connection.getSocketId();
-        return authorizer.authorize(this.getName(), socketId);
+        final String socketId = connection.getSocketId();
+        return authorizer.authorize(getName(), socketId);
     }
 
     @Override

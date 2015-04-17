@@ -15,19 +15,19 @@ public class HttpAuthorizerTest {
 
     @Test
     public void testHTTPURLIsIdentfiedAsSSL() {
-        HttpAuthorizer auth = new HttpAuthorizer("http://example.com/auth");
+        final HttpAuthorizer auth = new HttpAuthorizer("http://example.com/auth");
         Assert.assertFalse(auth.isSSL());
     }
 
     @Test
     public void testHTTPSURLIsIdentfiedAsSSL() {
-        HttpAuthorizer auth = new HttpAuthorizer("https://example.com/auth");
+        final HttpAuthorizer auth = new HttpAuthorizer("https://example.com/auth");
         Assert.assertTrue(auth.isSSL());
     }
 
-     @Test(expected = AuthorizationFailureException.class)
+    @Test(expected = AuthorizationFailureException.class)
     public void testNon200ResponseThrowsAuthorizationFailureException() {
-        HttpAuthorizer auth = new HttpAuthorizer("https://127.0.0.1/no-way-this-is-a-valid-url");
+        final HttpAuthorizer auth = new HttpAuthorizer("https://127.0.0.1/no-way-this-is-a-valid-url");
         auth.authorize("private-fish", "some socket id");
     }
 }

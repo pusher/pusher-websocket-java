@@ -7,7 +7,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class SimpleWebSocket extends WebSocketClient {
-    public static void main(String[] args) throws URISyntaxException {
+    public static void main(final String[] args) throws URISyntaxException {
         new SimpleWebSocket();
     }
 
@@ -16,27 +16,27 @@ public class SimpleWebSocket extends WebSocketClient {
 
         System.out.println("SimpleWebSocket");
 
-        this.connect();
+        connect();
     }
 
     @Override
-    public void onOpen(ServerHandshake handshakedata) {
+    public void onOpen(final ServerHandshake handshakedata) {
         System.out.println("onOpen");
 
     }
 
     @Override
-    public void onMessage(String message) {
+    public void onMessage(final String message) {
         System.out.println("onMessage: " + message);
     }
 
     @Override
-    public void onClose(int code, String reason, boolean remote) {
+    public void onClose(final int code, final String reason, final boolean remote) {
         System.out.println("onClose");
     }
 
     @Override
-    public void onError(Exception ex) {
+    public void onError(final Exception ex) {
         System.out.println("onError");
     }
 }

@@ -1,8 +1,6 @@
 package com.pusher.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.net.URI;
 import java.nio.channels.NotYetConnectedException;
@@ -19,7 +17,7 @@ public class TestWebSocketClientWrapper extends WebSocketClientWrapper {
     private final List<String> messagesSent = new ArrayList<String>();
     private boolean connectCalled = false;
 
-    public TestWebSocketClientWrapper(URI uri, WebSocketListener proxy) throws SSLException {
+    public TestWebSocketClientWrapper(final URI uri, final WebSocketListener proxy) throws SSLException {
         super(uri, proxy);
     }
 
@@ -27,23 +25,23 @@ public class TestWebSocketClientWrapper extends WebSocketClientWrapper {
         assertTrue(connectCalled);
     }
 
-    void assertLatestMessageWas(String msg) {
+    void assertLatestMessageWas(final String msg) {
         assertFalse("No messages have been sent", messagesSent.isEmpty());
-        assertEquals(msg, messagesSent.get(messagesSent.size()-1));
+        assertEquals(msg, messagesSent.get(messagesSent.size() - 1));
     }
 
-    void assertNumberOfMessagesSentIs(int count) {
+    void assertNumberOfMessagesSentIs(final int count) {
         assertEquals(count, messagesSent.size());
     }
 
     @Override
-    public void send(String text) throws NotYetConnectedException {
+    public void send(final String text) throws NotYetConnectedException {
         messagesSent.add(text);
         super.send(text);
     }
 
     @Override
     public void connect() {
-        this.connectCalled = true;
+        connectCalled = true;
     }
 }

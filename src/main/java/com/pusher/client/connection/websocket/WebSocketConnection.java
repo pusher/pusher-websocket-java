@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
@@ -38,12 +39,13 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private WebSocketClient underlyingConnection;
     private String socketId;
 
-    public WebSocketConnection(String url, long activityTimeout, long pongTimeout, Factory factory) throws URISyntaxException {
-        this.webSocketUri = new URI(url);
-        this.activityTimer = new ActivityTimer(activityTimeout, pongTimeout);
+    public WebSocketConnection(final String url, final long activityTimeout, final long pongTimeout,
+            final Factory factory) throws URISyntaxException {
+        webSocketUri = new URI(url);
+        activityTimer = new ActivityTimer(activityTimeout, pongTimeout);
         this.factory = factory;
 
-        for (ConnectionState state : ConnectionState.values()) {
+        for (final ConnectionState state : ConnectionState.values()) {
             eventListeners.put(state, new HashSet<ConnectionEventListener>());
         }
     }
@@ -62,7 +64,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
                         updateState(ConnectionState.CONNECTING);
                         underlyingConnection.connect();
-                    } catch (SSLException e) {
+                    }
+                    catch (final SSLException e) {
                         sendErrorToAllListeners("Error connecting over SSL", null, e);
                     }
                 }
@@ -84,12 +87,12 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     }
 
     @Override
-    public void bind(ConnectionState state, ConnectionEventListener eventListener) {
+    public void bind(final ConnectionState state, final ConnectionEventListener eventListener) {
         eventListeners.get(state).add(eventListener);
     }
 
     @Override
-    public boolean unbind(ConnectionState state, ConnectionEventListener eventListener) {
+    public boolean unbind(final ConnectionState state, final ConnectionEventListener eventListener) {
         return eventListeners.get(state).remove(eventListener);
     }
 
@@ -108,10 +111,12 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 try {
                     if (state == ConnectionState.CONNECTED) {
                         underlyingConnection.send(message);
-                    } else {
+                    }
+                    else {
                         sendErrorToAllListeners("Cannot send a message while in " + state + " state", null, null);
                     }
-                } catch (Exception e) {
+                }
+                catch (final Exception e) {
                     sendErrorToAllListeners("An exception occurred while sending message [" + message + "]", null, e);
                 }
             }
@@ -125,13 +130,13 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     /* implementation detail */
 
-    private void updateState(ConnectionState newState) {
+    private void updateState(final ConnectionState newState) {
         log.debug("State transition requested, current [" + state + "], new [" + newState + "]");
 
         final ConnectionStateChange change = new ConnectionStateChange(state, newState);
-        this.state = newState;
+        state = newState;
 
-        Set<ConnectionEventListener> interestedListeners = new HashSet<ConnectionEventListener>();
+        final Set<ConnectionEventListener> interestedListeners = new HashSet<ConnectionEventListener>();
         interestedListeners.addAll(eventListeners.get(ConnectionState.ALL));
         interestedListeners.addAll(eventListeners.get(newState));
 
@@ -145,58 +150,61 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         }
     }
 
-    private void handleEvent(String event, String wholeMessage) {
+    private void handleEvent(final String event, final String wholeMessage) {
         if (event.startsWith(INTERNAL_EVENT_PREFIX)) {
             handleInternalEvent(event, wholeMessage);
-        } else {
+        }
+        else {
             factory.getChannelManager().onMessage(event, wholeMessage);
         }
     }
 
-    private void handleInternalEvent(String event, String wholeMessage) {
+    private void handleInternalEvent(final String event, final String wholeMessage) {
         if (event.equals("pusher:connection_established")) {
             handleConnectionMessage(wholeMessage);
-        } else if (event.equals("pusher:error")) {
+        }
+        else if (event.equals("pusher:error")) {
             handleError(wholeMessage);
         }
     }
 
     @SuppressWarnings("rawtypes")
-    private void handleConnectionMessage(String message) {
-        Map jsonObject = new Gson().fromJson(message, Map.class);
-        String dataString = (String) jsonObject.get("data");
-        Map dataMap = new Gson().fromJson(dataString, Map.class);
-        socketId = (String) dataMap.get("socket_id");
+    private void handleConnectionMessage(final String message) {
+        final Map jsonObject = new Gson().fromJson(message, Map.class);
+        final String dataString = (String)jsonObject.get("data");
+        final Map dataMap = new Gson().fromJson(dataString, Map.class);
+        socketId = (String)dataMap.get("socket_id");
 
         updateState(ConnectionState.CONNECTED);
     }
 
     @SuppressWarnings("rawtypes")
-    private void handleError(String wholeMessage) {
-        Map json = new Gson().fromJson(wholeMessage, Map.class);
-        Object data = json.get("data");
+    private void handleError(final String wholeMessage) {
+        final Map json = new Gson().fromJson(wholeMessage, Map.class);
+        final Object data = json.get("data");
 
         Map dataMap;
         if (data instanceof String) {
-            dataMap = new Gson().fromJson(((String) data), Map.class);
-        } else {
-            dataMap = (Map) data;
+            dataMap = new Gson().fromJson((String)data, Map.class);
+        }
+        else {
+            dataMap = (Map)data;
         }
 
-        String message = (String) dataMap.get("message");
+        final String message = (String)dataMap.get("message");
 
-        Object codeObject = dataMap.get("code");
+        final Object codeObject = dataMap.get("code");
         String code = null;
         if (codeObject != null) {
-            code = String.valueOf(Math.round((Double) codeObject));
+            code = String.valueOf(Math.round((Double)codeObject));
         }
 
         sendErrorToAllListeners(message, code, null);
     }
 
     private void sendErrorToAllListeners(final String message, final String code, final Exception e) {
-        Set<ConnectionEventListener> allListeners = new HashSet<ConnectionEventListener>();
-        for (Set<ConnectionEventListener> listenersForState : eventListeners.values()) {
+        final Set<ConnectionEventListener> allListeners = new HashSet<ConnectionEventListener>();
+        for (final Set<ConnectionEventListener> listenersForState : eventListeners.values()) {
             allListeners.addAll(listenersForState);
         }
 
@@ -213,7 +221,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     /* WebSocketListener implementation */
 
     @Override
-    public void onOpen(ServerHandshake handshakedata) {
+    public void onOpen(final ServerHandshake handshakedata) {
         // TODO: log the handshake data
     }
 
@@ -225,8 +233,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.getEventQueue().execute(new Runnable() {
             @Override
             public void run() {
-                Map<String, String> map = new Gson().fromJson(message, Map.class);
-                String event = map.get("event");
+                final Map<String, String> map = new Gson().fromJson(message, Map.class);
+                final String event = map.get("event");
                 handleEvent(event, message);
             }
         });
@@ -241,9 +249,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             public void run() {
                 if (state != ConnectionState.DISCONNECTED) {
                     updateState(ConnectionState.DISCONNECTED);
-                } else {
-                    log.error("Received close from underlying socket when already disconnected. "
-                            + "Close code [" + code + "], Reason [" + reason + "], Remote [" + remote + "]");
+                }
+                else {
+                    log.error("Received close from underlying socket when already disconnected. " + "Close code ["
+                            + code + "], Reason [" + reason + "], Remote [" + remote + "]");
                 }
                 factory.shutdownThreads();
             }
@@ -255,14 +264,15 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.getEventQueue().execute(new Runnable() {
             @Override
             public void run() {
-                // Do not change connection state as Java_WebSocket will also call onClose.
-                // See: https://github.com/leggetter/pusher-java-client/issues/8#issuecomment-16128590
-                //updateState(ConnectionState.DISCONNECTED);
-                sendErrorToAllListeners("An exception was thrown by the websocket",    null, ex);
+                // Do not change connection state as Java_WebSocket will also
+                // call onClose.
+                // See:
+                // https://github.com/leggetter/pusher-java-client/issues/8#issuecomment-16128590
+                // updateState(ConnectionState.DISCONNECTED);
+                sendErrorToAllListeners("An exception was thrown by the websocket", null, ex);
             }
         });
     }
-
 
     private class ActivityTimer {
         private final long activityTimeout;
@@ -277,14 +287,17 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         }
 
         /**
-         * On any activity from the server
-         *  - Cancel pong timeout
-         *  - Cancel currently ping timeout and re-schedule
+         * On any activity from the server - Cancel pong timeout - Cancel
+         * currently ping timeout and re-schedule
          */
         public synchronized void activity() {
-            if (pongTimer != null) pongTimer.cancel(true);
+            if (pongTimer != null) {
+                pongTimer.cancel(true);
+            }
 
-            if (pingTimer != null) pingTimer.cancel(false);
+            if (pingTimer != null) {
+                pingTimer.cancel(false);
+            }
             pingTimer = factory.getTimers().schedule(new Runnable() {
                 @Override
                 public void run() {
@@ -299,17 +312,22 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
          * Cancel any pending timeouts, for example because we are disconnected.
          */
         public synchronized void cancelTimeouts() {
-            if (pingTimer != null) pingTimer.cancel(false);
-            if (pongTimer != null) pongTimer.cancel(false);
+            if (pingTimer != null) {
+                pingTimer.cancel(false);
+            }
+            if (pongTimer != null) {
+                pongTimer.cancel(false);
+            }
         }
 
         /**
-         * Called when a ping is sent to await the response
-         *  - Cancel any existing timeout
-         *  - Schedule new one
+         * Called when a ping is sent to await the response - Cancel any
+         * existing timeout - Schedule new one
          */
         private synchronized void schedulePongCheck() {
-            if (pongTimer != null) pongTimer.cancel(false);
+            if (pongTimer != null) {
+                pongTimer.cancel(false);
+            }
 
             pongTimer = factory.getTimers().schedule(new Runnable() {
                 @Override

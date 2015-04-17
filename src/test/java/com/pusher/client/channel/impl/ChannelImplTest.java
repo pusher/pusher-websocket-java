@@ -27,9 +27,9 @@ public class ChannelImplTest {
     public void setUp() {
         when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 
-        this.mockListener = getEventListener();
-        this.channel = newInstance(getChannelName());
-        this.channel.setEventListener(mockListener);
+        mockListener = getEventListener();
+        channel = newInstance(getChannelName());
+        channel.setEventListener(mockListener);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -59,24 +59,22 @@ public class ChannelImplTest {
 
     @Test
     public void testReturnsCorrectSubscribeMessage() {
-        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\""
-                + getChannelName() + "\"}}", channel.toSubscribeMessage());
+        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}",
+                channel.toSubscribeMessage());
     }
 
     @Test
     public void testReturnsCorrectUnsubscribeMessage() {
-        assertEquals("{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\""
-                + getChannelName() + "\"}}", channel.toUnsubscribeMessage());
+        assertEquals("{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}",
+                channel.toUnsubscribeMessage());
     }
 
     @Test
     public void testInternalSubscriptionSucceededMessageIsTranslatedToASubscriptionSuccessfulCallback() {
         channel.bind(EVENT_NAME, mockListener);
-        channel
-                .onMessage(
-                        "pusher_internal:subscription_succeeded",
-                        "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\""
-                                + getChannelName() + "\"}");
+        channel.onMessage("pusher_internal:subscription_succeeded",
+                "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\""
+                        + getChannelName() + "\"}");
 
         verify(mockListener).onSubscriptionSucceeded(getChannelName());
     }
@@ -85,37 +83,30 @@ public class ChannelImplTest {
     public void testDataIsExtractedFromMessageAndPassedToSingleListener() {
         // {"event":"my-event","data":"{\"some\":\"data\"}","channel":"my-channel"}
         channel.bind(EVENT_NAME, mockListener);
-        channel.onMessage(EVENT_NAME,
-                "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener).onEvent(getChannelName(), EVENT_NAME,
-                "{\"fish\":\"chips\"}");
+        verify(mockListener).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
     }
 
     @Test
     public void testDataIsExtractedFromMessageAndPassedToMultipleListeners() {
-        ChannelEventListener mockListener2 = getEventListener();
+        final ChannelEventListener mockListener2 = getEventListener();
 
         channel.bind(EVENT_NAME, mockListener);
         channel.bind(EVENT_NAME, mockListener2);
-        channel.onMessage(EVENT_NAME,
-                "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener).onEvent(getChannelName(), EVENT_NAME,
-                "{\"fish\":\"chips\"}");
-        verify(mockListener2).onEvent(getChannelName(), EVENT_NAME,
-                "{\"fish\":\"chips\"}");
+        verify(mockListener).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
+        verify(mockListener2).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
     }
 
     @Test
     public void testEventIsNotPassedOnIfThereAreNoMatchingListeners() {
 
         channel.bind(EVENT_NAME, mockListener);
-        channel.onMessage("DifferentEventName",
-                "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
+        channel.onMessage("DifferentEventName", "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
 
-        verify(mockListener, never())
-                .onEvent(anyString(), anyString(), anyString());
+        verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -123,11 +114,9 @@ public class ChannelImplTest {
 
         channel.bind(EVENT_NAME, mockListener);
         channel.unbind(EVENT_NAME, mockListener);
-        channel.onMessage(EVENT_NAME,
-                "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener, never())
-                .onEvent(anyString(), anyString(), anyString());
+        verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -196,10 +185,10 @@ public class ChannelImplTest {
     /* end of tests */
 
     /**
-     * This method is overridden in the test subclasses so that these tests can be
-     * run against PrivateChannelImpl and PresenceChannelImpl.
+     * This method is overridden in the test subclasses so that these tests can
+     * be run against PrivateChannelImpl and PresenceChannelImpl.
      */
-    protected ChannelImpl newInstance(String channelName) {
+    protected ChannelImpl newInstance(final String channelName) {
         return new ChannelImpl(channelName, factory);
     }
 
@@ -217,7 +206,7 @@ public class ChannelImplTest {
      * to use the appropriate listener subclass.
      */
     protected ChannelEventListener getEventListener() {
-        ChannelEventListener listener = mock(ChannelEventListener.class);
+        final ChannelEventListener listener = mock(ChannelEventListener.class);
         return listener;
     }
 }
