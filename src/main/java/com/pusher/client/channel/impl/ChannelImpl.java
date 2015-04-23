@@ -24,8 +24,7 @@ public class ChannelImpl implements InternalChannel {
     protected String resumeAfter;
     private final Factory factory;
 
-    public ChannelImpl(final String channelName, final Factory factory) {
-
+    public ChannelImpl(final String channelName, final String resumeId, final Factory factory) {
         if (channelName == null) {
             throw new IllegalArgumentException("Cannot subscribe to a channel with a null name");
         }
@@ -40,7 +39,8 @@ public class ChannelImpl implements InternalChannel {
             }
         }
 
-        name = channelName;
+        this.name = channelName;
+        this.resumeAfter = resumeId;
         this.factory = factory;
     }
 

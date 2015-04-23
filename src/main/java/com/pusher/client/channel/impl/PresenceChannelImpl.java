@@ -29,8 +29,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     private String myUserID;
 
     public PresenceChannelImpl(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer, final Factory factory) {
-        super(connection, channelName, authorizer, factory);
+            final String resumeId, final Authorizer authorizer, final Factory factory) {
+        super(connection, channelName, resumeId, authorizer, factory);
     }
 
     /* PresenceChannel implementation */

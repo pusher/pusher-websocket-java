@@ -33,28 +33,28 @@ public class ChannelImplTest {
         when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 
         mockListener = getEventListener();
-        channel = newInstance(getChannelName());
+        channel = newInstance(getChannelName(), null);
         channel.setEventListener(mockListener);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullChannelNameThrowsException() {
-        newInstance(null);
+        newInstance(null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPrivateChannelName() {
-        newInstance("private-my-channel");
+        newInstance("private-my-channel", null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPresenceChannelName() {
-        newInstance("presence-my-channel");
+        newInstance("presence-my-channel", null);
     }
 
     @Test
     public void testPublicChannelName() {
-        newInstance("my-channel");
+        newInstance("my-channel", null);
     }
 
     @Test
@@ -146,6 +146,27 @@ public class ChannelImplTest {
         assertEquals("ab6342e9f23c34", subscribeData.get("resume_after_id"));
     }
 
+    @Test
+    public void testMessageIdPassedInSubscribeWhenSetViaConstructor() {
+        channel = newInstance(getChannelName(), "ade5427ecba43");
+
+        String subscribeMessage = channel.toSubscribeMessage();
+        Map<String, String> subscribeData = (Map<String, String>)new Gson().fromJson(subscribeMessage, Map.class).get("data");
+
+        assertEquals("ade5427ecba43", subscribeData.get("resume_after_id"));
+    }
+
+    @Test
+    public void testMessageIdSetViaConstructorIsSuperscededByIncomingMessages() {
+        channel = newInstance(getChannelName(), "ade5427ecba43");
+        channel.onMessage("blah-event", "{\"event\":\"event1\",\"id\":\"ab6342e9f23c34\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+
+        String subscribeMessage = channel.toSubscribeMessage();
+        Map<String, String> subscribeData = (Map<String, String>)new Gson().fromJson(subscribeMessage, Map.class).get("data");
+
+        assertEquals("ab6342e9f23c34", subscribeData.get("resume_after_id"));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testBindWithNullEventNameThrowsException() {
         channel.bind(null, mockListener);
@@ -215,8 +236,8 @@ public class ChannelImplTest {
      * This method is overridden in the test subclasses so that these tests can
      * be run against PrivateChannelImpl and PresenceChannelImpl.
      */
-    protected ChannelImpl newInstance(final String channelName) {
-        return new ChannelImpl(channelName, factory);
+    protected ChannelImpl newInstance(final String channelName, final String resumeAfterId) {
+        return new ChannelImpl(channelName, resumeAfterId, factory);
     }
 
     /**

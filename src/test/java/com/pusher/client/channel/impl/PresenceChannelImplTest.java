@@ -167,26 +167,26 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     @Override
     @Test(expected = IllegalArgumentException.class)
     public void testPublicChannelName() {
-        newInstance("stuffchannel");
+        newInstance("stuffchannel", null);
     }
 
     @Override
     @Test(expected = IllegalArgumentException.class)
     public void testPrivateChannelName() {
-        newInstance("private-stuffchannel");
+        newInstance("private-stuffchannel", null);
     }
 
     @Override
     @Test
     public void testPresenceChannelName() {
-        newInstance("presence-stuffchannel");
+        newInstance("presence-stuffchannel", null);
     }
 
     /* end of tests */
 
     @Override
-    protected ChannelImpl newInstance(final String channelName) {
-        return new PresenceChannelImpl(mockConnection, channelName, mockAuthorizer, factory);
+    protected ChannelImpl newInstance(final String channelName, final String resumeAfterId) {
+        return new PresenceChannelImpl(mockConnection, channelName, resumeAfterId, mockAuthorizer, factory);
     }
 
     @Override

@@ -23,8 +23,8 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     private final Authorizer authorizer;
 
     public PrivateChannelImpl(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer, final Factory factory) {
-        super(channelName, factory);
+            final String resumeId, final Authorizer authorizer, final Factory factory) {
+        super(channelName, resumeId, factory);
         this.connection = connection;
         this.authorizer = authorizer;
     }
