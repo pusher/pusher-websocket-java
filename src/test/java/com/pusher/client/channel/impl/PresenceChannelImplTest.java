@@ -84,7 +84,47 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
         channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
 
         final InOrder inOrder = inOrder(mockPresenceListener);
-        inOrder.verify(mockPresenceListener).onSubscriptionSucceeded(getChannelName());
+        inOrder.verify(mockPresenceListener).onSubscriptionSucceeded(getChannelName(), null);
+        final ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
+        inOrder.verify(mockPresenceListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
+
+        assertEquals(1, argument.getValue().size());
+        assertTrue(argument.getValue().toArray()[0] instanceof User);
+
+        final User user = (User)argument.getValue().toArray()[0];
+        assertEquals(USER_ID, user.getId());
+        assertEquals("{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}", user.getInfo());
+    }
+
+    @Override
+    @Test
+    public void testInternalSubscriptionSucceededMessageWithResumeDataIsTranslatedToASubscriptionSuccessfulCallback() {
+        final String eventName = "pusher_internal:subscription_succeeded";
+
+        final Map<String, Object> userInfo = new LinkedHashMap<String, Object>();
+        userInfo.put("name", "Phil Leggetter");
+        userInfo.put("twitter_id", "@leggetter");
+
+        final Map<String, Object> hash = new LinkedHashMap<String, Object>();
+        hash.put(USER_ID, userInfo);
+
+        final Map<String, Object> presence = new LinkedHashMap<String, Object>();
+        presence.put("count", 1);
+        presence.put("ids", new String[] { USER_ID });
+        presence.put("hash", hash);
+
+        final Map<String, Object> resume = new LinkedHashMap<String, Object>();
+        resume.put("ok", Boolean.TRUE);
+        resume.put("resume_after", "blah");
+
+        final Map<String, Object> data = new LinkedHashMap<String, Object>();
+        data.put("presence", presence);
+        data.put("resume", resume);
+
+        channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
+
+        final InOrder inOrder = inOrder(mockPresenceListener);
+        inOrder.verify(mockPresenceListener).onSubscriptionSucceeded(getChannelName(), Boolean.TRUE);
         final ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
         inOrder.verify(mockPresenceListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
 

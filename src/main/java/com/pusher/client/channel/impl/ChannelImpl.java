@@ -93,11 +93,15 @@ public class ChannelImpl implements InternalChannel {
 
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
+
+            final Map<String, Object> resumeData = (Map<String, Object>)dataMap.get("resume");
+            final Boolean historyAvailable = resumeData == null ? null : (Boolean)resumeData.get("ok");
+
             if (eventListener != null) {
                 factory.getEventQueue().execute(new Runnable() {
                     @Override
                     public void run() {
-                        eventListener.onSubscriptionSucceeded(getName());
+                        eventListener.onSubscriptionSucceeded(getName(), historyAvailable);
                     }
                 });
             }

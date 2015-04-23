@@ -81,7 +81,17 @@ public class ChannelImplTest {
                 "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\""
                         + getChannelName() + "\"}");
 
-        verify(mockListener).onSubscriptionSucceeded(getChannelName());
+        verify(mockListener).onSubscriptionSucceeded(getChannelName(), null);
+    }
+
+    @Test
+    public void testInternalSubscriptionSucceededMessageWithResumeDataIsTranslatedToASubscriptionSuccessfulCallback() {
+        channel.bind(EVENT_NAME, mockListener);
+        channel.onMessage("pusher_internal:subscription_succeeded",
+                "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{\\\"resume\\\":{\\\"after_id\\\":\\\"blah\\\",\\\"ok\\\":true}}\",\"channel\":\""
+                        + getChannelName() + "\"}");
+
+        verify(mockListener).onSubscriptionSucceeded(getChannelName(), Boolean.TRUE);
     }
 
     @Test
