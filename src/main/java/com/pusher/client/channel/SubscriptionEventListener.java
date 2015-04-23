@@ -11,7 +11,7 @@ package com.pusher.client.channel;
  * <ul>
  * <li>Call {@link com.pusher.client.Pusher#subscribe(String)} to subscribe and
  * receive an instance of {@link Channel}.</li>
- * <li>Call {@link Channel#bind(String, ChannelEventListener)} to bind your
+ * <li>Call {@link Channel#bind(String, SubscriptionEventListener)} to bind your
  * listener to a specified event.</li>
  * </ul>
  *

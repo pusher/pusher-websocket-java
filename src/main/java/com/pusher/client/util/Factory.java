@@ -36,7 +36,7 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  * Conventions:
  *
  * - any method that starts with "new", such as
- * {@link #newPublicChannel(String)} creates a new instance of that class every
+ * {@link #newPublicChannel(String, String)} creates a new instance of that class every
  * time it is called.
  *
  * - any method that starts with "get", such as {@link #getEventQueue()} returns

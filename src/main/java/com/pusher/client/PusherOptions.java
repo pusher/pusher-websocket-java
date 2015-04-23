@@ -86,7 +86,7 @@ public class PusherOptions {
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
      *
-     * @param hostname
+     * @param host
      * @return this, for chaining
      */
     public PusherOptions setHost(final String host) {
@@ -101,8 +101,7 @@ public class PusherOptions {
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
      *
-     * @param non
-     *            -SSL port number
+     * @param wsPort non-SSL port number
      * @return this, for chaining
      */
     public PusherOptions setWsPort(final int wsPort) {
@@ -117,8 +116,7 @@ public class PusherOptions {
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
      *
-     * @param SSL
-     *            port number
+     * @param wssPort SSL port number
      * @return this, for chaining
      */
     public PusherOptions setWssPort(final int wssPort) {

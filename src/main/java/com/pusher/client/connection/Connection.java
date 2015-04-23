@@ -8,7 +8,7 @@ public interface Connection {
 
     /**
      * No need to call this via the API. Instead use {@link
-     * com.pusher.client.Pusher.connect()}.
+     * com.pusher.client.Pusher#connect()}.
      */
     void connect();
 

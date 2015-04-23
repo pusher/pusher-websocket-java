@@ -6,9 +6,7 @@ import java.util.Set;
  * An object that represents a Pusher presence channel. An implementation of
  * this interface is returned when you call
  * {@link com.pusher.client.Pusher#subscribePresence(String)} or
- * {@link com.pusher.client.Pusher#subscribePresence(String, ChannelEventListener, String...)}
- * .
- *
+ * {@link com.pusher.client.Pusher#subscribePresence(String, PresenceChannelEventListener, String...)}
  */
 public interface PresenceChannel extends PrivateChannel {
 
