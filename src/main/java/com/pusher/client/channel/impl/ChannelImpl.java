@@ -17,6 +17,7 @@ public class ChannelImpl implements InternalChannel {
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
+    protected static final String SUBSCRIPTION_FAILED_EVENT = "pusher_internal:subscription_failed";
     protected final String name;
     protected final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
@@ -82,16 +83,44 @@ public class ChannelImpl implements InternalChannel {
     /* InternalChannel implementation */
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onMessage(final String event, final String message) {
+        final Map<Object, Object> jsonObject = new Gson().fromJson(message, Map.class);
+        final String data = (String)jsonObject.get("data");
+        final String eventId = (String)jsonObject.get("id");
+
+        final Map<String, Object> dataMap = new Gson().fromJson(data, Map.class);
+
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
+            if (eventListener != null) {
+                factory.getEventQueue().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        eventListener.onSubscriptionSucceeded(getName());
+                    }
+                });
+            }
+        }
+        else if (event.equals(SUBSCRIPTION_FAILED_EVENT)) {
+            updateState(ChannelState.FAILED);
+
+            // JSON has only one number type: Javascript-float
+            final Double javascriptNumberCode = (Double)dataMap.get("code");
+
+            if (eventListener != null) {
+                factory.getEventQueue().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        eventListener.onSubscriptionFailed(
+                                getName(),
+                                javascriptNumberCode == null ? null : javascriptNumberCode.intValue(),
+                                (String)dataMap.get("message"));
+                    }
+                });
+            }
         }
         else {
-            @SuppressWarnings("unchecked")
-            final Map<Object, Object> jsonObject = new Gson().fromJson(message, Map.class);
-            final String data = (String)jsonObject.get("data");
-            final String eventId = (String)jsonObject.get("id");
-
             // Update last ID
             if (eventId != null) {
                 resumeAfter = eventId;
@@ -144,15 +173,6 @@ public class ChannelImpl implements InternalChannel {
     @Override
     public void updateState(final ChannelState state) {
         this.state = state;
-
-        if (state == ChannelState.SUBSCRIBED && eventListener != null) {
-            factory.getEventQueue().execute(new Runnable() {
-                @Override
-                public void run() {
-                    eventListener.onSubscriptionSucceeded(ChannelImpl.this.getName());
-                }
-            });
-        }
     }
 
     /* Comparable implementation */

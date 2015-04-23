@@ -124,4 +124,10 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
 
         System.out.println(sb.toString());
     }
+
+    @Override
+    public void onSubscriptionFailed(String channelName, Integer errorCode, String errorDescription) {
+        // TODO Auto-generated method stub
+
+    }
 }

@@ -85,4 +85,10 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
 
         System.out.println(String.format("Authentication failure due to [%s], exception was [%s]", message, e));
     }
+
+    @Override
+    public void onSubscriptionFailed(String channelName, Integer errorCode, String errorDescription) {
+        // TODO Auto-generated method stub
+
+    }
 }

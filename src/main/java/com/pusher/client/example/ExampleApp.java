@@ -84,4 +84,10 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     private long timestamp() {
         return System.currentTimeMillis() - startTime;
     }
+
+    @Override
+    public void onSubscriptionFailed(String channelName, Integer errorCode, String errorDescription) {
+        // TODO Auto-generated method stub
+
+    }
 }

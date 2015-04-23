@@ -26,7 +26,7 @@ public class ChannelImplTest {
     private static final String EVENT_NAME = "my-event";
     protected ChannelImpl channel;
     protected @Mock Factory factory;
-    private @Mock ChannelEventListener mockListener;
+    protected @Mock ChannelEventListener mockListener;
 
     @Before
     public void setUp() {
@@ -82,6 +82,17 @@ public class ChannelImplTest {
                         + getChannelName() + "\"}");
 
         verify(mockListener).onSubscriptionSucceeded(getChannelName());
+    }
+
+    @Test
+    public void testInternalSubscriptionFailedMessageIsTranslatedToASubscriptionFailedCallback() {
+        channel.bind(EVENT_NAME, mockListener);
+        channel.onMessage("pusher_internal:subscription_failed",
+                "{\"event\":\"pusher_internal:subscription_failed\","
+                + "\"data\":\"{\\\"code\\\":1000,\\\"message\\\":\\\"Generic test error\\\"}\","
+                + "\"channel\":\"" + getChannelName() + "\"}");
+
+        verify(mockListener).onSubscriptionFailed(getChannelName(), 1000, "Generic test error");
     }
 
     @Test
@@ -200,23 +211,6 @@ public class ChannelImplTest {
         channel.unbind("different event name", mockListener);
     }
 
-    @Test
-    public void testUpdateStateToSubscribeSentDoesNotNotifyListenerThatSubscriptionSucceeded() {
-        channel.bind(EVENT_NAME, mockListener);
-        channel.updateState(ChannelState.SUBSCRIBE_SENT);
-
-        verify(mockListener, never()).onSubscriptionSucceeded(getChannelName());
-    }
-
-    @Test
-    public void testUpdateStateToSubscribedNotifiesListenerThatSubscriptionSucceeded() {
-        channel.bind(EVENT_NAME, mockListener);
-        channel.updateState(ChannelState.SUBSCRIBE_SENT);
-        channel.updateState(ChannelState.SUBSCRIBED);
-
-        verify(mockListener).onSubscriptionSucceeded(getChannelName());
-    }
-
     @Test(expected = IllegalStateException.class)
     public void testBindWhenInUnsubscribedStateThrowsException() {
         channel.updateState(ChannelState.UNSUBSCRIBED);
@@ -254,7 +248,6 @@ public class ChannelImplTest {
      * to use the appropriate listener subclass.
      */
     protected ChannelEventListener getEventListener() {
-        final ChannelEventListener listener = mock(ChannelEventListener.class);
-        return listener;
+        return mock(ChannelEventListener.class);
     }
 }

@@ -41,4 +41,19 @@ public interface ChannelEventListener extends SubscriptionEventListener {
      *            The name of the channel that was successfully subscribed.
      */
     void onSubscriptionSucceeded(String channelName);
+
+    /**
+     * <p>
+     * Callback that is fired if a subscription request cannot be completed.
+     * </p>
+     *
+     * @param channelName
+     *            The name of the channel for which the subscription failed.
+     * @param errorCode
+     *            A code classifying the type of error
+     * @param errorDescription
+     *            A human readable description of the error
+     */
+    void onSubscriptionFailed(String channelName, Integer errorCode, String errorDescription);
+
 }
