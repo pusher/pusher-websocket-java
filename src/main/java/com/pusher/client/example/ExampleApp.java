@@ -76,8 +76,8 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     }
 
     @Override
-    public void onSubscriptionSucceeded(final String channelName, final Boolean historyComplete) {
-        System.out.println(String.format("[%d] Subscription to channel [%s] succeeded, history complete: [%b]", timestamp(), channelName, historyComplete));
+    public void onSubscriptionSucceeded(final String channelName, final Boolean resumeSucceeded) {
+        System.out.println(String.format("[%d] Subscription to channel [%s] succeeded, resume successful: [%b]", timestamp(), channelName, resumeSucceeded));
     }
 
     private long timestamp() {

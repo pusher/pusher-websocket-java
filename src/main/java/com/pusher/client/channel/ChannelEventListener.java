@@ -39,15 +39,16 @@ public interface ChannelEventListener extends SubscriptionEventListener {
      *
      * @param channelName
      *            The name of the channel that was successfully subscribed.
-     * @param historyComplete
-     *            If true, the requested history was available in full.
-     *            If false, the requested history was not fully available, but
-     *            the subcription has been made. available history will be delivered
-     *            to the appropriate {@link SubscriptionEventListener#onEvent}
-     *            callbacks.
-     *            If null, history was not requested for this subscription.
+     * @param resumeSuccessful
+     *            If true, the subscription will resume from the requested point,
+     *            all "missed" messages were available and will be forwarded.
+     *            If false, the subscription could not be resumed from the requested
+     *            point as some historical data was not available. What data was
+     *            available will be delivered to the appropriate {@link
+     *            SubscriptionEventListener#onEvent} callbacks.
+     *            If null, resume was not requested for this subscription.
      */
-    void onSubscriptionSucceeded(String channelName, Boolean historyComplete);
+    void onSubscriptionSucceeded(String channelName, Boolean resumeSuccessful);
 
     /**
      * <p>

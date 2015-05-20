@@ -73,8 +73,8 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     }
 
     @Override
-    public void onSubscriptionSucceeded(final String channelName, final Boolean historyComplete) {
-        System.out.println(String.format("Subscription to channel [%s] succeeded, history complete: [%b]", channelName, historyComplete));
+    public void onSubscriptionSucceeded(final String channelName, final Boolean resumeSucceeded) {
+        System.out.println(String.format("Subscription to channel [%s] succeeded, resume successful: [%b]", channelName, resumeSucceeded));
 
         channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
     }
