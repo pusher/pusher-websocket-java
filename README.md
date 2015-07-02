@@ -37,6 +37,18 @@ The pusher-java-client is available in Maven Central:
       <version>0.3.3</version>
     </dependency>
 
+### Gradle
+
+The pusher-java-client is available in Maven Central, however one of its dependencies is hosted on [Clojars.org](http://clojars.org) so you will need to add it to your repositories list.
+
+    repositories {
+      maven { url 'http://clojars.org/repo' }
+    }
+
+    dependencies {
+      compile 'com.pusher:pusher-java-client:0.3.3'
+    }
+
 ### Download
 
 You can download a version of the `.jar` directly from <http://repo1.maven.org/maven2/com/pusher/pusher-java-client/>
