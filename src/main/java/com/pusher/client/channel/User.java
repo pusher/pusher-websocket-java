@@ -16,8 +16,8 @@ public class User {
      * Users are created within the library and represent subscriptions to
      * presence channels.
      *
-     * @param id
-     * @param jsonData
+     * @param id The user id
+     * @param jsonData The user JSON data
      */
     public User(final String id, final String jsonData) {
         this.id = id;
@@ -36,6 +36,8 @@ public class User {
     /**
      * Custom additional information about a user as a String encoding a JSON
      * hash
+     * 
+     * @return The user info as a JSON string
      */
     public String getInfo() {
         return jsonData;
@@ -71,10 +73,11 @@ public class User {
      * info.getNumber() // returns 9
      * </pre>
      *
+     * @param <V> The class of the info
      * @param clazz
      *            the class into which the user info JSON representation should
      *            be parsed.
-     * @return An instance of clazz, populated with the user info
+     * @return V An instance of clazz, populated with the user info
      */
     public <V> V getInfo(final Class<V> clazz) {
         return new Gson().fromJson(jsonData, clazz);

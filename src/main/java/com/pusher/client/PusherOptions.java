@@ -44,10 +44,10 @@ public class PusherOptions {
     }
 
     /**
-     * Sets an encrypted (SSL) connection should be used when connecting to
+     * Sets whether an encrypted (SSL) connection should be used when connecting to
      * Pusher.
      *
-     * @param encrypted
+     * @param encrypted Whether to use an SSL connection
      * @return this, for chaining
      */
     public PusherOptions setEncrypted(final boolean encrypted) {
@@ -85,7 +85,7 @@ public class PusherOptions {
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
      *
-     * @param host
+     * @param host The host
      * @return this, for chaining
      */
     public PusherOptions setHost(final String host) {
@@ -186,7 +186,7 @@ public class PusherOptions {
      * Construct the URL for the WebSocket connection based on the options
      * previous set on this object and the provided API key
      *
-     * @param apiKey
+     * @param apiKey The API key
      * @return the WebSocket URL
      */
     public String buildUrl(final String apiKey) {
