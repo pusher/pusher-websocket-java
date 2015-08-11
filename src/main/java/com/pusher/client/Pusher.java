@@ -333,6 +333,15 @@ public class Pusher {
 
         channelManager.unsubscribeFrom(channelName);
     }
+    
+    /**
+     * Get a channel with the given name
+     * @param channelName
+     * @return The channel with the given name if it's present, otherwise <code>null</code>
+     */
+	public Channel getChannel(String channelName) {
+		return channelManager.getChannel(channelName);
+	}
 
     /* implementation detail */
 

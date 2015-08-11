@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
-
 import com.pusher.client.AuthorizationFailureException;
+import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannelEventListener;
@@ -63,6 +63,10 @@ public class ChannelManager implements ConnectionEventListener {
             connection.sendMessage(channel.toUnsubscribeMessage());
         }
     }
+    
+	public Channel getChannel(String channelName) {
+		return channelNameToChannelMap.get(channelName);
+	}
 
     @SuppressWarnings("unchecked")
     public void onMessage(final String event, final String wholeMessage) {
