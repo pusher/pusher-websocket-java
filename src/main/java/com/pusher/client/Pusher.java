@@ -22,15 +22,15 @@ import com.pusher.client.util.Factory;
  *
  * <p>
  * By creating a new {@link Pusher} instance and calling {@link
- * Pusher.connect()} a connection to Pusher is established.
+ * Pusher#connect()} a connection to Pusher is established.
  * </p>
  *
  * <p>
  * Subscriptions for data are represented by
  * {@link com.pusher.client.channel.Channel} objects, or subclasses thereof.
- * Subscriptions are created by calling {@link #Pusher.subscribe(String)},
- * {@link #Pusher.subscribePrivate(String)},
- * {@link #Pusher.subscribePresence(String)} or one of the overloads.
+ * Subscriptions are created by calling {@link Pusher#subscribe(String)},
+ * {@link Pusher#subscribePrivate(String)},
+ * {@link Pusher#subscribePresence(String)} or one of the overloads.
  * </p>
  */
 public class Pusher {
@@ -179,8 +179,8 @@ public class Pusher {
      * Disconnect from Pusher.
      *
      * <p>
-     * Calls are ignored if the {@link Pusher.getConnection().getState()} is not
-     * {@link com.pusher.client.connection.ConnectionState.CONNECTED}.
+     * Calls are ignored if the {@link Connection#getState()}, retrieved from {@link Pusher#getConnection}, is not
+     * {@link com.pusher.client.connection.ConnectionState#CONNECTED}.
      * </p>
      */
     public void disconnect() {
@@ -336,7 +336,7 @@ public class Pusher {
     
     /**
      * Get a channel with the given name
-     * @param channelName
+     * @param channelName The name of the channel
      * @return The channel with the given name if it's present, otherwise <code>null</code>
      */
 	public Channel getChannel(String channelName) {
