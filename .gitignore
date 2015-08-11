@@ -6,3 +6,6 @@ bin
 
 # Output directory
 target
+
+build
+.gradle
