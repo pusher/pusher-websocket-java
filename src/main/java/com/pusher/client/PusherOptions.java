@@ -9,7 +9,9 @@ import java.util.Properties;
  */
 public class PusherOptions {
 
-    public static final String LIB_VERSION = readVersionFromProperties();
+    private static final String SRC_LIB_DEV_VERSION = "@version@";
+    private static final String LIB_DEV_VERSION = "0.0.0-dev";
+	public static final String LIB_VERSION = readVersionFromProperties();
 
     private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
@@ -200,7 +202,15 @@ public class PusherOptions {
             final Properties p = new Properties();
             inStream = PusherOptions.class.getResourceAsStream("/pusher.properties");
             p.load(inStream);
-            final String version = (String)p.get("version");
+            String version = (String)p.get("version");
+            
+            // If the properties file contents indicates the version is being run
+            // from source then replace with a dev indicator. Otherwise the Pusher
+            // Socket API will reject the connection.
+            if(version.equals(SRC_LIB_DEV_VERSION)) {
+            	version = LIB_DEV_VERSION;
+            }
+            
             if (version != null && version.length() > 0) {
                 return version;
             }
