@@ -22,6 +22,7 @@ public class ChannelImpl implements InternalChannel {
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
     private final Factory factory;
+    private final Object lock = new Object();
 
     public ChannelImpl(final String channelName, final Factory factory) {
 
@@ -57,7 +58,9 @@ public class ChannelImpl implements InternalChannel {
         Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
         if (listeners == null) {
             listeners = new HashSet<SubscriptionEventListener>();
-            eventNameToListenerMap.put(eventName, listeners);
+            synchronized (lock) {
+              eventNameToListenerMap.put(eventName, listeners);
+            }
         }
 
         listeners.add(listener);
@@ -72,7 +75,9 @@ public class ChannelImpl implements InternalChannel {
         if (listeners != null) {
             listeners.remove(listener);
             if (listeners.isEmpty()) {
-                eventNameToListenerMap.remove(eventName);
+                synchronized (lock) {
+                    eventNameToListenerMap.remove(eventName);
+                }
             }
         }
     }
