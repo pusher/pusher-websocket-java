@@ -3,7 +3,6 @@ package com.pusher.client.channel.impl;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -213,17 +212,6 @@ public class ChannelManagerTest {
 
         verify(mockInternalChannel).onMessage("my-event",
                 "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + CHANNEL_NAME + "\"}");
-    }
-    
-    @Test
-    public void testCanGetSubscribedChannel() {
-        channelManager.subscribeTo(mockInternalChannel, mockEventListener);
-        Assert.assertEquals(mockInternalChannel, channelManager.getChannel(CHANNEL_NAME));
-    }
-    
-    @Test
-    public void testGettingChannelThatHasNotBeenSubscribedToReturnsNull() {
-        Assert.assertEquals(null, channelManager.getChannel("some-non-existent-channel"));
     }
 
     @Test

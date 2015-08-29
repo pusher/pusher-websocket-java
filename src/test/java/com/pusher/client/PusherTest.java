@@ -303,12 +303,5 @@ public class PusherTest {
         pusher.unsubscribe(PUBLIC_CHANNEL_NAME);
         verify(mockChannelManager).unsubscribeFrom(PUBLIC_CHANNEL_NAME);
     }
-    
-    @Test
-    public void testgetChannelCallToTheChannelManager() {
-        when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-        pusher.getChannel(PUBLIC_CHANNEL_NAME);
-        verify(mockChannelManager).getChannel(PUBLIC_CHANNEL_NAME);
-    }
 
 }
