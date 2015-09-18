@@ -53,10 +53,10 @@ public class PusherTest {
 
         when(factory.getConnection(eq(API_KEY), any(PusherOptions.class))).thenReturn(mockConnection);
         when(factory.getChannelManager()).thenReturn(mockChannelManager);
-        when(factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
-        when(factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, authorizer))
-                .thenReturn(mockPrivateChannel);
-        when(factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, authorizer)).thenReturn(
+        when(factory.newPublicChannel(PUBLIC_CHANNEL_NAME, null)).thenReturn(mockPublicChannel);
+        when(factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, null, authorizer)).thenReturn(
+                mockPrivateChannel);
+        when(factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, null, authorizer)).thenReturn(
                 mockPresenceChannel);
         when(factory.getEventQueue()).thenReturn(new InstantExecutor());
 

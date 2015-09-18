@@ -9,9 +9,10 @@ import java.util.Properties;
  */
 public class PusherOptions {
 
+    public static final String PROTOCOL = "8";
     public static final String LIB_VERSION = readVersionFromProperties();
 
-    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
+    private static final String URI_SUFFIX = "?client=java-client&protocol=" + PROTOCOL + "&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
     private static final String WSS_SCHEME = "wss";
 
@@ -85,7 +86,7 @@ public class PusherOptions {
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
      *
-     * @param hostname
+     * @param host
      * @return this, for chaining
      */
     public PusherOptions setHost(final String host) {
@@ -100,8 +101,7 @@ public class PusherOptions {
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
      *
-     * @param non
-     *            -SSL port number
+     * @param wsPort non-SSL port number
      * @return this, for chaining
      */
     public PusherOptions setWsPort(final int wsPort) {
@@ -116,8 +116,7 @@ public class PusherOptions {
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
      *
-     * @param SSL
-     *            port number
+     * @param wssPort SSL port number
      * @return this, for chaining
      */
     public PusherOptions setWssPort(final int wssPort) {

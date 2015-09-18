@@ -76,11 +76,11 @@ public class EndToEndTest {
             }
         });
 
-        when(factory.newPresenceChannel(any(InternalConnection.class), anyString(), any(Authorizer.class)))
+        when(factory.newPresenceChannel(any(InternalConnection.class), anyString(), anyString(), any(Authorizer.class)))
                 .thenCallRealMethod();
-        when(factory.newPrivateChannel(any(InternalConnection.class), anyString(), any(Authorizer.class)))
+        when(factory.newPrivateChannel(any(InternalConnection.class), anyString(), anyString(), any(Authorizer.class)))
                 .thenCallRealMethod();
-        when(factory.newPublicChannel(anyString())).thenCallRealMethod();
+        when(factory.newPublicChannel(anyString(), anyString())).thenCallRealMethod();
 
         when(mockAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
 

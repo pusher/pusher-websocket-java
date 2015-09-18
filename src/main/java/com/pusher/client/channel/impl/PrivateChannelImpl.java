@@ -23,8 +23,8 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     private final Authorizer authorizer;
 
     public PrivateChannelImpl(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer, final Factory factory) {
-        super(channelName, factory);
+            final String resumeId, final Authorizer authorizer, final Factory factory) {
+        super(channelName, resumeId, factory);
         this.connection = connection;
         this.authorizer = authorizer;
     }
@@ -84,7 +84,6 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     @Override
     @SuppressWarnings("rawtypes")
     public String toSubscribeMessage() {
-
         final String authResponse = getAuthResponse();
 
         try {
@@ -98,10 +97,13 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
             dataMap.put("channel", name);
             dataMap.put("auth", authKey);
 
+            if (resumeAfter != null) {
+              dataMap.put("resume_after_id", resumeAfter);
+            }
+
             jsonObject.put("data", dataMap);
 
-            final String json = new Gson().toJson(jsonObject);
-            return json;
+            return new Gson().toJson(jsonObject);
         }
         catch (final Exception e) {
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);

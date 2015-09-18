@@ -42,7 +42,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         "privatemy-channel" };
         for (final String invalidName : invalidNames) {
             try {
-                newInstance(invalidName);
+                newInstance(invalidName, null);
                 fail("No exception thrown for invalid name: " + invalidName);
             }
             catch (final IllegalArgumentException e) {
@@ -54,19 +54,19 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Override
     @Test(expected = IllegalArgumentException.class)
     public void testPublicChannelName() {
-        newInstance("stuffchannel");
+        newInstance("stuffchannel", null);
     }
 
     @Override
     @Test(expected = IllegalArgumentException.class)
     public void testPresenceChannelName() {
-        newInstance("presence-stuffchannel");
+        newInstance("presence-stuffchannel", null);
     }
 
     @Override
     @Test
     public void testPrivateChannelName() {
-        newInstance("private-stuffchannel");
+        newInstance("private-stuffchannel", null);
     }
 
     @Test
@@ -193,8 +193,8 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     /* end of tests */
 
     @Override
-    protected ChannelImpl newInstance(final String channelName) {
-        return new PrivateChannelImpl(mockConnection, channelName, mockAuthorizer, factory);
+    protected ChannelImpl newInstance(final String channelName, final String resumeAfterId) {
+        return new PrivateChannelImpl(mockConnection, channelName, resumeAfterId, mockAuthorizer, factory);
     }
 
     @Override

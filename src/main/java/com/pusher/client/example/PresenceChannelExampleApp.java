@@ -100,9 +100,8 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     }
 
     @Override
-    public void onSubscriptionSucceeded(final String channelName) {
-
-        System.out.println(String.format("Subscription to channel [%s] succeeded", channel.getName()));
+    public void onSubscriptionSucceeded(final String channelName, final Boolean resumeSucceeded) {
+        System.out.println(String.format("Subscription to channel [%s] succeeded, resume successful: [%b]", channelName, resumeSucceeded));
     }
 
     @Override
@@ -123,5 +122,11 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
         }
 
         System.out.println(sb.toString());
+    }
+
+    @Override
+    public void onSubscriptionFailed(String channelName, Integer errorCode, String errorDescription) {
+        // TODO Auto-generated method stub
+
     }
 }

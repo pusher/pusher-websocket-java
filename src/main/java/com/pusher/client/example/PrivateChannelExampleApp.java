@@ -73,9 +73,8 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     }
 
     @Override
-    public void onSubscriptionSucceeded(final String channelName) {
-
-        System.out.println(String.format("Subscription to channel [%s] succeeded", channel.getName()));
+    public void onSubscriptionSucceeded(final String channelName, final Boolean resumeSucceeded) {
+        System.out.println(String.format("Subscription to channel [%s] succeeded, resume successful: [%b]", channelName, resumeSucceeded));
 
         channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
     }
@@ -84,5 +83,11 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     public void onAuthenticationFailure(final String message, final Exception e) {
 
         System.out.println(String.format("Authentication failure due to [%s], exception was [%s]", message, e));
+    }
+
+    @Override
+    public void onSubscriptionFailed(String channelName, Integer errorCode, String errorDescription) {
+        // TODO Auto-generated method stub
+
     }
 }

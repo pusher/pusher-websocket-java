@@ -76,12 +76,17 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     }
 
     @Override
-    public void onSubscriptionSucceeded(final String channelName) {
-
-        System.out.println(String.format("[%d] Subscription to channel [%s] succeeded", timestamp(), channelName));
+    public void onSubscriptionSucceeded(final String channelName, final Boolean resumeSucceeded) {
+        System.out.println(String.format("[%d] Subscription to channel [%s] succeeded, resume successful: [%b]", timestamp(), channelName, resumeSucceeded));
     }
 
     private long timestamp() {
         return System.currentTimeMillis() - startTime;
+    }
+
+    @Override
+    public void onSubscriptionFailed(String channelName, Integer errorCode, String errorDescription) {
+        // TODO Auto-generated method stub
+
     }
 }

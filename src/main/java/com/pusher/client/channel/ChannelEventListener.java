@@ -11,7 +11,7 @@ package com.pusher.client.channel;
  * <ul>
  * <li>Call {@link com.pusher.client.Pusher#subscribe(String)} to subscribe and
  * receive an instance of {@link Channel}.</li>
- * <li>Call {@link Channel#bind(String, ChannelEventListener)} to bind your
+ * <li>Call {@link Channel#bind(String, SubscriptionEventListener)} to bind your
  * listener to a specified event.</li>
  * </ul>
  *
@@ -39,6 +39,29 @@ public interface ChannelEventListener extends SubscriptionEventListener {
      *
      * @param channelName
      *            The name of the channel that was successfully subscribed.
+     * @param resumeSuccessful
+     *            If true, the subscription will resume from the requested point,
+     *            all "missed" messages were available and will be forwarded.
+     *            If false, the subscription could not be resumed from the requested
+     *            point as some historical data was not available. What data was
+     *            available will be delivered to the appropriate {@link
+     *            SubscriptionEventListener#onEvent} callbacks.
+     *            If null, resume was not requested for this subscription.
      */
-    void onSubscriptionSucceeded(String channelName);
+    void onSubscriptionSucceeded(String channelName, Boolean resumeSuccessful);
+
+    /**
+     * <p>
+     * Callback that is fired if a subscription request cannot be completed.
+     * </p>
+     *
+     * @param channelName
+     *            The name of the channel for which the subscription failed.
+     * @param errorCode
+     *            A code classifying the type of error
+     * @param errorDescription
+     *            A human readable description of the error
+     */
+    void onSubscriptionFailed(String channelName, Integer errorCode, String errorDescription);
+
 }

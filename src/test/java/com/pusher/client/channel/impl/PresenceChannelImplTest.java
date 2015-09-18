@@ -13,13 +13,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.gson.Gson;
 
 import com.pusher.client.channel.ChannelEventListener;
-import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.channel.User;
@@ -31,14 +29,15 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     private static final String AUTH_RESPONSE_NUMERIC_ID = "\"auth\":\"a87fe72c6f36272aa4b1:f9db294eae7\",\"channel_data\":\"{\\\"user_id\\\":51169,\\\"user_info\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}\"";
     private static final String USER_ID = "5116a4519575b";
 
-    @Mock
-    private PresenceChannelEventListener mockEventListener;
+    private PresenceChannelEventListener mockPresenceListener;
 
     @Override
     @Before
     public void setUp() {
         super.setUp();
-        channel.setEventListener(mockEventListener);
+
+        mockPresenceListener = (PresenceChannelEventListener)mockListener;
+        channel.setEventListener(mockPresenceListener);
         when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "}");
     }
 
@@ -84,10 +83,50 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
         channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
 
-        final InOrder inOrder = inOrder(mockEventListener);
-        inOrder.verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
+        final InOrder inOrder = inOrder(mockPresenceListener);
+        inOrder.verify(mockPresenceListener).onSubscriptionSucceeded(getChannelName(), null);
         final ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
-        inOrder.verify(mockEventListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
+        inOrder.verify(mockPresenceListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
+
+        assertEquals(1, argument.getValue().size());
+        assertTrue(argument.getValue().toArray()[0] instanceof User);
+
+        final User user = (User)argument.getValue().toArray()[0];
+        assertEquals(USER_ID, user.getId());
+        assertEquals("{\"name\":\"Phil Leggetter\",\"twitter_id\":\"@leggetter\"}", user.getInfo());
+    }
+
+    @Override
+    @Test
+    public void testInternalSubscriptionSucceededMessageWithResumeDataIsTranslatedToASubscriptionSuccessfulCallback() {
+        final String eventName = "pusher_internal:subscription_succeeded";
+
+        final Map<String, Object> userInfo = new LinkedHashMap<String, Object>();
+        userInfo.put("name", "Phil Leggetter");
+        userInfo.put("twitter_id", "@leggetter");
+
+        final Map<String, Object> hash = new LinkedHashMap<String, Object>();
+        hash.put(USER_ID, userInfo);
+
+        final Map<String, Object> presence = new LinkedHashMap<String, Object>();
+        presence.put("count", 1);
+        presence.put("ids", new String[] { USER_ID });
+        presence.put("hash", hash);
+
+        final Map<String, Object> resume = new LinkedHashMap<String, Object>();
+        resume.put("ok", Boolean.TRUE);
+        resume.put("resume_after", "blah");
+
+        final Map<String, Object> data = new LinkedHashMap<String, Object>();
+        data.put("presence", presence);
+        data.put("resume", resume);
+
+        channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
+
+        final InOrder inOrder = inOrder(mockPresenceListener);
+        inOrder.verify(mockPresenceListener).onSubscriptionSucceeded(getChannelName(), Boolean.TRUE);
+        final ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
+        inOrder.verify(mockPresenceListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
 
         assertEquals(1, argument.getValue().size());
         assertTrue(argument.getValue().toArray()[0] instanceof User);
@@ -103,8 +142,8 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
         addUser(USER_ID);
 
-        final InOrder inOrder = inOrder(mockEventListener);
-        inOrder.verify(mockEventListener).userSubscribed(eq(getChannelName()), argument.capture());
+        final InOrder inOrder = inOrder(mockPresenceListener);
+        inOrder.verify(mockPresenceListener).userSubscribed(eq(getChannelName()), argument.capture());
 
         assertTrue(argument.getValue() instanceof User);
 
@@ -140,7 +179,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
         channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
 
         final ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
-        verify(mockEventListener).userUnsubscribed(eq(getChannelName()), argument.capture());
+        verify(mockPresenceListener).userUnsubscribed(eq(getChannelName()), argument.capture());
 
         assertTrue(argument.getValue() instanceof User);
 
@@ -155,38 +194,29 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
         channel.bind("private-myEvent", listener);
     }
 
-    @Test
-    @Override
-    public void testUpdateStateToSubscribedNotifiesListenerThatSubscriptionSucceeded() {
-        channel.updateState(ChannelState.SUBSCRIBE_SENT);
-        channel.updateState(ChannelState.SUBSCRIBED);
-
-        verify(mockEventListener).onSubscriptionSucceeded(getChannelName());
-    }
-
     @Override
     @Test(expected = IllegalArgumentException.class)
     public void testPublicChannelName() {
-        newInstance("stuffchannel");
+        newInstance("stuffchannel", null);
     }
 
     @Override
     @Test(expected = IllegalArgumentException.class)
     public void testPrivateChannelName() {
-        newInstance("private-stuffchannel");
+        newInstance("private-stuffchannel", null);
     }
 
     @Override
     @Test
     public void testPresenceChannelName() {
-        newInstance("presence-stuffchannel");
+        newInstance("presence-stuffchannel", null);
     }
 
     /* end of tests */
 
     @Override
-    protected ChannelImpl newInstance(final String channelName) {
-        return new PresenceChannelImpl(mockConnection, channelName, mockAuthorizer, factory);
+    protected ChannelImpl newInstance(final String channelName, final String resumeAfterId) {
+        return new PresenceChannelImpl(mockConnection, channelName, resumeAfterId, mockAuthorizer, factory);
     }
 
     @Override

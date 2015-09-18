@@ -17,14 +17,15 @@ public class ChannelImpl implements InternalChannel {
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
+    protected static final String SUBSCRIPTION_FAILED_EVENT = "pusher_internal:subscription_failed";
     protected final String name;
     protected final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
+    protected String resumeAfter;
     private final Factory factory;
 
-    public ChannelImpl(final String channelName, final Factory factory) {
-
+    public ChannelImpl(final String channelName, final String resumeId, final Factory factory) {
         if (channelName == null) {
             throw new IllegalArgumentException("Cannot subscribe to a channel with a null name");
         }
@@ -34,11 +35,13 @@ public class ChannelImpl implements InternalChannel {
                 throw new IllegalArgumentException(
                         "Channel name "
                                 + channelName
-                                + " is invalid. Private channel names must start with \"private-\" and presence channel names must start with \"presence-\"");
+                                + " is invalid. Private channel names must start with \"private-\" and"
+                                + " presence channel names must start with \"presence-\"");
             }
         }
 
-        name = channelName;
+        this.name = channelName;
+        this.resumeAfter = resumeId;
         this.factory = factory;
     }
 
@@ -80,18 +83,56 @@ public class ChannelImpl implements InternalChannel {
     /* InternalChannel implementation */
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onMessage(final String event, final String message) {
+        final Map<Object, Object> jsonObject = new Gson().fromJson(message, Map.class);
+        final String data = (String)jsonObject.get("data");
+        final String eventId = (String)jsonObject.get("id");
+
+        final Map<String, Object> dataMap = new Gson().fromJson(data, Map.class);
 
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
+
+            final Map<String, Object> resumeData = (Map<String, Object>)dataMap.get("resume");
+            final Boolean resumeSuccessful = resumeData == null ? null : (Boolean)resumeData.get("ok");
+
+            if (eventListener != null) {
+                factory.getEventQueue().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        eventListener.onSubscriptionSucceeded(getName(), resumeSuccessful);
+                    }
+                });
+            }
+        }
+        else if (event.equals(SUBSCRIPTION_FAILED_EVENT)) {
+            updateState(ChannelState.FAILED);
+
+            // JSON has only one number type: Javascript-float
+            final Double javascriptNumberCode = (Double)dataMap.get("code");
+
+            if (eventListener != null) {
+                factory.getEventQueue().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        eventListener.onSubscriptionFailed(
+                                getName(),
+                                javascriptNumberCode == null ? null : javascriptNumberCode.intValue(),
+                                (String)dataMap.get("message"));
+                    }
+                });
+            }
         }
         else {
+            // Update last ID
+            if (eventId != null) {
+                resumeAfter = eventId;
+            }
+
             final Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(event);
             if (listeners != null) {
                 for (final SubscriptionEventListener listener : listeners) {
-
-                    final String data = extractDataFrom(message);
-
                     factory.getEventQueue().execute(new Runnable() {
                         @Override
                         public void run() {
@@ -105,12 +146,15 @@ public class ChannelImpl implements InternalChannel {
 
     @Override
     public String toSubscribeMessage() {
-
         final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
         jsonObject.put("event", "pusher:subscribe");
 
         final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
         dataMap.put("channel", name);
+
+        if (resumeAfter != null) {
+          dataMap.put("resume_after_id", resumeAfter);
+        }
 
         jsonObject.put("data", dataMap);
 
@@ -132,17 +176,7 @@ public class ChannelImpl implements InternalChannel {
 
     @Override
     public void updateState(final ChannelState state) {
-
         this.state = state;
-
-        if (state == ChannelState.SUBSCRIBED && eventListener != null) {
-            factory.getEventQueue().execute(new Runnable() {
-                @Override
-                public void run() {
-                    eventListener.onSubscriptionSucceeded(ChannelImpl.this.getName());
-                }
-            });
-        }
     }
 
     /* Comparable implementation */
@@ -167,13 +201,6 @@ public class ChannelImpl implements InternalChannel {
     @Override
     public String toString() {
         return String.format("[Public Channel: name=%s]", name);
-    }
-
-    @SuppressWarnings("unchecked")
-    private String extractDataFrom(final String message) {
-        final Gson gson = new Gson();
-        final Map<Object, Object> jsonObject = gson.fromJson(message, Map.class);
-        return (String)jsonObject.get("data");
     }
 
     protected String[] getDisallowedNameExpressions() {

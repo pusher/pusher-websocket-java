@@ -36,7 +36,7 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  * Conventions:
  *
  * - any method that starts with "new", such as
- * {@link #newPublicChannel(String)} creates a new instance of that class every
+ * {@link #newPublicChannel(String, String)} creates a new instance of that class every
  * time it is called.
  *
  * - any method that starts with "get", such as {@link #getEventQueue()} returns
@@ -81,18 +81,18 @@ public class Factory {
         return timers;
     }
 
-    public ChannelImpl newPublicChannel(final String channelName) {
-        return new ChannelImpl(channelName, this);
+    public ChannelImpl newPublicChannel(final String channelName, final String resumeId) {
+        return new ChannelImpl(channelName, resumeId, this);
     }
 
     public PrivateChannelImpl newPrivateChannel(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer) {
-        return new PrivateChannelImpl(connection, channelName, authorizer, this);
+            final String resumeId, final Authorizer authorizer) {
+        return new PrivateChannelImpl(connection, channelName, resumeId, authorizer, this);
     }
 
     public PresenceChannelImpl newPresenceChannel(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer) {
-        return new PresenceChannelImpl(connection, channelName, authorizer, this);
+            final String resumeId, final Authorizer authorizer) {
+        return new PresenceChannelImpl(connection, channelName, resumeId, authorizer, this);
     }
 
     public synchronized ChannelManager getChannelManager() {
