@@ -45,6 +45,11 @@ public class ChannelManagerTest {
     private @Mock PresenceChannelEventListener mockPresenceChannelEventListener;
     private @Mock Factory factory;
 
+    private ChannelManager subscriptionTestChannelManager;
+    private @Mock Factory subscriptionTestFactory;
+    private @Mock InternalConnection subscriptionTestConnection;
+    private @Mock InstantExecutor mockQueue;
+
     @Before
     public void setUp() throws AuthorizationFailureException {
 
@@ -64,6 +69,12 @@ public class ChannelManagerTest {
 
         channelManager = new ChannelManager(factory);
         channelManager.setConnection(mockConnection);
+
+
+        when(subscriptionTestFactory.getEventQueue()).thenReturn(mockQueue);
+        subscriptionTestChannelManager = new ChannelManager(subscriptionTestFactory);
+        subscriptionTestChannelManager.setConnection(subscriptionTestConnection);
+
     }
 
     @Test
@@ -241,12 +252,20 @@ public class ChannelManagerTest {
     }
 
     @Test
-    public void testUnsubscribeFromSubscribedChannelUnsubscribes() {
+    public void testUnsubscribeFromSubscribedChannelSendsUnsubscribeMessage() {
         channelManager.subscribeTo(mockInternalChannel, mockEventListener);
         channelManager.unsubscribeFrom(CHANNEL_NAME);
 
         verify(mockConnection).sendMessage(OUTGOING_UNSUBSCRIBE_MESSAGE);
         assertFalse(mockInternalChannel.isSubscribed());
+    }
+
+    @Test
+    public void testUnsubscribeFromSubscribedChannelUnsubscribesInEventQueue() {
+        subscriptionTestChannelManager.subscribeTo(mockInternalChannel, mockEventListener);
+        subscriptionTestChannelManager.unsubscribeFrom(CHANNEL_NAME);
+
+        verify(mockQueue).execute(any(Runnable.class));
     }
 
     @Test

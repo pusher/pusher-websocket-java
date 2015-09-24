@@ -92,10 +92,8 @@ public class ChannelManager implements ConnectionEventListener {
             return;
         }
 
-        channel.updateState(ChannelState.UNSUBSCRIBED);
-
         if (connection.getState() == ConnectionState.CONNECTED) {
-            connection.sendMessage(channel.toUnsubscribeMessage());
+            sendUnsubscribeMessage(channel);
         }
     }
 
@@ -152,6 +150,16 @@ public class ChannelManager implements ConnectionEventListener {
                         clearDownSubscription(channel, e);
                     }
                 }
+            }
+        });
+    }
+
+    private void sendUnsubscribeMessage(final InternalChannel channel) {
+        factory.getEventQueue().execute(new Runnable() {
+            @Override
+            public void run() {
+                connection.sendMessage(channel.toUnsubscribeMessage());
+                channel.updateState(ChannelState.UNSUBSCRIBED);
             }
         });
     }
