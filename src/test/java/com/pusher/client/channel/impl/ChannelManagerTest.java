@@ -6,12 +6,17 @@ import static org.mockito.Mockito.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import static org.junit.Assert.*;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pusher.client.AuthorizationFailureException;
+import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PresenceChannel;
+import com.pusher.client.channel.PresenceChannelEventListener;
+import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
@@ -24,6 +29,7 @@ public class ChannelManagerTest {
 
     private static final String CHANNEL_NAME = "my-channel";
     private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
+    private static final String PRESENCE_CHANNEL_NAME = "presence-my-channel";
     private static final String OUTGOING_SUBSCRIBE_MESSAGE = "{\"event\":\"pusher:subscribe\"}";
     private static final String OUTGOING_UNSUBSCRIBE_MESSAGE = "{\"event\":\"pusher:unsubscribe\"}";
     private static final String SOCKET_ID = "21234.41243";
@@ -35,6 +41,8 @@ public class ChannelManagerTest {
     private @Mock ChannelEventListener mockEventListener;
     private @Mock PrivateChannelImpl mockPrivateChannel;
     private @Mock PrivateChannelEventListener mockPrivateChannelEventListener;
+    private @Mock PresenceChannelImpl mockPresenceChannel;
+    private @Mock PresenceChannelEventListener mockPresenceChannelEventListener;
     private @Mock Factory factory;
 
     @Before
@@ -50,6 +58,9 @@ public class ChannelManagerTest {
         when(mockPrivateChannel.getName()).thenReturn(PRIVATE_CHANNEL_NAME);
         when(mockPrivateChannel.toSubscribeMessage()).thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
         when(mockPrivateChannel.getEventListener()).thenReturn(mockPrivateChannelEventListener);
+        when(mockPresenceChannel.getName()).thenReturn(PRESENCE_CHANNEL_NAME);
+        when(mockPresenceChannel.toSubscribeMessage()).thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
+        when(mockPresenceChannel.getEventListener()).thenReturn(mockPresenceChannelEventListener);
 
         channelManager = new ChannelManager(factory);
         channelManager.setConnection(mockConnection);
@@ -269,5 +280,59 @@ public class ChannelManagerTest {
                 ConnectionState.CONNECTED));
 
         verify(mockConnection, never()).sendMessage(anyString());
+    }
+
+    @Test
+    public void testGetChannelFromString(){
+        channelManager.subscribeTo(mockInternalChannel, mockEventListener);
+        Channel channel = channelManager.getChannel(CHANNEL_NAME);
+        assertEquals(channel, mockInternalChannel);
+    }
+
+    @Test
+    public void testGetNonExistentChannelFromString(){
+       Channel channel = channelManager.getChannel("woot");
+        assertNull(channel);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetPrivateChannelWithGetChannelRaisesError(){
+        channelManager.getChannel("private-yolo");
+    }
+
+    @Test
+    public void testGetPrivateChannelFromString(){
+        channelManager.subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener);
+        PrivateChannel channel = channelManager.getPrivateChannel(PRIVATE_CHANNEL_NAME);
+        assertEquals(channel, mockPrivateChannel);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetPrivateChannelPassingInPresencePrefixedString(){
+        channelManager.getPrivateChannel("presence-yolo");
+    }
+
+    @Test
+    public void testGetNonExistentPrivateChannel(){
+        PrivateChannel channel = channelManager.getPrivateChannel("private-yolo");
+        assertNull(channel);
+    }
+
+    @Test
+    public void testGetPresenceChannelFromString(){
+        channelManager.subscribeTo(mockPresenceChannel, mockPresenceChannelEventListener);
+        PresenceChannel channel = channelManager.getPresenceChannel(PRESENCE_CHANNEL_NAME);
+        assertEquals(channel, mockPresenceChannel);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetPresenceChannelPassingInPrivatePrefixedString(){
+        channelManager.getPresenceChannel("private-yolo");
+    }
+
+    @Test
+    public void testGetNonExistentPresenceChannel(){
+        PresenceChannel channel = channelManager.getPresenceChannel("presence-yolo");
+        assertNull(channel);
     }
 }

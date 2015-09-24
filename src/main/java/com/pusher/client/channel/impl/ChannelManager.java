@@ -6,8 +6,11 @@ import java.util.Map;
 import com.google.gson.Gson;
 
 import com.pusher.client.AuthorizationFailureException;
+import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PresenceChannel;
+import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -23,6 +26,38 @@ public class ChannelManager implements ConnectionEventListener {
 
     public ChannelManager(final Factory factory) {
         this.factory = factory;
+    }
+
+    public Channel getChannel(String channelName){
+        if (channelName.startsWith("private-")){
+            throw new IllegalArgumentException("Please use the getPrivateChannel method");
+        } else if (channelName.startsWith("presence-")){
+            throw new IllegalArgumentException("Please use the getPresenceChannel method");
+        }
+        return (Channel) findChannelInChannelMap(channelName);
+    }
+
+    public PrivateChannel getPrivateChannel(String channelName) throws IllegalArgumentException{
+        if (!channelName.startsWith("private-")) {
+            throw new IllegalArgumentException("Private channels must begin with 'private-'");
+        } else {
+            return (PrivateChannel) findChannelInChannelMap(channelName);
+        }
+    }
+
+    public PresenceChannel getPresenceChannel(String channelName) throws IllegalArgumentException{
+        if (!channelName.startsWith("presence-")) {
+            throw new IllegalArgumentException("Presence channels must begin with 'presence-'");
+        } else {
+            return (PresenceChannel) findChannelInChannelMap(channelName);
+        }
+    }
+
+    private InternalChannel findChannelInChannelMap(String channelName){
+        if (channelNameToChannelMap.containsKey(channelName)){
+            return channelNameToChannelMap.get(channelName);
+        }
+        return null;
     }
 
     public void setConnection(final InternalConnection connection) {

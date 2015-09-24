@@ -375,4 +375,17 @@ public class Pusher {
                     "Cannot subscribe to a private or presence channel because no Authorizer has been set. Call PusherOptions.setAuthorizer() before connecting to Pusher");
         }
     }
+
+    public Channel getChannel(String channelName){
+        return channelManager.getChannel(channelName);
+    }
+
+    public PrivateChannel getPrivateChannel(String channelName){
+        return channelManager.getPrivateChannel(channelName);
+    }
+
+    public PresenceChannel getPresenceChannel(String channelName){
+        return channelManager.getPresenceChannel(channelName);
+    }
+
 }
