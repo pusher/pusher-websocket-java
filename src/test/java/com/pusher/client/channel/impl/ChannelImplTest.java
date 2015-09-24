@@ -1,6 +1,8 @@
 package com.pusher.client.channel.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -77,6 +79,16 @@ public class ChannelImplTest {
                         + getChannelName() + "\"}");
 
         verify(mockListener).onSubscriptionSucceeded(getChannelName());
+    }
+
+    @Test
+    public void testIsSubscribedMethod(){
+        assertFalse(channel.isSubscribed());
+        channel.bind(EVENT_NAME, mockListener);
+        channel.onMessage("pusher_internal:subscription_succeeded",
+                "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\""
+                        + getChannelName() + "\"}");
+        assertTrue(channel.isSubscribed());
     }
 
     @Test

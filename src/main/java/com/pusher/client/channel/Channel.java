@@ -79,4 +79,6 @@ public interface Channel {
      *             again to receive a fresh {@linkplain Channel} instance.
      */
     void unbind(String eventName, SubscriptionEventListener listener);
+
+    boolean isSubscribed();
 }

@@ -246,6 +246,7 @@ public class ChannelManagerTest {
         channelManager.unsubscribeFrom(CHANNEL_NAME);
 
         verify(mockConnection).sendMessage(OUTGOING_UNSUBSCRIBE_MESSAGE);
+        assertFalse(mockInternalChannel.isSubscribed());
     }
 
     @Test

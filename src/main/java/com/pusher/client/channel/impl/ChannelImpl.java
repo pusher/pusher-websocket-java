@@ -77,6 +77,11 @@ public class ChannelImpl implements InternalChannel {
         }
     }
 
+    @Override
+    public boolean isSubscribed() {
+        return state == ChannelState.SUBSCRIBED;
+    }
+
     /* InternalChannel implementation */
 
     @Override
