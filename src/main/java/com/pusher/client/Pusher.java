@@ -6,6 +6,7 @@ import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
+import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.InternalChannel;
 import com.pusher.client.channel.impl.PresenceChannelImpl;
@@ -21,15 +22,15 @@ import com.pusher.client.util.Factory;
  *
  * <p>
  * By creating a new {@link Pusher} instance and calling {@link
- * Pusher.connect()} a connection to Pusher is established.
+ * Pusher#connect()} a connection to Pusher is established.
  * </p>
  *
  * <p>
  * Subscriptions for data are represented by
  * {@link com.pusher.client.channel.Channel} objects, or subclasses thereof.
- * Subscriptions are created by calling {@link #Pusher.subscribe(String)},
- * {@link #Pusher.subscribePrivate(String)},
- * {@link #Pusher.subscribePresence(String)} or one of the overloads.
+ * Subscriptions are created by calling {@link Pusher#subscribe(String)},
+ * {@link Pusher#subscribePrivate(String)},
+ * {@link Pusher#subscribePresence(String)} or one of the overloads.
  * </p>
  */
 public class Pusher {
@@ -40,9 +41,7 @@ public class Pusher {
     private final Factory factory;
 
     /**
-     * <p>
      * Creates a new instance of Pusher.
-     * </p>
      *
      * <p>
      * Note that if you use this constructor you will not be able to subscribe
@@ -56,7 +55,6 @@ public class Pusher {
      * <li>Use the {@link #Pusher(String, PusherOptions)} constructor to create
      * an instance of Pusher.</li>
      * </ul>
-     * </p>
      *
      * <p>
      * The {@link com.pusher.client.example.PrivateChannelExampleApp} and
@@ -124,11 +122,7 @@ public class Pusher {
      * {@link Connection#bind(ConnectionState, ConnectionEventListener)} method
      * will receive connection events.
      *
-     * <p>
-     * Calls are ignored (a connection is not attempted) if the {@link
-     * Pusher.getConnection().getState()} is not
-     * {@link com.pusher.client.connection.ConnectionState.DISCONNECTED}.
-     * </p>
+     * <p>Calls are ignored (a connection is not attempted) if the {@link Connection#getState()} is not {@link com.pusher.client.connection.ConnectionState#DISCONNECTED}.</p>
      */
     public void connect() {
         connect(null);
@@ -141,11 +135,7 @@ public class Pusher {
      * {@link Connection#bind(ConnectionState, ConnectionEventListener)} method
      * before connecting.
      *
-     * <p>
-     * Calls are ignored (a connection is not attempted) if the {@link
-     * Pusher.getConnection().getState()} is not
-     * {@link com.pusher.client.connection.ConnectionState.DISCONNECTED}.
-     * </p>
+     <p>Calls are ignored (a connection is not attempted) if the {@link Connection#getState()} is not {@link com.pusher.client.connection.ConnectionState#DISCONNECTED}.</p>
      *
      * @param eventListener
      *            A {@link ConnectionEventListener} that will receive connection
@@ -189,8 +179,8 @@ public class Pusher {
      * Disconnect from Pusher.
      *
      * <p>
-     * Calls are ignored if the {@link Pusher.getConnection().getState()} is not
-     * {@link com.pusher.client.connection.ConnectionState.CONNECTED}.
+     * Calls are ignored if the {@link Connection#getState()}, retrieved from {@link Pusher#getConnection}, is not
+     * {@link com.pusher.client.connection.ConnectionState#CONNECTED}.
      * </p>
      */
     public void disconnect() {
@@ -276,22 +266,11 @@ public class Pusher {
      * Subscribes to a {@link com.pusher.client.channel.PrivateChannel} which
      * requires authentication.
      *
-     * @param channelName
-     *            The name of the channel to subscribe to.
-     * @param listener
-     *            A listener to be informed of both Pusher channel protocol
-     *            events and subscription data events.
-     * @param eventNames
-     *            An optional list of names of events to be bound to on the
-     *            channel. The equivalent of calling {@link
-     *            com.pusher.client.channel.Channel.bind(String,
-     *            SubscriptionListener)} on or more times.
-     * @return A new {@link com.pusher.client.channel.PrivateChannel}
-     *         representing the subscription.
-     * @throws IllegalStateException
-     *             if a {@link com.pusher.client.Authorizer} has not been set
-     *             for the {@link Pusher} instance via
-     *             {@link #Pusher(String, PusherOptions)}.
+     * @param channelName The name of the channel to subscribe to.
+     * @param listener A listener to be informed of both Pusher channel protocol events and subscription data events.
+     * @param eventNames An optional list of names of events to be bound to on the channel. The equivalent of calling {@link com.pusher.client.channel.Channel#bind(String, SubscriptionEventListener)} on or more times.
+     * @return A new {@link com.pusher.client.channel.PrivateChannel} representing the subscription.
+     * @throws IllegalStateException if a {@link com.pusher.client.Authorizer} has not been set for the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
      */
     public PrivateChannel subscribePrivate(final String channelName, final PrivateChannelEventListener listener,
             final String... eventNames) {
@@ -326,23 +305,11 @@ public class Pusher {
      * Subscribes to a {@link com.pusher.client.channel.PresenceChannel} which
      * requires authentication.
      *
-     * @param channelName
-     *            The name of the channel to subscribe to.
-     * @param listener
-     *            A listener to be informed of Pusher channel protocol,
-     *            including presence-specific events, and subscription data
-     *            events.
-     * @param eventNames
-     *            An optional list of names of events to be bound to on the
-     *            channel. The equivalent of calling {@link
-     *            com.pusher.client.channel.Channel.bind(String,
-     *            SubscriptionListener)} on or more times.
-     * @return A new {@link com.pusher.client.channel.PresenceChannel}
-     *         representing the subscription.
-     * @throws IllegalStateException
-     *             if a {@link com.pusher.client.Authorizer} has not been set
-     *             for the {@link Pusher} instance via
-     *             {@link #Pusher(String, PusherOptions)}.
+     * @param channelName The name of the channel to subscribe to.
+     * @param listener A listener to be informed of Pusher channel protocol, including presence-specific events, and subscription data events.
+     * @param eventNames An optional list of names of events to be bound to on the channel. The equivalent of calling {@link com.pusher.client.channel.Channel#bind(String, SubscriptionEventListener)} on or more times.
+     * @return A new {@link com.pusher.client.channel.PresenceChannel} representing the subscription.
+     * @throws IllegalStateException if a {@link com.pusher.client.Authorizer} has not been set for the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
      */
     public PresenceChannel subscribePresence(final String channelName, final PresenceChannelEventListener listener,
             final String... eventNames) {

@@ -12,8 +12,8 @@ public class ConnectionStateChange {
      * Used within the library to create a connection state change. Not be used
      * used as part of the API.
      *
-     * @param previousState
-     * @param currentState
+     * @param previousState The previous connection state
+     * @param currentState The current connection state
      */
     public ConnectionStateChange(final ConnectionState previousState, final ConnectionState currentState) {
 
@@ -31,7 +31,7 @@ public class ConnectionStateChange {
      * The previous connections state. The state the connection has transitioned
      * from.
      *
-     * @return
+     * @return The previous connection state
      */
     public ConnectionState getPreviousState() {
         return previousState;
@@ -41,7 +41,7 @@ public class ConnectionStateChange {
      * The current connection state. The state the connection has transitioned
      * to.
      *
-     * @return
+     * @return The current connection state
      */
     public ConnectionState getCurrentState() {
         return currentState;

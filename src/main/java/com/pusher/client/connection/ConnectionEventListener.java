@@ -1,11 +1,9 @@
 package com.pusher.client.connection;
 
 /**
- * <p>
  * Client applications should implement this interface if they wish to receive
  * notifications when the state of a {@link Connection} changes or an error is
  * thrown.
- * </p>
  *
  * <p>
  * Implementations of this interface can be bound to the connection by calling
@@ -24,11 +22,9 @@ package com.pusher.client.connection;
 public interface ConnectionEventListener {
 
     /**
-     * <p>
      * Callback that is fired whenever the {@link ConnectionState} of the
      * {@link Connection} changes. The state typically changes during connection
      * to Pusher and during disconnection and reconnection.
-     * </p>
      *
      * <p>
      * This callback is only fired if the {@linkplain ConnectionEventListener}
@@ -37,22 +33,18 @@ public interface ConnectionEventListener {
      * either the new state or {@link ConnectionState#ALL}.
      * </p>
      *
-     * @param change
-     *            An object that contains the previous state of the connection
+     * @param change An object that contains the previous state of the connection
      *            and the new state. The new state can be retrieved by calling
      *            {@link ConnectionStateChange#getCurrentState()}.
      */
     void onConnectionStateChange(ConnectionStateChange change);
 
     /**
-     * <p>
      * Callback that indicates either:
-     *
      * <ul>
      * <li>An error message has been received from Pusher, or</li>
      * <li>An error has occurred in the client library.</li>
      * </ul>
-     * </p>
      *
      * <p>
      * All {@linkplain ConnectionEventListener}s that have been registered by

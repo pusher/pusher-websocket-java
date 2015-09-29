@@ -56,7 +56,7 @@ public class HttpAuthorizer implements Authorizer {
     /**
      * Set additional headers to be sent as part of the request.
      *
-     * @param headers
+     * @param headers A map of headers
      */
     public void setHeaders(final HashMap<String, String> headers) {
         mHeaders = headers;
@@ -64,8 +64,7 @@ public class HttpAuthorizer implements Authorizer {
 
     /**
      * Identifies if the HTTP request will be sent over HTTPS.
-     *
-     * @return
+     * @return true if the endpoint protocol is 'https'
      */
     public Boolean isSSL() {
         return endPoint.getProtocol().equals("https");

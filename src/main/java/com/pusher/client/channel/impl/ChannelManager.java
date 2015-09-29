@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
-
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
