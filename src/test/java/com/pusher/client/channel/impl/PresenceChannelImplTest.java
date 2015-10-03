@@ -60,6 +60,15 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
                 + AUTH_RESPONSE_NUMERIC_ID + "}}", message);
     }
 
+    @Override
+    @Test
+    public void testIsSubscribedMethod(){
+        assertFalse(channel.isSubscribed());
+        channel.onMessage("pusher_internal:subscription_succeeded",
+                "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{\\\"presence\\\":{\\\"count\\\":1,\\\"ids\\\":[\\\"5116a4519575b\\\"],\\\"hash\\\":{\\\"5116a4519575b\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}}}\",\"channel\":\"presence-myChannel\"}");
+        assertTrue(channel.isSubscribed());
+    }
+
     @Test
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
