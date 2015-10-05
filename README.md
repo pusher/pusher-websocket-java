@@ -6,22 +6,35 @@ Pusher client library for Java targeting **Android** and general Java.
 
 This README covers the following topics:
 
-* Installation
-* API Overview
-* The Pusher constructor
-* Connecting
-* Disconnecting
-* Listening to connection events
-* Subscribing to channels
-  * Public
-  * Private
-  * Presence
-* Binding and handling events
-  * Unbinding events
-* Triggering client events
-* Accessing the connection socket ID
-* JavaDocs
-* Library development environment
+- [Installation](#installation)
+	- [Maven](#maven)
+	- [Gradle](#gradle)
+	- [Download](#download)
+	- [Source](#source)
+- [API Overview](#api-overview)
+- [The Pusher constructor](#the-pusher-constructor)
+- [Connecting](#connecting)
+- [Reconnecting](#reconnecting)
+- [Disconnecting](#disconnecting)
+- [Listening to connection events](#listening-to-connection-events)
+- [Subscribing to channels](#subscribing-to-channels)
+	- [Public channels](#public-channels)
+	- [Private channels](#private-channels)
+	- [Presence channels](#presence-channels)
+		- [The User object](#the-user-object)
+- [Binding and handling events](#binding-and-handling-events)
+- [Triggering events](#triggering-events)
+- [Accessing the connection socket ID](#accessing-the-connection-socket-id)
+- [Helper Methods](#helper-methods)
+	- [Getting a channel from string](#getting-a-channel-from-string)
+	- [Check if a channel has subscribed](#check-if-a-channel-has-subscribed)
+- [JavaDocs](#javadocs)
+- [Library Development Environment](#library-development-environment)
+	- [Prerequisites](#prerequisites)
+	- [Cloning the project](#cloning-the-project)
+	- [Eclipse Project](#eclipse-project)
+	- [Build](#build)
+	- [Run the Example Application](#run-the-example-application)
 
 ## Installation
 
@@ -31,23 +44,27 @@ The compiled library is available in two ways:
 
 The pusher-java-client is available in Maven Central:
 
-    <dependency>
-      <groupId>com.pusher</groupId>
-      <artifactId>pusher-java-client</artifactId>
-      <version>0.3.3</version>
-    </dependency>
+```xml
+<dependency>
+  <groupId>com.pusher</groupId>
+  <artifactId>pusher-java-client</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
 
 ### Gradle
 
 The pusher-java-client is available in Maven Central, however one of its dependencies is hosted on [Clojars.org](http://clojars.org) so you will need to add it to your repositories list.
 
-    repositories {
-      maven { url 'http://clojars.org/repo' }
-    }
+```groovy
+repositories {
+  maven { url 'http://clojars.org/repo' }
+}
 
-    dependencies {
-      compile 'com.pusher:pusher-java-client:0.3.3'
-    }
+dependencies {
+  compile 'com.pusher:pusher-java-client:1.0.0'
+}
+```
 
 ### Download
 
@@ -438,6 +455,41 @@ String socketId = pusher.getConnection().getSocketId();
 ```
 
 For more information on how and why there is a `socket_id` see the documentation on [authenticating users](http://pusher.com/docs/authenticating_users) and [excluding recipients](http://pusher.com/docs/server_api_guide/server_excluding_recipients).
+
+## Helper Methods
+
+### Getting a channel from string
+
+#### Basic channels
+
+```java
+Channel channel = pusher.getChannel("my-channel");
+```
+
+The library will raise an exception if the parameter to `Pusher#getPrivateChannel` is prefixed with `"private-"` or `"presence-"`.
+
+#### Private channels
+
+```java
+PrivateChannel channel = pusher.getPrivateChannel("private-channel");
+```
+
+The library will raise an exception if the parameter to `Pusher#getPrivateChannel` is not prefixed with `"private-"`.
+
+#### Presence channels
+
+```java
+PresenceChannel channel = pusher.getPresenceChannel("presence-channel");
+```
+
+The library will raise an exception if the parameter to `Pusher#getPrivateChannel` is not prefixed with `"presence-"`.
+
+### Check if a channel has subscribed
+
+```java
+Channel channel = pusher.getChannel("my-channel");
+channel.isSubscribed(); // => `true`/`false`
+```
 
 ## JavaDocs
 
