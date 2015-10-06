@@ -1,5 +1,6 @@
 package com.pusher.client.channel.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -55,15 +56,14 @@ public class ChannelImpl implements InternalChannel {
 
         validateArguments(eventName, listener);
 
-        Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
-        if (listeners == null) {
-            listeners = new HashSet<SubscriptionEventListener>();
-            synchronized (lock) {
-              eventNameToListenerMap.put(eventName, listeners);
+        synchronized (lock) {
+            Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
+            if (listeners == null) {
+                listeners = new HashSet<SubscriptionEventListener>();
+                eventNameToListenerMap.put(eventName, listeners);
             }
+            listeners.add(listener);
         }
-
-        listeners.add(listener);
     }
 
     @Override
@@ -71,11 +71,11 @@ public class ChannelImpl implements InternalChannel {
 
         validateArguments(eventName, listener);
 
-        final Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
-        if (listeners != null) {
-            listeners.remove(listener);
-            if (listeners.isEmpty()) {
-                synchronized (lock) {
+        synchronized (lock) {
+            final Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
+            if (listeners != null) {
+                listeners.remove(listener);
+                if (listeners.isEmpty()) {
                     eventNameToListenerMap.remove(eventName);
                 }
             }
