@@ -96,10 +96,19 @@ public class ChannelImpl implements InternalChannel {
             updateState(ChannelState.SUBSCRIBED);
         }
         else {
-            final Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(event);
+            final Set<SubscriptionEventListener> listeners;
+            synchronized (lock) {
+                final Set<SubscriptionEventListener> sharedListeners = eventNameToListenerMap.get(event);
+                if (sharedListeners != null) {
+                    listeners = new HashSet<SubscriptionEventListener>(sharedListeners);
+                }
+                else {
+                    listeners = null;
+                }
+            }
+
             if (listeners != null) {
                 for (final SubscriptionEventListener listener : listeners) {
-
                     final String data = extractDataFrom(message);
 
                     factory.getEventQueue().execute(new Runnable() {
