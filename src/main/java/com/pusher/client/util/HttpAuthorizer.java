@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -34,8 +35,8 @@ import com.pusher.client.Authorizer;
 public class HttpAuthorizer implements Authorizer {
 
     private final URL endPoint;
-    private HashMap<String, String> mHeaders = new HashMap<String, String>();
-    private HashMap<String, String> mQueryStringParameters = new HashMap<String, String>();
+    private Map<String, String> mHeaders = new HashMap<String, String>();
+    private Map<String, String> mQueryStringParameters = new HashMap<String, String>();
     private final String ENCODING_CHARACTER_SET = "UTF-8";
 
     /**
@@ -58,7 +59,7 @@ public class HttpAuthorizer implements Authorizer {
      *
      * @param headers A map of headers
      */
-    public void setHeaders(final HashMap<String, String> headers) {
+    public void setHeaders(final Map<String, String> headers) {
         mHeaders = headers;
     }
 
@@ -96,7 +97,7 @@ public class HttpAuthorizer implements Authorizer {
                         ENCODING_CHARACTER_SET));
             }
 
-            HttpURLConnection connection = null;
+            HttpURLConnection connection;
             if (isSSL()) {
                 connection = (HttpsURLConnection)endPoint.openConnection();
             }
