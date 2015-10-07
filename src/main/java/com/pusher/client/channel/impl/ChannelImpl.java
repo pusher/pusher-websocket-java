@@ -1,5 +1,6 @@
 package com.pusher.client.channel.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -18,10 +19,11 @@ public class ChannelImpl implements InternalChannel {
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
-    protected final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
+    private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
     private final Factory factory;
+    private final Object lock = new Object();
 
     public ChannelImpl(final String channelName, final Factory factory) {
 
@@ -54,13 +56,14 @@ public class ChannelImpl implements InternalChannel {
 
         validateArguments(eventName, listener);
 
-        Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
-        if (listeners == null) {
-            listeners = new HashSet<SubscriptionEventListener>();
-            eventNameToListenerMap.put(eventName, listeners);
+        synchronized (lock) {
+            Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
+            if (listeners == null) {
+                listeners = new HashSet<SubscriptionEventListener>();
+                eventNameToListenerMap.put(eventName, listeners);
+            }
+            listeners.add(listener);
         }
-
-        listeners.add(listener);
     }
 
     @Override
@@ -68,11 +71,13 @@ public class ChannelImpl implements InternalChannel {
 
         validateArguments(eventName, listener);
 
-        final Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
-        if (listeners != null) {
-            listeners.remove(listener);
-            if (listeners.isEmpty()) {
-                eventNameToListenerMap.remove(eventName);
+        synchronized (lock) {
+            final Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
+            if (listeners != null) {
+                listeners.remove(listener);
+                if (listeners.isEmpty()) {
+                    eventNameToListenerMap.remove(eventName);
+                }
             }
         }
     }
@@ -91,10 +96,19 @@ public class ChannelImpl implements InternalChannel {
             updateState(ChannelState.SUBSCRIBED);
         }
         else {
-            final Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(event);
+            final Set<SubscriptionEventListener> listeners;
+            synchronized (lock) {
+                final Set<SubscriptionEventListener> sharedListeners = eventNameToListenerMap.get(event);
+                if (sharedListeners != null) {
+                    listeners = new HashSet<SubscriptionEventListener>(sharedListeners);
+                }
+                else {
+                    listeners = null;
+                }
+            }
+
             if (listeners != null) {
                 for (final SubscriptionEventListener listener : listeners) {
-
                     final String data = extractDataFrom(message);
 
                     factory.getEventQueue().execute(new Runnable() {
