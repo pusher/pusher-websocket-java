@@ -482,7 +482,7 @@ The library will raise an exception if the parameter to `Pusher#getPrivateChanne
 PresenceChannel channel = pusher.getPresenceChannel("presence-channel");
 ```
 
-The library will raise an exception if the parameter to `Pusher#getPrivateChannel` is not prefixed with `"presence-"`.
+The library will raise an exception if the parameter to `Pusher#getPresenceChannel` is not prefixed with `"presence-"`.
 
 ### Check if a channel has subscribed
 
