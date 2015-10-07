@@ -1,5 +1,13 @@
 # pusher-java-client changelog
 
+## Version 1.0.0
+
+2015-10-7
+  * Use generic `Map` for `HttpAuthorizer` - trevorrjohn
+  * Add to `Pusher` `isSubscribed` `getChannel`, `getPrivateChannel` and `getPresenceChannel` methods - jpatel531
+  * Library unsubscribes asynchronously - jpatel531
+  * Synchronize access to channel event listeners - trevorrjohn, jpatel531, mdpye
+
 ## Version 0.3.3
 2015-02-09 mdpye
  * REALLY remove the JavaWebsockets submodule
