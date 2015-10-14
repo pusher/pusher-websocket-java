@@ -343,14 +343,32 @@ public class Pusher {
         }
     }
 
+    /**
+     *
+     * @param channelName The name of the public channel to be retrieved
+     * @return A public channel, or null if it could not be found
+     * @throws IllegalArgumentException if you try to retrieve a private or presence channel.
+     */
     public Channel getChannel(String channelName){
         return channelManager.getChannel(channelName);
     }
 
+    /**
+     *
+     * @param channelName The name of the private channel to be retrieved
+     * @return A private channel, or null if it could not be found
+     * @throws IllegalArgumentException if you try to retrieve a public or presence channel.
+     */
     public PrivateChannel getPrivateChannel(String channelName){
         return channelManager.getPrivateChannel(channelName);
     }
 
+    /**
+     *
+     * @param channelName The name of the presence channel to be retrieved
+     * @return A presence channel, or null if it could not be found
+     * @throws IllegalArgumentException if you try to retrieve a public or private channel.
+     */
     public PresenceChannel getPresenceChannel(String channelName){
         return channelManager.getPresenceChannel(channelName);
     }

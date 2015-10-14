@@ -80,5 +80,9 @@ public interface Channel {
      */
     void unbind(String eventName, SubscriptionEventListener listener);
 
+    /**
+     *
+     * @return Whether or not the channel is subscribed.
+     */
     boolean isSubscribed();
 }
