@@ -21,7 +21,7 @@ apply plugin: 'org.ajoberstar.github-pages'
 apply plugin: 'signing'
 
 group = "com.pusher"
-version = "0.3.4-SNAPSHOT"
+version = "1.0.0"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
@@ -138,14 +138,14 @@ uploadArchives { repositories { mavenDeployer {
 	}
 	repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
 		authentication(
-			userName: { getProperty("maven.username") },
-			password: { getProperty("maven.password") }
+			userName: getProperty("maven.username"),
+			password: getProperty("maven.password")
 		)
 	}
 	snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
 		authentication(
-			userName: { getProperty("maven.username") },
-			password: { getProperty("maven.password") }
+			userName: getProperty("maven.username"),
+			password: getProperty("maven.password")
 		)
 	}
 	pom.project {

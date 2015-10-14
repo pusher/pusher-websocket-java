@@ -12,3 +12,4 @@ build
 .idea
 
 *.iml
+gradle.properties
