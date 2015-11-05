@@ -120,10 +120,9 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     private void handleSubscriptionSuccessfulMessage(final String message) {
 
         // extract data from the JSON message
-        final Map presenceMap = extractPresenceMapFrom(message);
-
-        final List<String> ids = (List<String>)presenceMap.get("ids");
-        final Map<String, ?> hash = (Map<String, ?>)presenceMap.get("hash");
+        final PresenceData presenceData = extractPresenceDataFrom(message);
+        final List<String> ids = presenceData.ids;
+        final Map<String, Object> hash = presenceData.hash;
 
         // build the collection of Users
         for (final String id : ids) {
@@ -141,10 +140,13 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     @SuppressWarnings("rawtypes")
     private void handleMemberAddedEvent(final String message) {
+        Gson gson = new Gson();
+        final String dataString = extractDataStringFrom(message);
+        MemberData memberData = gson.fromJson(dataString, MemberData.class);
 
-        final Map dataMap = extractDataMapFrom(message);
-        final String id = String.valueOf(dataMap.get("user_id"));
-        final String userData = dataMap.get("user_info") != null ? new Gson().toJson(dataMap.get("user_info")) : null;
+
+        final String id = memberData.user_id;
+        final String userData = memberData.user_info != null ? new Gson().toJson(memberData.user_info) : null;
 
         final User user = new User(id, userData);
         idToUserMap.put(id, user);
@@ -159,10 +161,11 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     @SuppressWarnings("rawtypes")
     private void handleMemberRemovedEvent(final String message) {
 
-        final Map dataMap = extractDataMapFrom(message);
-        final String id = String.valueOf(dataMap.get("user_id"));
+        final String dataString = extractDataStringFrom(message);
+        final Gson gson = new Gson();
+        final MemberData memberData = gson.fromJson(dataString, MemberData.class);
 
-        final User user = idToUserMap.remove(id);
+        final User user = idToUserMap.remove(memberData.user_id);
 
         final ChannelEventListener listener = getEventListener();
         if (listener != null) {
@@ -172,22 +175,17 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     }
 
     @SuppressWarnings("rawtypes")
-    private static Map extractDataMapFrom(final String message) {
+    private static String extractDataStringFrom(final String message) {
         final Gson gson = new Gson();
         final Map jsonObject = gson.fromJson(message, Map.class);
-        final String dataString = (String)jsonObject.get("data");
-
-        final Map dataMap = gson.fromJson(dataString, Map.class);
-        return dataMap;
+        return  (String) jsonObject.get("data");
     }
 
     @SuppressWarnings("rawtypes")
-    private static Map extractPresenceMapFrom(final String message) {
-
-        final Map dataMap = extractDataMapFrom(message);
-        final Map presenceMap = (Map)dataMap.get("presence");
-
-        return presenceMap;
+    private static PresenceData extractPresenceDataFrom(final String message) {
+        final String dataString = extractDataStringFrom(message);
+        final Gson gson = new Gson();
+        return gson.fromJson(dataString, Presence.class).presence;
     }
 
     @SuppressWarnings("rawtypes")
@@ -195,4 +193,20 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         final Map channelDataMap = new Gson().fromJson((String)channelData, Map.class);
         myUserID = String.valueOf(channelDataMap.get("user_id"));
     }
+
+    private class MemberData {
+        public String user_id;
+        public Object user_info;
+    }
+
+    private class PresenceData {
+        public Integer count;
+        public List<String> ids;
+        public Map<String, Object> hash;
+    }
+
+    private class Presence {
+        public PresenceData presence;
+    }
+
 }
