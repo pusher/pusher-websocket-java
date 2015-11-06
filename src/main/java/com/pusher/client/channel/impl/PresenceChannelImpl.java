@@ -150,8 +150,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         MemberData memberData = gson.fromJson(dataString, MemberData.class);
 
 
-        final String id = memberData.user_id;
-        final String userData = memberData.user_info != null ? gson.toJson(memberData.user_info) : null;
+        final String id = memberData.userId;
+        final String userData = memberData.userInfo!= null ? gson.toJson(memberData.userInfo) : null;
 
         final User user = new User(id, userData);
         idToUserMap.put(id, user);
@@ -169,7 +169,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         final String dataString = extractDataStringFrom(message);
         final MemberData memberData = gson.fromJson(dataString, MemberData.class);
 
-        final User user = idToUserMap.remove(memberData.user_id);
+        final User user = idToUserMap.remove(memberData.userId);
 
         final ChannelEventListener listener = getEventListener();
         if (listener != null) {
@@ -197,8 +197,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     }
 
     private class MemberData {
-        public String user_id;
-        public Object user_info;
+        public String userId;
+        public Object userInfo;
     }
 
     private class PresenceData {
