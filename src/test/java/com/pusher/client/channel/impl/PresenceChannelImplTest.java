@@ -107,7 +107,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     }
 
     @Test
-    public void testMemberAddedMessageLeadsToUserIdBeingStoredCorrectly() {
+    public void testThatUserIdsPassedAsIntegersGetStoredAsStringifiedIntegersAndNotDoubles() {
         final Map<String, String> userInfo = new LinkedHashMap<String, String>();
         userInfo.put("name", "Phil Leggetter");
         userInfo.put("twitter_id", "@leggetter");
