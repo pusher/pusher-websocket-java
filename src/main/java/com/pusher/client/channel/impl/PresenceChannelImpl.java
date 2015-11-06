@@ -25,12 +25,11 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     private static final String MEMBER_ADDED_EVENT = "pusher_internal:member_added";
     private static final String MEMBER_REMOVED_EVENT = "pusher_internal:member_removed";
-
-    private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<String, User>());
-
-    private static final Gson gson = new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
+
+    private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<String, User>());
 
     private String myUserID;
 
@@ -76,7 +75,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         final String authResponse = getAuthResponse();
 
         try {
-            final Map authResponseMap = gson.fromJson(authResponse, Map.class);
+            final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
             final String authKey = (String)authResponseMap.get("auth");
             final Object channelData = authResponseMap.get("channel_data");
 
@@ -92,7 +91,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
             jsonObject.put("data", dataMap);
 
-            final String json = gson.toJson(jsonObject);
+            final String json = GSON.toJson(jsonObject);
 
             return json;
         }
@@ -132,7 +131,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
         // build the collection of Users
         for (final String id : ids) {
-            final String userData = hash.get(id) != null ? gson.toJson(hash.get(id)) : null;
+            final String userData = hash.get(id) != null ? GSON.toJson(hash.get(id)) : null;
             final User user = new User(id, userData);
             idToUserMap.put(id, user);
         }
@@ -147,11 +146,11 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     @SuppressWarnings("rawtypes")
     private void handleMemberAddedEvent(final String message) {
         final String dataString = extractDataStringFrom(message);
-        MemberData memberData = gson.fromJson(dataString, MemberData.class);
+        MemberData memberData = GSON.fromJson(dataString, MemberData.class);
 
 
         final String id = memberData.userId;
-        final String userData = memberData.userInfo!= null ? gson.toJson(memberData.userInfo) : null;
+        final String userData = memberData.userInfo!= null ? GSON.toJson(memberData.userInfo) : null;
 
         final User user = new User(id, userData);
         idToUserMap.put(id, user);
@@ -167,7 +166,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     private void handleMemberRemovedEvent(final String message) {
 
         final String dataString = extractDataStringFrom(message);
-        final MemberData memberData = gson.fromJson(dataString, MemberData.class);
+        final MemberData memberData = GSON.fromJson(dataString, MemberData.class);
 
         final User user = idToUserMap.remove(memberData.userId);
 
@@ -180,19 +179,19 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     @SuppressWarnings("rawtypes")
     private static String extractDataStringFrom(final String message) {
-        final Map jsonObject = gson.fromJson(message, Map.class);
+        final Map jsonObject = GSON.fromJson(message, Map.class);
         return  (String) jsonObject.get("data");
     }
 
     @SuppressWarnings("rawtypes")
     private static PresenceData extractPresenceDataFrom(final String message) {
         final String dataString = extractDataStringFrom(message);
-        return gson.fromJson(dataString, Presence.class).presence;
+        return GSON.fromJson(dataString, Presence.class).presence;
     }
 
     @SuppressWarnings("rawtypes")
     private void storeMyUserId(final Object channelData) {
-        final Map channelDataMap = gson.fromJson((String)channelData, Map.class);
+        final Map channelDataMap = GSON.fromJson((String)channelData, Map.class);
         myUserID = String.valueOf(channelDataMap.get("user_id"));
     }
 
