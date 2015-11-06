@@ -107,6 +107,27 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     }
 
     @Test
+    public void testThatUserIdsPassedAsIntegersGetStoredAsStringifiedIntegersAndNotDoubles() {
+        final Map<String, String> userInfo = new LinkedHashMap<String, String>();
+        userInfo.put("name", "Phil Leggetter");
+        userInfo.put("twitter_id", "@leggetter");
+
+        final Map<String, Object> data = new LinkedHashMap<String, Object>();
+        data.put("user_id", 123);
+        data.put("user_info", userInfo);
+
+        final String eventName = "pusher_internal:member_added";
+
+        channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
+
+        final ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
+        verify(mockEventListener).userSubscribed(eq(getChannelName()), argument.capture());
+
+        final User user = (User)argument.getValue();
+        assertEquals("123", user.getId());
+    }
+
+    @Test
     public void testInternalMemberAddedMessageIsTranslatedToUserSubscribedCallback() {
         final ArgumentCaptor<User> argument = ArgumentCaptor.forClass(User.class);
 
