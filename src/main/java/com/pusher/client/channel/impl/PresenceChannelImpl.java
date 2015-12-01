@@ -8,8 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.FieldNamingPolicy;
+import com.google.gson.annotations.SerializedName;
 
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
@@ -25,9 +24,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     private static final String MEMBER_ADDED_EVENT = "pusher_internal:member_added";
     private static final String MEMBER_REMOVED_EVENT = "pusher_internal:member_removed";
-    private static final Gson GSON = new GsonBuilder()
-            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-            .create();
+    private static final Gson GSON = new Gson();
 
     private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<String, User>());
 
@@ -196,17 +193,23 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     }
 
     private class MemberData {
+        @SerializedName("user_id")
         public String userId;
+        @SerializedName("user_info")
         public Object userInfo;
     }
 
     private class PresenceData {
+        @SerializedName("count")
         public Integer count;
+        @SerializedName("ids")
         public List<String> ids;
+        @SerializedName("hash")
         public Map<String, Object> hash;
     }
 
     private class Presence {
+        @SerializedName("presence")
         public PresenceData presence;
     }
 
