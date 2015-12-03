@@ -1,4 +1,9 @@
-# pusher-java-client changelog
+# pusher-websocket-java changelog
+
+## Version 1.0.2
+
+2015-11-06 leggetter, siggijons 
+  * Use @SerializedName in PresenceChannelImpl for better serialization support across languages e.g. Turkish
 
 ## Version 1.0.1
 
