@@ -1,5 +1,6 @@
 package com.pusher.client.util;
 
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ExecutorService;
@@ -54,7 +55,7 @@ public class Factory {
         if (connection == null) {
             try {
                 connection = new WebSocketConnection(options.buildUrl(apiKey), options.getActivityTimeout(),
-                        options.getPongTimeout(), this);
+                        options.getPongTimeout(), options.getProxy(), this);
             }
             catch (final URISyntaxException e) {
                 throw new IllegalArgumentException("Failed to initialise connection", e);
@@ -63,8 +64,8 @@ public class Factory {
         return connection;
     }
 
-    public WebSocketClient newWebSocketClientWrapper(final URI uri, final WebSocketListener proxy) throws SSLException {
-        return new WebSocketClientWrapper(uri, proxy);
+    public WebSocketClient newWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
+        return new WebSocketClientWrapper(uri, proxy, webSocketListener);
     }
 
     public synchronized ExecutorService getEventQueue() {

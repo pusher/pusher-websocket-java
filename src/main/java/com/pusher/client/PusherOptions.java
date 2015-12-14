@@ -2,6 +2,7 @@ package com.pusher.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.util.Properties;
 
 /**
@@ -34,6 +35,7 @@ public class PusherOptions {
     private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
     private Authorizer authorizer;
+    private Proxy proxy;
 
     /**
      * Gets whether an encrypted (SSL) connection should be used when connecting
@@ -194,6 +196,27 @@ public class PusherOptions {
     public String buildUrl(final String apiKey) {
         return String.format("%s://%s:%s/app/%s%s", encrypted ? WSS_SCHEME : WS_SCHEME, host, encrypted ? wssPort
                 : wsPort, apiKey, URI_SUFFIX);
+    }
+
+    /**
+     *
+     * The default value is Proxy.NO_PROXY.
+     *
+     * @param proxy
+     *            Specify a proxy, e.g. <code>options.setProxy( new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) ) )</code>;
+     * @return this, for chaining
+     */
+    public PusherOptions setProxy(Proxy proxy){
+        this.proxy = proxy;
+        return this;
+    }
+
+    public Proxy getProxy() {
+        if (this.proxy == null) {
+            return Proxy.NO_PROXY;
+        } else {
+            return this.proxy;
+        }
     }
 
     private static String readVersionFromProperties() {
