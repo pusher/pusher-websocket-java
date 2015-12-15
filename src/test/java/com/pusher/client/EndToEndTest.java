@@ -3,6 +3,7 @@ package com.pusher.client;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.net.Proxy;
 import java.net.URI;
 
 import org.java_websocket.handshake.ServerHandshake;
@@ -38,6 +39,7 @@ public class EndToEndTest {
             + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
     private static final long ACTIVITY_TIMEOUT = 120000;
     private static final long PONG_TIMEOUT = 120000;
+    private static final Proxy proxy = Proxy.NO_PROXY;
 
     private @Mock Authorizer mockAuthorizer;
     private @Mock ConnectionEventListener mockConnectionEventListener;
@@ -52,17 +54,18 @@ public class EndToEndTest {
     public void setUp() throws Exception {
         pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
 
-        connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
+        connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, proxy, factory);
 
         when(factory.getEventQueue()).thenReturn(new InstantExecutor());
         when(factory.getTimers()).thenReturn(new DoNothingExecutor());
-        when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketListener.class))).thenAnswer(
+        when(factory.newWebSocketClientWrapper(any(URI.class), any(Proxy.class), any(WebSocketListener.class))).thenAnswer(
                 new Answer<WebSocketClientWrapper>() {
                     @Override
                     public WebSocketClientWrapper answer(final InvocationOnMock invocation) throws Throwable {
                         final URI uri = (URI)invocation.getArguments()[0];
-                        final WebSocketListener proxy = (WebSocketListener)invocation.getArguments()[1];
-                        testWebsocket = new TestWebSocketClientWrapper(uri, proxy);
+                        final Proxy proxy = (Proxy)invocation.getArguments()[1];
+                        final WebSocketListener webSocketListener = (WebSocketListener)invocation.getArguments()[2];
+                        testWebsocket = new TestWebSocketClientWrapper(uri, proxy, webSocketListener);
                         return testWebsocket;
                     }
                 });

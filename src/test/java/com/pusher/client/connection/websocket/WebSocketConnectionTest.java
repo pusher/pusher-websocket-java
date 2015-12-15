@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -33,6 +35,7 @@ public class WebSocketConnectionTest {
     private static final String CONN_ESTABLISHED_EVENT = "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}";
     private static final String INCOMING_MESSAGE = "{\"event\":\"" + EVENT_NAME
             + "\",\"channel\":\"my-channel\",\"data\":{\"fish\":\"chips\"}}";
+    private static final Proxy PROXY = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxyaddress", 80));
 
     @Mock
     private ChannelManager mockChannelManager;
@@ -48,19 +51,19 @@ public class WebSocketConnectionTest {
     @Before
     public void setUp() throws URISyntaxException, SSLException {
         when(factory.getChannelManager()).thenReturn(mockChannelManager);
-        when(factory.newWebSocketClientWrapper(any(URI.class), any(WebSocketConnection.class))).thenReturn(
+        when(factory.newWebSocketClientWrapper(any(URI.class), any(Proxy.class), any(WebSocketConnection.class))).thenReturn(
                 mockUnderlyingConnection);
         when(factory.getEventQueue()).thenReturn(new InstantExecutor());
         when(factory.getTimers()).thenReturn(new DoNothingExecutor());
 
-        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
         connection.bind(ConnectionState.ALL, mockEventListener);
     }
 
     @Test
     public void testUnbindingWhenNotAlreadyBoundReturnsFalse() throws URISyntaxException {
         final ConnectionEventListener listener = mock(ConnectionEventListener.class);
-        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
+        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
         final boolean unbound = connection.unbind(ConnectionState.ALL, listener);
         assertEquals(false, unbound);
     }
@@ -68,7 +71,7 @@ public class WebSocketConnectionTest {
     @Test
     public void testUnbindingWhenBoundReturnsTrue() throws URISyntaxException {
         final ConnectionEventListener listener = mock(ConnectionEventListener.class);
-        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
+        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
 
         connection.bind(ConnectionState.ALL, listener);
 
@@ -106,7 +109,7 @@ public class WebSocketConnectionTest {
 
     @Test
     public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent() throws URISyntaxException {
-        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
         connection.bind(ConnectionState.CONNECTED, mockEventListener);
         connection.connect();
 
@@ -199,7 +202,7 @@ public class WebSocketConnectionTest {
 
     @Test
     public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent() throws URISyntaxException {
-        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, factory);
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
         connection.bind(ConnectionState.CONNECTED, mockEventListener);
 
         connection.connect();
