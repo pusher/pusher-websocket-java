@@ -53,10 +53,7 @@ public class ChannelManager implements ConnectionEventListener {
     }
 
     private InternalChannel findChannelInChannelMap(String channelName){
-        if (channelNameToChannelMap.containsKey(channelName)){
-            return channelNameToChannelMap.get(channelName);
-        }
-        return null;
+        return channelNameToChannelMap.get(channelName);
     }
 
     public void setConnection(final InternalConnection connection) {
