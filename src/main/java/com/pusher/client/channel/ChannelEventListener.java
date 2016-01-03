@@ -40,4 +40,15 @@ public interface ChannelEventListener extends SubscriptionEventListener {
      *            The name of the channel that was successfully subscribed.
      */
     void onSubscriptionSucceeded(String channelName);
+
+    /**
+     * <p>
+     * Callback that is fired when the channel state has been updated to
+     * ChannelState.UNSUBSCRIBED and getChannel(channelName) will return null.
+     * </p>
+     *
+     * @param channelName
+     *            The name of the channel that is no longer subscribed.
+     */
+    void onChannelUnsubscribed(String channelName);
 }
