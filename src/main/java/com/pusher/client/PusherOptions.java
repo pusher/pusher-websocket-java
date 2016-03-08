@@ -207,6 +207,9 @@ public class PusherOptions {
      * @return this, for chaining
      */
     public PusherOptions setProxy(Proxy proxy){
+        if (proxy == null) {
+          throw new IllegalArgumentException("proxy must not be null (instead use Proxy.NO_PROXY)");
+        }
         this.proxy = proxy;
         return this;
     }
