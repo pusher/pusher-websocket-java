@@ -35,7 +35,7 @@ public class PusherOptions {
     private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
     private Authorizer authorizer;
-    private Proxy proxy;
+    private Proxy proxy = Proxy.NO_PROXY;
 
     /**
      * Gets whether an encrypted (SSL) connection should be used when connecting
@@ -212,11 +212,7 @@ public class PusherOptions {
     }
 
     public Proxy getProxy() {
-        if (this.proxy == null) {
-            return Proxy.NO_PROXY;
-        } else {
-            return this.proxy;
-        }
+        return this.proxy;
     }
 
     private static String readVersionFromProperties() {
@@ -226,14 +222,14 @@ public class PusherOptions {
             inStream = PusherOptions.class.getResourceAsStream("/pusher.properties");
             p.load(inStream);
             String version = (String)p.get("version");
-            
+
             // If the properties file contents indicates the version is being run
             // from source then replace with a dev indicator. Otherwise the Pusher
             // Socket API will reject the connection.
             if(version.equals(SRC_LIB_DEV_VERSION)) {
             	version = LIB_DEV_VERSION;
             }
-            
+
             if (version != null && version.length() > 0) {
                 return version;
             }
