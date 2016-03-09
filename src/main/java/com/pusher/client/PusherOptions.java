@@ -2,6 +2,7 @@ package com.pusher.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.util.Properties;
 
 /**
@@ -34,6 +35,7 @@ public class PusherOptions {
     private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
     private Authorizer authorizer;
+    private Proxy proxy = Proxy.NO_PROXY;
 
     /**
      * Gets whether an encrypted (SSL) connection should be used when connecting
@@ -196,6 +198,29 @@ public class PusherOptions {
                 : wsPort, apiKey, URI_SUFFIX);
     }
 
+    /**
+     *
+     * The default value is Proxy.NO_PROXY.
+     *
+     * @param proxy
+     *            Specify a proxy, e.g. <code>options.setProxy( new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) ) )</code>;
+     * @return this, for chaining
+     */
+    public PusherOptions setProxy(Proxy proxy){
+        if (proxy == null) {
+          throw new IllegalArgumentException("proxy must not be null (instead use Proxy.NO_PROXY)");
+        }
+        this.proxy = proxy;
+        return this;
+    }
+
+    /**
+     * @returns The proxy to be used when opening a websocket connection to Pusher.
+     */
+    public Proxy getProxy() {
+        return this.proxy;
+    }
+
     private static String readVersionFromProperties() {
         InputStream inStream = null;
         try {
@@ -203,14 +228,14 @@ public class PusherOptions {
             inStream = PusherOptions.class.getResourceAsStream("/pusher.properties");
             p.load(inStream);
             String version = (String)p.get("version");
-            
+
             // If the properties file contents indicates the version is being run
             // from source then replace with a dev indicator. Otherwise the Pusher
             // Socket API will reject the connection.
             if(version.equals(SRC_LIB_DEV_VERSION)) {
             	version = LIB_DEV_VERSION;
             }
-            
+
             if (version != null && version.length() > 0) {
                 return version;
             }

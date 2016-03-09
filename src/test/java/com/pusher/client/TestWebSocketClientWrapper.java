@@ -2,6 +2,7 @@ package com.pusher.client;
 
 import static org.junit.Assert.*;
 
+import java.net.Proxy;
 import java.net.URI;
 import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
@@ -17,8 +18,8 @@ public class TestWebSocketClientWrapper extends WebSocketClientWrapper {
     private final List<String> messagesSent = new ArrayList<String>();
     private boolean connectCalled = false;
 
-    public TestWebSocketClientWrapper(final URI uri, final WebSocketListener proxy) throws SSLException {
-        super(uri, proxy);
+    public TestWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
+        super(uri, proxy, webSocketListener);
     }
 
     void assertConnectCalled() {

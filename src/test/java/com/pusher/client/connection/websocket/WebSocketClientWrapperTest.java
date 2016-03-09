@@ -2,6 +2,7 @@ package com.pusher.client.connection.websocket;
 
 import static org.mockito.Mockito.verify;
 
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -18,36 +19,37 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class WebSocketClientWrapperTest {
 
     private WebSocketClientWrapper wrapper;
-    private @Mock WebSocketListener mockProxy;
+    private @Mock WebSocketListener mockListener;
     private @Mock ServerHandshake mockHandshake;
+    private Proxy mockProxy = Proxy.NO_PROXY;
 
     @Before
     public void setUp() throws URISyntaxException, SSLException {
-        wrapper = new WebSocketClientWrapper(new URI("http://www.test.com"), mockProxy);
+        wrapper = new WebSocketClientWrapper(new URI("http://www.test.com"), mockProxy, mockListener);
     }
 
     @Test
-    public void testOnOpenCallIsDelegatedToTheProxy() {
+    public void testOnOpenCallIsDelegatedToTheListener() {
         wrapper.onOpen(mockHandshake);
-        verify(mockProxy).onOpen(mockHandshake);
+        verify(mockListener).onOpen(mockHandshake);
     }
 
     @Test
-    public void testOnMessageIsDelegatedToTheProxy() {
+    public void testOnMessageIsDelegatedToTheListener() {
         wrapper.onMessage("hello");
-        verify(mockProxy).onMessage("hello");
+        verify(mockListener).onMessage("hello");
     }
 
     @Test
-    public void testOnCloseIsDelegatedToTheProxy() {
+    public void testOnCloseIsDelegatedToTheListener() {
         wrapper.onClose(1, "reason", true);
-        verify(mockProxy).onClose(1, "reason", true);
+        verify(mockListener).onClose(1, "reason", true);
     }
 
     @Test
-    public void testOnErrorIsDelegatedToTheProxy() {
+    public void testOnErrorIsDelegatedToTheListener() {
         final Exception e = new Exception();
         wrapper.onError(e);
-        verify(mockProxy).onError(e);
+        verify(mockListener).onError(e);
     }
 }

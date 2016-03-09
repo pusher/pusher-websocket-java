@@ -1,6 +1,7 @@
 package com.pusher.client.connection.websocket;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -21,9 +22,9 @@ import org.java_websocket.handshake.ServerHandshake;
 public class WebSocketClientWrapper extends WebSocketClient {
 
     private static final String WSS_SCHEME = "wss";
-    private final WebSocketListener proxy;
+    private final WebSocketListener webSocketListener;
 
-    public WebSocketClientWrapper(final URI uri, final WebSocketListener proxy) throws SSLException {
+    public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
         super(uri);
 
         if (uri.getScheme().equals(WSS_SCHEME)) {
@@ -51,27 +52,27 @@ public class WebSocketClientWrapper extends WebSocketClient {
                 throw new SSLException(e);
             }
         }
-
-        this.proxy = proxy;
+        this.webSocketListener = webSocketListener;
+        setProxy(proxy);
     }
 
     @Override
     public void onOpen(final ServerHandshake handshakedata) {
-        proxy.onOpen(handshakedata);
+        webSocketListener.onOpen(handshakedata);
     }
 
     @Override
     public void onMessage(final String message) {
-        proxy.onMessage(message);
+        webSocketListener.onMessage(message);
     }
 
     @Override
     public void onClose(final int code, final String reason, final boolean remote) {
-        proxy.onClose(code, reason, remote);
+        webSocketListener.onClose(code, reason, remote);
     }
 
     @Override
     public void onError(final Exception ex) {
-        proxy.onError(ex);
+        webSocketListener.onError(ex);
     }
 }
