@@ -215,7 +215,7 @@ public class PusherOptions {
     }
 
     /**
-     * @returns The proxy to be used when opening a websocket connection to Pusher.
+     * @return The proxy to be used when opening a websocket connection to Pusher.
      */
     public Proxy getProxy() {
         return this.proxy;
