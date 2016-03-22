@@ -69,7 +69,7 @@ repositories {
 }
 
 dependencies {
-  compile 'com.pusher:pusher-java-client:1.0.2'
+  compile 'com.pusher:pusher-java-client:1.1.1'
 }
 ```
 

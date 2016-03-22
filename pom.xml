@@ -10,7 +10,7 @@
     <groupId>com.pusher</groupId>
     <artifactId>pusher-java-client</artifactId>
     <name>Pusher Java Client Library</name>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <url>http://github.com/pusher/pusher-java-client</url>
 
     <description>
