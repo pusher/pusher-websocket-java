@@ -111,7 +111,7 @@ public class ChannelImpl implements InternalChannel {
                 for (final SubscriptionEventListener listener : listeners) {
                     final String data = extractDataFrom(message);
 
-                    factory.getEventQueue().execute(new Runnable() {
+                    factory.queueOnEventThread(new Runnable() {
                         @Override
                         public void run() {
                             listener.onEvent(name, event, data);
@@ -155,7 +155,7 @@ public class ChannelImpl implements InternalChannel {
         this.state = state;
 
         if (state == ChannelState.SUBSCRIBED && eventListener != null) {
-            factory.getEventQueue().execute(new Runnable() {
+            factory.queueOnEventThread(new Runnable() {
                 @Override
                 public void run() {
                     eventListener.onSubscriptionSucceeded(ChannelImpl.this.getName());

@@ -50,6 +50,7 @@ public class Factory {
     private ChannelManager channelManager;
     private ExecutorService eventQueue;
     private ScheduledExecutorService timers;
+    private static final Object eventLock = new Object();
 
     public synchronized InternalConnection getConnection(final String apiKey, final PusherOptions options) {
         if (connection == null) {
@@ -66,13 +67,6 @@ public class Factory {
 
     public WebSocketClient newWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
         return new WebSocketClientWrapper(uri, proxy, webSocketListener);
-    }
-
-    public synchronized ExecutorService getEventQueue() {
-        if (eventQueue == null) {
-            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
-        }
-        return eventQueue;
     }
 
     public synchronized ScheduledExecutorService getTimers() {
@@ -103,6 +97,17 @@ public class Factory {
         return channelManager;
     }
 
+    public void queueOnEventThread(final Runnable r) {
+        getEventQueue().execute(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (eventLock) {
+                    r.run();
+                }
+            }
+        });
+    }
+
     public synchronized void shutdownThreads() {
         if (eventQueue != null) {
             eventQueue.shutdown();
@@ -112,6 +117,13 @@ public class Factory {
             timers.shutdown();
             timers = null;
         }
+    }
+
+    private synchronized ExecutorService getEventQueue() {
+        if (eventQueue == null) {
+            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
+        }
+        return eventQueue;
     }
 
     private static class DaemonThreadFactory implements ThreadFactory {

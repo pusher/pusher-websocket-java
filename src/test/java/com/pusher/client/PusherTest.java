@@ -8,7 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannelEventListener;
@@ -22,7 +24,6 @@ import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.HttpAuthorizer;
-import com.pusher.client.util.InstantExecutor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PusherTest {
@@ -58,8 +59,14 @@ public class PusherTest {
                 .thenReturn(mockPrivateChannel);
         when(factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, authorizer)).thenReturn(
                 mockPresenceChannel);
-        when(factory.getEventQueue()).thenReturn(new InstantExecutor());
-
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final Runnable r = (Runnable) invocation.getArguments()[0];
+                r.run();
+                return null;
+            }
+        }).when(factory).queueOnEventThread(any(Runnable.class));
         pusher = new Pusher(API_KEY, options, factory);
     }
 

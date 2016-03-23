@@ -61,7 +61,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @Override
     public void connect() {
-        factory.getEventQueue().execute(new Runnable() {
+        factory.queueOnEventThread(new Runnable() {
 
             @Override
             public void run() {
@@ -82,7 +82,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @Override
     public void disconnect() {
-        factory.getEventQueue().execute(new Runnable() {
+        factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
                 if (state == ConnectionState.CONNECTED) {
@@ -112,7 +112,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @Override
     public void sendMessage(final String message) {
-        factory.getEventQueue().execute(new Runnable() {
+        factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -148,7 +148,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         interestedListeners.addAll(eventListeners.get(newState));
 
         for (final ConnectionEventListener listener : interestedListeners) {
-            factory.getEventQueue().execute(new Runnable() {
+            factory.queueOnEventThread(new Runnable() {
                 @Override
                 public void run() {
                     listener.onConnectionStateChange(change);
@@ -216,7 +216,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         }
 
         for (final ConnectionEventListener listener : allListeners) {
-            factory.getEventQueue().execute(new Runnable() {
+            factory.queueOnEventThread(new Runnable() {
                 @Override
                 public void run() {
                     listener.onError(message, code, e);
@@ -237,7 +237,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     public void onMessage(final String message) {
         activityTimer.activity();
 
-        factory.getEventQueue().execute(new Runnable() {
+        factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
                 final Map<String, String> map = new Gson().fromJson(message, Map.class);
@@ -251,7 +251,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     public void onClose(final int code, final String reason, final boolean remote) {
         activityTimer.cancelTimeouts();
 
-        factory.getEventQueue().execute(new Runnable() {
+        factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
                 if (state != ConnectionState.DISCONNECTED) {
@@ -268,7 +268,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @Override
     public void onError(final Exception ex) {
-        factory.getEventQueue().execute(new Runnable() {
+        factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
                 // Do not change connection state as Java_WebSocket will also
