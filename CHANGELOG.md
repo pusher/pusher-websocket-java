@@ -1,14 +1,29 @@
 # pusher-websocket-java changelog
 
+## Version 1.1.2
+
+2016-03-23 jpatel531
+
+  * Fix cases where the library would throw an error due to a connection state change
+    from `CONNECTING` to `CONNECTING`. More information [here](https://github.com/pusher/pusher-websocket-java/pull/102)
+  * Fix `ConcurrentModificationException` on event listeners.
+
+## Version 1.1.1
+
+2016-03-22 jpatel531
+
+  * Removes the dependency on slf4j-log4j
+
+## Version 1.1.0
+
+2016-03-09 jpatel531, jameshfisher
+
+  * Allow specifying a proxy via which to connect to Pusher.
+
 ## Version 1.0.2
 
-2015-11-06 leggetter, siggijons 
+2015-11-06 leggetter, siggijons
   * Use @SerializedName in PresenceChannelImpl for better serialization support across languages e.g. Turkish
-
-## Version 1.0.1
-
-2015-11-06 hamchapman, jpatel531
-  * Resolves issues where Gson would cast numeric user ids as doubles before converting them to a string, leading to inconsistencies
 
 ## Version 1.0.1
 
