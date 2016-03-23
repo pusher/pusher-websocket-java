@@ -15,7 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -23,7 +25,6 @@ import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.InstantExecutor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WebSocketConnectionTest {
@@ -53,7 +54,14 @@ public class WebSocketConnectionTest {
         when(factory.getChannelManager()).thenReturn(mockChannelManager);
         when(factory.newWebSocketClientWrapper(any(URI.class), any(Proxy.class), any(WebSocketConnection.class))).thenReturn(
                 mockUnderlyingConnection);
-        when(factory.getEventQueue()).thenReturn(new InstantExecutor());
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final Runnable r = (Runnable) invocation.getArguments()[0];
+                r.run();
+                return null;
+            }
+        }).when(factory).queueOnEventThread(any(Runnable.class));
         when(factory.getTimers()).thenReturn(new DoNothingExecutor());
 
         connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);

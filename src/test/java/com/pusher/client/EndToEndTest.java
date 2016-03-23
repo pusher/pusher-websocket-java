@@ -26,7 +26,6 @@ import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
 import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.InstantExecutor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndToEndTest {
@@ -56,7 +55,15 @@ public class EndToEndTest {
 
         connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, proxy, factory);
 
-        when(factory.getEventQueue()).thenReturn(new InstantExecutor());
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final Runnable r = (Runnable) invocation.getArguments()[0];
+                r.run();
+                return null;
+            }
+        }).when(factory).queueOnEventThread(any(Runnable.class));
+
         when(factory.getTimers()).thenReturn(new DoNothingExecutor());
         when(factory.newWebSocketClientWrapper(any(URI.class), any(Proxy.class), any(WebSocketListener.class))).thenAnswer(
                 new Answer<WebSocketClientWrapper>() {

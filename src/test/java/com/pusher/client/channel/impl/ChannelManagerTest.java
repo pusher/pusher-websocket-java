@@ -8,7 +8,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.channel.Channel;
@@ -22,7 +24,6 @@ import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.InstantExecutor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChannelManagerTest {
@@ -48,12 +49,18 @@ public class ChannelManagerTest {
     private ChannelManager subscriptionTestChannelManager;
     private @Mock Factory subscriptionTestFactory;
     private @Mock InternalConnection subscriptionTestConnection;
-    private @Mock InstantExecutor mockQueue;
 
     @Before
     public void setUp() throws AuthorizationFailureException {
 
-        when(factory.getEventQueue()).thenReturn(new InstantExecutor());
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final Runnable r = (Runnable) invocation.getArguments()[0];
+                r.run();
+                return null;
+            }
+        }).when(factory).queueOnEventThread(any(Runnable.class));
         when(mockInternalChannel.getName()).thenReturn(CHANNEL_NAME);
         when(mockInternalChannel.toSubscribeMessage()).thenReturn(OUTGOING_SUBSCRIBE_MESSAGE);
         when(mockInternalChannel.toUnsubscribeMessage()).thenReturn(OUTGOING_UNSUBSCRIBE_MESSAGE);
@@ -71,7 +78,14 @@ public class ChannelManagerTest {
         channelManager.setConnection(mockConnection);
 
 
-        when(subscriptionTestFactory.getEventQueue()).thenReturn(mockQueue);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final Runnable r = (Runnable) invocation.getArguments()[0];
+                r.run();
+                return null;
+            }
+        }).when(subscriptionTestFactory).queueOnEventThread(any(Runnable.class));
         subscriptionTestChannelManager = new ChannelManager(subscriptionTestFactory);
         subscriptionTestChannelManager.setConnection(subscriptionTestConnection);
 
@@ -265,7 +279,7 @@ public class ChannelManagerTest {
         subscriptionTestChannelManager.subscribeTo(mockInternalChannel, mockEventListener);
         subscriptionTestChannelManager.unsubscribeFrom(CHANNEL_NAME);
 
-        verify(mockQueue).execute(any(Runnable.class));
+        verify(subscriptionTestFactory).queueOnEventThread(any(Runnable.class));
     }
 
     @Test

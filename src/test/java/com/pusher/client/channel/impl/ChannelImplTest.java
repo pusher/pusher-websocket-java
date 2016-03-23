@@ -10,12 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.InstantExecutor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChannelImplTest {
@@ -27,7 +28,14 @@ public class ChannelImplTest {
 
     @Before
     public void setUp() {
-        when(factory.getEventQueue()).thenReturn(new InstantExecutor());
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final Runnable r = (Runnable) invocation.getArguments()[0];
+                r.run();
+                return null;
+            }
+        }).when(factory).queueOnEventThread(any(Runnable.class));
 
         mockListener = getEventListener();
         channel = newInstance(getChannelName());

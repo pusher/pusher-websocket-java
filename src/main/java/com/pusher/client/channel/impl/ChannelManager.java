@@ -131,7 +131,7 @@ public class ChannelManager implements ConnectionEventListener {
 
     private void sendOrQueueSubscribeMessage(final InternalChannel channel) {
 
-        factory.getEventQueue().execute(new Runnable() {
+        factory.queueOnEventThread(new Runnable() {
 
             @Override
             public void run() {
@@ -141,8 +141,7 @@ public class ChannelManager implements ConnectionEventListener {
                         final String message = channel.toSubscribeMessage();
                         connection.sendMessage(message);
                         channel.updateState(ChannelState.SUBSCRIBE_SENT);
-                    }
-                    catch (final AuthorizationFailureException e) {
+                    } catch (final AuthorizationFailureException e) {
                         clearDownSubscription(channel, e);
                     }
                 }
@@ -151,7 +150,7 @@ public class ChannelManager implements ConnectionEventListener {
     }
 
     private void sendUnsubscribeMessage(final InternalChannel channel) {
-        factory.getEventQueue().execute(new Runnable() {
+        factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
                 connection.sendMessage(channel.toUnsubscribeMessage());
@@ -166,7 +165,7 @@ public class ChannelManager implements ConnectionEventListener {
         channel.updateState(ChannelState.FAILED);
 
         if (channel.getEventListener() != null) {
-            factory.getEventQueue().execute(new Runnable() {
+            factory.queueOnEventThread(new Runnable() {
 
                 @Override
                 public void run() {
