@@ -1,5 +1,7 @@
 # Pusher Java Client
 
+[![Build Status](https://travis-ci.org/pusher/pusher-websocket-java.svg?branch=master)](https://travis-ci.org/pusher/pusher-websocket-java)
+
 Pusher client library for Java targeting **Android** and general Java.
 
 ## TOC
