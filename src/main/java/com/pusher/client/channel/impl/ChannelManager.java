@@ -33,7 +33,7 @@ public class ChannelManager implements ConnectionEventListener {
         } else if (channelName.startsWith("presence-")){
             throw new IllegalArgumentException("Please use the getPresenceChannel method");
         }
-        return (Channel) findChannelInChannelMap(channelName);
+        return findChannelInChannelMap(channelName);
     }
 
     public PrivateChannel getPrivateChannel(String channelName) throws IllegalArgumentException{

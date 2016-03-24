@@ -88,9 +88,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
             jsonObject.put("data", dataMap);
 
-            final String json = GSON.toJson(jsonObject);
-
-            return json;
+            return GSON.toJson(jsonObject);
         }
         catch (final Exception e) {
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
@@ -199,7 +197,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         public Object userInfo;
     }
 
-    private class PresenceData {
+    private static class PresenceData {
         @SerializedName("count")
         public Integer count;
         @SerializedName("ids")

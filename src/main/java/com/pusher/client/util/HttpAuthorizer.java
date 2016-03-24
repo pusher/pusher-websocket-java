@@ -111,7 +111,7 @@ public class HttpAuthorizer implements Authorizer {
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             connection.setRequestProperty("charset", "utf-8");
             connection.setRequestProperty("Content-Length",
-                    "" + Integer.toString(urlParameters.toString().getBytes().length));
+                    "" + Integer.toString(urlParameters.toString().getBytes(ENCODING_CHARACTER_SET).length));
 
             // Add in the user defined headers
             for (final String headerName : mHeaders.keySet()) {
@@ -129,7 +129,7 @@ public class HttpAuthorizer implements Authorizer {
 
             // Read response
             final InputStream is = connection.getInputStream();
-            final BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            final BufferedReader rd = new BufferedReader(new InputStreamReader(is, ENCODING_CHARACTER_SET));
             String line;
             final StringBuffer response = new StringBuffer();
             while ((line = rd.readLine()) != null) {
