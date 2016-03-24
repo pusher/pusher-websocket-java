@@ -131,58 +131,59 @@ artifacts {
 	archives jar, fatJar, sourcesJar, javadocJar
 }
 
-uploadArchives { repositories { mavenDeployer {
-	beforeDeployment {
-		MavenDeployment deployment -> signing.signPom(deployment)
-	}
-	repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-		authentication(
-			userName: getProperty("maven.username"),
-			password: getProperty("maven.password")
-		)
-	}
-	snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-		authentication(
-			userName: getProperty("maven.username"),
-			password: getProperty("maven.password")
-		)
-	}
-	pom.project {
-		name 'Pusher Java Client Library'
-		packaging 'jar'
-		artifactId 'pusher-java-client'
-		description 'This is a Java client library for Pusher, targeted at core Java and Android.'
-		url 'http://github.com/pusher/pusher-java-client'
-		scm {
-			connection 'scm:git:git@github.com:pusher/pusher-java-client'
-			developerConnection 'scm:git:git@github.com:pusher/pusher-java-client'
+task createPublishTarget << {
+	uploadArchives { repositories { mavenDeployer {
+		beforeDeployment {
+			MavenDeployment deployment -> signing.signPom(deployment)
+		}
+		repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+			authentication(
+				userName: getProperty("maven.username"),
+				password: getProperty("maven.password")
+			)
+		}
+		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+			authentication(
+				userName: getProperty("maven.username"),
+				password: getProperty("maven.password")
+			)
+		}
+		pom.project {
+			name 'Pusher Java Client Library'
+			packaging 'jar'
+			artifactId 'pusher-java-client'
+			description 'This is a Java client library for Pusher, targeted at core Java and Android.'
 			url 'http://github.com/pusher/pusher-java-client'
-		}
-		licenses {
-			license {
-				name 'MIT'
-				url 'https://raw.github.com/pusher/pusher-java-client/master/LICENCE.txt'
-				distribution 'https://raw.github.com/pusher/pusher-java-client/mvn-repo/'
+			scm {
+				connection 'scm:git:git@github.com:pusher/pusher-java-client'
+				developerConnection 'scm:git:git@github.com:pusher/pusher-java-client'
+				url 'http://github.com/pusher/pusher-java-client'
+			}
+			licenses {
+				license {
+					name 'MIT'
+					url 'https://raw.github.com/pusher/pusher-java-client/master/LICENCE.txt'
+					distribution 'https://raw.github.com/pusher/pusher-java-client/mvn-repo/'
+				}
+			}
+			organization {
+				name 'Pusher'
+				url 'http://pusher.com'
+			}
+			issueManagement {
+				system 'GitHub'
+				url 'https://github.com/pusher/pusher-java-client/issues'
+			}
+			developers {
+				developer {
+					id 'mike'
+					name 'Mike Pye'
+					email 'mike@pusher.com'
+				}
 			}
 		}
-		organization {
-			name 'Pusher'
-			url 'http://pusher.com'
-		}
-		issueManagement {
-			system 'GitHub'
-			url 'https://github.com/pusher/pusher-java-client/issues'
-		}
-		developers {
-			developer {
-				id 'mike'
-				name 'Mike Pye'
-				email 'mike@pusher.com'
-			}
-		}
-	}
-}}}
-
+	}}}
+}
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.0'
