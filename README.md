@@ -532,7 +532,7 @@ From the top level directory execute:
 * `gradlew javadoc` to generate the JavaDoc. The docs will be output to the `build/docs/javadoc/` directory.
 * `gradlew assemble` assemble all artifacts but does not run any tests.
 * `gradlew build` to build all jars and execute all tests & verification. The jars will be output to the `build/libs` directory.
-* `gradlew uploadArchives` to upload all artifacts. **This task requires some properties to be set, see below.**
+* `gradlew createPublishTarget uploadArchives` to upload all artifacts. **This task requires some properties to be set, see below.**
 * `gradlew publishGhPages` to upload JavaDocs to `gh-pages`. **This task requires some properties to be set, see below.**
 
 #### Build Properties
