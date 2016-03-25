@@ -100,8 +100,7 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 
             jsonObject.put("data", dataMap);
 
-            final String json = new Gson().toJson(jsonObject);
-            return json;
+            return new Gson().toJson(jsonObject);
         }
         catch (final Exception e) {
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
