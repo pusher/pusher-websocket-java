@@ -28,6 +28,7 @@ import com.pusher.client.util.Factory;
 
 public class WebSocketConnection implements InternalConnection, WebSocketListener {
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
+    private static final Gson GSON = new Gson();
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
@@ -178,9 +179,9 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @SuppressWarnings("rawtypes")
     private void handleConnectionMessage(final String message) {
-        final Map jsonObject = new Gson().fromJson(message, Map.class);
+        final Map jsonObject = GSON.fromJson(message, Map.class);
         final String dataString = (String)jsonObject.get("data");
-        final Map dataMap = new Gson().fromJson(dataString, Map.class);
+        final Map dataMap = GSON.fromJson(dataString, Map.class);
         socketId = (String)dataMap.get("socket_id");
 
         updateState(ConnectionState.CONNECTED);
@@ -188,12 +189,12 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @SuppressWarnings("rawtypes")
     private void handleError(final String wholeMessage) {
-        final Map json = new Gson().fromJson(wholeMessage, Map.class);
+        final Map json = GSON.fromJson(wholeMessage, Map.class);
         final Object data = json.get("data");
 
         Map dataMap;
         if (data instanceof String) {
-            dataMap = new Gson().fromJson((String)data, Map.class);
+            dataMap = GSON.fromJson((String)data, Map.class);
         }
         else {
             dataMap = (Map)data;
@@ -241,7 +242,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
-                final Map<String, String> map = new Gson().fromJson(message, Map.class);
+                final Map<String, String> map = GSON.fromJson(message, Map.class);
                 final String event = map.get("event");
                 handleEvent(event, message);
             }

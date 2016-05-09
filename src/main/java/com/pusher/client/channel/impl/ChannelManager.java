@@ -19,6 +19,7 @@ import com.pusher.client.util.Factory;
 
 public class ChannelManager implements ConnectionEventListener {
 
+    private static final Gson GSON = new Gson();
     private final Map<String, InternalChannel> channelNameToChannelMap = new HashMap<String, InternalChannel>();
     private final Factory factory;
     private InternalConnection connection;
@@ -96,7 +97,7 @@ public class ChannelManager implements ConnectionEventListener {
     @SuppressWarnings("unchecked")
     public void onMessage(final String event, final String wholeMessage) {
 
-        final Map<Object, Object> json = new Gson().fromJson(wholeMessage, Map.class);
+        final Map<Object, Object> json = GSON.fromJson(wholeMessage, Map.class);
         final Object channelNameObject = json.get("channel");
 
         if (channelNameObject != null) {
