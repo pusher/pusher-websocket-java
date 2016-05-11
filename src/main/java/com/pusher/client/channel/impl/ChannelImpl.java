@@ -16,6 +16,7 @@ import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
 
+    private static final Gson GSON = new Gson();
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
@@ -133,7 +134,7 @@ public class ChannelImpl implements InternalChannel {
 
         jsonObject.put("data", dataMap);
 
-        return new Gson().toJson(jsonObject);
+        return GSON.toJson(jsonObject);
     }
 
     @Override
@@ -146,7 +147,7 @@ public class ChannelImpl implements InternalChannel {
 
         jsonObject.put("data", dataMap);
 
-        return new Gson().toJson(jsonObject);
+        return GSON.toJson(jsonObject);
     }
 
     @Override
@@ -190,8 +191,7 @@ public class ChannelImpl implements InternalChannel {
 
     @SuppressWarnings("unchecked")
     private String extractDataFrom(final String message) {
-        final Gson gson = new Gson();
-        final Map<Object, Object> jsonObject = gson.fromJson(message, Map.class);
+        final Map<Object, Object> jsonObject = GSON.fromJson(message, Map.class);
         return (String)jsonObject.get("data");
     }
 
