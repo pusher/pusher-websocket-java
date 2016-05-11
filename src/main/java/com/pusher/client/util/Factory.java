@@ -97,7 +97,7 @@ public class Factory {
         return channelManager;
     }
 
-    public void queueOnEventThread(final Runnable r) {
+    public synchronized void queueOnEventThread(final Runnable r) {
         getEventQueue().execute(new Runnable() {
             @Override
             public void run() {
