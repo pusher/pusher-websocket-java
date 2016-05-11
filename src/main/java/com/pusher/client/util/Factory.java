@@ -98,7 +98,10 @@ public class Factory {
     }
 
     public synchronized void queueOnEventThread(final Runnable r) {
-        getEventQueue().execute(new Runnable() {
+        if (eventQueue == null) {
+            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
+        }
+        eventQueue.execute(new Runnable() {
             @Override
             public void run() {
                 synchronized (eventLock) {
@@ -117,13 +120,6 @@ public class Factory {
             timers.shutdown();
             timers = null;
         }
-    }
-
-    private synchronized ExecutorService getEventQueue() {
-        if (eventQueue == null) {
-            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
-        }
-        return eventQueue;
     }
 
     private static class DaemonThreadFactory implements ThreadFactory {
