@@ -40,9 +40,6 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  * {@link #newPublicChannel(String)} creates a new instance of that class every
  * time it is called.
  *
- * - any method that starts with "get", such as {@link #getEventQueue()} returns
- * a singleton. These are lazily constructed and their access methods should be
- * synchronized for this reason.
  */
 public class Factory {
 
@@ -97,8 +94,11 @@ public class Factory {
         return channelManager;
     }
 
-    public void queueOnEventThread(final Runnable r) {
-        getEventQueue().execute(new Runnable() {
+    public synchronized void queueOnEventThread(final Runnable r) {
+        if (eventQueue == null) {
+            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
+        }
+        eventQueue.execute(new Runnable() {
             @Override
             public void run() {
                 synchronized (eventLock) {
@@ -117,13 +117,6 @@ public class Factory {
             timers.shutdown();
             timers = null;
         }
-    }
-
-    private synchronized ExecutorService getEventQueue() {
-        if (eventQueue == null) {
-            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
-        }
-        return eventQueue;
     }
 
     private static class DaemonThreadFactory implements ThreadFactory {
