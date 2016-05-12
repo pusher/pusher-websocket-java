@@ -40,9 +40,6 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  * {@link #newPublicChannel(String)} creates a new instance of that class every
  * time it is called.
  *
- * - any method that starts with "get", such as {@link #getEventQueue()} returns
- * a singleton. These are lazily constructed and their access methods should be
- * synchronized for this reason.
  */
 public class Factory {
 
