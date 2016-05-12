@@ -1,5 +1,12 @@
 # pusher-websocket-java changelog
 
+## Version 1.1.3
+
+2016-05-12 mdpye, plackemacher, jpatel531
+
+  * Fix exceptions where tasks were being pushed onto a shutting-down event queue.
+  * Reduce construction of GSON objects and keep one centralized instance.
+
 ## Version 1.1.2
 
 2016-03-23 jpatel531
