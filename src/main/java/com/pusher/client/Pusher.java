@@ -33,7 +33,7 @@ import com.pusher.client.util.Factory;
  * {@link Pusher#subscribePresence(String)} or one of the overloads.
  * </p>
  */
-public class Pusher {
+public class Pusher implements Client {
 
     private final PusherOptions pusherOptions;
     private final InternalConnection connection;
