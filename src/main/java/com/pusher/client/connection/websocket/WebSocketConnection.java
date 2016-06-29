@@ -72,7 +72,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                                 .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
                         updateState(ConnectionState.CONNECTING);
                         underlyingConnection.connect();
-                    } catch (final SSLException e) {
+                    }
+                    catch (final SSLException e) {
                         sendErrorToAllListeners("Error connecting over SSL", null, e);
                     }
                 }
@@ -118,10 +119,12 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 try {
                     if (state == ConnectionState.CONNECTED) {
                         underlyingConnection.send(message);
-                    } else {
+                    }
+                    else {
                         sendErrorToAllListeners("Cannot send a message while in " + state + " state", null, null);
                     }
-                } catch (final Exception e) {
+                }
+                catch (final Exception e) {
                     sendErrorToAllListeners("An exception occurred while sending message [" + message + "]", null, e);
                 }
             }
@@ -145,14 +148,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         interestedListeners.addAll(eventListeners.get(ConnectionState.ALL));
         interestedListeners.addAll(eventListeners.get(newState));
 
-        /*Set<ConnectionEventListener> interestedListeners = new HashSet<ConnectionEventListener>();
-        for (Iterator<ConnectionEventListener> i = eventListeners.get(ConnectionState.ALL).iterator(); i.hasNext();) {
-            interestedListeners.add(i.next());
-        }
-        for (Iterator<ConnectionEventListener> i = eventListeners.get(newState).iterator(); i.hasNext();) {
-            interestedListeners.add(i.next());
-        }*/
-
         for (final ConnectionEventListener listener : interestedListeners) {
             factory.queueOnEventThread(new Runnable() {
                 @Override
@@ -166,7 +161,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private void handleEvent(final String event, final String wholeMessage) {
         if (event.startsWith(INTERNAL_EVENT_PREFIX)) {
             handleInternalEvent(event, wholeMessage);
-        } else {
+        }
+        else {
             factory.getChannelManager().onMessage(event, wholeMessage);
         }
     }
@@ -174,7 +170,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private void handleInternalEvent(final String event, final String wholeMessage) {
         if (event.equals("pusher:connection_established")) {
             handleConnectionMessage(wholeMessage);
-        } else if (event.equals("pusher:error")) {
+        }
+        else if (event.equals("pusher:error")) {
             handleError(wholeMessage);
         }
     }
@@ -182,9 +179,9 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     @SuppressWarnings("rawtypes")
     private void handleConnectionMessage(final String message) {
         final Map jsonObject = GSON.fromJson(message, Map.class);
-        final String dataString = (String) jsonObject.get("data");
+        final String dataString = (String)jsonObject.get("data");
         final Map dataMap = GSON.fromJson(dataString, Map.class);
-        socketId = (String) dataMap.get("socket_id");
+        socketId = (String)dataMap.get("socket_id");
 
         updateState(ConnectionState.CONNECTED);
     }
@@ -196,17 +193,18 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
         Map dataMap;
         if (data instanceof String) {
-            dataMap = GSON.fromJson((String) data, Map.class);
-        } else {
-            dataMap = (Map) data;
+            dataMap = GSON.fromJson((String)data, Map.class);
+        }
+        else {
+            dataMap = (Map)data;
         }
 
-        final String message = (String) dataMap.get("message");
+        final String message = (String)dataMap.get("message");
 
         final Object codeObject = dataMap.get("code");
         String code = null;
         if (codeObject != null) {
-            code = String.valueOf(Math.round((Double) codeObject));
+            code = String.valueOf(Math.round((Double)codeObject));
         }
 
         sendErrorToAllListeners(message, code, null);
@@ -259,7 +257,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             public void run() {
                 if (state != ConnectionState.DISCONNECTED) {
                     updateState(ConnectionState.DISCONNECTED);
-                } else {
+                }
+                else {
                     log.error("Received close from underlying socket when already disconnected. " + "Close code ["
                             + code + "], Reason [" + reason + "], Remote [" + remote + "]");
                 }
