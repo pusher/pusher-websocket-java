@@ -1,9 +1,21 @@
 package com.pusher.client.connection.websocket;
 
+import com.google.gson.Gson;
+import com.pusher.client.connection.ConnectionEventListener;
+import com.pusher.client.connection.ConnectionState;
+import com.pusher.client.connection.ConnectionStateChange;
+import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.util.Factory;
+
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -12,19 +24,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
-
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-
-import com.pusher.client.connection.ConnectionEventListener;
-import com.pusher.client.connection.ConnectionState;
-import com.pusher.client.connection.ConnectionStateChange;
-import com.pusher.client.connection.impl.InternalConnection;
-import com.pusher.client.util.Factory;
 
 public class WebSocketConnection implements InternalConnection, WebSocketListener {
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
@@ -55,7 +54,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         this.factory = factory;
 
         for (final ConnectionState state : ConnectionState.values()) {
-            eventListeners.put(state, new HashSet<ConnectionEventListener>());
+            eventListeners.put(state, Collections.newSetFromMap(new ConcurrentHashMap<ConnectionEventListener, Boolean>()));
         }
     }
 
@@ -73,8 +72,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                                 .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
                         updateState(ConnectionState.CONNECTING);
                         underlyingConnection.connect();
-                    }
-                    catch (final SSLException e) {
+                    } catch (final SSLException e) {
                         sendErrorToAllListeners("Error connecting over SSL", null, e);
                     }
                 }
@@ -120,12 +118,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 try {
                     if (state == ConnectionState.CONNECTED) {
                         underlyingConnection.send(message);
-                    }
-                    else {
+                    } else {
                         sendErrorToAllListeners("Cannot send a message while in " + state + " state", null, null);
                     }
-                }
-                catch (final Exception e) {
+                } catch (final Exception e) {
                     sendErrorToAllListeners("An exception occurred while sending message [" + message + "]", null, e);
                 }
             }
@@ -149,6 +145,14 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         interestedListeners.addAll(eventListeners.get(ConnectionState.ALL));
         interestedListeners.addAll(eventListeners.get(newState));
 
+        /*Set<ConnectionEventListener> interestedListeners = new HashSet<ConnectionEventListener>();
+        for (Iterator<ConnectionEventListener> i = eventListeners.get(ConnectionState.ALL).iterator(); i.hasNext();) {
+            interestedListeners.add(i.next());
+        }
+        for (Iterator<ConnectionEventListener> i = eventListeners.get(newState).iterator(); i.hasNext();) {
+            interestedListeners.add(i.next());
+        }*/
+
         for (final ConnectionEventListener listener : interestedListeners) {
             factory.queueOnEventThread(new Runnable() {
                 @Override
@@ -162,8 +166,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private void handleEvent(final String event, final String wholeMessage) {
         if (event.startsWith(INTERNAL_EVENT_PREFIX)) {
             handleInternalEvent(event, wholeMessage);
-        }
-        else {
+        } else {
             factory.getChannelManager().onMessage(event, wholeMessage);
         }
     }
@@ -171,8 +174,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private void handleInternalEvent(final String event, final String wholeMessage) {
         if (event.equals("pusher:connection_established")) {
             handleConnectionMessage(wholeMessage);
-        }
-        else if (event.equals("pusher:error")) {
+        } else if (event.equals("pusher:error")) {
             handleError(wholeMessage);
         }
     }
@@ -180,9 +182,9 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     @SuppressWarnings("rawtypes")
     private void handleConnectionMessage(final String message) {
         final Map jsonObject = GSON.fromJson(message, Map.class);
-        final String dataString = (String)jsonObject.get("data");
+        final String dataString = (String) jsonObject.get("data");
         final Map dataMap = GSON.fromJson(dataString, Map.class);
-        socketId = (String)dataMap.get("socket_id");
+        socketId = (String) dataMap.get("socket_id");
 
         updateState(ConnectionState.CONNECTED);
     }
@@ -194,18 +196,17 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
         Map dataMap;
         if (data instanceof String) {
-            dataMap = GSON.fromJson((String)data, Map.class);
-        }
-        else {
-            dataMap = (Map)data;
+            dataMap = GSON.fromJson((String) data, Map.class);
+        } else {
+            dataMap = (Map) data;
         }
 
-        final String message = (String)dataMap.get("message");
+        final String message = (String) dataMap.get("message");
 
         final Object codeObject = dataMap.get("code");
         String code = null;
         if (codeObject != null) {
-            code = String.valueOf(Math.round((Double)codeObject));
+            code = String.valueOf(Math.round((Double) codeObject));
         }
 
         sendErrorToAllListeners(message, code, null);
@@ -258,8 +259,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             public void run() {
                 if (state != ConnectionState.DISCONNECTED) {
                     updateState(ConnectionState.DISCONNECTED);
-                }
-                else {
+                } else {
                     log.error("Received close from underlying socket when already disconnected. " + "Close code ["
                             + code + "], Reason [" + reason + "], Remote [" + remote + "]");
                 }
