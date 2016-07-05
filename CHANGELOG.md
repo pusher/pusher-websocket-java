@@ -1,5 +1,11 @@
 # pusher-websocket-java changelog
 
+## Version 1.2.0
+
+2016-07-05 jpatel531
+
+  * Expose Client interface
+
 ## Version 1.1.3
 
 2016-05-12 mdpye, plackemacher, jpatel531
