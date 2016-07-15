@@ -3,7 +3,7 @@ package com.pusher.client.connection.websocket;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -55,7 +55,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         this.factory = factory;
 
         for (final ConnectionState state : ConnectionState.values()) {
-            eventListeners.put(state, new HashSet<ConnectionEventListener>());
+            eventListeners.put(state, Collections.newSetFromMap(new ConcurrentHashMap<ConnectionEventListener, Boolean>()));
         }
     }
 
