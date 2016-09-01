@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.net.ssl.SSLException;
 
@@ -29,8 +30,8 @@ import com.pusher.client.util.Factory;
 @RunWith(MockitoJUnitRunner.class)
 public class WebSocketConnectionTest {
 
-    private static final long ACTIVITY_TIMEOUT = 120000;
-    private static final long PONG_TIMEOUT = 30000;
+    private static final long ACTIVITY_TIMEOUT = 500;
+    private static final long PONG_TIMEOUT = 500;
     private static final String URL = "ws://ws.example.com/";
     private static final String EVENT_NAME = "my-event";
     private static final String CONN_ESTABLISHED_EVENT = "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}";
@@ -246,7 +247,7 @@ public class WebSocketConnectionTest {
         connection.disconnect();
         verify(mockEventListener).onConnectionStateChange(
                 new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));
-        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
+        assertEquals(ConnectionState.DISCONNECTING, connection.getState());
     }
 
     @Test
@@ -275,20 +276,18 @@ public class WebSocketConnectionTest {
         connection.disconnect();
 
         verify(mockUnderlyingConnection, times(1)).close();
-        verify(mockEventListener, times(4)).onConnectionStateChange(any(ConnectionStateChange.class));
+        verify(mockEventListener, times(3)).onConnectionStateChange(any(ConnectionStateChange.class));
     }
 
     @Test
-    public void testDisconnectImmediatelyCallsOnClose() {
+    public void testPongTimeoutResultsInDisconnect() throws InterruptedException {
+        when(factory.getTimers()).thenReturn(new ScheduledThreadPoolExecutor(2));
+
         connection.connect();
-        verify(mockEventListener).onConnectionStateChange(
-                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
-
         connection.onMessage(CONN_ESTABLISHED_EVENT);
-        verify(mockEventListener).onConnectionStateChange(
-                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
 
-        connection.disconnect();
+        verify(mockUnderlyingConnection, timeout((int) (ACTIVITY_TIMEOUT + PONG_TIMEOUT))).close();
+
         verify(mockEventListener).onConnectionStateChange(
                 new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));
 

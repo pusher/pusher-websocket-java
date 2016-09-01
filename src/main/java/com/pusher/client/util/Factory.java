@@ -62,7 +62,7 @@ public class Factory {
         return connection;
     }
 
-    public WebSocketClient newWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
+    public WebSocketClientWrapper newWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
         return new WebSocketClientWrapper(uri, proxy, webSocketListener);
     }
 

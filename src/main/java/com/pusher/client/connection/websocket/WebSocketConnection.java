@@ -40,7 +40,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final Proxy proxy;
 
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
-    private WebSocketClient underlyingConnection;
+    private WebSocketClientWrapper underlyingConnection;
     private String socketId;
 
     public WebSocketConnection(
@@ -90,11 +90,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 if (state == ConnectionState.CONNECTED) {
                     updateState(ConnectionState.DISCONNECTING);
                     underlyingConnection.close();
-
-                    // Proceed immediately to handle the close
-                    // The WebSocketClient will attempt a graceful WebSocket shutdown by exchanging the close frames
-                    // but may not succeed if this disconnect was called due to pong timeout...
-                    onClose(-1, "Pong timeout", false);
                 }
             }
         });
@@ -256,21 +251,21 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @Override
     public void onClose(final int code, final String reason, final boolean remote) {
-        if (state != ConnectionState.DISCONNECTED) {
-            activityTimer.cancelTimeouts();
-
-            factory.queueOnEventThread(new Runnable() {
-                @Override
-                public void run() {
-                    updateState(ConnectionState.DISCONNECTED);
-                    factory.shutdownThreads();
-                }
-            });
-        } else {
-            // Sometimes expected when we disconnected due to pong timeout
+        if (state == ConnectionState.DISCONNECTED) {
             log.error("Received close from underlying socket when already disconnected. " + "Close code ["
                     + code + "], Reason [" + reason + "], Remote [" + remote + "]");
+            return;
         }
+
+        activityTimer.cancelTimeouts();
+
+        factory.queueOnEventThread(new Runnable() {
+            @Override
+            public void run() {
+                updateState(ConnectionState.DISCONNECTED);
+                factory.shutdownThreads();
+            }
+        });
     }
 
     @Override
@@ -347,7 +342,15 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 @Override
                 public void run() {
                     log.debug("Timed out awaiting pong from server - disconnecting");
+
+                    underlyingConnection.removeWebSocketListener();
+
                     disconnect();
+
+                    // Proceed immediately to handle the close
+                    // The WebSocketClient will attempt a graceful WebSocket shutdown by exchanging the close frames
+                    // but may not succeed if this disconnect was called due to pong timeout...
+                    onClose(-1, "Pong timeout", false);
                 }
             }, pongTimeout, TimeUnit.MILLISECONDS);
         }
