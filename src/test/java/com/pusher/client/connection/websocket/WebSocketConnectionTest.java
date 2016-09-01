@@ -246,7 +246,7 @@ public class WebSocketConnectionTest {
         connection.disconnect();
         verify(mockEventListener).onConnectionStateChange(
                 new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));
-        assertEquals(ConnectionState.DISCONNECTING, connection.getState());
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
     }
 
     @Test
@@ -275,7 +275,27 @@ public class WebSocketConnectionTest {
         connection.disconnect();
 
         verify(mockUnderlyingConnection, times(1)).close();
-        verify(mockEventListener, times(3)).onConnectionStateChange(any(ConnectionStateChange.class));
+        verify(mockEventListener, times(4)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
+
+    @Test
+    public void testDisconnectImmediatelyCallsOnClose() {
+        connection.connect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
+
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
+
+        connection.disconnect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));
+
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED));
+
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
     }
 
     /* end of tests */
