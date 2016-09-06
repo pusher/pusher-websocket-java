@@ -1,5 +1,9 @@
 # pusher-websocket-java changelog
 
+## Version 1.2.2
+
+ * Improve resillience of pong timeout disconnections
+
 ## Version 1.2.0
 
 2016-07-05 jpatel531
