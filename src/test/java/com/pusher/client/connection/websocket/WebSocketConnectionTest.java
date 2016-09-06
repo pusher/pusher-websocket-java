@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.net.ssl.SSLException;
 
+import org.java_websocket.framing.CloseFrame;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -286,7 +287,8 @@ public class WebSocketConnectionTest {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-        verify(mockUnderlyingConnection, timeout((int) (ACTIVITY_TIMEOUT + PONG_TIMEOUT))).close();
+        verify(mockUnderlyingConnection, timeout((int) (ACTIVITY_TIMEOUT + PONG_TIMEOUT)))
+                .closeConnection(CloseFrame.ABNORMAL_CLOSE, "Pong timeout");
 
         verify(mockEventListener).onConnectionStateChange(
                 new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));

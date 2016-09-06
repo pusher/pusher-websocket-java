@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
 
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +91,18 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 if (state == ConnectionState.CONNECTED) {
                     updateState(ConnectionState.DISCONNECTING);
                     underlyingConnection.close();
+                }
+            }
+        });
+    }
+
+    private void forceDisconnect(final String reason) {
+        factory.queueOnEventThread(new Runnable() {
+            @Override
+            public void run() {
+                if (state == ConnectionState.CONNECTED) {
+                    updateState(ConnectionState.DISCONNECTING);
+                    underlyingConnection.closeConnection(CloseFrame.ABNORMAL_CLOSE, reason);
                 }
             }
         });
@@ -345,10 +358,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
                     underlyingConnection.removeWebSocketListener();
 
-                    disconnect();
+                    forceDisconnect("Pong timeout");
 
                     // Proceed immediately to handle the close
-                    // The WebSocketClient will attempt a graceful WebSocket shutdown by exchanging the close frames
+                    // The WebSocketClient will attempt to flush the messages before shutting down
                     // but may not succeed if this disconnect was called due to pong timeout...
                     onClose(-1, "Pong timeout", false);
                 }
