@@ -138,7 +138,7 @@ public class HttpAuthorizer implements Authorizer {
             rd.close();
 
             final int responseHttpStatus = connection.getResponseCode();
-            if (responseHttpStatus != 200) {
+            if (responseHttpStatus != 200 && responseHttpStatus != 201) {
                 throw new AuthorizationFailureException(response.toString());
             }
 
