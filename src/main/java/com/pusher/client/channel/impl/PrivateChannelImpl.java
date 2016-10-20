@@ -52,12 +52,12 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
         }
 
         try {
-            final Map userData = GSON.fromJson(data, Map.class);
+            //final Map userData = GSON.fromJson(data, Map.class);
 
             final Map<Object, Object> jsonPayload = new LinkedHashMap<Object, Object>();
             jsonPayload.put("event", eventName);
             jsonPayload.put("channel", name);
-            jsonPayload.put("data", userData);
+            jsonPayload.put("data", data);
 
             final String jsonMessage = GSON.toJson(jsonPayload);
             connection.sendMessage(jsonMessage);
