@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
-import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,9 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private static final Gson GSON = new Gson();
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
-    static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
+    private static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
+    private static final int MAX_CONNECTION_ATTEMPTS = 6; //Taken from the Swift lib
+    private static final int MAX_RECONNECT_GAP_IN_SECONDS = 30;
 
     private final Factory factory;
     private final ActivityTimer activityTimer;
@@ -42,6 +43,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClientWrapper underlyingConnection;
     private String socketId;
+    private int reconnectAttempts = 0;
+
 
     public WebSocketConnection(
             final String url,
@@ -68,18 +71,22 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             @Override
             public void run() {
                 if (state == ConnectionState.DISCONNECTED) {
-                    try {
-                        underlyingConnection = factory
-                                .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
-                        updateState(ConnectionState.CONNECTING);
-                        underlyingConnection.connect();
-                    }
-                    catch (final SSLException e) {
-                        sendErrorToAllListeners("Error connecting over SSL", null, e);
-                    }
+                    tryConnecting();
                 }
             }
         });
+    }
+
+    private void tryConnecting(){
+        try {
+            underlyingConnection = factory
+                    .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
+            updateState(ConnectionState.CONNECTING);
+            underlyingConnection.connect();
+        }
+        catch (final SSLException e) {
+            sendErrorToAllListeners("Error connecting over SSL", null, e);
+        }
     }
 
     @Override
@@ -257,6 +264,39 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             return;
         }
 
+        //Reconnection logic
+        if(state == ConnectionState.CONNECTED || state == ConnectionState.CONNECTING){
+
+            if(reconnectAttempts < MAX_CONNECTION_ATTEMPTS){
+                tryReconnecting();
+            }
+            else{
+                updateState(ConnectionState.DISCONNECTING);
+                cancelTimeoutsAndTransitonToDisconnected();
+            }
+            return;
+        }
+
+        if (state == ConnectionState.DISCONNECTING){
+            cancelTimeoutsAndTransitonToDisconnected();
+        }
+    }
+
+    private void tryReconnecting() {
+        reconnectAttempts++;
+        updateState(ConnectionState.RECONNECTING);
+        long reconnectInterval = Math.min(MAX_RECONNECT_GAP_IN_SECONDS, reconnectAttempts * reconnectAttempts);
+
+        factory.getTimers().schedule(new Runnable() {
+            @Override
+            public void run() {
+                underlyingConnection.removeWebSocketListener();
+                tryConnecting();
+            }
+        }, reconnectInterval, TimeUnit.SECONDS);
+    }
+
+    private void cancelTimeoutsAndTransitonToDisconnected() {
         activityTimer.cancelTimeouts();
 
         factory.queueOnEventThread(new Runnable() {
@@ -290,7 +330,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         private Future<?> pingTimer;
         private Future<?> pongTimer;
 
-        public ActivityTimer(final long activityTimeout, final long pongTimeout) {
+        ActivityTimer(final long activityTimeout, final long pongTimeout) {
             this.activityTimeout = activityTimeout;
             this.pongTimeout = pongTimeout;
         }
@@ -299,7 +339,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
          * On any activity from the server - Cancel pong timeout - Cancel
          * currently ping timeout and re-schedule
          */
-        public synchronized void activity() {
+        synchronized void activity() {
             if (pongTimer != null) {
                 pongTimer.cancel(true);
             }
@@ -320,7 +360,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         /**
          * Cancel any pending timeouts, for example because we are disconnected.
          */
-        public synchronized void cancelTimeouts() {
+        synchronized void cancelTimeouts() {
             if (pingTimer != null) {
                 pingTimer.cancel(false);
             }
