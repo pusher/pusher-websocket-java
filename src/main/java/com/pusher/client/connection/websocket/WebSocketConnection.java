@@ -178,7 +178,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private void handleInternalEvent(final String event, final String wholeMessage) {
         if (event.equals("pusher:connection_established")) {
             handleConnectionMessage(wholeMessage);
-            reconnectAttempts = 0;
         }
         else if (event.equals("pusher:error")) {
             handleError(wholeMessage);
@@ -193,6 +192,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         socketId = (String)dataMap.get("socket_id");
 
         updateState(ConnectionState.CONNECTED);
+        reconnectAttempts = 0;
     }
 
     @SuppressWarnings("rawtypes")
@@ -259,8 +259,8 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @Override
     public void onClose(final int code, final String reason, final boolean remote) {
-        if (state == ConnectionState.DISCONNECTED) {
-            log.error("Received close from underlying socket when already disconnected. " + "Close code ["
+        if (state == ConnectionState.DISCONNECTED || state == ConnectionState.RECONNECTING) {
+            log.error("Received close from underlying socket when already disconnected." + "Close code ["
                     + code + "], Reason [" + reason + "], Remote [" + remote + "]");
             return;
         }
