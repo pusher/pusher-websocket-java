@@ -31,7 +31,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     private static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
-    private static final int MAX_CONNECTION_ATTEMPTS = 6; //Taken from the Swift lib
+    private static final int MAX_RECONNECTION_ATTEMPTS = 6; //Taken from the Swift lib
     private static final int MAX_RECONNECT_GAP_IN_SECONDS = 30;
 
     private final Factory factory;
@@ -178,6 +178,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private void handleInternalEvent(final String event, final String wholeMessage) {
         if (event.equals("pusher:connection_established")) {
             handleConnectionMessage(wholeMessage);
+            reconnectAttempts = 0;
         }
         else if (event.equals("pusher:error")) {
             handleError(wholeMessage);
@@ -267,7 +268,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         //Reconnection logic
         if(state == ConnectionState.CONNECTED || state == ConnectionState.CONNECTING){
 
-            if(reconnectAttempts < MAX_CONNECTION_ATTEMPTS){
+            if(reconnectAttempts < MAX_RECONNECTION_ATTEMPTS){
                 tryReconnecting();
             }
             else{
