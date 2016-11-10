@@ -1,5 +1,10 @@
 # pusher-websocket-java changelog
 
+## Version 1.3.0
+
+* Add retry logic when the connection is lost
+* Accept 201 status code from auth endpoints 
+
 ## Version 1.2.2
 
  * Improve resillience of pong timeout disconnections
@@ -101,7 +106,7 @@
 
 2013-11-04 mdpye
  * Import a logging framework (slf4j)
- * Log error with additional info and continue when trying to 
+ * Log error with additional info and continue when trying to
    transition from disconnected->disconnected state
 
 2013-11-01 mdpye

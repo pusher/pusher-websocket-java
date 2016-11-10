@@ -58,7 +58,7 @@ The pusher-java-client is available in Maven Central, however one of its depende
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>1.2.2</version>
+      <version>1.3.0</version>
     </dependency>
 </dependencies>
 ```
@@ -71,7 +71,7 @@ repositories {
 }
 
 dependencies {
-  compile 'com.pusher:pusher-java-client:1.2.2'
+  compile 'com.pusher:pusher-java-client:1.3.0'
 }
 ```
 
