@@ -1,5 +1,8 @@
 package com.pusher.client.connection.websocket;
 
+import com.pusher.java_websocket.client.WebSocketClient;
+import com.pusher.java_websocket.handshake.ServerHandshake;
+
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URI;
@@ -9,9 +12,6 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocketFactory;
-
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 
 /**
  * A thin wrapper around the WebSocketClient class from the Java-WebSocket

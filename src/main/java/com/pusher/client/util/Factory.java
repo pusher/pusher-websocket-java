@@ -10,8 +10,6 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.net.ssl.SSLException;
 
-import org.java_websocket.client.WebSocketClient;
-
 import com.pusher.client.Authorizer;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelImpl;

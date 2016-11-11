@@ -36,16 +36,17 @@ ext.sharedManifest = manifest {
 	)
 }
 
-
 repositories {
+    //TODO: remove mavenLocal when finished testing and ready for release / released snapshot to mavenCentral
+	mavenLocal()
 	mavenCentral()
-	maven { url "http://clojars.org/repo" }
 }
 
 dependencies {
 	compile "com.google.code.gson:gson:2.2.2"
 	compile "org.slf4j:slf4j-api:1.7.5"
-	compile "org.java-websocket:java-websocket:1.3.1"
+	compile "com.pusher:java-websocket:1.4.0-SNAPSHOT"
+
 	testCompile "org.mockito:mockito-all:1.8.5"
 	testCompile "org.powermock:powermock-module-junit4:1.4.11"
 	testCompile "org.powermock:powermock-api-mockito:1.4.11"
@@ -186,5 +187,5 @@ task createPublishTarget << {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '2.0'
+	gradleVersion = '2.14.1'
 }
