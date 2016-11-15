@@ -1,7 +1,6 @@
 # pusher-websocket-java changelog
 
 ## Version 1.3.0
-
 * Add retry logic when the connection is lost
 * Accept 201 status code from auth endpoints 
 
