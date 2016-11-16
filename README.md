@@ -44,21 +44,14 @@ The compiled library is available in two ways:
 
 ### Maven
 
-The pusher-java-client is available in Maven Central, however one of its dependencies is hosted on [Clojars.org](http://clojars.org) so you will need to add it to your repositories list.
+The pusher-java-client is available in Maven Central.
 
 ```xml
-<repositories>
-    <repository>
-        <id>clojars.org</id>
-        <url>http://clojars.org/repo</url>
-    </repository>
-</repositories>
-
 <dependencies>
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>1.3.0</version>
+      <version>1.4.0</version>
     </dependency>
 </dependencies>
 ```
@@ -66,12 +59,8 @@ The pusher-java-client is available in Maven Central, however one of its depende
 ### Gradle
 
 ```groovy
-repositories {
-  maven { url 'http://clojars.org/repo' }
-}
-
 dependencies {
-  compile 'com.pusher:pusher-java-client:1.3.0'
+  compile 'com.pusher:pusher-java-client:1.4.0'
 }
 ```
 
