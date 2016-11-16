@@ -3,8 +3,8 @@ package com.pusher.client.example;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
+import com.pusher.java_websocket.client.WebSocketClient;
+import com.pusher.java_websocket.handshake.ServerHandshake;
 
 public class SimpleWebSocket extends WebSocketClient {
     public static void main(final String[] args) throws URISyntaxException {

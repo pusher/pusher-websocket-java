@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import java.net.Proxy;
 import java.net.URI;
 
-import org.java_websocket.handshake.ServerHandshake;
+import com.pusher.java_websocket.handshake.ServerHandshake;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
