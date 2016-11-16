@@ -39,13 +39,12 @@ ext.sharedManifest = manifest {
 
 repositories {
 	mavenCentral()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
 dependencies {
 	compile "com.google.code.gson:gson:2.2.2"
 	compile "org.slf4j:slf4j-api:1.7.5"
-	compile "com.pusher:java-websocket:1.4.0-SNAPSHOT"
+	compile "com.pusher:java-websocket:1.4.1"
 	testCompile "org.mockito:mockito-all:1.8.5"
 	testCompile "org.powermock:powermock-module-junit4:1.4.11"
 	testCompile "org.powermock:powermock-api-mockito:1.4.11"

@@ -1,5 +1,8 @@
 # pusher-websocket-java changelog
 
+## Version 1.4.0
+* Update the dependency to use pusher/java-websocket fork and remove dependency on clojars.org repository.
+
 ## Version 1.3.0
 * Add retry logic when the connection is lost
 * Accept 201 status code from auth endpoints 
