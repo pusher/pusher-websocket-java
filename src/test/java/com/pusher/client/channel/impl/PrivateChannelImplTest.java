@@ -110,7 +110,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         verify(mockConnection)
         .sendMessage(
                 "{\"event\":\"client-myEvent\",\"channel\":\"" + getChannelName()
-                + "\",\"data\":{\"fish\":\"chips\"}}");
+                + "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -129,20 +129,16 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         ((PrivateChannelImpl)channel).trigger("myEvent", "{\"fish\":\"chips\"}");
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testTriggerWithInvalidJSONThrowsException() {
-        when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-        channel.updateState(ChannelState.SUBSCRIBED);
-
-        ((PrivateChannelImpl)channel).trigger("client-myEvent", "{\"fish\":malformed");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testTriggerWithJSONStringInsteadOfObjectThrowsException() {
+    @Test
+    public void testTriggerWithString() {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channel.updateState(ChannelState.SUBSCRIBED);
 
         ((PrivateChannelImpl)channel).trigger("client-myEvent", "string");
+
+        verify(mockConnection).sendMessage(
+                "{\"event\":\"client-myEvent\",\"channel\":\"" + getChannelName()
+                        + "\",\"data\":\"string\"}");
     }
 
     @Test(expected = IllegalStateException.class)

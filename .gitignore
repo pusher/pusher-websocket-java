@@ -13,3 +13,4 @@ build
 
 *.iml
 gradle.properties
+local.properties
