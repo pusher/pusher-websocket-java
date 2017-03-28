@@ -191,7 +191,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         final Map dataMap = GSON.fromJson(dataString, Map.class);
         socketId = (String)dataMap.get("socket_id");
 
-        updateState(ConnectionState.CONNECTED);
+        if(state != ConnectionState.CONNECTED){
+            updateState(ConnectionState.CONNECTED);
+
+        }
         reconnectAttempts = 0;
     }
 
