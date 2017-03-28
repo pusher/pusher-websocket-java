@@ -24,6 +24,7 @@ import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
+import java.util.concurrent.Executors;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChannelManagerTest {
@@ -325,7 +326,7 @@ public class ChannelManagerTest {
 
     @Test
     public void testGetNonExistentChannelFromString(){
-       Channel channel = channelManager.getChannel("woot");
+        Channel channel = channelManager.getChannel("woot");
         assertNull(channel);
     }
 
@@ -368,5 +369,26 @@ public class ChannelManagerTest {
     public void testGetNonExistentPresenceChannel(){
         PresenceChannel channel = channelManager.getPresenceChannel("presence-yolo");
         assertNull(channel);
+    }
+
+    @Test
+    public void testConcurrentModificationExceptionDoesNotHappenWhenConnectionIsEstablished() {
+        for(int i = 0; i<1000; i++) {
+            channelManager.subscribeTo(new ChannelImpl("channel" + i, factory), null);
+        }
+
+        Runnable removeChannels = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Start unsubscribe");
+                for(int i=900; i<1000; i++){
+                    channelManager.unsubscribeFrom("channel"+i);
+                }
+                System.out.println("end unsubscribe");
+            }
+        };
+        Executors.newSingleThreadExecutor().submit(removeChannels);
+
+        channelManager.onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
     }
 }
