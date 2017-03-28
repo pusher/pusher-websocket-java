@@ -1,6 +1,7 @@
 package com.pusher.client.channel.impl;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -116,8 +117,9 @@ public class ChannelManager implements ConnectionEventListener {
     public void onConnectionStateChange(final ConnectionStateChange change) {
 
         if (change.getCurrentState() == ConnectionState.CONNECTED) {
-
-            for (final InternalChannel channel : channelNameToChannelMap.values()) {
+            Iterator<Map.Entry<String, InternalChannel>> iterator = channelNameToChannelMap.entrySet().iterator();
+            while(iterator.hasNext()) {
+                InternalChannel channel = iterator.next().getValue();
                 sendOrQueueSubscribeMessage(channel);
             }
         }
