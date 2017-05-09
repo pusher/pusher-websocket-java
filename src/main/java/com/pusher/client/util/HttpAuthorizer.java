@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -86,15 +87,14 @@ public class HttpAuthorizer implements Authorizer {
     public String authorize(final String channelName, final String socketId) throws AuthorizationFailureException {
 
         try {
-            final StringBuffer urlParameters = new StringBuffer();
+            final StringBuilder urlParameters = new StringBuilder();
             urlParameters.append("channel_name=").append(URLEncoder.encode(channelName, ENCODING_CHARACTER_SET));
             urlParameters.append("&socket_id=").append(URLEncoder.encode(socketId, ENCODING_CHARACTER_SET));
 
             // Adding extra parameters supplied to be added to query string.
-            for (final String parameterName : mQueryStringParameters.keySet()) {
-                urlParameters.append("&").append(parameterName).append("=");
-                urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName),
-                        ENCODING_CHARACTER_SET));
+            for (final Entry<String, String> parameter : mQueryStringParameters.entrySet()) {
+                urlParameters.append("&").append(parameter.getKey()).append("=");
+                urlParameters.append(URLEncoder.encode(parameter.getValue(), ENCODING_CHARACTER_SET));
             }
 
             HttpURLConnection connection;
@@ -114,9 +114,9 @@ public class HttpAuthorizer implements Authorizer {
                     "" + Integer.toString(urlParameters.toString().getBytes().length));
 
             // Add in the user defined headers
-            for (final String headerName : mHeaders.keySet()) {
-                final String headerValue = mHeaders.get(headerName);
-                connection.setRequestProperty(headerName, headerValue);
+            for (final Entry<String, String> header : mHeaders.entrySet()) {
+                final String headerValue = header.getValue();
+                connection.setRequestProperty(header.getKey(), headerValue);
             }
 
             connection.setUseCaches(false);
@@ -131,7 +131,7 @@ public class HttpAuthorizer implements Authorizer {
             final InputStream is = connection.getInputStream();
             final BufferedReader rd = new BufferedReader(new InputStreamReader(is));
             String line;
-            final StringBuffer response = new StringBuffer();
+            final StringBuilder response = new StringBuilder();
             while ((line = rd.readLine()) != null) {
                 response.append(line);
             }
