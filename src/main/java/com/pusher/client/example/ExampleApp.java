@@ -17,10 +17,6 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     private final String eventName;
     private final long startTime = System.currentTimeMillis();
 
-    public static void main(final String[] args) {
-        new ExampleApp(args);
-    }
-
     public ExampleApp(final String[] args) {
 
         final String apiKey = args.length > 0 ? args[0] : "161717a55e65825bacf1";
@@ -43,6 +39,10 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
                 e.printStackTrace();
             }
         }
+    }
+    
+    public static void main(final String[] args) {
+        new ExampleApp(args);
     }
 
     /* ConnectionEventListener implementation */

@@ -183,7 +183,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     @SuppressWarnings("rawtypes")
     private static PresenceData extractPresenceDataFrom(final String message) {
         final String dataString = extractDataStringFrom(message);
-        return GSON.fromJson(dataString, Presence.class).presence;
+        return GSON.fromJson(dataString, Presence.class).presenceData;
     }
 
     @SuppressWarnings("rawtypes")
@@ -210,7 +210,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     private class Presence {
         @SerializedName("presence")
-        public PresenceData presence;
+        public PresenceData presenceData;
     }
 
 }

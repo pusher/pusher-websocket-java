@@ -19,10 +19,6 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
 
     private final PresenceChannel channel;
 
-    public static void main(final String[] args) {
-        new PresenceChannelExampleApp(args);
-    }
-
     public PresenceChannelExampleApp(final String[] args) {
 
         final String apiKey = args.length > 0 ? args[0] : "a87fe72c6f36272aa4b1";
@@ -48,6 +44,10 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
                 e.printStackTrace();
             }
         }
+    }
+    
+    public static void main(final String[] args) {
+        new PresenceChannelExampleApp(args);
     }
 
     /* ConnectionEventListener implementation */

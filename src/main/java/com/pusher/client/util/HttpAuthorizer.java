@@ -37,7 +37,7 @@ public class HttpAuthorizer implements Authorizer {
     private final URL endPoint;
     private Map<String, String> mHeaders = new HashMap<String, String>();
     private Map<String, String> mQueryStringParameters = new HashMap<String, String>();
-    private final String ENCODING_CHARACTER_SET = "UTF-8";
+    private final static String ENCODING_CHARACTER_SET = "UTF-8";
 
     /**
      * Creates a new authorizer.
@@ -78,7 +78,7 @@ public class HttpAuthorizer implements Authorizer {
      * @param queryStringParameters
      *            the query parameters
      */
-    public void setQueryStringParameters(final HashMap<String, String> queryStringParameters) {
+    public void setQueryStringParameters(final Map<String, String> queryStringParameters) {
         mQueryStringParameters = queryStringParameters;
     }
 

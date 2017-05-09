@@ -16,10 +16,6 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
 
     private final PrivateChannel channel;
 
-    public static void main(final String[] args) {
-        new PrivateChannelExampleApp(args);
-    }
-
     public PrivateChannelExampleApp(final String[] args) {
 
         final String apiKey = args.length > 0 ? args[0] : "a87fe72c6f36272aa4b1";
@@ -45,6 +41,10 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
                 e.printStackTrace();
             }
         }
+    }
+    
+    public static void main(final String[] args) {
+        new PrivateChannelExampleApp(args);
     }
 
     /* ConnectionEventListener implementation */
