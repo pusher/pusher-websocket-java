@@ -1,5 +1,7 @@
 # pusher-websocket-java changelog
 
+This Changelog is no longer being updated. For any further changes please see the Releases section on this Github repository - https://github.com/pusher/pusher-websocket-java/releases
+
 ## Version 1.4.0
 * Update the dependency to use pusher/java-websocket fork and remove dependency on clojars.org repository.
 
