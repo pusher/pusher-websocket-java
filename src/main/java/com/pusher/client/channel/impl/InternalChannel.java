@@ -5,16 +5,16 @@ import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 
 public interface InternalChannel extends Channel, Comparable<InternalChannel> {
-    
+
     String toSubscribeMessage();
 
     String toUnsubscribeMessage();
 
     void onMessage(String event, String message);
-    
+
     void updateState(ChannelState state);
 
-	void setEventListener(ChannelEventListener listener);
+    void setEventListener(ChannelEventListener listener);
 
-	ChannelEventListener getEventListener();
+    ChannelEventListener getEventListener();
 }

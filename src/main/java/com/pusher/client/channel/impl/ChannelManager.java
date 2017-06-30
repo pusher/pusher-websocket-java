@@ -1,12 +1,15 @@
 package com.pusher.client.channel.impl;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
+import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PresenceChannel;
+import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -16,136 +19,180 @@ import com.pusher.client.util.Factory;
 
 public class ChannelManager implements ConnectionEventListener {
 
-	private final Map<String, InternalChannel> channelNameToChannelMap = new HashMap<String, InternalChannel>();
-	private InternalConnection connection;
+    private static final Gson GSON = new Gson();
+    private final Map<String, InternalChannel> channelNameToChannelMap = new ConcurrentHashMap<String, InternalChannel>();
 
-	public ChannelManager() {
-	}
-	
-	public void setConnection(InternalConnection connection) {
-		if (connection == null) {
-			throw new IllegalArgumentException("Cannot construct ChannelManager with a null connection");
-		}
-		
-		if(this.connection != null) {
-			this.connection.unbind(ConnectionState.CONNECTED, this);
-		}
+    private final Factory factory;
+    private InternalConnection connection;
 
-		this.connection = connection;
-		connection.bind(ConnectionState.CONNECTED, this);
-	}
+    public ChannelManager(final Factory factory) {
+        this.factory = factory;
+    }
 
-	public void subscribeTo(InternalChannel channel, ChannelEventListener listener, String... eventNames) {
+    public Channel getChannel(String channelName){
+        if (channelName.startsWith("private-")){
+            throw new IllegalArgumentException("Please use the getPrivateChannel method");
+        } else if (channelName.startsWith("presence-")){
+            throw new IllegalArgumentException("Please use the getPresenceChannel method");
+        }
+        return (Channel) findChannelInChannelMap(channelName);
+    }
 
-		validateArgumentsAndBindEvents(channel, listener, eventNames);
-		channelNameToChannelMap.put(channel.getName(), channel);
-		sendOrQueueSubscribeMessage(channel);
-	}
-	
-	public void unsubscribeFrom(String channelName) {
+    public PrivateChannel getPrivateChannel(String channelName) throws IllegalArgumentException{
+        if (!channelName.startsWith("private-")) {
+            throw new IllegalArgumentException("Private channels must begin with 'private-'");
+        } else {
+            return (PrivateChannel) findChannelInChannelMap(channelName);
+        }
+    }
 
-		if (channelName == null) {
-			throw new IllegalArgumentException("Cannot unsubscribe from null channel");
-		}
+    public PresenceChannel getPresenceChannel(String channelName) throws IllegalArgumentException{
+        if (!channelName.startsWith("presence-")) {
+            throw new IllegalArgumentException("Presence channels must begin with 'presence-'");
+        } else {
+            return (PresenceChannel) findChannelInChannelMap(channelName);
+        }
+    }
 
-		InternalChannel channel = channelNameToChannelMap.remove(channelName);
-		if (channel != null) {
-			connection.sendMessage(channel.toUnsubscribeMessage());
-			channel.updateState(ChannelState.UNSUBSCRIBED);
-		} else {
-			throw new IllegalArgumentException("Cannot unsubscribe to channel " + channelName + ", no subscription found");
-		}
-	}
+    private InternalChannel findChannelInChannelMap(String channelName){
+        return channelNameToChannelMap.get(channelName);
+    }
 
-	@SuppressWarnings("unchecked")
-	public void onMessage(String event, String wholeMessage) {
+    public void setConnection(final InternalConnection connection) {
+        if (connection == null) {
+            throw new IllegalArgumentException("Cannot construct ChannelManager with a null connection");
+        }
 
-		Map<Object, Object> json = new Gson().fromJson(wholeMessage, Map.class);
-		Object channelNameObject = json.get("channel");
+        if (this.connection != null) {
+            this.connection.unbind(ConnectionState.CONNECTED, this);
+        }
 
-		if (channelNameObject != null) {
-			String channelName = (String) channelNameObject;
-			InternalChannel channel = channelNameToChannelMap.get(channelName);
+        this.connection = connection;
+        connection.bind(ConnectionState.CONNECTED, this);
+    }
 
-			if (channel != null) {
-				channel.onMessage(event, wholeMessage);
-			}
-		}
-	}
+    public void subscribeTo(final InternalChannel channel, final ChannelEventListener listener, final String... eventNames) {
 
-	/* ConnectionEventListener implementation */
+        validateArgumentsAndBindEvents(channel, listener, eventNames);
+        channelNameToChannelMap.put(channel.getName(), channel);
+        sendOrQueueSubscribeMessage(channel);
+    }
 
-	@Override
-	public void onConnectionStateChange(ConnectionStateChange change) {
-		
-		if (change.getCurrentState() == ConnectionState.CONNECTED) {
+    public void unsubscribeFrom(final String channelName) {
 
-			for (InternalChannel channel : channelNameToChannelMap.values()) {
-				sendOrQueueSubscribeMessage(channel);
-			}
-		}
-	}
+        if (channelName == null) {
+            throw new IllegalArgumentException("Cannot unsubscribe from null channel");
+        }
 
-	@Override
-	public void onError(String message, String code, Exception e) {
-		// ignore or log
-	}
-	
-	/* implementation detail */
-	
-	private void sendOrQueueSubscribeMessage(final InternalChannel channel) {
+        final InternalChannel channel = channelNameToChannelMap.remove(channelName);
+        if (channel == null) {
+            return;
+        }
+        if (connection.getState() == ConnectionState.CONNECTED) {
+            sendUnsubscribeMessage(channel);
+        }
+    }
 
-		Factory.getEventQueue().execute(new Runnable() {
+    @SuppressWarnings("unchecked")
+    public void onMessage(final String event, final String wholeMessage) {
 
-			@Override
-			public void run() {
-					
-				if (connection.getState() == ConnectionState.CONNECTED) {
-					try {
-						String message = channel.toSubscribeMessage();
-						connection.sendMessage(message);
-						channel.updateState(ChannelState.SUBSCRIBE_SENT);
-					} catch(AuthorizationFailureException e) {
-						clearDownSubscription(channel, e);
-					}
-				}
-			}
-		});
-	}
+        final Map<Object, Object> json = GSON.fromJson(wholeMessage, Map.class);
+        final Object channelNameObject = json.get("channel");
 
-	private void clearDownSubscription(final InternalChannel channel, final Exception e) {
-		
-		channelNameToChannelMap.remove(channel.getName());
-		channel.updateState(ChannelState.FAILED);
-		
-		if(channel.getEventListener() != null) {
-			Factory.getEventQueue().execute(new Runnable() {
-				
-				public void run() {
-					// Note: this cast is safe because an AuthorizationFailureException will never be thrown
-					// when subscribing to a non-private channel
-					ChannelEventListener eventListener = channel.getEventListener();
-					PrivateChannelEventListener privateChannelListener = (PrivateChannelEventListener) eventListener;
-					privateChannelListener.onAuthenticationFailure(e.getMessage(), e);
-				}
-			});
-		}
-	}
-	
-	private void validateArgumentsAndBindEvents(InternalChannel channel, ChannelEventListener listener, String... eventNames) {
+        if (channelNameObject != null) {
+            final String channelName = (String)channelNameObject;
+            final InternalChannel channel = channelNameToChannelMap.get(channelName);
 
-		if (channel == null) {
-			throw new IllegalArgumentException("Cannot subscribe to a null channel");
-		}
+            if (channel != null) {
+                channel.onMessage(event, wholeMessage);
+            }
+        }
+    }
 
-		if (channelNameToChannelMap.containsKey(channel.getName())) {
-			throw new IllegalArgumentException("Already subscribed to a channel with name " + channel.getName());
-		}
+    /* ConnectionEventListener implementation */
 
-		for (String eventName : eventNames) {
-			channel.bind(eventName, listener);
-		}
-		
-		channel.setEventListener(listener);
-	}
+    @Override
+    public void onConnectionStateChange(final ConnectionStateChange change) {
+
+        if (change.getCurrentState() == ConnectionState.CONNECTED) {
+            for(final InternalChannel channel : channelNameToChannelMap.values()){
+                sendOrQueueSubscribeMessage(channel);
+            }
+        }
+    }
+
+    @Override
+    public void onError(final String message, final String code, final Exception e) {
+        // ignore or log
+    }
+
+    /* implementation detail */
+
+    private void sendOrQueueSubscribeMessage(final InternalChannel channel) {
+
+        factory.queueOnEventThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                if (connection.getState() == ConnectionState.CONNECTED) {
+                    try {
+                        final String message = channel.toSubscribeMessage();
+                        connection.sendMessage(message);
+                        channel.updateState(ChannelState.SUBSCRIBE_SENT);
+                    } catch (final AuthorizationFailureException e) {
+                        clearDownSubscription(channel, e);
+                    }
+                }
+            }
+        });
+    }
+
+    private void sendUnsubscribeMessage(final InternalChannel channel) {
+        factory.queueOnEventThread(new Runnable() {
+            @Override
+            public void run() {
+                connection.sendMessage(channel.toUnsubscribeMessage());
+                channel.updateState(ChannelState.UNSUBSCRIBED);
+            }
+        });
+    }
+
+    private void clearDownSubscription(final InternalChannel channel, final Exception e) {
+
+        channelNameToChannelMap.remove(channel.getName());
+        channel.updateState(ChannelState.FAILED);
+
+        if (channel.getEventListener() != null) {
+            factory.queueOnEventThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    // Note: this cast is safe because an
+                    // AuthorizationFailureException will never be thrown
+                    // when subscribing to a non-private channel
+                    final ChannelEventListener eventListener = channel.getEventListener();
+                    final PrivateChannelEventListener privateChannelListener = (PrivateChannelEventListener)eventListener;
+                    privateChannelListener.onAuthenticationFailure(e.getMessage(), e);
+                }
+            });
+        }
+    }
+
+    private void validateArgumentsAndBindEvents(final InternalChannel channel, final ChannelEventListener listener, final String... eventNames) {
+
+        if (channel == null) {
+            throw new IllegalArgumentException("Cannot subscribe to a null channel");
+        }
+
+        if (channelNameToChannelMap.containsKey(channel.getName())) {
+            throw new IllegalArgumentException("Already subscribed to a channel with name " + channel.getName());
+        }
+
+        for (final String eventName : eventNames) {
+            channel.bind(eventName, listener);
+        }
+
+        channel.setEventListener(listener);
+    }
 }

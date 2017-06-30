@@ -6,3 +6,11 @@ bin
 
 # Output directory
 target
+
+build
+.gradle
+.idea
+
+*.iml
+gradle.properties
+local.properties

@@ -1,66 +1,92 @@
 package com.pusher.client.connection.websocket;
 
+import java.io.IOException;
+import java.net.Proxy;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSocketFactory;
 
-import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
+import com.pusher.java_websocket.client.WebSocketClient;
+import com.pusher.java_websocket.handshake.ServerHandshake;
 
 /**
- * A thin wrapper around the WebSocketClient class from the Java-WebSocket library. The purpose of this
- * class is to enable the WebSocketConnection class to be unit tested by swapping out an instance of
- * this wrapper for a mock version. 
+ * A thin wrapper around the WebSocketClient class from the Java-WebSocket
+ * library. The purpose of this class is to enable the WebSocketConnection class
+ * to be unit tested by swapping out an instance of this wrapper for a mock
+ * version.
  */
 public class WebSocketClientWrapper extends WebSocketClient {
 
-	private static final String WSS_SCHEME = "wss";
-	private final WebSocketListener proxy;
-    
-	public WebSocketClientWrapper(URI uri, WebSocketListener proxy)
-			throws SSLException {
-		super(uri);
+    private static final String WSS_SCHEME = "wss";
+    private WebSocketListener webSocketListener;
 
-		if (uri.getScheme().equals( WSS_SCHEME )) {
-			try {
-				SSLContext sslContext = SSLContext.getInstance("TLS");
-				sslContext.init(null, null, null);
+    public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
+        super(uri);
 
-				this.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(
-						sslContext));
-			}
-			catch (NoSuchAlgorithmException e) {
-				throw new SSLException(e);
-			}
-			catch (KeyManagementException e) {
-				throw new SSLException(e);
-			}
-		}
+        if (uri.getScheme().equals(WSS_SCHEME)) {
+            try {
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, null, null); // will use java's default
+                                                   // key and trust store which
+                                                   // is sufficient unless you
+                                                   // deal with self-signed
+                                                   // certificates
 
-		this.proxy = proxy;
-	}
-    
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-	proxy.onOpen(handshakedata);
+                final SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory)
+                                                                               // SSLSocketFactory.getDefault();
+
+                setSocket(factory.createSocket());
+            }
+            catch (final IOException e) {
+                throw new SSLException(e);
+            }
+            catch (final NoSuchAlgorithmException e) {
+                throw new SSLException(e);
+            }
+            catch (final KeyManagementException e) {
+                throw new SSLException(e);
+            }
+        }
+        this.webSocketListener = webSocketListener;
+        setProxy(proxy);
     }
 
     @Override
-    public void onMessage(String message) {
-	proxy.onMessage(message);
+    public void onOpen(final ServerHandshake handshakedata) {
+        if (webSocketListener != null) {
+            webSocketListener.onOpen(handshakedata);
+        }
     }
 
     @Override
-    public void onClose(int code, String reason, boolean remote) {
-	proxy.onClose(code, reason, remote);
+    public void onMessage(final String message) {
+        if (webSocketListener != null) {
+            webSocketListener.onMessage(message);
+        }
     }
 
     @Override
-    public void onError(Exception ex) {
-	proxy.onError(ex);
-    }    
+    public void onClose(final int code, final String reason, final boolean remote) {
+        if (webSocketListener != null) {
+            webSocketListener.onClose(code, reason, remote);
+        }
+    }
+
+    @Override
+    public void onError(final Exception ex) {
+        if (webSocketListener != null) {
+            webSocketListener.onError(ex);
+        }
+    }
+
+    /**
+     * Removes the WebSocketListener so that the underlying WebSocketClient doesn't expose any listener events.
+     */
+    public void removeWebSocketListener() {
+        webSocketListener = null;
+    }
 }

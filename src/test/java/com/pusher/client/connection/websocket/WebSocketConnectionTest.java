@@ -1,343 +1,354 @@
 package com.pusher.client.connection.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.net.ssl.SSLException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
-import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.InstantExecutor;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Factory.class })
+@RunWith(MockitoJUnitRunner.class)
 public class WebSocketConnectionTest {
 
-	private static final String API_KEY = "123456";
-	private static final String EVENT_NAME = "my-event";
-	private static final String INCOMING_MESSAGE = "{\"event\":\"" + EVENT_NAME
-			+ "\",\"channel\":\"my-channel\",\"data\":{\"fish\":\"chips\"}}";
+    private static final long ACTIVITY_TIMEOUT = 500;
+    private static final long PONG_TIMEOUT = 500;
+    private static final String URL = "ws://ws.example.com/";
+    private static final String EVENT_NAME = "my-event";
+    private static final String CONN_ESTABLISHED_EVENT = "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}";
+    private static final String INCOMING_MESSAGE = "{\"event\":\"" + EVENT_NAME
+            + "\",\"channel\":\"my-channel\",\"data\":{\"fish\":\"chips\"}}";
+    private static final Proxy PROXY = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxyaddress", 80));
 
-	private WebSocketConnection connection;
-	private @Mock
-	ChannelManager mockChannelManager;
-	private @Mock
-	WebSocketClientWrapper mockUnderlyingConnection;
-	private @Mock
-	ConnectionEventListener mockEventListener;
+    @Mock
+    private ChannelManager mockChannelManager;
+    @Mock
+    private WebSocketClientWrapper mockUnderlyingConnection;
+    @Mock
+    private ConnectionEventListener mockEventListener;
+    @Mock
+    private Factory factory;
 
-	@Before
-	public void setUp() throws URISyntaxException, SSLException {
+    private WebSocketConnection connection;
 
-		PowerMockito.mockStatic(Factory.class);
-		when(Factory.getChannelManager()).thenReturn(mockChannelManager);
-		when(
-				Factory.newWebSocketClientWrapper(any(URI.class),
-						any(WebSocketConnection.class))).thenReturn(
-				mockUnderlyingConnection);
-		when(Factory.getEventQueue()).thenReturn(new InstantExecutor());
+    @Before
+    public void setUp() throws URISyntaxException, SSLException {
+        when(factory.getChannelManager()).thenReturn(mockChannelManager);
+        when(factory.newWebSocketClientWrapper(any(URI.class), any(Proxy.class), any(WebSocketConnection.class))).thenReturn(
+                mockUnderlyingConnection);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final Runnable r = (Runnable) invocation.getArguments()[0];
+                r.run();
+                return null;
+            }
+        }).when(factory).queueOnEventThread(any(Runnable.class));
+        when(factory.getTimers()).thenReturn(new DoNothingExecutor());
 
-		this.connection = new WebSocketConnection(API_KEY, false);
-		this.connection.bind(ConnectionState.ALL, mockEventListener);
-	}
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
+        connection.bind(ConnectionState.ALL, mockEventListener);
+    }
 
-	@Test
-	public void testUnbindingWhenNotAlreadyBoundReturnsFalse()
-			throws URISyntaxException {
-		ConnectionEventListener listener = PowerMockito
-				.mock(ConnectionEventListener.class);
-		WebSocketConnection connection = new WebSocketConnection(API_KEY, false);
-		boolean unbound = connection.unbind(ConnectionState.ALL, listener);
-		assertEquals(false, unbound);
-	}
+    @Test
+    public void testUnbindingWhenNotAlreadyBoundReturnsFalse() throws URISyntaxException {
+        final ConnectionEventListener listener = mock(ConnectionEventListener.class);
+        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
+        final boolean unbound = connection.unbind(ConnectionState.ALL, listener);
+        assertEquals(false, unbound);
+    }
 
-	@Test
-	public void testUnbindingWhenBoundReturnsTrue() throws URISyntaxException {
-		ConnectionEventListener listener = PowerMockito
-				.mock(ConnectionEventListener.class);
-		WebSocketConnection connection = new WebSocketConnection(API_KEY, false);
+    @Test
+    public void testUnbindingWhenBoundReturnsTrue() throws URISyntaxException {
+        final ConnectionEventListener listener = mock(ConnectionEventListener.class);
+        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
 
-		connection.bind(ConnectionState.ALL, listener);
+        connection.bind(ConnectionState.ALL, listener);
 
-		boolean unbound = connection.unbind(ConnectionState.ALL, listener);
-		assertEquals(true, unbound);
-	}
+        final boolean unbound = connection.unbind(ConnectionState.ALL, listener);
+        assertEquals(true, unbound);
+    }
 
-	@Test
-	public void testVerifyURLIsCorrect() throws SSLException {
-		this.connection.connect();
-		ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
+    @Test
+    public void testStartsInDisconnectedState() {
+        assertSame(ConnectionState.DISCONNECTED, connection.getState());
+    }
 
-		PowerMockito.verifyStatic();
-		Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
+    @Test
+    public void testConnectCallIsDelegatedToUnderlyingConnection() {
+        connection.connect();
+        verify(mockUnderlyingConnection).connect();
+    }
 
-		assertEquals("ws://ws.pusherapp.com:80/app/" + API_KEY
-				+ "?client=java-client&protocol=5&version=0.0.0", argument.getValue()
-				.toString());
-	}
+    @Test
+    public void testConnectUpdatesStateAndNotifiesListener() {
+        connection.connect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
+        assertEquals(ConnectionState.CONNECTING, connection.getState());
+    }
 
-	@Test
-	public void testVerifyEncryptedURLIsCorrect() throws URISyntaxException,
-			SSLException {
-		this.connection = new WebSocketConnection(API_KEY, true);
+    @Test
+    public void testConnectDoesNotCallConnectOnUnderlyingConnectionIfAlreadyInConnectingState() {
+        connection.connect();
+        connection.connect();
 
-		this.connection.connect();
-		ArgumentCaptor<URI> argument = ArgumentCaptor.forClass(URI.class);
+        verify(mockUnderlyingConnection, times(1)).connect();
+        verify(mockEventListener, times(1)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
 
-		PowerMockito.verifyStatic();
-		Factory.newWebSocketClientWrapper(argument.capture(), eq(connection));
+    @Test
+    public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent() throws URISyntaxException {
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
+        connection.bind(ConnectionState.CONNECTED, mockEventListener);
+        connection.connect();
 
-		assertEquals("wss://ws.pusherapp.com:443/app/" + API_KEY
-				+ "?client=java-client&protocol=5&version=0.0.0", argument.getValue()
-				.toString());
-	}
+        verify(mockEventListener, never()).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
 
-	@Test
-	public void testStartsInDisconnectedState() {
-		assertSame(ConnectionState.DISCONNECTED, connection.getState());
-	}
+    @Test
+    public void testReceivePusherConnectionEstablishedMessageIsTranslatedToAConnectedCallback() {
+        connection.connect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
 
-	@Test
-	public void testConnectCallIsDelegatedToUnderlyingConnection() {
-		connection.connect();
-		verify(mockUnderlyingConnection).connect();
-	}
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
 
-	@Test
-	public void testConnectUpdatesStateAndNotifiesListener() {
-		connection.connect();
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.DISCONNECTED,
-						ConnectionState.CONNECTING));
-		assertEquals(ConnectionState.CONNECTING, connection.getState());
-	}
+        assertEquals(ConnectionState.CONNECTED, connection.getState());
+    }
 
-	@Test
-	public void testConnectDoesNotCallConnectOnUnderlyingConnectionIfAlreadyInConnectingState() {
-		connection.connect();
-		connection.connect();
+    @Test
+    public void testReceivePusherConnectionEstablishedMessageSetsSocketId() {
+        assertNull(connection.getSocketId());
 
-		verify(mockUnderlyingConnection, times(1)).connect();
-		verify(mockEventListener, times(1)).onConnectionStateChange(
-				any(ConnectionStateChange.class));
-	}
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-	@Test
-	public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent()
-			throws URISyntaxException {
-		connection = new WebSocketConnection(API_KEY, false);
-		connection.bind(ConnectionState.CONNECTED, mockEventListener);
-		connection.connect();
+        assertEquals("21112.816204", connection.getSocketId());
+    }
 
-		verify(mockEventListener, never()).onConnectionStateChange(
-				any(ConnectionStateChange.class));
-	}
+    @Test
+    public void testReceivePusherErrorMessageRaisesErrorEvent() {
+        connection.connect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
 
-	@Test
-	public void testReceivePusherConnectionEstablishedMessageIsTranslatedToAConnectedCallback() {
-		connection.connect();
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.DISCONNECTED,
-						ConnectionState.CONNECTING));
+        connection
+                .onMessage("{\"event\":\"pusher:error\",\"data\":{\"code\":4001,\"message\":\"Could not find app by key 12345\"}}");
+        verify(mockEventListener).onError("Could not find app by key 12345", "4001", null);
+    }
 
-		connection
-				.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.CONNECTING,
-						ConnectionState.CONNECTED));
+    @Test
+    public void testSendMessageSendsMessageToPusher() {
+        connect();
 
-		assertEquals(ConnectionState.CONNECTED, connection.getState());
-	}
+        connection.sendMessage("message");
 
-	@Test
-	public void testReceivePusherConnectionEstablishedMessageSetsSocketId() {
-		assertNull(connection.getSocketId());
+        verify(mockUnderlyingConnection).send("message");
+    }
 
-		connection.connect();
-		connection
-				.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
+    @Test
+    public void testSendMessageWhenNotConnectedRaisesErrorEvent() {
+        connection.sendMessage("message");
 
-		assertEquals("21112.816204", connection.getSocketId());
-	}
+        verify(mockUnderlyingConnection, never()).send("message");
+        verify(mockEventListener).onError(
+                "Cannot send a message while in " + ConnectionState.DISCONNECTED.toString() + " state", null, null);
+    }
 
-	@Test
-	public void testReceivePusherErrorMessageRaisesErrorEvent() {
-		connection.connect();
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.DISCONNECTED,
-						ConnectionState.CONNECTING));
+    @Test
+    public void testSendMessageWhenWebSocketLibraryThrowsExceptionRaisesErrorEvent() {
+        connect();
 
-		connection
-				.onMessage("{\"event\":\"pusher:error\",\"data\":{\"code\":4001,\"message\":\"Could not find app by key 12345\"}}");
-		verify(mockEventListener).onError("Could not find app by key 12345",
-				"4001", null);
-	}
+        final RuntimeException e = new RuntimeException();
+        doThrow(e).when(mockUnderlyingConnection).send(anyString());
 
-	@Test
-	public void testSendMessageSendsMessageToPusher() {
-		connect();
+        connection.sendMessage("message");
 
-		connection.sendMessage("message");
+        verify(mockEventListener).onError("An exception occurred while sending message [message]", null, e);
+    }
 
-		verify(mockUnderlyingConnection).send("message");
-	}
+    @Test
+    public void testReceiveUserMessagePassesMessageToChannelManager() {
+        connect();
 
-	@Test
-	public void testSendMessageWhenNotConnectedRaisesErrorEvent() {
-		connection.sendMessage("message");
+        connection.onMessage(INCOMING_MESSAGE);
 
-		verify(mockUnderlyingConnection, never()).send("message");
-		verify(mockEventListener).onError(
-				"Cannot send a message while in "
-						+ ConnectionState.DISCONNECTED.toString() + " state", null, null);
-	}
+        verify(mockChannelManager).onMessage(EVENT_NAME, INCOMING_MESSAGE);
+    }
 
-	@Test
-	public void testSendMessageWhenWebSocketLibraryThrowsExceptionRaisesErrorEvent() {
-		connect();
+    @Test
+    public void testOnCloseCallbackUpdatesStateToDisconnectedWhenPreviousStateIsDisconnecting() {
+        connection.connect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
 
-		RuntimeException e = new RuntimeException();
-		doThrow(e).when(mockUnderlyingConnection).send(anyString());
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED));
 
-		connection.sendMessage("message");
+        connection.disconnect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));
 
-		verify(mockEventListener).onError(
-				"An exception occurred while sending message [message]", null, e);
-	}
+        connection.onClose(1, "reason", true);
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED));
+    }
 
-	@Test
-	public void testReceiveUserMessagePassesMessageToChannelManager() {
-		connect();
+    @Test
+    public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent() throws URISyntaxException {
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, PROXY, factory);
+        connection.bind(ConnectionState.CONNECTED, mockEventListener);
 
-		connection.onMessage(INCOMING_MESSAGE);
+        connection.connect();
+        connection.onClose(1, "reason", true);
+        verify(mockEventListener, never()).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
 
-		verify(mockChannelManager).onMessage(EVENT_NAME, INCOMING_MESSAGE);
-	}
+    @Test
+    public void testOnErrorCallbackRaisesErrorEvent() {
+        connection.connect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
 
-	@Test
-	public void testOnCloseCallbackUpdatesStateToDisconnected() {
-		connection.connect();
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.DISCONNECTED,
-						ConnectionState.CONNECTING));
+        final Exception e = new Exception();
+        connection.onError(e);
+        verify(mockEventListener).onError("An exception was thrown by the websocket", null, e);
+    }
 
-		connection.onClose(1, "reason", true);
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.CONNECTING,
-						ConnectionState.DISCONNECTED));
-	}
+    @Test
+    public void testDisonnectCallIsDelegatedToUnderlyingConnection() {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-	@Test
-	public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent()
-			throws URISyntaxException {
-		connection = new WebSocketConnection(API_KEY, false);
-		connection.bind(ConnectionState.CONNECTED, mockEventListener);
+        connection.disconnect();
+        verify(mockUnderlyingConnection).close();
+    }
 
-		connection.connect();
-		connection.onClose(1, "reason", true);
-		verify(mockEventListener, never()).onConnectionStateChange(
-				any(ConnectionStateChange.class));
-	}
+    @Test
+    public void testDisconnectInConnectedStateUpdatesStateToDisconnectingAndNotifiesListener() {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-	@Test
-	public void testOnErrorCallbackRaisesErrorEvent() {
-		connection.connect();
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.DISCONNECTED,
-						ConnectionState.CONNECTING));
+        connection.disconnect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));
+        assertEquals(ConnectionState.DISCONNECTING, connection.getState());
+    }
 
-		Exception e = new Exception();
-		connection.onError(e);
-		verify(mockEventListener).onError(
-				"An exception was thrown by the websocket", null, e);
-	}
+    @Test
+    public void testDisconnectInDisconnectedStateIsIgnored() {
+        connection.disconnect();
 
-	@Test
-	public void testDisonnectCallIsDelegatedToUnderlyingConnection() {
-		connection.connect();
-		connection
-				.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
+        verify(mockUnderlyingConnection, times(0)).close();
+        verify(mockEventListener, times(0)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
 
-		connection.disconnect();
-		verify(mockUnderlyingConnection).close();
-	}
+    @Test
+    public void testDisconnectInConnectingStateIsIgnored() {
+        connection.connect();
 
-	@Test
-	public void testDisconnectInConnectedStateUpdatesStateToDisconnectingAndNotifiesListener() {
-		connection.connect();
-		connection
-				.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
+        connection.disconnect();
 
-		connection.disconnect();
-		verify(mockEventListener).onConnectionStateChange(
-				new ConnectionStateChange(ConnectionState.CONNECTED,
-						ConnectionState.DISCONNECTING));
-		assertEquals(ConnectionState.DISCONNECTING, connection.getState());
-	}
+        verify(mockUnderlyingConnection, times(0)).close();
+        verify(mockEventListener, times(1)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
 
-	@Test
-	public void testDisconnectInDisconnectedStateIsIgnored() {
-		connection.disconnect();
+    @Test
+    public void testDisconnectInDisconnectingStateIsIgnored() {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-		verify(mockUnderlyingConnection, times(0)).close();
-		verify(mockEventListener, times(0)).onConnectionStateChange(
-				any(ConnectionStateChange.class));
-	}
+        connection.disconnect();
 
-	@Test
-	public void testDisconnectInConnectingStateIsIgnored() {
-		connection.connect();
+        verify(mockUnderlyingConnection, times(1)).close();
+        verify(mockEventListener, times(3)).onConnectionStateChange(any(ConnectionStateChange.class));
+    }
 
-		connection.disconnect();
+    @Test
+    public void testPongTimeoutResultsInDisconnect() throws InterruptedException {
+        when(factory.getTimers()).thenReturn(new ScheduledThreadPoolExecutor(2));
 
-		verify(mockUnderlyingConnection, times(0)).close();
-		verify(mockEventListener, times(1)).onConnectionStateChange(
-				any(ConnectionStateChange.class));
-	}
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-	@Test
-	public void testDisconnectInDisconnectingStateIsIgnored() {
-		connection.connect();
-		connection
-				.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
+        verify(mockUnderlyingConnection, timeout((int) (ACTIVITY_TIMEOUT + PONG_TIMEOUT))).close();
 
-		connection.disconnect();
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));
 
-		verify(mockUnderlyingConnection, times(1)).close();
-		verify(mockEventListener, times(3)).onConnectionStateChange(
-				any(ConnectionStateChange.class));
-	}
+        verify(mockEventListener).onConnectionStateChange(
+                new ConnectionStateChange(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED));
 
-	/* end of tests */
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
+    }
 
-	private void connect() {
-		connection.connect();
-		connection
-				.onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}");
-	}
+    @Test
+    public void stateIsReconnectingAfterOnCloseWithoutTheUserDisconnecting() throws InterruptedException, SSLException {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+
+        connection.onClose(500, "reason", true);
+
+        assertEquals(ConnectionState.RECONNECTING, connection.getState());
+    }
+
+    @Test
+    public void stateIsReconnectingAfterTryingToConnectForTheFirstTime() throws InterruptedException, SSLException {
+        connection.connect();
+
+        connection.onClose(500, "reason", true);
+
+        assertEquals(ConnectionState.RECONNECTING, connection.getState());
+    }
+
+//    TODO: leaving the following tests commented out just for reference. The lib needs to be rearchitected before we can hope to get any of these in
+//    @Test
+//    public void reconnectingLogicActuallyBeingCalled(){
+//        fail("not implemented");
+//    }
+//
+//    @Test
+//    public void retryMaximumNumberOfTimes(){
+//        fail("not implemented");
+//    }
+//
+//    @Test
+//    public void disconnectAfterTooManyRetries(){
+//        fail("not implemented");
+//    }
+//
+//    @Test
+//    public void retryWithTimeout(){
+//        fail("not implemented");
+//    }
+
+    /* end of tests */
+
+    private void connect() {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+    }
 }

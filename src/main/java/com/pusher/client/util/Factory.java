@@ -1,17 +1,17 @@
 package com.pusher.client.util;
 
-import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 import javax.net.ssl.SSLException;
 
-import org.java_websocket.client.WebSocketClient;
-
 import com.pusher.client.Authorizer;
+import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.PresenceChannelImpl;
@@ -27,70 +27,109 @@ import com.pusher.client.connection.websocket.WebSocketListener;
  * class directly, otherwise they would be tightly coupled. Instead, they all
  * call the factory methods in this class when they want to create instances of
  * another class.
- * 
- * When unit testing we can use PowerMock to mock out the methods in this class
- * to return mocks instead of the actual implementations. This allows us to test
- * classes in isolation.
- * 
+ *
+ * An instance of Factory is provided on construction to each class which may
+ * require it, the initial factory is instantiated in the Pusher constructor,
+ * the only constructor which a library consumer should need to call directly.
+ *
  * Conventions:
- * 
+ *
  * - any method that starts with "new", such as
  * {@link #newPublicChannel(String)} creates a new instance of that class every
  * time it is called.
- * 
- * - any method that starts with "get", such as {@link #getEventQueue()} returns
- * a singleton.
+ *
  */
 public class Factory {
 
-    private static InternalConnection connection;
-    private static ChannelManager channelManager;
-    private static ExecutorService eventQueue;
+    private InternalConnection connection;
+    private ChannelManager channelManager;
+    private ExecutorService eventQueue;
+    private ScheduledExecutorService timers;
+    private static final Object eventLock = new Object();
 
-    public static InternalConnection getConnection(String apiKey, boolean encrypted) {
-	if (connection == null) {
-	    try {
-		connection = new WebSocketConnection(apiKey, encrypted);
-	    } catch (URISyntaxException e) {
-		throw new IllegalArgumentException(
-			"Failed to initialise connection", e);
-	    }
-	}
-	return connection;
-    }
-
-    public static WebSocketClient newWebSocketClientWrapper(URI uri,
-	    WebSocketListener proxy) throws SSLException {
-	return new WebSocketClientWrapper(uri, proxy);
+    public synchronized InternalConnection getConnection(final String apiKey, final PusherOptions options) {
+        if (connection == null) {
+            try {
+                connection = new WebSocketConnection(options.buildUrl(apiKey), options.getActivityTimeout(),
+                        options.getPongTimeout(), options.getProxy(), this);
+            }
+            catch (final URISyntaxException e) {
+                throw new IllegalArgumentException("Failed to initialise connection", e);
+            }
+        }
+        return connection;
     }
 
-    public static ExecutorService getEventQueue() {
-	if (eventQueue == null) {
-	    eventQueue = Executors.newSingleThreadExecutor();
-	}
-	return eventQueue;
+    public WebSocketClientWrapper newWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
+        return new WebSocketClientWrapper(uri, proxy, webSocketListener);
     }
 
-    public static ChannelImpl newPublicChannel(String channelName) {
-	return new ChannelImpl(channelName);
-    }
-    
-    public static PrivateChannelImpl newPrivateChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
-	return new PrivateChannelImpl(connection, channelName, authorizer);
-    }
-    
-    public static PresenceChannelImpl newPresenceChannel(InternalConnection connection, String channelName, Authorizer authorizer) {
-	return new PresenceChannelImpl(connection, channelName, authorizer);
+    public synchronized ScheduledExecutorService getTimers() {
+        if (timers == null) {
+            timers = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("timers"));
+        }
+        return timers;
     }
 
-    public static ChannelManager getChannelManager() {
-	if (channelManager == null) {
-	    channelManager = new ChannelManager();
-	}
-	return channelManager;
+    public ChannelImpl newPublicChannel(final String channelName) {
+        return new ChannelImpl(channelName, this);
     }
 
-    public static URL newURL(String endPoint) throws MalformedURLException {
-	return new URL(endPoint);
+    public PrivateChannelImpl newPrivateChannel(final InternalConnection connection, final String channelName,
+            final Authorizer authorizer) {
+        return new PrivateChannelImpl(connection, channelName, authorizer, this);
+    }
+
+    public PresenceChannelImpl newPresenceChannel(final InternalConnection connection, final String channelName,
+            final Authorizer authorizer) {
+        return new PresenceChannelImpl(connection, channelName, authorizer, this);
+    }
+
+    public synchronized ChannelManager getChannelManager() {
+        if (channelManager == null) {
+            channelManager = new ChannelManager(this);
+        }
+        return channelManager;
+    }
+
+    public synchronized void queueOnEventThread(final Runnable r) {
+        if (eventQueue == null) {
+            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
+        }
+        eventQueue.execute(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (eventLock) {
+                    r.run();
+                }
+            }
+        });
+    }
+
+    public synchronized void shutdownThreads() {
+        if (eventQueue != null) {
+            eventQueue.shutdown();
+            eventQueue = null;
+        }
+        if (timers != null) {
+            timers.shutdown();
+            timers = null;
+        }
+    }
+
+    private static class DaemonThreadFactory implements ThreadFactory {
+        private final String name;
+
+        public DaemonThreadFactory(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public Thread newThread(final Runnable r) {
+            final Thread t = new Thread(r);
+            t.setDaemon(true);
+            t.setName("pusher-java-client " + name);
+            return t;
+        }
     }
 }
