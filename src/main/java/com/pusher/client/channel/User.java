@@ -7,7 +7,7 @@ import com.google.gson.Gson;
  * {@link com.pusher.client.channel.PresenceChannel PresenceChannel}.
  */
 public class User {
-
+    private static final Gson GSON = new Gson();
     private final String id;
     private final String jsonData;
 
@@ -80,7 +80,7 @@ public class User {
      * @return V An instance of clazz, populated with the user info
      */
     public <V> V getInfo(final Class<V> clazz) {
-        return new Gson().fromJson(jsonData, clazz);
+        return GSON.fromJson(jsonData, clazz);
     }
 
     @Override

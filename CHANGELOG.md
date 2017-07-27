@@ -1,14 +1,53 @@
 # pusher-websocket-java changelog
 
+## Version 1.4.0
+* Update the dependency to use pusher/java-websocket fork and remove dependency on clojars.org repository.
+
+## Version 1.3.0
+* Add retry logic when the connection is lost
+* Accept 201 status code from auth endpoints 
+
+## Version 1.2.2
+
+ * Improve resillience of pong timeout disconnections
+
+## Version 1.2.0
+
+2016-07-05 jpatel531
+
+  * Expose Client interface
+
+## Version 1.1.3
+
+2016-05-12 mdpye, plackemacher, jpatel531
+
+  * Fix exceptions where tasks were being pushed onto a shutting-down event queue.
+  * Reduce construction of GSON objects and keep one centralized instance.
+
+## Version 1.1.2
+
+2016-03-23 jpatel531
+
+  * Fix cases where the library would throw an error due to a connection state change
+    from `CONNECTING` to `CONNECTING`. More information [here](https://github.com/pusher/pusher-websocket-java/pull/102)
+  * Fix `ConcurrentModificationException` on event listeners.
+
+## Version 1.1.1
+
+2016-03-22 jpatel531
+
+  * Removes the dependency on slf4j-log4j
+
+## Version 1.1.0
+
+2016-03-09 jpatel531, jameshfisher
+
+  * Allow specifying a proxy via which to connect to Pusher.
+
 ## Version 1.0.2
 
-2015-11-06 leggetter, siggijons 
+2015-11-06 leggetter, siggijons
   * Use @SerializedName in PresenceChannelImpl for better serialization support across languages e.g. Turkish
-
-## Version 1.0.1
-
-2015-11-06 hamchapman, jpatel531
-  * Resolves issues where Gson would cast numeric user ids as doubles before converting them to a string, leading to inconsistencies
 
 ## Version 1.0.1
 
@@ -69,7 +108,7 @@
 
 2013-11-04 mdpye
  * Import a logging framework (slf4j)
- * Log error with additional info and continue when trying to 
+ * Log error with additional info and continue when trying to
    transition from disconnected->disconnected state
 
 2013-11-01 mdpye

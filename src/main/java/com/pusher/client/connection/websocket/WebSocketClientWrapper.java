@@ -10,8 +10,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
+import com.pusher.java_websocket.client.WebSocketClient;
+import com.pusher.java_websocket.handshake.ServerHandshake;
 
 /**
  * A thin wrapper around the WebSocketClient class from the Java-WebSocket
@@ -22,15 +22,14 @@ import org.java_websocket.handshake.ServerHandshake;
 public class WebSocketClientWrapper extends WebSocketClient {
 
     private static final String WSS_SCHEME = "wss";
-    private final WebSocketListener webSocketListener;
+    private WebSocketListener webSocketListener;
 
     public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
         super(uri);
 
         if (uri.getScheme().equals(WSS_SCHEME)) {
             try {
-                SSLContext sslContext = null;
-                sslContext = SSLContext.getInstance("TLS");
+                SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, null, null); // will use java's default
                                                    // key and trust store which
                                                    // is sufficient unless you
@@ -58,21 +57,36 @@ public class WebSocketClientWrapper extends WebSocketClient {
 
     @Override
     public void onOpen(final ServerHandshake handshakedata) {
-        webSocketListener.onOpen(handshakedata);
+        if (webSocketListener != null) {
+            webSocketListener.onOpen(handshakedata);
+        }
     }
 
     @Override
     public void onMessage(final String message) {
-        webSocketListener.onMessage(message);
+        if (webSocketListener != null) {
+            webSocketListener.onMessage(message);
+        }
     }
 
     @Override
     public void onClose(final int code, final String reason, final boolean remote) {
-        webSocketListener.onClose(code, reason, remote);
+        if (webSocketListener != null) {
+            webSocketListener.onClose(code, reason, remote);
+        }
     }
 
     @Override
     public void onError(final Exception ex) {
-        webSocketListener.onError(ex);
+        if (webSocketListener != null) {
+            webSocketListener.onError(ex);
+        }
+    }
+
+    /**
+     * Removes the WebSocketListener so that the underlying WebSocketClient doesn't expose any listener events.
+     */
+    public void removeWebSocketListener() {
+        webSocketListener = null;
     }
 }

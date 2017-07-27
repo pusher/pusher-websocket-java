@@ -3,17 +3,17 @@ package com.pusher.client.connection.websocket;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
+import com.pusher.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,19 +27,24 @@ import com.pusher.client.util.Factory;
 
 public class WebSocketConnection implements InternalConnection, WebSocketListener {
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
+    private static final Gson GSON = new Gson();
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
-    static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
+    private static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
+    private static final int MAX_RECONNECTION_ATTEMPTS = 6; //Taken from the Swift lib
+    private static final int MAX_RECONNECT_GAP_IN_SECONDS = 30;
 
     private final Factory factory;
     private final ActivityTimer activityTimer;
-    private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new HashMap<ConnectionState, Set<ConnectionEventListener>>();
+    private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new ConcurrentHashMap<ConnectionState, Set<ConnectionEventListener>>();
     private final URI webSocketUri;
     private final Proxy proxy;
 
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
-    private WebSocketClient underlyingConnection;
+    private WebSocketClientWrapper underlyingConnection;
     private String socketId;
+    private int reconnectAttempts = 0;
+
 
     public WebSocketConnection(
             final String url,
@@ -53,7 +58,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         this.factory = factory;
 
         for (final ConnectionState state : ConnectionState.values()) {
-            eventListeners.put(state, new HashSet<ConnectionEventListener>());
+            eventListeners.put(state, Collections.newSetFromMap(new ConcurrentHashMap<ConnectionEventListener, Boolean>()));
         }
     }
 
@@ -66,18 +71,22 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             @Override
             public void run() {
                 if (state == ConnectionState.DISCONNECTED) {
-                    try {
-                        underlyingConnection = factory
-                                .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
-                        updateState(ConnectionState.CONNECTING);
-                        underlyingConnection.connect();
-                    }
-                    catch (final SSLException e) {
-                        sendErrorToAllListeners("Error connecting over SSL", null, e);
-                    }
+                    tryConnecting();
                 }
             }
         });
+    }
+
+    private void tryConnecting(){
+        try {
+            underlyingConnection = factory
+                    .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
+            updateState(ConnectionState.CONNECTING);
+            underlyingConnection.connect();
+        }
+        catch (final SSLException e) {
+            sendErrorToAllListeners("Error connecting over SSL", null, e);
+        }
     }
 
     @Override
@@ -177,22 +186,26 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @SuppressWarnings("rawtypes")
     private void handleConnectionMessage(final String message) {
-        final Map jsonObject = new Gson().fromJson(message, Map.class);
+        final Map jsonObject = GSON.fromJson(message, Map.class);
         final String dataString = (String)jsonObject.get("data");
-        final Map dataMap = new Gson().fromJson(dataString, Map.class);
+        final Map dataMap = GSON.fromJson(dataString, Map.class);
         socketId = (String)dataMap.get("socket_id");
 
-        updateState(ConnectionState.CONNECTED);
+        if(state != ConnectionState.CONNECTED){
+            updateState(ConnectionState.CONNECTED);
+
+        }
+        reconnectAttempts = 0;
     }
 
     @SuppressWarnings("rawtypes")
     private void handleError(final String wholeMessage) {
-        final Map json = new Gson().fromJson(wholeMessage, Map.class);
+        final Map json = GSON.fromJson(wholeMessage, Map.class);
         final Object data = json.get("data");
 
         Map dataMap;
         if (data instanceof String) {
-            dataMap = new Gson().fromJson((String)data, Map.class);
+            dataMap = GSON.fromJson((String)data, Map.class);
         }
         else {
             dataMap = (Map)data;
@@ -240,7 +253,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
-                final Map<String, String> map = new Gson().fromJson(message, Map.class);
+                final Map<String, String> map = GSON.fromJson(message, Map.class);
                 final String event = map.get("event");
                 handleEvent(event, message);
             }
@@ -249,18 +262,51 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     @Override
     public void onClose(final int code, final String reason, final boolean remote) {
+        if (state == ConnectionState.DISCONNECTED || state == ConnectionState.RECONNECTING) {
+            log.error("Received close from underlying socket when already disconnected." + "Close code ["
+                    + code + "], Reason [" + reason + "], Remote [" + remote + "]");
+            return;
+        }
+
+        //Reconnection logic
+        if(state == ConnectionState.CONNECTED || state == ConnectionState.CONNECTING){
+
+            if(reconnectAttempts < MAX_RECONNECTION_ATTEMPTS){
+                tryReconnecting();
+            }
+            else{
+                updateState(ConnectionState.DISCONNECTING);
+                cancelTimeoutsAndTransitonToDisconnected();
+            }
+            return;
+        }
+
+        if (state == ConnectionState.DISCONNECTING){
+            cancelTimeoutsAndTransitonToDisconnected();
+        }
+    }
+
+    private void tryReconnecting() {
+        reconnectAttempts++;
+        updateState(ConnectionState.RECONNECTING);
+        long reconnectInterval = Math.min(MAX_RECONNECT_GAP_IN_SECONDS, reconnectAttempts * reconnectAttempts);
+
+        factory.getTimers().schedule(new Runnable() {
+            @Override
+            public void run() {
+                underlyingConnection.removeWebSocketListener();
+                tryConnecting();
+            }
+        }, reconnectInterval, TimeUnit.SECONDS);
+    }
+
+    private void cancelTimeoutsAndTransitonToDisconnected() {
         activityTimer.cancelTimeouts();
 
         factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
-                if (state != ConnectionState.DISCONNECTED) {
-                    updateState(ConnectionState.DISCONNECTED);
-                }
-                else {
-                    log.error("Received close from underlying socket when already disconnected. " + "Close code ["
-                            + code + "], Reason [" + reason + "], Remote [" + remote + "]");
-                }
+                updateState(ConnectionState.DISCONNECTED);
                 factory.shutdownThreads();
             }
         });
@@ -288,7 +334,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         private Future<?> pingTimer;
         private Future<?> pongTimer;
 
-        public ActivityTimer(final long activityTimeout, final long pongTimeout) {
+        ActivityTimer(final long activityTimeout, final long pongTimeout) {
             this.activityTimeout = activityTimeout;
             this.pongTimeout = pongTimeout;
         }
@@ -297,7 +343,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
          * On any activity from the server - Cancel pong timeout - Cancel
          * currently ping timeout and re-schedule
          */
-        public synchronized void activity() {
+        synchronized void activity() {
             if (pongTimer != null) {
                 pongTimer.cancel(true);
             }
@@ -318,7 +364,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         /**
          * Cancel any pending timeouts, for example because we are disconnected.
          */
-        public synchronized void cancelTimeouts() {
+        synchronized void cancelTimeouts() {
             if (pingTimer != null) {
                 pingTimer.cancel(false);
             }
@@ -340,7 +386,15 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 @Override
                 public void run() {
                     log.debug("Timed out awaiting pong from server - disconnecting");
+
+                    underlyingConnection.removeWebSocketListener();
+
                     disconnect();
+
+                    // Proceed immediately to handle the close
+                    // The WebSocketClient will attempt a graceful WebSocket shutdown by exchanging the close frames
+                    // but may not succeed if this disconnect was called due to pong timeout...
+                    onClose(-1, "Pong timeout", false);
                 }
             }, pongTimeout, TimeUnit.MILLISECONDS);
         }

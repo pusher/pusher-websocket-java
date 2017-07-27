@@ -1,5 +1,7 @@
 # Pusher Java Client
 
+[![Build Status](https://travis-ci.org/pusher/pusher-websocket-java.svg?branch=master)](https://travis-ci.org/pusher/pusher-websocket-java)
+
 Pusher client library for Java targeting **Android** and general Java.
 
 ## TOC
@@ -42,21 +44,14 @@ The compiled library is available in two ways:
 
 ### Maven
 
-The pusher-java-client is available in Maven Central, however one of its dependencies is hosted on [Clojars.org](http://clojars.org) so you will need to add it to your repositories list.
+The pusher-java-client is available in Maven Central.
 
 ```xml
-<repositories>
-    <repository>
-        <id>clojars.org</id>
-        <url>http://clojars.org/repo</url>
-    </repository>
-</repositories>
-
 <dependencies>
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>1.0.2</version>
+      <version>1.4.0</version>
     </dependency>
 </dependencies>
 ```
@@ -64,12 +59,8 @@ The pusher-java-client is available in Maven Central, however one of its depende
 ### Gradle
 
 ```groovy
-repositories {
-  maven { url 'http://clojars.org/repo' }
-}
-
 dependencies {
-  compile 'com.pusher:pusher-java-client:1.1.1'
+  compile 'com.pusher:pusher-java-client:1.4.0'
 }
 ```
 
@@ -87,7 +78,8 @@ Here's the API in a nutshell.
 
 ```java
 // Create a new Pusher instance
-Pusher pusher = new Pusher(YOUR_APP_KEY);
+PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 
 pusher.connect(new ConnectionEventListener() {
     @Override
@@ -129,24 +121,19 @@ More information in reference format can be found below.
 The standard constructor take an application key which you can get from the app's API Access section in the Pusher dashboard.
 
 ```java
-Pusher pusher = new Pusher(YOUR_APP_KEY);
+PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
 If you are going to use [private](http://pusher.com/docs/private_channels) or [presence](http://pusher.com/docs/presence_channels) channels then you will need to provide an `Authorizer` to be used when authenticating subscriptions. In order to do this you need to pass in a `PusherOptions` object which has had an `Authorizer` set.
 
 ```java
 HttpAuthorizer authorizer = new HttpAuthorizer("http://example.com/some_auth_endpoint");
-PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
+PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER).setAuthorizer(authorizer);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
 See the documentation on [Authenticating Users](http://pusher.com/docs/authenticating_users) for more information.
-
-You can also specify the Pusher cluster you wish to connect to on the PusherOptions, e.g.
-
-```java
-options.setCluster("eu");
-```
 
 If you need finer control over the endpoint then the setHost, setWsPort and setWssPort methods can be employed.
 ## Connecting
@@ -154,7 +141,8 @@ If you need finer control over the endpoint then the setHost, setWsPort and setW
 In order to send and receive messages you need to connect to Pusher.
 
 ```java
-Pusher pusher = new Pusher(YOUR_APP_KEY);
+PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 pusher.connect();
 ```
 
@@ -177,7 +165,8 @@ After disconnection the Pusher instance will release any internally allocated re
 Implement the `ConnectionEventListener` interface to receive connection state change events:
 
 ```java
-Pusher pusher = new Pusher(YOUR_APP_KEY);
+PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 pusher.connect(new ConnectionEventListener() {
     @Override
     public void onConnectionStateChange(ConnectionStateChange change) {
@@ -530,7 +519,7 @@ From the top level directory execute:
 * `gradlew javadoc` to generate the JavaDoc. The docs will be output to the `build/docs/javadoc/` directory.
 * `gradlew assemble` assemble all artifacts but does not run any tests.
 * `gradlew build` to build all jars and execute all tests & verification. The jars will be output to the `build/libs` directory.
-* `gradlew uploadArchives` to upload all artifacts. **This task requires some properties to be set, see below.**
+* `gradlew createPublishTarget uploadArchives` to upload all artifacts. **This task requires some properties to be set, see below.**
 * `gradlew publishGhPages` to upload JavaDocs to `gh-pages`. **This task requires some properties to be set, see below.**
 
 #### Build Properties

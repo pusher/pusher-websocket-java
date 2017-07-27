@@ -8,11 +8,12 @@ import java.net.URISyntaxException;
 
 import javax.net.ssl.SSLException;
 
-import org.java_websocket.handshake.ServerHandshake;
+import com.pusher.java_websocket.handshake.ServerHandshake;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.internal.verification.NoMoreInteractions;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -51,5 +52,16 @@ public class WebSocketClientWrapperTest {
         final Exception e = new Exception();
         wrapper.onError(e);
         verify(mockListener).onError(e);
+    }
+
+    @Test
+    public void testRemoveWebSocketListener() {
+        wrapper.onClose(1, "reason", true);
+        verify(mockListener).onClose(1, "reason", true);
+
+        wrapper.removeWebSocketListener();
+
+        wrapper.onClose(1, "reason", true);
+        verify(mockListener, new NoMoreInteractions()).onClose(1, "reason", true);
     }
 }
