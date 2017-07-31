@@ -78,7 +78,8 @@ Here's the API in a nutshell.
 
 ```java
 // Create a new Pusher instance
-Pusher pusher = new Pusher(YOUR_APP_KEY);
+PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 
 pusher.connect(new ConnectionEventListener() {
     @Override
@@ -120,24 +121,19 @@ More information in reference format can be found below.
 The standard constructor take an application key which you can get from the app's API Access section in the Pusher dashboard.
 
 ```java
-Pusher pusher = new Pusher(YOUR_APP_KEY);
+PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
 If you are going to use [private](http://pusher.com/docs/private_channels) or [presence](http://pusher.com/docs/presence_channels) channels then you will need to provide an `Authorizer` to be used when authenticating subscriptions. In order to do this you need to pass in a `PusherOptions` object which has had an `Authorizer` set.
 
 ```java
 HttpAuthorizer authorizer = new HttpAuthorizer("http://example.com/some_auth_endpoint");
-PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
+PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER).setAuthorizer(authorizer);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
 See the documentation on [Authenticating Users](http://pusher.com/docs/authenticating_users) for more information.
-
-You can also specify the Pusher cluster you wish to connect to on the PusherOptions, e.g.
-
-```java
-options.setCluster("eu");
-```
 
 If you need finer control over the endpoint then the setHost, setWsPort and setWssPort methods can be employed.
 ## Connecting
@@ -145,7 +141,8 @@ If you need finer control over the endpoint then the setHost, setWsPort and setW
 In order to send and receive messages you need to connect to Pusher.
 
 ```java
-Pusher pusher = new Pusher(YOUR_APP_KEY);
+PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 pusher.connect();
 ```
 
@@ -168,7 +165,8 @@ After disconnection the Pusher instance will release any internally allocated re
 Implement the `ConnectionEventListener` interface to receive connection state change events:
 
 ```java
-Pusher pusher = new Pusher(YOUR_APP_KEY);
+PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 pusher.connect(new ConnectionEventListener() {
     @Override
     public void onConnectionStateChange(ConnectionStateChange change) {
