@@ -78,7 +78,7 @@ Here's the API in a nutshell.
 
 ```java
 // Create a new Pusher instance
-PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 
 pusher.connect(new ConnectionEventListener() {
@@ -121,7 +121,7 @@ More information in reference format can be found below.
 The standard constructor take an application key which you can get from the app's API Access section in the Pusher dashboard.
 
 ```java
-PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
@@ -141,7 +141,7 @@ If you need finer control over the endpoint then the setHost, setWsPort and setW
 In order to send and receive messages you need to connect to Pusher.
 
 ```java
-PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 pusher.connect();
 ```
@@ -165,7 +165,7 @@ After disconnection the Pusher instance will release any internally allocated re
 Implement the `ConnectionEventListener` interface to receive connection state change events:
 
 ```java
-PusherOption options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
+PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 pusher.connect(new ConnectionEventListener() {
     @Override
