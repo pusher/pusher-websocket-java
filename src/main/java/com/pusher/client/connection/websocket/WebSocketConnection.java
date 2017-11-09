@@ -10,12 +10,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import javax.net.ssl.SSLException;
 
 import com.pusher.java_websocket.handshake.ServerHandshake;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
@@ -26,7 +25,7 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
 public class WebSocketConnection implements InternalConnection, WebSocketListener {
-    private static final Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
+    private static final Logger log = Logger.getLogger(WebSocketConnection.class.getName());
     private static final Gson GSON = new Gson();
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
@@ -147,7 +146,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     /* implementation detail */
 
     private void updateState(final ConnectionState newState) {
-        log.debug("State transition requested, current [" + state + "], new [" + newState + "]");
+        log.fine("State transition requested, current [" + state + "], new [" + newState + "]");
 
         final ConnectionStateChange change = new ConnectionStateChange(state, newState);
         state = newState;
@@ -263,7 +262,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     @Override
     public void onClose(final int code, final String reason, final boolean remote) {
         if (state == ConnectionState.DISCONNECTED || state == ConnectionState.RECONNECTING) {
-            log.error("Received close from underlying socket when already disconnected." + "Close code ["
+            log.warning("Received close from underlying socket when already disconnected." + "Close code ["
                     + code + "], Reason [" + reason + "], Remote [" + remote + "]");
             return;
         }
@@ -354,7 +353,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             pingTimer = factory.getTimers().schedule(new Runnable() {
                 @Override
                 public void run() {
-                    log.debug("Sending ping");
+                    log.fine("Sending ping");
                     sendMessage(PING_EVENT_SERIALIZED);
                     schedulePongCheck();
                 }
@@ -385,7 +384,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             pongTimer = factory.getTimers().schedule(new Runnable() {
                 @Override
                 public void run() {
-                    log.debug("Timed out awaiting pong from server - disconnecting");
+                    log.fine("Timed out awaiting pong from server - disconnecting");
 
                     underlyingConnection.removeWebSocketListener();
 
