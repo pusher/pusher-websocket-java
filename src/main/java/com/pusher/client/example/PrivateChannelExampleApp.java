@@ -83,7 +83,7 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     @Override
     public void onUnsubscribedChannel(final String channelName) {
 
-        System.out.println(String.format("[%d] Unsubscription from channel [%s]", timestamp(), channelName));
+        System.out.println(String.format("Unsubscription from channel [%s]", channelName));
     }
 
     @Override
