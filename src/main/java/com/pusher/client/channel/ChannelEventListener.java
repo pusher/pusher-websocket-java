@@ -41,7 +41,7 @@ public interface ChannelEventListener extends SubscriptionEventListener {
      */
     void onSubscriptionSucceeded(String channelName);
 
-    **
+    /**
      * <p>
      * Callback that is fired when an unsubscription acknowledgement
      * message is received from Pusher after unsubscribing from the channel.
