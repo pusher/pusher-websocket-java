@@ -162,7 +162,14 @@ public class ChannelImpl implements InternalChannel {
                     eventListener.onSubscriptionSucceeded(ChannelImpl.this.getName());
                 }
             });
-        }
+        } else if (state == ChannelState.UNSUBSCRIBED && eventListener != null) {
+	    factory.queueOnEventThread(new Runnable() {
+                @Override
+                public void run() {
+                    eventListener.onUnsubscribedChannel(ChannelImpl.this.getName());
+                }
+            });
+	}
     }
 
     /* Comparable implementation */
