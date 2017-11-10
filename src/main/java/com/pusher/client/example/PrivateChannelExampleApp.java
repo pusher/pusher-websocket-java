@@ -81,6 +81,12 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     }
 
     @Override
+    public void onUnsubscribedChannel(final String channelName) {
+
+        System.out.println(String.format("[%d] Unsubscription from channel [%s]", timestamp(), channelName));
+    }
+
+    @Override
     public void onAuthenticationFailure(final String message, final Exception e) {
 
         System.out.println(String.format("Authentication failure due to [%s], exception was [%s]", message, e));
