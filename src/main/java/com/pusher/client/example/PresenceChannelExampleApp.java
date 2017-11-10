@@ -106,6 +106,12 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     }
 
     @Override
+    public void onUnsubscribedChannel(final String channelName) {
+
+        System.out.println(String.format("Unsubscription from channel [%s]", channelName));
+    }
+
+    @Override
     public void onAuthenticationFailure(final String message, final Exception e) {
 
         System.out.println(String.format("Authentication failure due to [%s], exception was [%s]", message, e));

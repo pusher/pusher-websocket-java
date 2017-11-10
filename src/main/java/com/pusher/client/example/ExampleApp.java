@@ -81,6 +81,12 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
         System.out.println(String.format("[%d] Subscription to channel [%s] succeeded", timestamp(), channelName));
     }
 
+    @Override
+    public void onUnsubscribedChannel(final String channelName) {
+
+        System.out.println(String.format("[%d] Unsubscription from channel [%s]", timestamp(), channelName));
+    }
+
     private long timestamp() {
         return System.currentTimeMillis() - startTime;
     }
