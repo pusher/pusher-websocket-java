@@ -60,7 +60,7 @@ The pusher-java-client is available in Maven Central.
 
 ```groovy
 dependencies {
-  compile 'com.pusher:pusher-java-client:1.5.0'
+  compile 'com.pusher:pusher-java-client:1.6.0'
 }
 ```
 
