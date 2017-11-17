@@ -51,7 +51,7 @@ The pusher-java-client is available in Maven Central.
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>1.5.0</version>
+      <version>1.6.0</version>
     </dependency>
 </dependencies>
 ```
