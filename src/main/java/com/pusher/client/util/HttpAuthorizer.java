@@ -145,17 +145,21 @@ public class HttpAuthorizer implements Authorizer {
         }
     }
 
-    protected String bodyFactory(final String channelName, final String socketId) {
-        final StringBuffer urlParameters = new StringBuffer();
-        urlParameters.append("channel_name=").append(URLEncoder.encode(channelName, ENCODING_CHARACTER_SET));
-        urlParameters.append("&socket_id=").append(URLEncoder.encode(socketId, ENCODING_CHARACTER_SET));
+    protected String bodyFactory(final String channelName, final String socketId) throws Exception {
+        try {
+            final StringBuffer urlParameters = new StringBuffer();
+            urlParameters.append("channel_name=").append(URLEncoder.encode(channelName, ENCODING_CHARACTER_SET));
+            urlParameters.append("&socket_id=").append(URLEncoder.encode(socketId, ENCODING_CHARACTER_SET));
 
-        // Adding extra parameters supplied to be added to query string.
-        for (final String parameterName : mQueryStringParameters.keySet()) {
-            urlParameters.append("&").append(parameterName).append("=");
-            urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName),
-                    ENCODING_CHARACTER_SET));
+            // Adding extra parameters supplied to be added to query string.
+            for (final String parameterName : mQueryStringParameters.keySet()) {
+                urlParameters.append("&").append(parameterName).append("=");
+                urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName),
+                        ENCODING_CHARACTER_SET));
+            }
+            return urlParameters.toString();
+        } catch (final Exception e) {
+            throw e;
         }
-        return urlParameters.toString();
     }
 }
