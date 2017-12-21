@@ -157,6 +157,6 @@ public class HttpAuthorizer implements Authorizer {
             urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName),
                     ENCODING_CHARACTER_SET));
         }
-        return urlParameters.toString()
+        return urlParameters.toString();
     }
 }
