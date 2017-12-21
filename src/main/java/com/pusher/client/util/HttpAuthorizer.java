@@ -86,16 +86,11 @@ public class HttpAuthorizer implements Authorizer {
     public String authorize(final String channelName, final String socketId) throws AuthorizationFailureException {
 
         try {
-            final StringBuffer urlParameters = new StringBuffer();
-            urlParameters.append("channel_name=").append(URLEncoder.encode(channelName, ENCODING_CHARACTER_SET));
-            urlParameters.append("&socket_id=").append(URLEncoder.encode(socketId, ENCODING_CHARACTER_SET));
+            final String body = new bodyFactory(channelName, socketId);
 
-            // Adding extra parameters supplied to be added to query string.
-            for (final String parameterName : mQueryStringParameters.keySet()) {
-                urlParameters.append("&").append(parameterName).append("=");
-                urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName),
-                        ENCODING_CHARACTER_SET));
-            }
+            final HashMap<String, String> defaultHeaders = new HashMap<String, String>();
+            defaultHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+            defaultHeaders.put("charset", ENCODING_CHARACTER_SET);
 
             HttpURLConnection connection;
             if (isSSL()) {
@@ -108,14 +103,14 @@ public class HttpAuthorizer implements Authorizer {
             connection.setDoInput(true);
             connection.setInstanceFollowRedirects(false);
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestProperty("charset", "utf-8");
-            connection.setRequestProperty("Content-Length",
-                    "" + Integer.toString(urlParameters.toString().getBytes().length));
 
             // Add in the user defined headers
-            for (final String headerName : mHeaders.keySet()) {
-                final String headerValue = mHeaders.get(headerName);
+            defaultHeaders.putAll(mHeaders);
+            // Add in the Content-Length, so it can't be overwritten by mHeaders
+            defaultHeaders.put("Content-Length","" + Integer.toString(body.getBytes().length));
+            
+            for (final String headerName : defaultHeaders.keySet()) {
+                final String headerValue = defaultHeaders.get(headerName);
                 connection.setRequestProperty(headerName, headerValue);
             }
 
@@ -123,7 +118,7 @@ public class HttpAuthorizer implements Authorizer {
 
             // Send request
             final DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(urlParameters.toString());
+            wr.writeBytes(body);
             wr.flush();
             wr.close();
 
@@ -148,5 +143,20 @@ public class HttpAuthorizer implements Authorizer {
         catch (final IOException e) {
             throw new AuthorizationFailureException(e);
         }
+    }
+
+    @Override
+    private String bodyFactory(final String channelName, final String socketId) {
+        final StringBuffer urlParameters = new StringBuffer();
+        urlParameters.append("channel_name=").append(URLEncoder.encode(channelName, ENCODING_CHARACTER_SET));
+        urlParameters.append("&socket_id=").append(URLEncoder.encode(socketId, ENCODING_CHARACTER_SET));
+
+        // Adding extra parameters supplied to be added to query string.
+        for (final String parameterName : mQueryStringParameters.keySet()) {
+            urlParameters.append("&").append(parameterName).append("=");
+            urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName),
+                    ENCODING_CHARACTER_SET));
+        }
+        return urlParameters.toString()
     }
 }
