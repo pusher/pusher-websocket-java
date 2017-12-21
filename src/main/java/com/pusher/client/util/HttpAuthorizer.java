@@ -145,8 +145,7 @@ public class HttpAuthorizer implements Authorizer {
         }
     }
 
-    @Override
-    private String bodyFactory(final String channelName, final String socketId) {
+    protected String bodyFactory(final String channelName, final String socketId) {
         final StringBuffer urlParameters = new StringBuffer();
         urlParameters.append("channel_name=").append(URLEncoder.encode(channelName, ENCODING_CHARACTER_SET));
         urlParameters.append("&socket_id=").append(URLEncoder.encode(socketId, ENCODING_CHARACTER_SET));
