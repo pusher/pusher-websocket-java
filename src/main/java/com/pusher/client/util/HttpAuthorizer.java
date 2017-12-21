@@ -86,7 +86,7 @@ public class HttpAuthorizer implements Authorizer {
     public String authorize(final String channelName, final String socketId) throws AuthorizationFailureException {
 
         try {
-            final String body = new bodyFactory(channelName, socketId);
+            final String body = bodyFactory(channelName, socketId);
 
             final HashMap<String, String> defaultHeaders = new HashMap<String, String>();
             defaultHeaders.put("Content-Type", "application/x-www-form-urlencoded");
