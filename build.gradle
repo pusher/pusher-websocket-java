@@ -21,7 +21,7 @@ apply plugin: 'org.ajoberstar.github-pages'
 apply plugin: 'signing'
 
 group = "com.pusher"
-version = "1.6.1-SNAPSHOT"
+version = "1.6.2-SNAPSHOT"
 sourceCompatibility = "1.6"
 targetCompatibility = "1.6"
 
@@ -94,7 +94,6 @@ assemble.dependsOn fatJar
 task sourcesJar(type: Jar, dependsOn: classes) {
 	classifier = 'sources'
 	from sourceSets.main.allSource
-	classifier = 'javadoc'
 }
 assemble.dependsOn sourcesJar
 
@@ -102,7 +101,6 @@ assemble.dependsOn sourcesJar
 task javadocJar(type: Jar, dependsOn: javadoc) {
 	classifier = 'javadoc'
 	from javadoc.destinationDir
-	classifier = 'sources'
 }
 assemble.dependsOn javadocJar
 
@@ -151,17 +149,17 @@ task createPublishTarget << {
 			packaging 'jar'
 			artifactId 'pusher-java-client'
 			description 'This is a Java client library for Pusher, targeted at core Java and Android.'
-			url 'http://github.com/pusher/pusher-java-client'
+			url 'http://github.com/pusher/pusher-websocket-java'
 			scm {
-				connection 'scm:git:git@github.com:pusher/pusher-java-client'
-				developerConnection 'scm:git:git@github.com:pusher/pusher-java-client'
-				url 'http://github.com/pusher/pusher-java-client'
+				connection 'scm:git:git@github.com:pusher/pusher-websocket-java'
+				developerConnection 'scm:git:git@github.com:pusher/pusher-websocket-java'
+				url 'http://github.com/pusher/pusher-websocket-java'
 			}
 			licenses {
 				license {
 					name 'MIT'
-					url 'https://raw.github.com/pusher/pusher-java-client/master/LICENCE.txt'
-					distribution 'https://raw.github.com/pusher/pusher-java-client/mvn-repo/'
+					url 'https://raw.github.com/pusher/pusher-websocket-java/master/LICENCE.txt'
+					distribution 'https://raw.github.com/pusher/pusher-websocket-java/mvn-repo/'
 				}
 			}
 			organization {
@@ -170,7 +168,7 @@ task createPublishTarget << {
 			}
 			issueManagement {
 				system 'GitHub'
-				url 'https://github.com/pusher/pusher-java-client/issues'
+				url 'https://github.com/pusher/pusher-websocket-java/issues'
 			}
 			developers {
 				developer {
