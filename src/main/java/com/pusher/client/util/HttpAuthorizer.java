@@ -1,5 +1,7 @@
 package com.pusher.client.util;
 
+import com.pusher.client.AuthorizationFailureException;
+import com.pusher.client.Authorizer;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,14 +10,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.net.ssl.HttpsURLConnection;
-
-import com.pusher.client.AuthorizationFailureException;
-import com.pusher.client.Authorizer;
 
 /**
  * Used to authenticate a {@link com.pusher.client.channel.PrivateChannel
@@ -36,8 +33,7 @@ public class HttpAuthorizer implements Authorizer {
 
     private final URL endPoint;
     private Map<String, String> mHeaders = new HashMap<String, String>();
-    private Map<String, String> mQueryStringParameters = new HashMap<String, String>();
-    private final String ENCODING_CHARACTER_SET = "UTF-8";
+    private ConnectionFactory mConnectionFactory = null;
 
     /**
      * Creates a new authorizer.
@@ -48,8 +44,24 @@ public class HttpAuthorizer implements Authorizer {
     public HttpAuthorizer(final String endPoint) {
         try {
             this.endPoint = new URL(endPoint);
+            this.mConnectionFactory = new UrlEncodedConnectionFactory();
         }
         catch (final MalformedURLException e) {
+            throw new IllegalArgumentException("Could not parse authentication end point into a valid URL", e);
+        }
+    }
+
+    /**
+     * Creates a new authorizer.
+     *
+     * @param endPoint The endpoint to be called when authenticating.
+     * @param connectionFactory a custom connection factory to be used for building the connection
+     */
+    public HttpAuthorizer(final String endPoint, final ConnectionFactory connectionFactory) {
+        try {
+            this.endPoint = new URL(endPoint);
+            this.mConnectionFactory = connectionFactory;
+        } catch (final MalformedURLException e) {
             throw new IllegalArgumentException("Could not parse authentication end point into a valid URL", e);
         }
     }
@@ -71,31 +83,16 @@ public class HttpAuthorizer implements Authorizer {
         return endPoint.getProtocol().equals("https");
     }
 
-    /**
-     * This methods is for passing extra parameters authentication that needs to
-     * be added to query string.
-     *
-     * @param queryStringParameters
-     *            the query parameters
-     */
-    public void setQueryStringParameters(final HashMap<String, String> queryStringParameters) {
-        mQueryStringParameters = queryStringParameters;
-    }
-
     @Override
     public String authorize(final String channelName, final String socketId) throws AuthorizationFailureException {
-
         try {
-            final StringBuffer urlParameters = new StringBuffer();
-            urlParameters.append("channel_name=").append(URLEncoder.encode(channelName, ENCODING_CHARACTER_SET));
-            urlParameters.append("&socket_id=").append(URLEncoder.encode(socketId, ENCODING_CHARACTER_SET));
+            mConnectionFactory.setChannelName(channelName);
+            mConnectionFactory.setSocketId(socketId);
+            String body = mConnectionFactory.getBody();
 
-            // Adding extra parameters supplied to be added to query string.
-            for (final String parameterName : mQueryStringParameters.keySet()) {
-                urlParameters.append("&").append(parameterName).append("=");
-                urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName),
-                        ENCODING_CHARACTER_SET));
-            }
+            final HashMap<String, String> defaultHeaders = new HashMap<String, String>();
+            defaultHeaders.put("Content-Type", mConnectionFactory.getContentType());
+            defaultHeaders.put("charset", mConnectionFactory.getCharset());
 
             HttpURLConnection connection;
             if (isSSL()) {
@@ -108,14 +105,14 @@ public class HttpAuthorizer implements Authorizer {
             connection.setDoInput(true);
             connection.setInstanceFollowRedirects(false);
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestProperty("charset", "utf-8");
-            connection.setRequestProperty("Content-Length",
-                    "" + Integer.toString(urlParameters.toString().getBytes().length));
 
             // Add in the user defined headers
-            for (final String headerName : mHeaders.keySet()) {
-                final String headerValue = mHeaders.get(headerName);
+            defaultHeaders.putAll(mHeaders);
+            // Add in the Content-Length, so it can't be overwritten by mHeaders
+            defaultHeaders.put("Content-Length","" + Integer.toString(body.getBytes().length));
+            
+            for (final String headerName : defaultHeaders.keySet()) {
+                final String headerValue = defaultHeaders.get(headerName);
                 connection.setRequestProperty(headerName, headerValue);
             }
 
@@ -123,7 +120,7 @@ public class HttpAuthorizer implements Authorizer {
 
             // Send request
             final DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.writeBytes(urlParameters.toString());
+            wr.writeBytes(body);
             wr.flush();
             wr.close();
 
