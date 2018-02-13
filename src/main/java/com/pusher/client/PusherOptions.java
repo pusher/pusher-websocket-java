@@ -14,7 +14,7 @@ public class PusherOptions {
     private static final String LIB_DEV_VERSION = "0.0.0-dev";
 	public static final String LIB_VERSION = readVersionFromProperties();
 
-    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
+    private static final String URI_SUFFIX = "?client=java-client&protocol=7&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
     private static final String WSS_SCHEME = "wss";
 
