@@ -25,6 +25,9 @@ public class PusherOptions {
     private static final long DEFAULT_ACTIVITY_TIMEOUT = 120000;
     private static final long DEFAULT_PONG_TIMEOUT = 30000;
 
+    private static final int MAX_RECONNECTION_ATTEMPTS = 6; //Taken from the Swift lib
+    private static final int MAX_RECONNECT_GAP_IN_SECONDS = 30;
+
     // Note that the primary cluster lives on a different domain
     // (others are subdomains of pusher.com). This is not an oversight.
     // Legacy reasons.
@@ -36,6 +39,8 @@ public class PusherOptions {
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
     private Authorizer authorizer;
     private Proxy proxy = Proxy.NO_PROXY;
+    private int maxReconnectionAttempts = MAX_RECONNECTION_ATTEMPTS;
+    private int maxReconnectGabInSeconds = MAX_RECONNECT_GAP_IN_SECONDS;
 
     /**
      * Gets whether an encrypted (SSL) connection should be used when connecting
@@ -182,7 +187,30 @@ public class PusherOptions {
         return this;
     }
 
-    public long getPongTimeout() {
+    /**
+     * Number of reconnect attempts when websocket connection failed
+     * @param maxReconnectionAttempts
+	 * 				number of max reconnection attempts, default = {@link #MAX_RECONNECTION_ATTEMPTS} 6
+     * @return this, for chaining
+     */
+    public PusherOptions setMaxReconnectionAttempts(int maxReconnectionAttempts) {
+        this.maxReconnectionAttempts = maxReconnectionAttempts;
+        return this;
+    }
+
+	/**
+	 * The delay in two reconnection extends exponentially (1, 2, 4, .. seconds) This property sets the maximum in between two
+	 * reconnection attempts.
+	 * @param maxReconnectGabInSeconds
+	 * 				time in seconds of the maximum gab between two reconnection attempts, default = {@link #MAX_RECONNECT_GAP_IN_SECONDS} 30s
+	 * @return this, for chaining
+	 */
+	public PusherOptions setMaxReconnectGabInSeconds(int maxReconnectGabInSeconds) {
+		this.maxReconnectGabInSeconds = maxReconnectGabInSeconds;
+		return this;
+	}
+
+	public long getPongTimeout() {
         return pongTimeout;
     }
 
@@ -221,7 +249,21 @@ public class PusherOptions {
         return this.proxy;
     }
 
-    private static String readVersionFromProperties() {
+	/**
+	 * @return the maximum reconnection attempts
+	 */
+	public int getMaxReconnectionAttempts() {
+		return maxReconnectionAttempts;
+	}
+
+	/**
+	 * @return the maximum reconnection gap in seconds
+	 */
+	public int getMaxReconnectGapInSeconds() {
+		return maxReconnectGabInSeconds;
+	}
+
+	private static String readVersionFromProperties() {
         InputStream inStream = null;
         try {
             final Properties p = new Properties();

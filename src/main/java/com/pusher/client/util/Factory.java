@@ -50,8 +50,14 @@ public class Factory {
     public synchronized InternalConnection getConnection(final String apiKey, final PusherOptions options) {
         if (connection == null) {
             try {
-                connection = new WebSocketConnection(options.buildUrl(apiKey), options.getActivityTimeout(),
-                        options.getPongTimeout(), options.getProxy(), this);
+                connection = new WebSocketConnection(
+                        options.buildUrl(apiKey),
+                        options.getActivityTimeout(),
+                        options.getPongTimeout(),
+                        options.getMaxReconnectionAttempts(),
+                        options.getMaxReconnectGapInSeconds(),
+                        options.getProxy(),
+                        this);
             }
             catch (final URISyntaxException e) {
                 throw new IllegalArgumentException("Failed to initialise connection", e);
