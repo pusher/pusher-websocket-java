@@ -1,12 +1,17 @@
 package com.pusher.client;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.net.Proxy;
 import java.net.URI;
 
-import com.pusher.java_websocket.handshake.ServerHandshake;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +31,7 @@ import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
 import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
+import com.pusher.java_websocket.handshake.ServerHandshake;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndToEndTest {
@@ -38,6 +44,7 @@ public class EndToEndTest {
             + PRIVATE_CHANNEL_NAME + "\",\"auth\":\"" + AUTH_KEY + "\"}}";
     private static final long ACTIVITY_TIMEOUT = 120000;
     private static final long PONG_TIMEOUT = 120000;
+
     private static final Proxy proxy = Proxy.NO_PROXY;
 
     private @Mock Authorizer mockAuthorizer;
@@ -53,7 +60,8 @@ public class EndToEndTest {
     public void setUp() throws Exception {
         pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
 
-        connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, proxy, factory);
+        connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, pusherOptions.getMaxReconnectionAttempts(),
+				pusherOptions.getMaxReconnectGapInSeconds(), proxy, factory);
 
         doAnswer(new Answer() {
             @Override

@@ -30,14 +30,14 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     private static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
-    private static final int MAX_RECONNECTION_ATTEMPTS = 6; //Taken from the Swift lib
-    private static final int MAX_RECONNECT_GAP_IN_SECONDS = 30;
 
     private final Factory factory;
     private final ActivityTimer activityTimer;
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new ConcurrentHashMap<ConnectionState, Set<ConnectionEventListener>>();
     private final URI webSocketUri;
     private final Proxy proxy;
+    private final int maxReconnectionAttempts;
+    private final int maxReconnectionGap;
 
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClientWrapper underlyingConnection;
@@ -49,10 +49,14 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             final String url,
             final long activityTimeout,
             final long pongTimeout,
+            int maxReconnectionAttempts,
+            int maxReconnectionGap,
             final Proxy proxy,
             final Factory factory) throws URISyntaxException {
         webSocketUri = new URI(url);
         activityTimer = new ActivityTimer(activityTimeout, pongTimeout);
+        this.maxReconnectionAttempts = maxReconnectionAttempts;
+        this.maxReconnectionGap = maxReconnectionGap;
         this.proxy = proxy;
         this.factory = factory;
 
@@ -270,7 +274,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         //Reconnection logic
         if(state == ConnectionState.CONNECTED || state == ConnectionState.CONNECTING){
 
-            if(reconnectAttempts < MAX_RECONNECTION_ATTEMPTS){
+            if(reconnectAttempts < maxReconnectionAttempts){
                 tryReconnecting();
             }
             else{
@@ -288,7 +292,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private void tryReconnecting() {
         reconnectAttempts++;
         updateState(ConnectionState.RECONNECTING);
-        long reconnectInterval = Math.min(MAX_RECONNECT_GAP_IN_SECONDS, reconnectAttempts * reconnectAttempts);
+        long reconnectInterval = Math.min(maxReconnectionGap, reconnectAttempts * reconnectAttempts);
 
         factory.getTimers().schedule(new Runnable() {
             @Override
