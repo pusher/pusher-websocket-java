@@ -40,7 +40,7 @@ public class PusherOptions {
     private Authorizer authorizer;
     private Proxy proxy = Proxy.NO_PROXY;
     private int maxReconnectionAttempts = MAX_RECONNECTION_ATTEMPTS;
-    private int maxReconnectGabInSeconds = MAX_RECONNECT_GAP_IN_SECONDS;
+    private int maxReconnectGapInSeconds = MAX_RECONNECT_GAP_IN_SECONDS;
 
     /**
      * Gets whether an encrypted (SSL) connection should be used when connecting
@@ -201,12 +201,12 @@ public class PusherOptions {
 	/**
 	 * The delay in two reconnection extends exponentially (1, 2, 4, .. seconds) This property sets the maximum in between two
 	 * reconnection attempts.
-	 * @param maxReconnectGabInSeconds
+	 * @param maxReconnectGapInSeconds
 	 * 				time in seconds of the maximum gab between two reconnection attempts, default = {@link #MAX_RECONNECT_GAP_IN_SECONDS} 30s
 	 * @return this, for chaining
 	 */
-	public PusherOptions setMaxReconnectGabInSeconds(int maxReconnectGabInSeconds) {
-		this.maxReconnectGabInSeconds = maxReconnectGabInSeconds;
+	public PusherOptions setMaxReconnectGapInSeconds(int maxReconnectGapInSeconds) {
+		this.maxReconnectGapInSeconds = maxReconnectGapInSeconds;
 		return this;
 	}
 
@@ -260,7 +260,7 @@ public class PusherOptions {
 	 * @return the maximum reconnection gap in seconds
 	 */
 	public int getMaxReconnectGapInSeconds() {
-		return maxReconnectGabInSeconds;
+		return maxReconnectGapInSeconds;
 	}
 
 	private static String readVersionFromProperties() {
