@@ -51,7 +51,7 @@ The pusher-java-client is available in Maven Central.
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>1.7.0</version>
+      <version>1.8.0</version>
     </dependency>
 </dependencies>
 ```
@@ -60,7 +60,7 @@ The pusher-java-client is available in Maven Central.
 
 ```groovy
 dependencies {
-  compile 'com.pusher:pusher-java-client:1.7.0'
+  compile 'com.pusher:pusher-java-client:1.8.0'
 }
 ```
 
