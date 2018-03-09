@@ -1,7 +1,9 @@
 package com.pusher.client.connection.websocket;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.Socket;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -10,6 +12,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.pusher.java_websocket.WebSocket;
 import com.pusher.java_websocket.client.WebSocketClient;
 import com.pusher.java_websocket.handshake.ServerHandshake;
 
@@ -37,9 +40,13 @@ public class WebSocketClientWrapper extends WebSocketClient {
                                                    // certificates
 
                 final SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory)
-                                                                               // SSLSocketFactory.getDefault();
-
-                setSocket(factory.createSocket());
+                int port = uri.getPort();
+                if( port == -1 ) {
+                    port = WebSocket.DEFAULT_WSS_PORT;
+                }                                                      // SSLSocketFactory.getDefault();
+                Socket socket = new Socket(proxy);
+                socket.connect(new InetSocketAddress(uri.getHost(), port));
+                setSocket(factory.createSocket(socket, uri.getHost(), port, true));
             }
             catch (final IOException e) {
                 throw new SSLException(e);
