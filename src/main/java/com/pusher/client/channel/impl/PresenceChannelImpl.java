@@ -1,15 +1,7 @@
 package com.pusher.client.channel.impl;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelEventListener;
@@ -19,6 +11,13 @@ import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.User;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceChannel {
 
@@ -126,13 +125,14 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         final List<String> ids = presenceData.ids;
         final Map<String, Object> hash = presenceData.hash;
 
-        // build the collection of Users
-        for (final String id : ids) {
-            final String userData = hash.get(id) != null ? GSON.toJson(hash.get(id)) : null;
-            final User user = new User(id, userData);
-            idToUserMap.put(id, user);
+        if (ids != null && !ids.isEmpty()) {
+            // build the collection of Users
+            for (final String id : ids) {
+                final String userData = hash.get(id) != null ? GSON.toJson(hash.get(id)) : null;
+                final User user = new User(id, userData);
+                idToUserMap.put(id, user);
+            }
         }
-
         final ChannelEventListener listener = getEventListener();
         if (listener != null) {
             final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
