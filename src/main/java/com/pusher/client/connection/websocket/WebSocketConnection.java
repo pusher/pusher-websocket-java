@@ -271,6 +271,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             return;
         }
 
+        if(!shouldReconnect(code)) {
+            updateState(ConnectionState.DISCONNECTING);
+        }
+
         //Reconnection logic
         if(state == ConnectionState.CONNECTED || state == ConnectionState.CONNECTING){
 
@@ -301,6 +305,12 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 tryConnecting();
             }
         }, reconnectInterval, TimeUnit.SECONDS);
+    }
+
+    // Received error codes 4000 >= 4099 indicate we shouldn't attempt reconnection
+    // https://pusher.com/docs/pusher_protocol#error-codes
+    private boolean shouldReconnect(int code) {
+        return !(code >= 4000 && code <= 4099);
     }
 
     private void cancelTimeoutsAndTransitonToDisconnected() {

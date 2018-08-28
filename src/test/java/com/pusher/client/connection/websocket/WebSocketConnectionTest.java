@@ -316,7 +316,37 @@ public class WebSocketConnectionTest {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-        connection.onClose(500, "reason", true);
+        connection.onClose(3999, "reason", true);
+
+        assertEquals(ConnectionState.RECONNECTING, connection.getState());
+    }
+
+    @Test
+    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4000() throws InterruptedException, SSLException {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+
+        connection.onClose(4000, "reason", true);
+
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
+    }
+
+    @Test
+    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4099() throws InterruptedException, SSLException {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+
+        connection.onClose(4099, "reason", true);
+
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
+    }
+
+    @Test
+    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4100() throws InterruptedException, SSLException {
+        connection.connect();
+        connection.onMessage(CONN_ESTABLISHED_EVENT);
+
+        connection.onClose(4100, "reason", true);
 
         assertEquals(ConnectionState.RECONNECTING, connection.getState());
     }
