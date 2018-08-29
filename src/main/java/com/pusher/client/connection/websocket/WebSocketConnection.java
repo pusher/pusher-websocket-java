@@ -307,10 +307,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         }, reconnectInterval, TimeUnit.SECONDS);
     }
 
-    // Received error codes 4000 >= 4099 indicate we shouldn't attempt reconnection
+    // Received error codes 4000-4099 indicate we shouldn't attempt reconnection
     // https://pusher.com/docs/pusher_protocol#error-codes
     private boolean shouldReconnect(int code) {
-        return !(code >= 4000 && code <= 4099);
+        return code < 4000 || code >= 4100;
     }
 
     private void cancelTimeoutsAndTransitonToDisconnected() {
