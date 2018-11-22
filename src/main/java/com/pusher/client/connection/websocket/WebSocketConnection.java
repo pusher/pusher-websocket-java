@@ -65,6 +65,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         }
     }
 
+    public WebSocketClientWrapper getUnderlyingConnection() {
+        return underlyingConnection;
+    }
+
     /* Connection implementation */
 
     @Override
