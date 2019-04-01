@@ -19,7 +19,7 @@ import com.pusher.client.util.Factory;
 public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 
     private static final Gson GSON = new Gson();
-    private static final String CLIENT_EVENT_PREFIX = "client-";
+    protected static final String CLIENT_EVENT_PREFIX = "client-";
     private final InternalConnection connection;
     private final Authorizer authorizer;
 

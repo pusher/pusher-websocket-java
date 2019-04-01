@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.EventMetadata;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
@@ -13,6 +15,8 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -51,7 +55,47 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     @Override
     public void onMessage(final String event, final String message) {
 
-        super.onMessage(event, message);
+        if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
+            updateState(ChannelState.SUBSCRIBED);
+        }
+        else {
+            final Set<PresenceChannelEventListener> listeners;
+            synchronized (lock) {
+                final Set<PresenceChannelEventListener> sharedListeners = eventNameToListenerMap.get(event);
+                if (sharedListeners != null) {
+                    listeners = new HashSet<PresenceChannelEventListener>(sharedListeners);
+                }
+                else {
+                    listeners = null;
+                }
+            }
+
+            if (listeners != null) {
+                for (final PresenceChannelEventListener listener : listeners) {
+                    final String data = extractDataFrom(message);
+                    final EventMetadata metadata = new EventMetadata();
+
+                    // extracting user_id if client-event
+                    if (event.startsWith(CLIENT_EVENT_PREFIX)) {
+
+                        // extracting user_id from message
+                        String userId = extractUserIdStringFrom(message);
+
+                        metadata.setUserId(userId);
+
+                    }
+                        getFactory().queueOnEventThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onEvent(name, event, data);
+
+                            listener.onEventWithMetadata(name, event, data, metadata);
+                        }
+                    });
+                }
+            }
+        }
+
 
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             handleSubscriptionSuccessfulMessage(message);
@@ -96,6 +140,9 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         }
     }
 
+    private final Object lock = new Object();
+    private final Map<String, Set<PresenceChannelEventListener>> eventNameToListenerMap = new HashMap<String, Set<PresenceChannelEventListener>>();
+
     @Override
     public void bind(final String eventName, final SubscriptionEventListener listener) {
 
@@ -104,7 +151,31 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
                     "Only instances of PresenceChannelEventListener can be bound to a presence channel");
         }
 
-        super.bind(eventName, listener);
+                validateArguments(eventName, listener);
+
+        synchronized (lock) {
+            Set<PresenceChannelEventListener> listeners = eventNameToListenerMap.get(eventName);
+            if (listeners == null) {
+                listeners = new HashSet<PresenceChannelEventListener>();
+                eventNameToListenerMap.put(eventName, listeners);
+            }
+            listeners.add((PresenceChannelEventListener)listener);
+        }
+    }
+
+    @Override
+    public void unbind(final String eventName, final SubscriptionEventListener listener) {
+        validateArguments(eventName, listener);
+
+        synchronized (lock) {
+            final Set<PresenceChannelEventListener> listeners = eventNameToListenerMap.get(eventName);
+            if (listeners != null) {
+                listeners.remove(listener);
+                if (listeners.isEmpty()) {
+                    eventNameToListenerMap.remove(eventName);
+                }
+            }
+        }
     }
 
     @Override
@@ -177,7 +248,12 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     @SuppressWarnings("rawtypes")
     private static String extractDataStringFrom(final String message) {
         final Map jsonObject = GSON.fromJson(message, Map.class);
-        return  (String) jsonObject.get("data");
+        return (String) jsonObject.get("data");
+    }
+
+    private static String extractUserIdStringFrom(final String message) {
+        final Map jsonObject = GSON.fromJson(message, Map.class);
+        return (String) jsonObject.get("user_id");
     }
 
     @SuppressWarnings("rawtypes")

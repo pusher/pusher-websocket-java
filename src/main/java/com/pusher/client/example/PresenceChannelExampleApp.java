@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.EventMetadata;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.User;
@@ -97,6 +98,13 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
 
         System.out.println(String.format("Received event [%s] on channel [%s] with data [%s]", eventName, channelName,
                 data));
+    }
+
+    @Override
+    public void onEventWithMetadata(final String channelName, final String eventName, final String data, final EventMetadata metadata) {
+
+        System.out.println(String.format("Received event [%s] on channel [%s] with data [%s] with metadata user_id: [%s]", eventName, channelName,
+                data, metadata.getUserId()));
     }
 
     @Override

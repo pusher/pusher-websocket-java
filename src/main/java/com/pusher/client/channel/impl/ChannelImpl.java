@@ -23,6 +23,11 @@ public class ChannelImpl implements InternalChannel {
     private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
+
+    protected Factory getFactory() {
+        return factory;
+    }
+
     private final Factory factory;
     private final Object lock = new Object();
 
@@ -190,7 +195,7 @@ public class ChannelImpl implements InternalChannel {
     }
 
     @SuppressWarnings("unchecked")
-    private String extractDataFrom(final String message) {
+    protected String extractDataFrom(final String message) {
         final Map<Object, Object> jsonObject = GSON.fromJson(message, Map.class);
         return (String)jsonObject.get("data");
     }
@@ -199,7 +204,7 @@ public class ChannelImpl implements InternalChannel {
         return new String[] { "^private-.*", "^presence-.*" };
     }
 
-    private void validateArguments(final String eventName, final SubscriptionEventListener listener) {
+    protected void validateArguments(final String eventName, final SubscriptionEventListener listener) {
 
         if (eventName == null) {
             throw new IllegalArgumentException("Cannot bind or unbind to channel " + name + " with a null event name");

@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.EventMetadata;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.channel.User;
@@ -67,6 +68,23 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
         channel.onMessage("pusher_internal:subscription_succeeded",
                 "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{\\\"presence\\\":{\\\"count\\\":1,\\\"ids\\\":[\\\"5116a4519575b\\\"],\\\"hash\\\":{\\\"5116a4519575b\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}}}\",\"channel\":\"presence-myChannel\"}");
         assertTrue(channel.isSubscribed());
+    }
+
+    @Override
+    @Test
+    public void testDataIsExtractedFromMessageAndPassedToSingleListener() {
+        final ArgumentCaptor<EventMetadata> argument = ArgumentCaptor.forClass(EventMetadata.class);
+
+        final String eventName = "client-my-event";
+        PresenceChannelEventListener mockListener = getEventListener();
+
+        channel = newInstance(getChannelName());
+        channel.bind(eventName, mockListener);
+        channel.onMessage(eventName, "{\"event\":\"client-my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"user_id\":\"Kuzya\"}");
+
+        verify(mockListener).onEventWithMetadata(eq(getChannelName()), eq(eventName), eq("{\"fish\":\"chips\"}"), argument.capture());
+
+        assertEquals("Kuzya", argument.getValue().getUserId());
     }
 
     @Test
@@ -225,7 +243,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     }
 
     @Override
-    protected ChannelEventListener getEventListener() {
+    protected PresenceChannelEventListener getEventListener() {
         return mock(PresenceChannelEventListener.class);
     }
 

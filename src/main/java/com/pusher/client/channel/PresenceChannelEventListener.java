@@ -39,4 +39,6 @@ public interface PresenceChannelEventListener extends PrivateChannelEventListene
      *            The user who unsubscribed.
      */
     void userUnsubscribed(String channelName, User user);
+
+    void onEventWithMetadata(String channelName, String eventName, String data, EventMetadata metadata);
 }
