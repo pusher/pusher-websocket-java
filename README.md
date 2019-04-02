@@ -259,7 +259,7 @@ Presence channels provide additional events relating to users joining (subscribi
 PresenceChannel channel = pusher.subscribePresence("presence-channel",
     new PresenceChannelEventListener() {
         @Override
-        public void onUserInformationReceived(String channelName, Set<User> users) {
+        public void onUsersInformationReceived(String channelName, Set<User> users) {
             for (User user : users) {
                 userSubscribed(channelName, user);
             }
