@@ -504,6 +504,21 @@ The JavaDocs can be found here: <http://pusher.github.com/pusher-websocket-java/
 * Clone the project: `git clone https://github.com/pusher/pusher-java-client`
 * Change to the top level directory for the project: `cd pusher-java-client`
 
+### Android Studio
+* In your app project's `settings.gradle` add the following lines:
+
+```
+include ':pusher-websocket-java'
+project(':pusher-websocket-java').projectDir = new File('<PATH_TO_THIS_PROJECT>/pusher-websocket-java')
+```
+* Add the following line to your application's `build.gradle` where you would normally add the actual `pusher-websocket-java` SDK:
+
+```
+dependencies {
+    compile project(':pusher-websocket-java')
+}
+```
+
 ### Eclipse Project
 
 Assuming you are using Eclipse, follow these steps:
