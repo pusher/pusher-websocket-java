@@ -34,7 +34,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     private String myUserID;
 
     public PresenceChannelImpl(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer, final Factory factory) {
+                               final Authorizer authorizer, final Factory factory) {
         super(connection, channelName, authorizer, factory);
     }
 
@@ -87,9 +87,13 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
                         getFactory().queueOnEventThread(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onEvent(name, event, data);
+                            if (event.startsWith(CLIENT_EVENT_PREFIX)) {
+                                listener.onEventWithMetadata(name, event, data, metadata);
+                            }
+                            else {
+                                listener.onEvent(name, event, data);
+                            }
 
-                            listener.onEventWithMetadata(name, event, data, metadata);
                         }
                     });
                 }
@@ -116,7 +120,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
         try {
             final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
-            final String authKey = (String)authResponseMap.get("auth");
+            final String authKey = (String) authResponseMap.get("auth");
             final Object channelData = authResponseMap.get("channel_data");
 
             storeMyUserId(channelData);
@@ -134,8 +138,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
             final String json = GSON.toJson(jsonObject);
 
             return json;
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
         }
     }
@@ -180,7 +183,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     @Override
     protected String[] getDisallowedNameExpressions() {
-        return new String[] { "^(?!presence-).*" };
+        return new String[]{"^(?!presence-).*"};
     }
 
     @Override
@@ -188,7 +191,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         return String.format("[Presence Channel: name=%s]", name);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private void handleSubscriptionSuccessfulMessage(final String message) {
 
         // extract data from the JSON message
@@ -206,7 +209,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         }
         final ChannelEventListener listener = getEventListener();
         if (listener != null) {
-            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener) listener;
             presenceListener.onUsersInformationReceived(getName(), getUsers());
         }
     }
@@ -218,14 +221,14 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
 
         final String id = memberData.userId;
-        final String userData = memberData.userInfo!= null ? GSON.toJson(memberData.userInfo) : null;
+        final String userData = memberData.userInfo != null ? GSON.toJson(memberData.userInfo) : null;
 
         final User user = new User(id, userData);
         idToUserMap.put(id, user);
 
         final ChannelEventListener listener = getEventListener();
         if (listener != null) {
-            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener) listener;
             presenceListener.userSubscribed(getName(), user);
         }
     }
@@ -240,7 +243,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
         final ChannelEventListener listener = getEventListener();
         if (listener != null) {
-            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener) listener;
             presenceListener.userUnsubscribed(getName(), user);
         }
     }
@@ -264,7 +267,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     @SuppressWarnings("rawtypes")
     private void storeMyUserId(final Object channelData) {
-        final Map channelDataMap = GSON.fromJson((String)channelData, Map.class);
+        final Map channelDataMap = GSON.fromJson((String) channelData, Map.class);
         myUserID = String.valueOf(channelDataMap.get("user_id"));
     }
 
