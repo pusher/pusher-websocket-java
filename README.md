@@ -492,6 +492,7 @@ channel.isSubscribed(); // => `true`/`false`
 The JavaDocs can be found here: <http://pusher.github.com/pusher-websocket-java/>
 
 ## Library Development Environment
+If you'd like to tweak this library there are ways to use your local code rather than the official.
 
 ### Prerequisites
 
