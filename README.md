@@ -146,6 +146,26 @@ Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 pusher.connect();
 ```
 
+## The PusherOptions object
+
+Most of the functionality of this library is configured through the PusherOptions object. You configure it by calling
+methods with parameters on the object before passing it to the Pusher object. Below is a table containing all of the
+methods you can call.
+
+| Method                      | Parameter         | Description                                                                                                                                   |
+|-----------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| setEncrypted                | Boolean           | Sets whether the connection should be made with TLS or not.                                                                                   |
+| setAuthorizer               | Pusher Authorizer | Sets the authorizer to be used when authenticating private and presence channels.                                                             |
+| setHost                     | String            | The host to which connections will be made.                                                                                                   |
+| setWsPort                   | int               | The port to which unencrypted connections will be made. Automatically set correctly.                                                          |
+| setWssPort                  | int               | The port to which encrypted connections will be made. Automatically set correctly.                                                            |
+| setCluster                  | String            | Sets the cluster the client will connect to, thereby setting the Host and Port correctly.                                                     |
+| setActivityTimeout          | long              | The number of milliseconds of inactivity at which a "ping" will be triggered to check the connection. The default value is 120,000.           |
+| setPongTimeout              | long              | The number of milliseconds the client waits to receive a "pong" response from the server before disconnecting. The default value is 30,000.   |
+| setMaxReconnectionAttempts  | int               | Number of reconnection attempts that will be made when pusher.connect() is called, after which the client will give up.                       |
+| setMaxReconnectGapInSeconds | int               | The delay in two reconnection extends exponentially (1, 2, 4, .. seconds) This property sets the maximum inbetween two reconnection attempts. |
+| setProxy                    | Proxy             | Specify a proxy, e.g. ```options.setProxy( new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) ) )```                     |
+
 ## Reconnecting
 
 The `connect` method is also used to re-connect in case the connection has been lost, for example if an Android
