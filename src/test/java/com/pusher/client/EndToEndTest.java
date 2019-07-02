@@ -58,7 +58,7 @@ public class EndToEndTest {
 
     @Before
     public void setUp() throws Exception {
-        pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
+        pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setTLS(false);
 
         connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, pusherOptions.getMaxReconnectionAttempts(),
 				pusherOptions.getMaxReconnectGapInSeconds(), proxy, factory);

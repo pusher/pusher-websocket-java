@@ -31,7 +31,7 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
 
         final HttpAuthorizer authorizer = new HttpAuthorizer(
                 "http://www.leggetter.co.uk/pusher/pusher-examples/php/authentication/src/presence_auth.php");
-        final PusherOptions options = new PusherOptions().setAuthorizer(authorizer).setEncrypted(true);
+        final PusherOptions options = new PusherOptions().setAuthorizer(authorizer).forceTLS();
 
         pusher = new Pusher(apiKey, options);
         pusher.connect(this);

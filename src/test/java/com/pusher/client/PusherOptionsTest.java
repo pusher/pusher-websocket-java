@@ -26,8 +26,8 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testEncryptedInitializedAsTrue() {
-        assert pusherOptions.isEncrypted();
+    public void testTLSInitializedAsTrue() {
+        assert pusherOptions.getTLS();
     }
 
     @Test
@@ -42,9 +42,9 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testEncryptedCanBeSetToTrue() {
-        pusherOptions.setEncrypted(true);
-        assertSame(true, pusherOptions.isEncrypted());
+    public void testTLSCanBeSetToTrue() {
+        pusherOptions.setTLS(true);
+        assertSame(true, pusherOptions.getTLS());
     }
 
     @Test
@@ -53,8 +53,8 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testSetEncryptedReturnsSelf() {
-        assertSame(pusherOptions, pusherOptions.setEncrypted(true));
+    public void testSetTLSReturnsSelf() {
+        assertSame(pusherOptions, pusherOptions.setTLS(true));
     }
 
     @Test
@@ -64,8 +64,8 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testNonSSLURLIsCorrect() {
-        pusherOptions.setEncrypted(false);
+    public void testNonTLSURLIsCorrect() {
+        pusherOptions.setTLS(false);
         assertEquals(pusherOptions.buildUrl(API_KEY), "ws://ws.pusherapp.com:80/app/" + API_KEY
                 + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
     }
@@ -78,8 +78,8 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testClusterSetNonSSLURLIsCorrect() {
-        pusherOptions.setCluster("eu").setEncrypted(false);
+    public void testClusterSetNonTLSURLIsCorrect() {
+        pusherOptions.setCluster("eu").setTLS(false);
         assertEquals(pusherOptions.buildUrl(API_KEY), "ws://ws-eu.pusher.com:80/app/" + API_KEY
                 + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
     }
@@ -92,8 +92,8 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testCustomHostAndPortNonSSLURLIsCorrect() {
-        pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181).setEncrypted(false);
+    public void testCustomHostAndPortNonTLSURLIsCorrect() {
+        pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181).setTLS(false);
         assertEquals(pusherOptions.buildUrl(API_KEY), "ws://subdomain.example.com:8080/app/" + API_KEY
                 + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
     }

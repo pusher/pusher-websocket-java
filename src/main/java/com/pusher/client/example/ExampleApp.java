@@ -27,7 +27,7 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
         channelName = args.length > 1 ? args[1] : "my-channel";
         eventName = args.length > 2 ? args[2] : "my-event";
 
-        final PusherOptions options = new PusherOptions().setEncrypted(true);
+        final PusherOptions options = new PusherOptions().forceTLS();
         pusher = new Pusher(apiKey, options);
         pusher.connect(this);
 

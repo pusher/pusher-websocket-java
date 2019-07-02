@@ -34,7 +34,7 @@ public class PusherOptions {
     private String host = "ws.pusherapp.com";
     private int wsPort = WS_PORT;
     private int wssPort = WSS_PORT;
-    private boolean encrypted = true;
+    private boolean useTLS = true;
     private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
     private Authorizer authorizer;
@@ -43,24 +43,42 @@ public class PusherOptions {
     private int maxReconnectGapInSeconds = MAX_RECONNECT_GAP_IN_SECONDS;
 
     /**
-     * Gets whether an encrypted (SSL) connection should be used when connecting
-     * to Pusher.
+     * Gets whether a TLS connection should be used when connecting to Pusher.
      *
-     * @return true if an encrypted connection should be used; otherwise false.
+     * @return true if a TLS connection should be used; otherwise false.
      */
-    public boolean isEncrypted() {
-        return encrypted;
+    public boolean getTLS() {
+        return useTLS;
     }
 
     /**
-     * Sets whether an encrypted (SSL) connection should be used when connecting to
-     * Pusher.
+     * Sets whether a TLS connection should be used when connecting to Pusher.
      *
-     * @param encrypted Whether to use an SSL connection
+     * @param useTLS Whether to use a TLS connection
+     * @return this, for chaining
+     */
+    public PusherOptions setTLS(final boolean useTLS) {
+        this.useTLS = useTLS;
+        return this;
+    }
+
+    /**
+     * Deprecated; renamed to `getTLS`
+     *
+     * @return true if a TLS connection should be used; otherwise false.
+     */
+    public boolean isEncrypted() {
+        return useTLS;
+    }
+
+    /**
+     * Deprecated; renamed to `setTLS`
+     *
+     * @param encrypted Whether to use a TLS connection
      * @return this, for chaining
      */
     public PusherOptions setEncrypted(final boolean encrypted) {
-        this.encrypted = encrypted;
+        this.useTLS = encrypted;
         return this;
     }
 
@@ -103,7 +121,7 @@ public class PusherOptions {
     }
 
     /**
-     * The port to which unencrypted connections will be made.
+     * The port to which non-TLS connections will be made.
      *
      * Note that if you wish to connect to a standard Pusher cluster, the
      * convenience method setCluster will set the host and ports correctly from
@@ -118,7 +136,7 @@ public class PusherOptions {
     }
 
     /**
-     * The port to which encrypted connections will be made.
+     * The port to which TLS connections will be made.
      *
      * Note that if you wish to connect to a standard Pusher cluster, the
      * convenience method setCluster will set the host and ports correctly from
@@ -222,7 +240,7 @@ public class PusherOptions {
      * @return the WebSocket URL
      */
     public String buildUrl(final String apiKey) {
-        return String.format("%s://%s:%s/app/%s%s", encrypted ? WSS_SCHEME : WS_SCHEME, host, encrypted ? wssPort
+        return String.format("%s://%s:%s/app/%s%s", useTLS ? WSS_SCHEME : WS_SCHEME, host, useTLS ? wssPort
                 : wsPort, apiKey, URI_SUFFIX);
     }
 
