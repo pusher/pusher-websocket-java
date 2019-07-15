@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.EventMetadata;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.util.Factory;
 
@@ -111,16 +112,23 @@ public class ChannelImpl implements InternalChannel {
             if (listeners != null) {
                 for (final SubscriptionEventListener listener : listeners) {
                     final String data = extractDataFrom(message);
-
+                    final EventMetadata metadata = new EventMetadata(getMetaData(message));
                     factory.queueOnEventThread(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onEvent(name, event, data);
+                            listener.onEvent(name, event, data, metadata);
                         }
                     });
                 }
             }
         }
+    }
+
+    private Map<String, String> getMetaData(String message) {
+        final Map<String, String> metadata = GSON.fromJson(message, HashMap.class);
+        metadata.remove("event");
+        metadata.remove("data");
+        return metadata;
     }
 
     @Override

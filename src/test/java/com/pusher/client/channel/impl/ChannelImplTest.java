@@ -6,9 +6,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
+import com.pusher.client.channel.EventMetadata;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -105,7 +107,7 @@ public class ChannelImplTest {
         channel.bind(EVENT_NAME, mockListener);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
+        verify(mockListener).onEvent(eq(getChannelName()), eq(EVENT_NAME), eq("{\"fish\":\"chips\"}"), any(EventMetadata.class));
     }
 
     @Test
@@ -116,8 +118,8 @@ public class ChannelImplTest {
         channel.bind(EVENT_NAME, mockListener2);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
-        verify(mockListener2).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
+        verify(mockListener).onEvent(eq(getChannelName()), eq(EVENT_NAME), eq("{\"fish\":\"chips\"}"), any(EventMetadata.class));
+        verify(mockListener2).onEvent(eq(getChannelName()), eq(EVENT_NAME), eq("{\"fish\":\"chips\"}"), any(EventMetadata.class));
     }
 
     @Test
@@ -126,7 +128,7 @@ public class ChannelImplTest {
         channel.bind(EVENT_NAME, mockListener);
         channel.onMessage("DifferentEventName", "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
 
-        verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
+        verify(mockListener, never()).onEvent(anyString(), anyString(), anyString(), any(EventMetadata.class));
     }
 
     @Test
@@ -136,7 +138,7 @@ public class ChannelImplTest {
         channel.unbind(EVENT_NAME, mockListener);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
+        verify(mockListener, never()).onEvent(anyString(), anyString(), anyString(), any(EventMetadata.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -201,6 +203,36 @@ public class ChannelImplTest {
         channel.updateState(ChannelState.UNSUBSCRIBED);
         channel.unbind(EVENT_NAME, mockListener);
     }
+    @Test
+    public void testMetaDataIsExtractedFromMessageAndPassedToSingleListener() {
+        final ArgumentCaptor<EventMetadata> argument = ArgumentCaptor.forClass(EventMetadata.class);
+
+        final String eventName = "client-my-event";
+        ChannelEventListener mockListener = getEventListener();
+
+        channel = newInstance(getChannelName());
+        channel.bind(eventName, mockListener);
+        channel.onMessage(eventName, "{\"event\":\"client-my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"metadata-key\":\"42\"}");
+
+        verify(mockListener).onEvent(eq(getChannelName()), eq(eventName), eq("{\"fish\":\"chips\"}"), argument.capture());
+        assertEquals("42", argument.getValue().getMetadataAttr("metadata-key"));
+    }
+
+    @Test
+    public void testUserIdIsExtractedFromMessageAndPassedToSingleListenerWithHelperMethod() {
+        final ArgumentCaptor<EventMetadata> argument = ArgumentCaptor.forClass(EventMetadata.class);
+
+        final String eventName = "client-my-event";
+        ChannelEventListener mockListener = getEventListener();
+
+        channel = newInstance(getChannelName());
+        channel.bind(eventName, mockListener);
+        channel.onMessage(eventName, "{\"event\":\"client-my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"user_id\":\"Kuzya\"}");
+
+        verify(mockListener).onEvent(eq(getChannelName()), eq(eventName), eq("{\"fish\":\"chips\"}"), argument.capture());
+        assertEquals("Kuzya", argument.getValue().getUserId());
+    }
+
 
     /* end of tests */
 

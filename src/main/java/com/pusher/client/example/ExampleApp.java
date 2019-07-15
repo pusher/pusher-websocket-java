@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.EventMetadata;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionStateChange;
 
@@ -64,10 +65,10 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     /* ChannelEventListener implementation */
 
     @Override
-    public void onEvent(final String channelName, final String eventName, final String data) {
+    public void onEvent(final String channelName, final String eventName, final String data, final EventMetadata metadata) {
 
-        System.out.println(String.format("[%d] Received event [%s] on channel [%s] with data [%s]", timestamp(),
-                eventName, channelName, data));
+        System.out.println(String.format("[%d] Received event [%s] on channel [%s] with data [%s] and metadata [%s]", timestamp(),
+                eventName, channelName, data, metadata.toString()));
 
         final Gson gson = new Gson();
         @SuppressWarnings("unchecked")
