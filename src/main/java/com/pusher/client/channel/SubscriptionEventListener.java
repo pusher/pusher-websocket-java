@@ -40,9 +40,9 @@ public interface SubscriptionEventListener {
      *            The JSON data that was included with the event. This can be
      *            parsed with Google's Gson library, which is a dependency of
      *            this library, or your library of choice
-     * @param metadata
-     *            A class which exposes metadata about the event.
-     *            See {@linkplain EventMetadata} for more.
+     * @param event
+     *            A PusherEvent object which exposes the whole event.
+     *            See {@linkplain PusherEvent} for more.
      */
-    void onEvent(String channelName, String eventName, String data, EventMetadata metadata);
+    void onEvent(String channelName, String eventName, String data, PusherEvent event);
 }

@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.EventMetadata;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.User;
@@ -94,10 +94,10 @@ public class PresenceChannelExampleApp implements ConnectionEventListener, Prese
     }
 
     @Override
-    public void onEvent(final String channelName, final String eventName, final String data, final EventMetadata metadata) {
+    public void onEvent(final String channelName, final String eventName, final String data, final PusherEvent event) {
 
         System.out.println(String.format("Received event [%s] on channel [%s] with data [%s] and metadata [%s]", eventName, channelName,
-                data, metadata.toString()));
+                data, event.toString()));
     }
 
     @Override
