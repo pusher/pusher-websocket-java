@@ -522,8 +522,8 @@ If you'd like to tweak this library there are ways to use your local code rather
 
 ### Cloning the project
 
-* Clone the project: `git clone https://github.com/pusher/pusher-java-client`
-* Change to the top level directory for the project: `cd pusher-java-client`
+* Clone the project: `git clone https://github.com/pusher/pusher-websocket-java`
+* Change to the top level directory for the project: `cd pusher-websocket-java`
 
 ### Android Studio
 * In your app project's `settings.gradle` add the following lines:
