@@ -2,11 +2,6 @@ package com.pusher.client.channel;
 
 import java.util.Map;
 
-/**
- * PusherEvent stores all data concerning an event. This data
- * includes things that are not essential to using Channels,
- * but may be useful for your service.
- */
 public class PusherEvent {
     private Map<String, Object> eventData;
 
@@ -29,9 +24,8 @@ public class PusherEvent {
 
     /**
      * returns the userId associated with this event.
-     * This is a helper method intended to help with discovery as to which
-     * attributes are available in the eventData object.
-     * @return the userID string, or null.
+     * @return the userID string: https://pusher.com/docs/channels/using_channels/events#user-id-in-client-events,
+     * or null if the customer if the event is not a client event.
      */
     public Object getUserId() {
         return eventData.get("user_id");
@@ -44,11 +38,9 @@ public class PusherEvent {
 
     public String toString() {
         String returnString = "";
-        if(eventData !=null) {
-            for (String key: eventData.keySet()){
-                Object value = eventData.get(key);
-                returnString = returnString + key + ": " + value.toString() + ", ";
-            }
+        for (String key: eventData.keySet()){
+            Object value = eventData.get(key);
+            returnString = returnString + key + ": " + value.toString() + ", ";
         }
         return returnString;
     }

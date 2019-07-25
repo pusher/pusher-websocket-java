@@ -109,7 +109,6 @@ public class ChannelImpl implements InternalChannel {
 
             if (listeners != null) {
                 for (final SubscriptionEventListener listener : listeners) {
-                    final String data = extractDataFrom(message);
                     final PusherEvent e = GSON.fromJson(message, PusherEvent.class);
                     factory.queueOnEventThread(new Runnable() {
                         @Override
@@ -122,10 +121,6 @@ public class ChannelImpl implements InternalChannel {
         }
     }
 
-    private Map<String, String> getMetaData(String message) {
-        final Map<String, String> metadata = GSON.fromJson(message, HashMap.class);
-        return metadata;
-    }
 
     @Override
     public String toSubscribeMessage() {
