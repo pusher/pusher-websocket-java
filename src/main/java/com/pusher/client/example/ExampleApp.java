@@ -65,15 +65,8 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
     /* ChannelEventListener implementation */
 
     @Override
-    public void onEvent(final String channelName, final String eventName, final String data, final PusherEvent event) {
-
-        System.out.println(String.format("[%d] Received event [%s] on channel [%s] with data [%s] and event [%s]", timestamp(),
-                eventName, channelName, data, event.toString()));
-
-        final Gson gson = new Gson();
-        @SuppressWarnings("unchecked")
-        final Map<String, String> jsonObject = gson.fromJson(data, Map.class);
-        System.out.println(jsonObject);
+    public void onEvent(final PusherEvent event) {
+        System.out.println(String.format("[%d] Received event [%s]", timestamp(), event.toString()));
     }
 
     @Override

@@ -28,21 +28,9 @@ public interface SubscriptionEventListener {
      * Callback that is fired whenever an event that this
      * {@linkplain SubscriptionEventListener} has been bound to is received.
      *
-     * @param channelName
-     *            The name of the channel that the event has been received on.
-     *            This is useful if your {@linkplain ChannelEventListener} has
-     *            been bound to events on more than one channel.
-     * @param eventName
-     *            The name of the event that has been received. This will always
-     *            be one of the events that your
-     *            {@linkplain ChannelEventListener} has been bound to.
-     * @param data
-     *            The JSON data that was included with the event. This can be
-     *            parsed with Google's Gson library, which is a dependency of
-     *            this library, or your library of choice
      * @param event
      *            A PusherEvent object which exposes the whole event.
      *            See {@linkplain PusherEvent} for more.
      */
-    void onEvent(String channelName, String eventName, String data, PusherEvent event);
+    void onEvent(final PusherEvent event);
 }

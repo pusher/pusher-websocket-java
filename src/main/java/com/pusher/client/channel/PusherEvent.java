@@ -8,13 +8,13 @@ import java.util.Map;
  * but may be useful for your service.
  */
 public class PusherEvent {
-    private Map<String, String> eventData;
+    private Map<String, Object> eventData;
 
     /**
      * PusherEvent constructor that takes a hashmap.
      * @param eventData hashmap(string, string)
      */
-    public PusherEvent(Map<String, String> eventData) {
+    public PusherEvent(Map<String, Object> eventData) {
         this.eventData = eventData;
     }
     /**
@@ -22,7 +22,7 @@ public class PusherEvent {
      * @param key - the key you wish to get
      * @return value (string) - the value as a string.
      */
-    public String getProperty(String key) {
+    public Object getProperty(String key) {
         return eventData.get(key);
     }
 
@@ -33,21 +33,21 @@ public class PusherEvent {
      * attributes are available in the eventData object.
      * @return the userID string, or null.
      */
-    public String getUserId() {
+    public Object getUserId() {
         return eventData.get("user_id");
     }
 
-    public String getChannel() { return eventData.get("channel"); }
-    public String getEventName() { return eventData.get("event"); }
-    public String getData() { return eventData.get("data"); }
+    public Object getChannel() { return eventData.get("channel"); }
+    public Object getEventName() { return eventData.get("event"); }
+    public Object getData() { return eventData.get("data"); }
 
 
     public String toString() {
         String returnString = "";
         if(eventData !=null) {
             for (String key: eventData.keySet()){
-                String value = eventData.get(key);
-                returnString = returnString + key + ": " + value + ", ";
+                Object value = eventData.get(key);
+                returnString = returnString + key + ": " + value.toString() + ", ";
             }
         }
         return returnString;
