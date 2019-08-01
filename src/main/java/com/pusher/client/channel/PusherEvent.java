@@ -30,8 +30,7 @@ public class PusherEvent {
     public Object getUserId() {
         return eventData.get("user_id");
     }
-
-    public Object getChannel() { return eventData.get("channel"); }
+    public Object getChannelName() { return eventData.get("channel"); }
     public Object getEventName() { return eventData.get("event"); }
     public Object getData() { return eventData.get("data"); }
 

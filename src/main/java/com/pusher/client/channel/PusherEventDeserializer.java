@@ -15,4 +15,5 @@ public class PusherEventDeserializer implements JsonDeserializer<PusherEvent> {
         PusherEvent event = new PusherEvent(GSON.fromJson(json, Map.class));
         return event;
     }
+
 }
