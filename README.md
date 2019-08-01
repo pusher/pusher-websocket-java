@@ -107,12 +107,12 @@ Channel channel = pusher.subscribe("my-channel");
 // Bind to listen for events called "my-event" sent to "my-channel"
 channel.bind("my-event", new SubscriptionEventListener() {
     @Override
-    public void onEvent(PusherEvent event) {
-        System.out.println("Received event with data: " + event.toString());
+    public void onEvent(String channel, String event, String data) {
+        System.out.println("Received event with data: " + data);
     }
 });
 
-// Disconnect from the service
+// Disconnect from the service (or become disconnected my network conditions)
 pusher.disconnect();
 
 // Reconnect, with all channel subscriptions and event bindings automatically recreated
@@ -340,27 +340,6 @@ UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);
 
 For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](https://pusher.com/docs/channels/server_api/authenticating-users#implementing-the-auth-endpoint-for-a-presence-channel) documentation.
 
-#### Client event authenticity
-
-Channels now provides a 'user-id' with client events sent from the server. With presence channels, your authentication endpoint provides your user with a user-id. Previously, it was up to you to include this user-id in every client-event triggered by your clients. Now, when a client of yours triggers a client event, Channels will append their user-id to their triggered message, so that the other clients in the channel receive it. This allows you to trust that a given user really did trigger a given payload.
-
-If you’d like to make use of this feature, you’ll need to extract the user-id from the message delivered by Channels. To do this, call getUserId() on the event payload your event handler gets called with, like so:
-
-```java
-channel.bind("client-my-event", new SubscriptionEventListener() {
-    @Override
-    public void onEvent(PusherEvent event) {
-        System.out.println("Received event with userId: " + event.getUserId());
-    }
-});
-```
-
-You can also instead retrieve it in the following way:
-
-```java
-event.getProperty(“user_id”)
-```
-
 ## Binding and handling events
 
 There are two types of events that occur on channel subscriptions.
@@ -380,7 +359,7 @@ Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
     }
 
     @Override
-    public void onEvent(PusherEvent event) {
+    public void onEvent(String channelName, String eventName, String data) {
         // Called for incoming events names "foo", "bar" or "baz"
     }
 }, "foo", "bar", "baz");
@@ -396,13 +375,13 @@ Events triggered by your application are received by the `onEvent` method on the
 Channel channel = pusher.subscribe("my-channel");
 channel.bind("my-event", new ChannelEventListener() {
     @Override
-    public void onEvent(PusherEvent event) {
+    public void onEvent(String channelName, String eventName, String data) {
         // Called for incoming events named "my-event"
     }
 });
 ```
 
-The event data is accessible by calling the `getData()` method on the event. From there you can handle the data as you like. Since we encourage data to be in JSON here's an example that uses [Gson object deserialization](https://sites.google.com/site/gson/gson-user-guide#TOC-Object-Examples):
+The event data will be passed as the third parameter to the `onEvent` method. From there you can handle the data as you like. Since we encourage data to be in JSON here's an example that uses [Gson object deserialization](https://sites.google.com/site/gson/gson-user-guide#TOC-Object-Examples):
 
 ```java
 public class Example implements ChannelEventListener {
@@ -413,9 +392,9 @@ public class Example implements ChannelEventListener {
     }
 
     @Override
-    public void onEvent(PusherEvent event) {
+    public void onEvent(String channelName, String eventName, String data) {
         Gson gson = new Gson();
-        EventExample exampleEvent = gson.fromJson(event.getData(), EventExample.class);
+        EventExample exampleEvent = gson.fromJson(data, EventExample.class);
     }
 }
 
