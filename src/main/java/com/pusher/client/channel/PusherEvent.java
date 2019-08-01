@@ -3,13 +3,13 @@ package com.pusher.client.channel;
 import java.util.Map;
 
 public class PusherEvent {
-    private Map<String, Object> eventData;
+    private Map<String, String> eventData;
 
     /**
      * PusherEvent constructor that takes a hashmap.
      * @param eventData hashmap(string, string)
      */
-    public PusherEvent(Map<String, Object> eventData) {
+    public PusherEvent(Map<String, String> eventData) {
         this.eventData = eventData;
     }
     /**
@@ -17,7 +17,7 @@ public class PusherEvent {
      * @param key - the key you wish to get
      * @return value (string) - the value as a string.
      */
-    public Object getProperty(String key) {
+    public String getProperty(String key) {
         return eventData.get(key);
     }
 
@@ -27,18 +27,18 @@ public class PusherEvent {
      * @return the userID string: https://pusher.com/docs/channels/using_channels/events#user-id-in-client-events,
      * or null if the customer if the event is not a client event.
      */
-    public Object getUserId() {
+    public String getUserId() {
         return eventData.get("user_id");
     }
-    public Object getChannelName() { return eventData.get("channel"); }
-    public Object getEventName() { return eventData.get("event"); }
-    public Object getData() { return eventData.get("data"); }
+    public String getChannelName() { return eventData.get("channel"); }
+    public String getEventName() { return eventData.get("event"); }
+    public String getData() { return eventData.get("data"); }
 
 
     public String toString() {
         String returnString = "";
         for (String key: eventData.keySet()){
-            Object value = eventData.get(key);
+            String value = eventData.get(key);
             returnString = returnString + key + ": " + value.toString() + ", ";
         }
         return returnString;
