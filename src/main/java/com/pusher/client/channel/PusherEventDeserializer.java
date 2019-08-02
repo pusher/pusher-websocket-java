@@ -1,12 +1,12 @@
 package com.pusher.client.channel;
 
-        import com.google.gson.*;
+import com.google.gson.*;
 
-        import java.lang.reflect.Type;
-        import java.util.HashMap;
-        import java.util.Iterator;
-        import java.util.Map;
-        import java.util.Set;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 public class PusherEventDeserializer implements JsonDeserializer<PusherEvent> {
     @Override

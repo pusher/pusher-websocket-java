@@ -3,7 +3,7 @@
 This Changelog is no longer being updated. For any further changes please see the Releases section on this Github repository - https://github.com/pusher/pusher-websocket-java/releases
 
 ## Version 2.0.0
-* The onEvent handler now gets called with one parameter, called the PusherEvent. This PusherEvent has all the same information available as was available before with the 3 parameters, but now is accessible by calling getChannel(), getData() or getEventName() on the PusherEvent object you receive. In addition, for presence channel client events, you can now retrieve an authenticated User ID by calling getUserId() on the PusherEvent object. To read more on Authenticated users, see the README or our docs [here](https://pusher.com/docs/channels/using_channels/events#user-id-in-client-events).
+* The onEvent handler now gets called with one parameter, called the PusherEvent. This PusherEvent has all the same information available as was available before with the 3 parameters, but now is accessible by calling getChannelName(), getData() or getEventName() on the PusherEvent object you receive. In addition, for presence channel client events, you can now retrieve an authenticated User ID by calling getUserId() on the PusherEvent object. To read more on Authenticated users, see the README or our docs [here](https://pusher.com/docs/channels/using_channels/events#user-id-in-client-events).
 
 
 ## Version 1.4.0
