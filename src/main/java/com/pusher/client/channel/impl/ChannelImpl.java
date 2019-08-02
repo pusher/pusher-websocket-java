@@ -187,12 +187,7 @@ public class ChannelImpl implements InternalChannel {
     public String toString() {
         return String.format("[Public Channel: name=%s]", name);
     }
-
-    @SuppressWarnings("unchecked")
-    private String extractDataFrom(final String message) {
-        final Map<Object, Object> jsonObject = GSON.fromJson(message, Map.class);
-        return (String)jsonObject.get("data");
-    }
+    
 
     protected String[] getDisallowedNameExpressions() {
         return new String[] { "^private-.*", "^presence-.*" };
