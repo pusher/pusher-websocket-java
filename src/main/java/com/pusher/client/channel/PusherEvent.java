@@ -15,9 +15,9 @@ public class PusherEvent {
     /**
      * getProperty returns the value associated with the key, or null.
      * @param key - the key you wish to get
-     * @return value (string) - the value as a string.
+     * @return value (Object) - the value as a string.
      */
-    public String getProperty(String key) {
+    public Object getProperty(String key) {
         return eventData.get(key);
     }
 
