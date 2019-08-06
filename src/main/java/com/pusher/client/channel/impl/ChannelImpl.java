@@ -187,7 +187,7 @@ public class ChannelImpl implements InternalChannel {
     public String toString() {
         return String.format("[Public Channel: name=%s]", name);
     }
-    
+
 
     protected String[] getDisallowedNameExpressions() {
         return new String[] { "^private-.*", "^presence-.*" };
