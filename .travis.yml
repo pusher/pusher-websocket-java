@@ -1,9 +1,19 @@
-language: java
-sudo: false
-jdk:
-  - openjdk8
-  - openjdk9
-  - openjdk10
-  - openjdk11
-script:
-  - ./gradlew test
+matrix:
+  include:
+  - language: java
+    sudo: false
+    jdk:
+    - openjdk8
+    - openjdk9
+    - openjdk10
+    - openjdk11
+    script:
+    - ./gradlew test
+  - language: android
+    dist: trusty # 2019-08-06 Travis only supports Android builds on Trusty
+    android:
+      components:
+      - build-tools-29.0.0
+      - android-29
+    script:
+    - ./gradlew test
