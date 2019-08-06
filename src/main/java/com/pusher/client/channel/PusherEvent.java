@@ -1,23 +1,25 @@
 package com.pusher.client.channel;
 
-import java.util.Map;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 
 public class PusherEvent {
-    private Map<String, Object> eventData;
+    private JsonObject eventData;
 
     /**
-     * PusherEvent constructor that takes a hashmap.
-     * @param eventData hashmap(string, string)
+     * PusherEvent constructor that takes a JsonObject.
+     * @param eventData JsonObject;
      */
-    public PusherEvent(Map<String, Object> eventData) {
+    public PusherEvent(JsonObject eventData) {
         this.eventData = eventData;
     }
     /**
+     * Note: the API of this method is not stable we recommend using the specialized getters.
      * getProperty returns the value associated with the key, or null.
      * @param key - the key you wish to get
-     * @return value (Object) - the value as a string.
+     * @return value (JsonElement) - the value as an JsonElement.
      */
-    public Object getProperty(String key) {
+    public JsonElement getProperty(String key) {
         return eventData.get(key);
     }
 
@@ -27,18 +29,12 @@ public class PusherEvent {
      * @return the userID string: https://pusher.com/docs/channels/using_channels/events#user-id-in-client-events,
      * or null if the customer if the event is not a client event.
      */
-    public String getUserId() {return eventData.get("user_id").toString(); }
-    public String getChannelName() { return eventData.get("channel").toString(); }
-    public String getEventName() { return eventData.get("event").toString(); }
-    public String getData() { return eventData.get("data").toString(); }
-
+    public String getUserId() { return eventData.get("user_id").getAsString(); }
+    public String getChannelName() { return eventData.get("channel").getAsString(); }
+    public String getEventName() { return eventData.get("event").getAsString(); }
+    public String getData() { return eventData.get("data").getAsString(); }
 
     public String toString() {
-        String returnString = "";
-        for (String key: eventData.keySet()){
-            String value = eventData.get(key).toString();
-            returnString = returnString + key + ": " + value.toString() + ", ";
-        }
-        return returnString;
+        return eventData.toString();
     }
 }

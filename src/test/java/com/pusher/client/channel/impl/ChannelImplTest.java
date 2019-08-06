@@ -214,17 +214,17 @@ public class ChannelImplTest {
         channel.unbind(EVENT_NAME, mockListener);
     }
     @Test
-    public void testMetaDataIsExtractedFromMessageAndPassedToSingleListener() {
+    public void testMetaDataIsExtractedFromMessageAsIntAndPassedToSingleListener() {
 
         final String eventName = "client-my-event";
         ChannelEventListener mockListener = getEventListener();
 
         channel = newInstance(getChannelName());
         channel.bind(eventName, mockListener);
-        channel.onMessage(eventName, "{\"event\":\"client-my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"metadata-key\":\"42\"}");
+        channel.onMessage(eventName, "{\"event\":\"client-my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"metadata-key\":42}");
 
         verify(mockListener).onEvent(argCaptor.capture());
-        assertEquals("42", argCaptor.getValue().getProperty("metadata-key"));
+        assertEquals(42, argCaptor.getValue().getProperty("metadata-key").getAsInt());
         assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
 
