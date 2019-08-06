@@ -355,12 +355,6 @@ channel.bind("client-my-event", new SubscriptionEventListener() {
 });
 ```
 
-You can also instead retrieve it in the following way:
-
-```java
-event.getProperty("user_id")
-```
-
 ## Binding and handling events
 
 There are two types of events that occur on channel subscriptions.
