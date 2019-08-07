@@ -3,7 +3,6 @@ package com.pusher.client.channel.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.pusher.client.channel.PusherEvent;
