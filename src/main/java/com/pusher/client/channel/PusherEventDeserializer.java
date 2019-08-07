@@ -10,11 +10,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
 public class PusherEventDeserializer implements JsonDeserializer<PusherEvent> {
+    private final Gson GSON = new Gson();
+
     @Override
     @SuppressWarnings("unchecked")
     public PusherEvent deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        Gson GSON = new Gson();
-        PusherEvent event = new PusherEvent(GSON.fromJson(json, Map.class));
-        return event;
+        return new PusherEvent(GSON.fromJson(json, Map.class));
     }
 }
