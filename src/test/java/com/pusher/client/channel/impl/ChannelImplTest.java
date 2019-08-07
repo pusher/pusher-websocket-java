@@ -213,35 +213,6 @@ public class ChannelImplTest {
         channel.updateState(ChannelState.UNSUBSCRIBED);
         channel.unbind(EVENT_NAME, mockListener);
     }
-    @Test
-    public void testMetaDataIsExtractedFromMessageAsIntAndPassedToSingleListener() {
-
-        final String eventName = "client-my-event";
-        ChannelEventListener mockListener = getEventListener();
-
-        channel = newInstance(getChannelName());
-        channel.bind(eventName, mockListener);
-        channel.onMessage(eventName, "{\"event\":\"client-my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"metadata-key\":42}");
-
-        verify(mockListener).onEvent(argCaptor.capture());
-        assertEquals(Double.valueOf(42), (Double)argCaptor.getValue().getProperty("metadata-key"));
-        assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
-    }
-
-    @Test
-    public void testUserIdIsExtractedFromMessageAndPassedToSingleListenerWithHelperMethod() {
-
-        final String eventName = "client-my-event";
-        ChannelEventListener mockListener = getEventListener();
-
-        channel = newInstance(getChannelName());
-        channel.bind(eventName, mockListener);
-        channel.onMessage(eventName, "{\"event\":\"client-my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"user_id\":\"Kuzya\"}");
-
-        verify(mockListener).onEvent(argCaptor.capture());
-        assertEquals("Kuzya", argCaptor.getValue().getUserId());
-    }
-
 
     /* end of tests */
 
