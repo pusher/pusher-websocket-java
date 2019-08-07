@@ -224,7 +224,7 @@ public class ChannelImplTest {
         channel.onMessage(eventName, "{\"event\":\"client-my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"metadata-key\":42}");
 
         verify(mockListener).onEvent(argCaptor.capture());
-        assertEquals(42, argCaptor.getValue().getProperty("metadata-key").getAsInt());
+        assertEquals(Double.valueOf(42), (Double)argCaptor.getValue().getProperty("metadata-key"));
         assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
 
