@@ -32,7 +32,7 @@ public class PusherEvent {
      *
      * @return
      *      The userID string: https://pusher.com/docs/channels/using_channels/events#user-id-in-client-events,
-     *      or null if the customer if the event is not a client event.
+     *      or null if the event is not a client event on a presence channel.
      */
     public String getUserId() { return (String)eventData.get("user_id"); }
     public String getChannelName() { return (String)eventData.get("channel"); }
