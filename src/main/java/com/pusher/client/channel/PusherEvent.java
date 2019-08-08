@@ -17,7 +17,7 @@ public class PusherEvent {
      * @return
      *      The object can be casted as follows:
      *      - JSON strings - java.lang.String
-     *      - JSON number - java.lang.String
+     *      - JSON number - java.lang.Double
      *      - JSON boolean - java.lang.Boolean
      *      - JSON array - java.util.ArrayList
      *      - JSON object - java.util.Map
