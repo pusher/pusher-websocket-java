@@ -16,7 +16,7 @@ public class PusherEvent {
      * @param key The key you wish to get.
      * @return
      *      The object can be casted as follows:
-     *      - JSON strings - java.lang.Double
+     *      - JSON strings - java.lang.String
      *      - JSON number - java.lang.String
      *      - JSON boolean - java.lang.Boolean
      *      - JSON array - java.util.ArrayList
