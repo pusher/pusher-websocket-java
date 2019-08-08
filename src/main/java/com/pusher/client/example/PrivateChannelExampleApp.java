@@ -69,7 +69,7 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     @Override
     public void onEvent(final PusherEvent event) {
 
-        System.out.println(String.format("Received event [%s] on channel [%s] with data [%s] and event [%s]", event.toString()));
+        System.out.println(String.format("Received event [%s] on channel [%s] with data [%s] and event [%s]", event.getEventName(), event.getChannelName(), event.getData(), event.toString()));
     }
 
     @Override
