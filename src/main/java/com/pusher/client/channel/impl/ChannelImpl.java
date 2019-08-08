@@ -1,6 +1,5 @@
 package com.pusher.client.channel.impl;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -9,14 +8,12 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 
-import com.pusher.client.channel.ChannelEventListener;
-import com.pusher.client.channel.ChannelState;
-import com.pusher.client.channel.SubscriptionEventListener;
+import com.google.gson.GsonBuilder;
+import com.pusher.client.channel.*;
 import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
-
-    private static final Gson GSON = new Gson();
+    private final Gson GSON;
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
@@ -27,7 +24,9 @@ public class ChannelImpl implements InternalChannel {
     private final Object lock = new Object();
 
     public ChannelImpl(final String channelName, final Factory factory) {
-
+        GsonBuilder gsonBldr = new GsonBuilder();
+        gsonBldr.registerTypeAdapter(PusherEvent.class, new PusherEventDeserializer());
+        GSON = gsonBldr.create();
         if (channelName == null) {
             throw new IllegalArgumentException("Cannot subscribe to a channel with a null name");
         }
@@ -110,18 +109,18 @@ public class ChannelImpl implements InternalChannel {
 
             if (listeners != null) {
                 for (final SubscriptionEventListener listener : listeners) {
-                    final String data = extractDataFrom(message);
-
+                    final PusherEvent e = GSON.fromJson(message, PusherEvent.class);
                     factory.queueOnEventThread(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onEvent(name, event, data);
+                            listener.onEvent(e);
                         }
                     });
                 }
             }
         }
     }
+
 
     @Override
     public String toSubscribeMessage() {
@@ -189,11 +188,6 @@ public class ChannelImpl implements InternalChannel {
         return String.format("[Public Channel: name=%s]", name);
     }
 
-    @SuppressWarnings("unchecked")
-    private String extractDataFrom(final String message) {
-        final Map<Object, Object> jsonObject = GSON.fromJson(message, Map.class);
-        return (String)jsonObject.get("data");
-    }
 
     protected String[] getDisallowedNameExpressions() {
         return new String[] { "^private-.*", "^presence-.*" };

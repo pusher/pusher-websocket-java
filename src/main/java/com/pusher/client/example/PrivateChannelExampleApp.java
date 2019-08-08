@@ -2,6 +2,7 @@ package com.pusher.client.example;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -66,10 +67,9 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
     /* PrivateChannelEventListener implementation */
 
     @Override
-    public void onEvent(final String channelName, final String eventName, final String data) {
+    public void onEvent(final PusherEvent event) {
 
-        System.out.println(String.format("Received event [%s] on channel [%s] with data [%s]", eventName, channelName,
-                data));
+        System.out.println(String.format("Received event [%s] on channel [%s] with data [%s] and event [%s]", event.getEventName(), event.getChannelName(), event.getData(), event.toString()));
     }
 
     @Override
