@@ -1,6 +1,6 @@
 package com.pusher.client.connection.websocket;
 
-import com.pusher.java_websocket.handshake.ServerHandshake;
+import org.java_websocket.handshake.ServerHandshake;
 
 public interface WebSocketListener {
 
