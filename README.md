@@ -1,8 +1,15 @@
-# Pusher Java Client
+# Pusher Channels Java Client
 
 [![Build Status](https://travis-ci.org/pusher/pusher-websocket-java.svg?branch=master)](https://travis-ci.org/pusher/pusher-websocket-java)
 
-Pusher client library for Java targeting **Android** and general Java.
+Pusher Channels client library for Java targeting **Android** and general Java.
+
+## Supported platforms
+
+* Java SE - supports versions 8, 9, 10 and 11.
+* Oracle JDK
+* OpenJDK
+* [Android, via this wrapper SDK](https://github.com/pusher/pusher-websocket-android)
 
 ## TOC
 
@@ -100,12 +107,12 @@ Channel channel = pusher.subscribe("my-channel");
 // Bind to listen for events called "my-event" sent to "my-channel"
 channel.bind("my-event", new SubscriptionEventListener() {
     @Override
-    public void onEvent(String channel, String event, String data) {
-        System.out.println("Received event with data: " + data);
+    public void onEvent(PusherEvent event) {
+        System.out.println("Received event with data: " + event.toString());
     }
 });
 
-// Disconnect from the service (or become disconnected my network conditions)
+// Disconnect from the service
 pusher.disconnect();
 
 // Reconnect, with all channel subscriptions and event bindings automatically recreated
@@ -118,14 +125,14 @@ More information in reference format can be found below.
 
 ## The Pusher constructor
 
-The standard constructor take an application key which you can get from the app's API Access section in the Pusher dashboard.
+The standard constructor take an application key which you can get from the app's API Access section in the Pusher Channels dashboard.
 
 ```java
 PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
-If you are going to use [private](http://pusher.com/docs/private_channels) or [presence](http://pusher.com/docs/presence_channels) channels then you will need to provide an `Authorizer` to be used when authenticating subscriptions. In order to do this you need to pass in a `PusherOptions` object which has had an `Authorizer` set.
+If you are going to use [private](https://pusher.com/docs/channels/using_channels/private-channels) or [presence](https://pusher.com/docs/channels/using_channels/presence-channels) channels then you will need to provide an `Authorizer` to be used when authenticating subscriptions. In order to do this you need to pass in a `PusherOptions` object which has had an `Authorizer` set.
 
 ```java
 HttpAuthorizer authorizer = new HttpAuthorizer("http://example.com/some_auth_endpoint");
@@ -133,18 +140,38 @@ PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER).setAuth
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
-See the documentation on [Authenticating Users](http://pusher.com/docs/authenticating_users) for more information.
+See the documentation on [Authenticating Users](https://pusher.com/docs/channels/server_api/authenticating-users) for more information.
 
 If you need finer control over the endpoint then the setHost, setWsPort and setWssPort methods can be employed.
 ## Connecting
 
-In order to send and receive messages you need to connect to Pusher.
+In order to send and receive messages you need to connect to Channels.
 
 ```java
 PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 pusher.connect();
 ```
+
+## The PusherOptions object
+
+Most of the functionality of this library is configured through the PusherOptions object. You configure it by calling
+methods with parameters on the object before passing it to the Pusher object. Below is a table containing all of the
+methods you can call.
+
+| Method                      | Parameter         | Description                                                                                                                                   |
+|-----------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| setEncrypted                | Boolean           | Sets whether the connection should be made with TLS or not.                                                                                   |
+| setAuthorizer               | Pusher Authorizer | Sets the authorizer to be used when authenticating private and presence channels.                                                             |
+| setHost                     | String            | The host to which connections will be made.                                                                                                   |
+| setWsPort                   | int               | The port to which unencrypted connections will be made. Automatically set correctly.                                                          |
+| setWssPort                  | int               | The port to which encrypted connections will be made. Automatically set correctly.                                                            |
+| setCluster                  | String            | Sets the cluster the client will connect to, thereby setting the Host and Port correctly.                                                     |
+| setActivityTimeout          | long              | The number of milliseconds of inactivity at which a "ping" will be triggered to check the connection. The default value is 120,000.           |
+| setPongTimeout              | long              | The number of milliseconds the client waits to receive a "pong" response from the server before disconnecting. The default value is 30,000.   |
+| setMaxReconnectionAttempts  | int               | Number of reconnection attempts that will be made when pusher.connect() is called, after which the client will give up.                       |
+| setMaxReconnectGapInSeconds | int               | The delay in two reconnection extends exponentially (1, 2, 4, .. seconds) This property sets the maximum inbetween two reconnection attempts. |
+| setProxy                    | Proxy             | Specify a proxy, e.g. ```options.setProxy( new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) ) )```                     |
 
 ## Reconnecting
 
@@ -188,11 +215,11 @@ A series of `ConnectionState` members can be passed after the listener in this c
 pusher.connect(new MyConnectionEventListener(), ConnectionState.DISCONNECTED);
 ```
 
-For more information see [connection states](http://pusher.com/docs/connection_states).
+For more information see [connection states](https://pusher.com/docs/channels/using_channels/connection#connection-states).
 
 ## Subscribing to channels
 
-Pusher uses the concept of [channels](http://pusher.com/docs/channels) as a way of subscribing to data. They are identified and subscribed to by a simple name. Events are bound to on a channels and are also identified by name. To listen to an event you need to implemented the `ChannelEventListener` interface (see **Binding and handling events**).
+Channels uses the concept of [channels](https://pusher.com/docs/channels/using_channels/channels) as a way of subscribing to data. They are identified and subscribed to by a simple name. Events are bound to on a channels and are also identified by name. To listen to an event you need to implemented the `ChannelEventListener` interface (see **Binding and handling events**).
 
 As mentioned above, channel subscriptions need only be registered once per `Pusher` instance. They are preserved across disconnection and re-established with the server on reconnect. They should NOT be re-registered. They may, however, be registered with a `Pusher` instance before the first call to `connect` - they will be completed with the server as soon as a connection becomes available.
 
@@ -217,7 +244,7 @@ Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
 
 ### Private channels
 
-It's possible to subscribe to [private channels](http://pusher.com/docs/private_channels) that provide a mechanism for [authenticating channel subscriptions](http://pusher.com/docs/authenticating_users). In order to do this you need to provide an `Authorizer` when creating the `Pusher` instance (see **The Pusher constructor** above).
+It's possible to subscribe to [private channels](https://pusher.com/docs/channels/using_channels/private-channels) that provide a mechanism for [authenticating channel subscriptions](https://pusher.com/docs/channels/server_api/authenticating-users). In order to do this you need to provide an `Authorizer` when creating the `Pusher` instance (see **The Pusher constructor** above).
 
 The library provides a `HttpAuthorizer` implementation of `Authorizer` which makes an HTTP `POST` request to an authenticating endpoint. However, you can implement your own authentication mechanism if required.
 
@@ -245,7 +272,7 @@ PrivateChannel channel = pusher.subscribePrivate("private-channel",
 
 ### Presence channels
 
-[Presence channels](http://pusher.com/docs/presence_channels) are private channels which provide additional events exposing who is currently subscribed to the channel. Since they extend private channels they also need to be authenticated (see [authenticating channel subscriptions](http://pusher.com/docs/authenticating_users)).
+[Presence channels](https://pusher.com/docs/channels/using_channels/presence-channels) are private channels which provide additional events exposing who is currently subscribed to the channel. Since they extend private channels they also need to be authenticated (see [authenticating channel subscriptions](https://pusher.com/docs/channels/server_api/authenticating-users)).
 
 Presence channels can be subscribed to as follows:
 
@@ -291,7 +318,7 @@ PresenceChannel channel = pusher.subscribePresence("presence-channel",
 
 #### The User object
 
-*Note: In the [Pusher documentation](http://pusher.com/docs) a User may be referred to as a `Member`.*
+*Note: In the [Pusher Channels documentation](http://pusher.com/docs/channels) a User may be referred to as a `Member`.*
 
 The `User` object has two main methods.
 
@@ -311,7 +338,22 @@ Gson gson = new Gson();
 UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);
 ```
 
-For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](http://pusher.com/docs/authenticating_users#implementing_presence_endpoints) documentation.
+For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](https://pusher.com/docs/channels/server_api/authenticating-users#implementing-the-auth-endpoint-for-a-presence-channel) documentation.
+
+#### Client event authenticity
+
+Channels now provides a 'user-id' with client events sent from the server. With presence channels, your authentication endpoint provides your user with a user-id. Previously, it was up to you to include this user-id in every client-event triggered by your clients. Now, when a client of yours triggers a client event, Channels will append their user-id to their triggered message, so that the other clients in the channel receive it. This allows you to trust that a given user really did trigger a given payload.
+
+If you’d like to make use of this feature, you’ll need to extract the user-id from the message delivered by Channels. To do this, call getUserId() on the event payload your event handler gets called with, like so:
+
+```java
+channel.bind("client-my-event", new SubscriptionEventListener() {
+    @Override
+    public void onEvent(PusherEvent event) {
+        System.out.println("Received event with userId: " + event.getUserId());
+    }
+});
+```
 
 ## Binding and handling events
 
@@ -332,7 +374,7 @@ Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
     }
 
     @Override
-    public void onEvent(String channelName, String eventName, String data) {
+    public void onEvent(PusherEvent event) {
         // Called for incoming events names "foo", "bar" or "baz"
     }
 }, "foo", "bar", "baz");
@@ -348,13 +390,13 @@ Events triggered by your application are received by the `onEvent` method on the
 Channel channel = pusher.subscribe("my-channel");
 channel.bind("my-event", new ChannelEventListener() {
     @Override
-    public void onEvent(String channelName, String eventName, String data) {
+    public void onEvent(PusherEvent event) {
         // Called for incoming events named "my-event"
     }
 });
 ```
 
-The event data will be passed as the third parameter to the `onEvent` method. From there you can handle the data as you like. Since we encourage data to be in JSON here's an example that uses [Gson object deserialization](https://sites.google.com/site/gson/gson-user-guide#TOC-Object-Examples):
+The event data is accessible by calling the `getData()` method on the event. From there you can handle the data as you like. Since we encourage data to be in JSON here's an example that uses [Gson object deserialization](https://sites.google.com/site/gson/gson-user-guide#TOC-Object-Examples):
 
 ```java
 public class Example implements ChannelEventListener {
@@ -365,9 +407,9 @@ public class Example implements ChannelEventListener {
     }
 
     @Override
-    public void onEvent(String channelName, String eventName, String data) {
+    public void onEvent(PusherEvent event) {
         Gson gson = new Gson();
-        EventExample exampleEvent = gson.fromJson(data, EventExample.class);
+        EventExample exampleEvent = gson.fromJson(event.getData(), EventExample.class);
     }
 }
 
@@ -414,19 +456,19 @@ public class Example implements ChannelEventListener {
 
 ## Triggering events
 
-Once a [private](http://pusher.com/docs/private_channels) or [presence](http://pusher.com/docs/presence_channels) subscription has been authorized (see [authenticating users](http://pusher.com/docs/authenticating_users)) and the subscription has succeeded, it is possible to trigger events on those channels.
+Once a [private](https://pusher.com/docs/channels/using_channels/private-channels) or [presence](https://pusher.com/docs/channels/using_channels/presence-channels) subscription has been authorized (see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users)) and the subscription has succeeded, it is possible to trigger events on those channels.
 
 ```java
 channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
 ```
 
-Events triggered by clients are called [client events](http://pusher.com/docs/client_events). Because they are being triggered from a client which may not be trusted there are a number of enforced rules when using them. Some of these rules include:
+Events triggered by clients are called [client events](https://pusher.com/docs/channels/using_channels/events#triggering-client-events). Because they are being triggered from a client which may not be trusted there are a number of enforced rules when using them. Some of these rules include:
 
 * Event names must have a `client-` prefix
 * Rate limits
 * You can only trigger an event when the subscription has succeeded
 
-For full details see the [client events documentation](http://pusher.com/docs/client_events).
+For full details see the [client events documentation](https://pusher.com/docs/channels/using_channels/events#triggering-client-events).
 
 ```java
 PrivateChannel channel = pusher.subscribePrivate("private-channel",
@@ -450,7 +492,7 @@ You can access the value **once the connection has been established** as follows
 String socketId = pusher.getConnection().getSocketId();
 ```
 
-For more information on how and why there is a `socket_id` see the documentation on [authenticating users](http://pusher.com/docs/authenticating_users) and [excluding recipients](http://pusher.com/docs/server_api_guide/server_excluding_recipients).
+For more information on how and why there is a `socket_id` see the documentation on [authenticating users](ttps://pusher.com/docs/channels/server_api/authenticating-users) and [excluding recipients](https://pusher.com/docs/channels/server_api/excluding-event-recipients).
 
 ## Helper Methods
 
@@ -492,18 +534,18 @@ channel.isSubscribed(); // => `true`/`false`
 The JavaDocs can be found here: <http://pusher.github.com/pusher-websocket-java/>
 
 ## Library Development Environment
-If you'd like to tweak this library there are ways to use your local code rather than the official.
+If you'd like to tweak this library there are ways to use your local code rather than the official. This is a rough guide on how to do so.
 
 ### Prerequisites
 
 * A Java Virtual Machine.
 * Gradle, the build system used for the project, is downloaded by the Gradle Wrapper (`gradlew`) which is included in the repo.
-  * On Windows `./gradlew.bat` should be used, on Linux `./gradle`.
+* On Windows `./gradlew.bat` should be used, on Linux `./gradle`.
 
 ### Cloning the project
 
-* Clone the project: `git clone https://github.com/pusher/pusher-java-client`
-* Change to the top level directory for the project: `cd pusher-java-client`
+* Clone the project: `git clone https://github.com/pusher/pusher-websocket-java`
+* Change to the top level directory for the project: `cd pusher-websocket-java`
 
 ### Android Studio
 * In your app project's `settings.gradle` add the following lines:

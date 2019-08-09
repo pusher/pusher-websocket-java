@@ -3,12 +3,14 @@ package com.pusher.client.channel.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
+import com.pusher.client.channel.PusherEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -25,6 +27,9 @@ public class ChannelImplTest {
     protected ChannelImpl channel;
     protected @Mock Factory factory;
     private @Mock ChannelEventListener mockListener;
+
+    @Captor
+    ArgumentCaptor<PusherEvent> argCaptor;
 
     @Before
     public void setUp() {
@@ -105,9 +110,10 @@ public class ChannelImplTest {
         channel.bind(EVENT_NAME, mockListener);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
+        verify(mockListener, times(1)).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
-
     @Test
     public void testDataIsExtractedFromMessageAndPassedToMultipleListeners() {
         final ChannelEventListener mockListener2 = getEventListener();
@@ -116,8 +122,13 @@ public class ChannelImplTest {
         channel.bind(EVENT_NAME, mockListener2);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
-        verify(mockListener2).onEvent(getChannelName(), EVENT_NAME, "{\"fish\":\"chips\"}");
+        verify(mockListener).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
+
+        verify(mockListener2).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
 
     @Test
@@ -126,7 +137,7 @@ public class ChannelImplTest {
         channel.bind(EVENT_NAME, mockListener);
         channel.onMessage("DifferentEventName", "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
 
-        verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
+        verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }
 
     @Test
@@ -136,7 +147,7 @@ public class ChannelImplTest {
         channel.unbind(EVENT_NAME, mockListener);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
-        verify(mockListener, never()).onEvent(anyString(), anyString(), anyString());
+        verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -180,12 +191,12 @@ public class ChannelImplTest {
         verify(mockListener, never()).onSubscriptionSucceeded(getChannelName());
     }
 
+
     @Test
     public void testUpdateStateToSubscribedNotifiesListenerThatSubscriptionSucceeded() {
         channel.bind(EVENT_NAME, mockListener);
         channel.updateState(ChannelState.SUBSCRIBE_SENT);
         channel.updateState(ChannelState.SUBSCRIBED);
-
         verify(mockListener).onSubscriptionSucceeded(getChannelName());
     }
 
