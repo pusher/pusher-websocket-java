@@ -8,7 +8,9 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
@@ -49,6 +51,8 @@ public class WebSocketConnectionTest {
     private ConnectionEventListener mockEventListener;
     @Mock
     private Factory factory;
+    @Mock
+    private ScheduledExecutorService scheduledExecutorService;
 
     private WebSocketConnection connection;
 
@@ -360,26 +364,47 @@ public class WebSocketConnectionTest {
         assertEquals(ConnectionState.RECONNECTING, connection.getState());
     }
 
-//    TODO: leaving the following tests commented out just for reference. The lib needs to be rearchitected before we can hope to get any of these in
-//    @Test
-//    public void reconnectingLogicActuallyBeingCalled(){
-//        fail("not implemented");
-//    }
-//
-//    @Test
-//    public void retryMaximumNumberOfTimes(){
-//        fail("not implemented");
-//    }
-//
-//    @Test
-//    public void disconnectAfterTooManyRetries(){
-//        fail("not implemented");
-//    }
-//
-//    @Test
-//    public void retryWithTimeout(){
-//        fail("not implemented");
-//    }
+    @Test
+    @SuppressWarnings("rawtypes")
+    public void testStopsReconnectingAfterMaxReconnectionAttemptsIsReached() throws URISyntaxException, InterruptedException, SSLException {
+        when(factory.getTimers()).thenReturn(scheduledExecutorService);
+        // Run the reconnect functionality synchronously
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final Runnable r = (Runnable) invocation.getArguments()[0];
+                r.run();
+                return null;
+            }
+        }).when(scheduledExecutorService).schedule(any(Runnable.class), any(Long.class), any(TimeUnit.class));
+
+        // Reconnect a single time (maxReconnectionAttempts = 1)
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, 1, MAX_GAP, PROXY, factory);
+
+        connection.connect();
+
+        // After the first close, we expect a reconnect
+        connection.onClose(500, "reason", true);
+        assertEquals(ConnectionState.CONNECTING, connection.getState());
+
+        // It should give up on the second attempt
+        connection.onClose(500, "reason", true);
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
+
+        // Test that behavior is the same after `connect()` is called
+        // This guards against a bug fixed in https://github.com/pusher/pusher-websocket-java/pull/201
+        // where the number of retries was not reset after calling `connect()`.
+
+        connection.connect();
+
+        // After the first close, we expect a reconnect
+        connection.onClose(500, "reason", true);
+        assertEquals(ConnectionState.CONNECTING, connection.getState());
+
+        // It should give up on the second attempt
+        connection.onClose(500, "reason", true);
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
+    }
 
     /* end of tests */
 
