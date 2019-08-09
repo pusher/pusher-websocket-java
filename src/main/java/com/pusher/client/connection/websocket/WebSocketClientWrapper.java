@@ -10,8 +10,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.pusher.java_websocket.client.WebSocketClient;
-import com.pusher.java_websocket.handshake.ServerHandshake;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 
 /**
  * A thin wrapper around the WebSocketClient class from the Java-WebSocket
