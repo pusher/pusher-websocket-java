@@ -43,7 +43,7 @@ repositories {
 
 dependencies {
 	compile "com.google.code.gson:gson:2.2.2"
-	compile "com.pusher:java-websocket:1.4.1"
+	compile "org.java-websocket:Java-WebSocket:1.4.0"
 	testCompile "org.mockito:mockito-all:1.8.5"
 	testCompile "org.powermock:powermock-module-junit4:1.4.11"
 	testCompile "org.powermock:powermock-api-mockito:1.4.11"

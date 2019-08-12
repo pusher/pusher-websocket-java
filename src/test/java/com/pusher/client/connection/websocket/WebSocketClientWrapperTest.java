@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 
 import javax.net.ssl.SSLException;
 
-import com.pusher.java_websocket.handshake.ServerHandshake;
+import org.java_websocket.handshake.ServerHandshake;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

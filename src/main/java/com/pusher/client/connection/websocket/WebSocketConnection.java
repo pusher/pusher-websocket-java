@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLException;
 
-import com.pusher.java_websocket.handshake.ServerHandshake;
+import org.java_websocket.handshake.ServerHandshake;
 
 import com.google.gson.Gson;
 
@@ -323,6 +323,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 factory.shutdownThreads();
             }
         });
+        reconnectAttempts = 0;
     }
 
     @Override

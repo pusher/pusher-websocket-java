@@ -31,7 +31,7 @@ import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
 import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
-import com.pusher.java_websocket.handshake.ServerHandshake;
+import org.java_websocket.handshake.ServerHandshake;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndToEndTest {
