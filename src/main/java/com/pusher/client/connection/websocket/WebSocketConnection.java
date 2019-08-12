@@ -323,6 +323,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 factory.shutdownThreads();
             }
         });
+        reconnectAttempts = 0;
     }
 
     @Override
