@@ -1,7 +1,9 @@
 package com.pusher.client.channel.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannel;
@@ -66,7 +68,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     @Override
     public String toSubscribeMessage() {
         String msg = super.toSubscribeMessage();
-        storeMyUserId(channelData);
+        myUserID = extractUserIdFromChannelData((String)channelData);
         return msg;
     }
 
@@ -161,9 +163,24 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     }
 
     @SuppressWarnings("rawtypes")
-    private void storeMyUserId(final Object channelData) {
-        final Map channelDataMap = GSON.fromJson((String)channelData, Map.class);
-        myUserID = String.valueOf(channelDataMap.get("user_id"));
+    private String extractUserIdFromChannelData(final String channelData) {
+        final Map channelDataMap;
+        try {
+            channelDataMap = GSON.fromJson((String)channelData, Map.class);
+        } catch (final JsonSyntaxException e) {
+            throw new AuthorizationFailureException("Invalid response from Authorizer: unable to parse channel_data object: " + channelData, e);
+        }
+        Object maybeUserId;
+        try {
+            maybeUserId = channelDataMap.get("user_id");
+        } catch (final NullPointerException e) {
+            throw new AuthorizationFailureException("Invalid response from Authorizer: no user_id key in channel_data object: " + channelData);
+        }
+        if (maybeUserId == null) {
+            throw new AuthorizationFailureException("Invalid response from Authorizer: no user_id key in channel_data object: " + channelData);
+        }
+        // user_id can be a string or an integer in the Channels websocket protocol
+        return String.valueOf(maybeUserId);
     }
 
     private class MemberData {
