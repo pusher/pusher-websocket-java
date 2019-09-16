@@ -21,7 +21,7 @@ apply plugin: 'org.ajoberstar.github-pages'
 apply plugin: 'signing'
 
 group = "com.pusher"
-version = "2.0.0"
+version = "2.0.1"
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
