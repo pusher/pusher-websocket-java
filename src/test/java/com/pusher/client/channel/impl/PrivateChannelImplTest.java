@@ -21,7 +21,8 @@ import com.pusher.client.connection.impl.InternalConnection;
 @RunWith(MockitoJUnitRunner.class)
 public class PrivateChannelImplTest extends ChannelImplTest {
 
-    private static final String AUTH_TOKEN = "\"auth\":\"a87fe72c6f36272aa4b1:41dce43734b18bb\"";
+    private static final String AUTH_RESPONSE = "\"auth\":\"a87fe72c6f36272aa4b1:41dce43734b18bb\"";
+    private static final String AUTH_RESPONSE_WITH_CHANNEL_DATA = "\"auth\":\"a87fe72c6f36272aa4b1:41dce43734b18bb\",\"channel_data\":\"{\\\"user_id\\\":\\\"51169fc47abac\\\"}\"";
 
     @Mock
     protected InternalConnection mockConnection;
@@ -32,7 +33,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Before
     public void setUp() {
         super.setUp();
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_TOKEN + "}");
+        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "}");
     }
 
     @Test
@@ -72,7 +73,16 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Test
     @Override
     public void testReturnsCorrectSubscribeMessage() {
-        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"," + AUTH_TOKEN
+        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"," + AUTH_RESPONSE
+                + "}}", channel.toSubscribeMessage());
+    }
+
+    @Test
+    public void testReturnsCorrectSubscribeMessageWithChannelData() {
+        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(
+                "{" + AUTH_RESPONSE_WITH_CHANNEL_DATA + "}");
+
+        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"," + AUTH_RESPONSE_WITH_CHANNEL_DATA
                 + "}}", channel.toSubscribeMessage());
     }
 

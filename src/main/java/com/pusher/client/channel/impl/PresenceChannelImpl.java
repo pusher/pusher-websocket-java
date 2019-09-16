@@ -1,6 +1,7 @@
 package com.pusher.client.channel.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
@@ -65,35 +66,10 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public String toSubscribeMessage() {
-
-        final String authResponse = getAuthResponse();
-
-        try {
-            final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
-            final String authKey = (String)authResponseMap.get("auth");
-            final Object channelData = authResponseMap.get("channel_data");
-
-            storeMyUserId(channelData);
-
-            final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
-            jsonObject.put("event", "pusher:subscribe");
-
-            final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
-            dataMap.put("channel", name);
-            dataMap.put("auth", authKey);
-            dataMap.put("channel_data", channelData);
-
-            jsonObject.put("data", dataMap);
-
-            final String json = GSON.toJson(jsonObject);
-
-            return json;
-        }
-        catch (final Exception e) {
-            throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
-        }
+        String msg = super.toSubscribeMessage();
+        myUserID = extractUserIdFromChannelData(channelData);
+        return msg;
     }
 
     @Override
@@ -187,9 +163,24 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     }
 
     @SuppressWarnings("rawtypes")
-    private void storeMyUserId(final Object channelData) {
-        final Map channelDataMap = GSON.fromJson((String)channelData, Map.class);
-        myUserID = String.valueOf(channelDataMap.get("user_id"));
+    private String extractUserIdFromChannelData(final String channelData) {
+        final Map channelDataMap;
+        try {
+            channelDataMap = GSON.fromJson((String)channelData, Map.class);
+        } catch (final JsonSyntaxException e) {
+            throw new AuthorizationFailureException("Invalid response from Authorizer: unable to parse channel_data object: " + channelData, e);
+        }
+        Object maybeUserId;
+        try {
+            maybeUserId = channelDataMap.get("user_id");
+        } catch (final NullPointerException e) {
+            throw new AuthorizationFailureException("Invalid response from Authorizer: no user_id key in channel_data object: " + channelData);
+        }
+        if (maybeUserId == null) {
+            throw new AuthorizationFailureException("Invalid response from Authorizer: no user_id key in channel_data object: " + channelData);
+        }
+        // user_id can be a string or an integer in the Channels websocket protocol
+        return String.valueOf(maybeUserId);
     }
 
     private class MemberData {
