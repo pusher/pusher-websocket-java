@@ -1,10 +1,13 @@
 package com.pusher.client.connection;
 
+import java.util.logging.Logger;
+
 /**
  * Represents a change in connection state.
  */
 public class ConnectionStateChange {
 
+    private static final Logger log = Logger.getLogger(ConnectionStateChange.class.getName());
     private final ConnectionState previousState;
     private final ConnectionState currentState;
 
@@ -18,9 +21,8 @@ public class ConnectionStateChange {
     public ConnectionStateChange(final ConnectionState previousState, final ConnectionState currentState) {
 
         if (previousState == currentState) {
-            throw new IllegalArgumentException(
-                    "Attempted to create an connection state update where both previous and current state are: "
-                            + currentState);
+	    log.fine("Attempted to create an connection state update where both previous and current state are: "
+		     + currentState);
         }
 
         this.previousState = previousState;
