@@ -20,11 +20,6 @@ public class ConnectionStateChangeTest {
         assertSame(current, change.getCurrentState());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testFailFastIfPreviousStateIsSameAsCurrentState() {
-        new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.CONNECTED);
-    }
-
     @Test
     public void testHashCodeAndEquals() {
         final ConnectionStateChange instanceOne = new ConnectionStateChange(ConnectionState.DISCONNECTED,
