@@ -2,6 +2,10 @@
 
 This Changelog is no longer being updated. For any further changes please see the Releases section on this Github repository - https://github.com/pusher/pusher-websocket-java/releases
 
+## Version 2.0.2
+
+* Make a no-op state change non-fatal, allowing transitions to/from the same state
+
 ## Version 2.0.1
 
 * Forward `channel_data` returned by the auth endpoint when subscribing to private channels
