@@ -8,6 +8,7 @@ import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
@@ -46,6 +47,14 @@ public class ChannelManager implements ConnectionEventListener {
         }
     }
 
+    public PrivateEncryptedChannel getPrivateEncryptedChannel(String channelName) throws IllegalArgumentException{
+        if (!channelName.startsWith("private-encrypted")) {
+            throw new IllegalArgumentException("Encrypted private channels must begin with 'private-encrypted-'");
+        } else {
+            return (PrivateEncryptedChannel) findChannelInChannelMap(channelName);
+        }
+    }
+
     public PresenceChannel getPresenceChannel(String channelName) throws IllegalArgumentException{
         if (!channelName.startsWith("presence-")) {
             throw new IllegalArgumentException("Presence channels must begin with 'presence-'");
@@ -76,6 +85,12 @@ public class ChannelManager implements ConnectionEventListener {
         validateArgumentsAndBindEvents(channel, listener, eventNames);
         channelNameToChannelMap.put(channel.getName(), channel);
         sendOrQueueSubscribeMessage(channel);
+
+        if (channel instanceof PrivateEncryptedChannelImpl) {
+           PrivateEncryptedChannelImpl impl = (PrivateEncryptedChannelImpl)channel;
+           impl.saveSharedSecret();
+        }
+
     }
 
     public void unsubscribeFrom(final String channelName) {

@@ -12,8 +12,10 @@ import javax.net.ssl.SSLException;
 
 import com.pusher.client.Authorizer;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.channel.impl.ChannelManager;
+import com.pusher.client.channel.impl.PrivateEncryptedChannelImpl;
 import com.pusher.client.channel.impl.PresenceChannelImpl;
 import com.pusher.client.channel.impl.PrivateChannelImpl;
 import com.pusher.client.connection.impl.InternalConnection;
@@ -84,6 +86,13 @@ public class Factory {
     public PrivateChannelImpl newPrivateChannel(final InternalConnection connection, final String channelName,
             final Authorizer authorizer) {
         return new PrivateChannelImpl(connection, channelName, authorizer, this);
+    }
+
+    public PrivateEncryptedChannelImpl newPrivateEncryptedChannel(
+            final InternalConnection connection,
+            final String channelName,
+            final Authorizer authorizer) {
+        return new PrivateEncryptedChannelImpl(connection, channelName, authorizer, this);
     }
 
     public PresenceChannelImpl newPresenceChannel(final InternalConnection connection, final String channelName,

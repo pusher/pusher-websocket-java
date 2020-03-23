@@ -2,6 +2,8 @@ package com.pusher.client;
 
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.PrivateEncryptedChannel;
+import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannel;
@@ -11,6 +13,7 @@ import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.InternalChannel;
 import com.pusher.client.channel.impl.PresenceChannelImpl;
 import com.pusher.client.channel.impl.PrivateChannelImpl;
+import com.pusher.client.channel.impl.PrivateEncryptedChannelImpl;
 import com.pusher.client.connection.Connection;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -284,6 +287,32 @@ public class Pusher implements Client {
         return channel;
     }
 
+
+    /**
+     * Subscribes to a {@link com.pusher.client.channel.PrivateEncryptedChannel} which
+     * requires authentication.
+     *
+     * @param channelName The name of the channel to subscribe to.
+     * @param listener A listener to be informed of both Pusher channel protocol events and subscription data events.
+     * @param eventNames An optional list of names of events to be bound to on the channel. The equivalent of calling {@link com.pusher.client.channel.Channel#bind(String, SubscriptionEventListener)} one or more times.
+     * @return A new {@link com.pusher.client.channel.PrivateEncryptedChannel} representing the subscription.
+     * @throws IllegalStateException if a {@link com.pusher.client.Authorizer} has not been set for the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
+     */
+    public PrivateEncryptedChannel subscribePrivateEncrypted(
+            final String channelName,
+            final PrivateEncryptedChannelEventListener listener,
+            final String... eventNames) {
+
+        throwExceptionIfNoAuthorizerHasBeenSet();
+
+        final PrivateEncryptedChannelImpl channel = factory.newPrivateEncryptedChannel(
+                        connection, channelName,pusherOptions.getAuthorizer());
+        channelManager.subscribeTo(channel, listener, eventNames);
+
+        return channel;
+    }
+
+
     /**
      * Subscribes to a {@link com.pusher.client.channel.PresenceChannel} which
      * requires authentication.
@@ -361,6 +390,16 @@ public class Pusher implements Client {
      */
     public PrivateChannel getPrivateChannel(String channelName){
         return channelManager.getPrivateChannel(channelName);
+    }
+
+    /**
+     *
+     * @param channelName The name of the private encrypted channel to be retrieved
+     * @return A private encrypted channel, or null if it could not be found
+     * @throws IllegalArgumentException if you try to retrieve a public or presence channel.
+     */
+    public PrivateEncryptedChannel getPrivateEncryptedChannel(String channelName){
+        return channelManager.getPrivateEncryptedChannel(channelName);
     }
 
     /**
