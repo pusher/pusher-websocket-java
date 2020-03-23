@@ -8,6 +8,6 @@ jdk:
 script:
   - ./gradlew jacocoTestReport test
 
-  after_success:
-  # report coverage
-  - bash <(curl -s https://codecov.io/bash)
+after_success:
+# report coverage
+- bash <(curl -s https://codecov.io/bash)
