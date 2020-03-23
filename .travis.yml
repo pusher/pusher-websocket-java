@@ -5,5 +5,8 @@ jdk:
   - openjdk9
   - openjdk10
   - openjdk11
+
+if: (type = pull_request AND repo = pusher/pusher-websocket-java) OR (branch = master)
+
 script:
   - ./gradlew test
