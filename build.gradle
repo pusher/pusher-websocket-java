@@ -66,6 +66,7 @@ javadoc {
 	exclude "**/com/pusher/client/channel/impl/*"
 	exclude "**/com/pusher/client/connection/impl/*"
 	exclude "**/com/pusher/client/connection/websocket/*"
+	exclude "**/com/pusher/client/crypto/nacl/*"
 	exclude "**/org/java_websocket/*"
 	exclude "**/com/pusher/client/example/*"
 	options.linkSource = true
