@@ -6,4 +6,8 @@ jdk:
   - openjdk10
   - openjdk11
 script:
-  - ./gradlew test
+  - ./gradlew jacocoTestReport test
+
+after_success:
+# report coverage
+- bash <(curl -s https://codecov.io/bash)

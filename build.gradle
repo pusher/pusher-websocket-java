@@ -19,6 +19,7 @@ apply plugin: 'maven'
 apply plugin: 'eclipse'
 apply plugin: 'org.ajoberstar.github-pages'
 apply plugin: 'signing'
+apply plugin: 'jacoco'
 
 group = "com.pusher"
 version = "2.0.2"
@@ -185,4 +186,14 @@ task createPublishTarget {
 
 wrapper {
 	gradleVersion = '5.5.1'
+}
+
+jacoco {
+	toolVersion = "0.8.4"
+}
+
+jacocoTestReport {
+	reports.xml.enabled = true
+	reports.html.enabled = false
+	reports.csv.enabled = false
 }
