@@ -9,6 +9,7 @@ import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -18,10 +19,36 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private final InternalConnection connection;
     private final Authorizer authorizer;
 
-    protected String channelData;
+    private class PrivateEncryptedChannelData {
+        final String auth;
+        final String sharedSecret;
+        final String channelData;
 
-    public PrivateEncryptedChannelImpl(final InternalConnection connection, final String channelName,
-                                       final Authorizer authorizer, final Factory factory) {
+        protected PrivateEncryptedChannelData(String auth, String sharedSecret, String channelData) {
+            this.auth = auth;
+            this.sharedSecret = sharedSecret;
+            this.channelData = channelData;
+        }
+
+        public String getAuth() {
+            return auth;
+        }
+
+        public String getSharedSecret() {
+            return sharedSecret;
+        }
+
+        public String getChannelData() {
+            return channelData;
+        }
+    }
+
+    private PrivateEncryptedChannelData authorizerData;
+
+    public PrivateEncryptedChannelImpl(final InternalConnection connection,
+                                       final String channelName,
+                                       final Authorizer authorizer,
+                                       final Factory factory) {
         super(channelName, factory);
         this.connection = connection;
         this.authorizer = authorizer;
@@ -35,53 +62,70 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     @Override
     public void bind(final String eventName, final SubscriptionEventListener listener) {
 
-        if (listener instanceof PrivateEncryptedChannelEventListener == false) {
+        if (!(listener instanceof PrivateEncryptedChannelEventListener)) {
             throw new IllegalArgumentException(
-                    "Only instances of PrivateChannelEventListener can be bound to a private channel");
+                    "Only instances of PrivateEncryptedChannelEventListener can be bound " +
+                            "to a private encrypted channel");
         }
 
         super.bind(eventName, listener);
     }
 
-    // todo: is this the best way of doing this? Should each channel have a prepare/validate
-    // requirements before we send a subscribe event where we can do this work.
-    protected void saveSharedSecret() {
+    private void saveSharedSecret() {
         final String authResponse = getAuthResponse();
         final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
         final String sharedSecret = (String)authResponseMap.get("shared_secret");
+        final byte[] sharedSecretBase64 = Base64.getDecoder().decode(sharedSecret);
 
-        // todo actually save this somewhere
+        // todo set up secret box opener -> pass the key
+        // todo make sure when unsubscribe we clear the text
+        // todo can we clear everything when the user disconnects totally
+    }
+
+    /**
+     * ensure we've got all the bits and pieces we need to continue
+     */
+    protected void prepareChannel() {
+        final String authResponse = getAuthResponse();
+
+        try {
+            final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
+            final String authKey = (String) authResponseMap.get("auth");
+            final String sharedSecret = (String) authResponseMap.get("shared_secret");
+            final String channelData = (String)authResponseMap.get("channel_data");
+
+            if (authKey == null || sharedSecret == null) {
+                throw new AuthorizationFailureException("Didn't receive all the fields we expected " +
+                        "from the Authorizer: " + authResponse);
+            }
+
+            authorizerData = new PrivateEncryptedChannelData(authKey, sharedSecret, channelData);
+            saveSharedSecret();
+
+        } catch (final Exception e) {
+            throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
+        }
     }
 
     @Override
     @SuppressWarnings("rawtypes")
     public String toSubscribeMessage() {
 
-        final String authResponse = getAuthResponse();
-
-        try {
-            final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
-            final String authKey = (String)authResponseMap.get("auth");
-            channelData = (String)authResponseMap.get("channel_data");
-
-            final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
-            jsonObject.put("event", "pusher:subscribe");
-
-            final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
-            dataMap.put("channel", name);
-            dataMap.put("auth", authKey);
-            if (channelData != null) {
-                dataMap.put("channel_data", channelData);
-            }
-
-            jsonObject.put("data", dataMap);
-
-            final String json = GSON.toJson(jsonObject);
-            return json;
+        // create the data part
+        final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
+        dataMap.put("channel", name);
+        dataMap.put("auth", authorizerData.getAuth());
+        if (authorizerData.getChannelData() != null) {
+            dataMap.put("channel_data", authorizerData.channelData);
         }
-        catch (final Exception e) {
-            throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
-        }
+
+        // create the wrapper part
+        final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
+        jsonObject.put("event", "pusher:subscribe");
+        jsonObject.put("authorizerData", dataMap);
+        jsonObject.put("data", dataMap);
+
+        return GSON.toJson(jsonObject);
     }
 
     private String getAuthResponse() {
@@ -89,10 +133,9 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         return authorizer.authorize(getName(), socketId);
     }
 
-    // todo: does this need to change to say private-encrypted?
     @Override
     protected String[] getDisallowedNameExpressions() {
-        return new String[] { "^(?!private-).*" };
+        return new String[] { "^(?!private-encrypted).*" };
     }
 
     @Override

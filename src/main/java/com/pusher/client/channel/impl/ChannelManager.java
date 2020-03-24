@@ -86,11 +86,6 @@ public class ChannelManager implements ConnectionEventListener {
         channelNameToChannelMap.put(channel.getName(), channel);
         sendOrQueueSubscribeMessage(channel);
 
-        if (channel instanceof PrivateEncryptedChannelImpl) {
-           PrivateEncryptedChannelImpl impl = (PrivateEncryptedChannelImpl)channel;
-           impl.saveSharedSecret();
-        }
-
     }
 
     public void unsubscribeFrom(final String channelName) {
@@ -152,6 +147,13 @@ public class ChannelManager implements ConnectionEventListener {
 
                 if (connection.getState() == ConnectionState.CONNECTED) {
                     try {
+
+                        // only private encrypted channels can prepare themselves atm
+                        if (channel instanceof PrivateEncryptedChannelImpl) {
+                            PrivateEncryptedChannelImpl impl = (PrivateEncryptedChannelImpl)channel;
+                            impl.prepareChannel();
+                        }
+
                         final String message = channel.toSubscribeMessage();
                         connection.sendMessage(message);
                         channel.updateState(ChannelState.SUBSCRIBE_SENT);
