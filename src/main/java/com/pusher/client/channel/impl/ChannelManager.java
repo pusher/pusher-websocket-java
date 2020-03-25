@@ -99,6 +99,12 @@ public class ChannelManager implements ConnectionEventListener {
             return;
         }
         if (connection.getState() == ConnectionState.CONNECTED) {
+
+            // only private encrypted channels need to be securely torn down
+            if (channel instanceof PrivateEncryptedChannelImpl) {
+                ((PrivateEncryptedChannelImpl) channel).tearDownChannel();
+            }
+
             sendUnsubscribeMessage(channel);
         }
     }
@@ -150,8 +156,7 @@ public class ChannelManager implements ConnectionEventListener {
 
                         // only private encrypted channels can prepare themselves atm
                         if (channel instanceof PrivateEncryptedChannelImpl) {
-                            PrivateEncryptedChannelImpl impl = (PrivateEncryptedChannelImpl)channel;
-                            impl.prepareChannel();
+                            ((PrivateEncryptedChannelImpl)channel).prepareChannel();
                         }
 
                         final String message = channel.toSubscribeMessage();

@@ -7,6 +7,7 @@ import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.util.Factory;
 
 import java.util.Base64;
@@ -18,6 +19,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private static final Gson GSON = new Gson();
     private final InternalConnection connection;
     private final Authorizer authorizer;
+    private SecretBoxOpener secretBoxOpener;
 
     private class PrivateEncryptedChannelData {
         final String auth;
@@ -75,11 +77,13 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         final String authResponse = getAuthResponse();
         final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
         final String sharedSecret = (String)authResponseMap.get("shared_secret");
+
+        //todo: fix this as it's java 1.8+ only, which won't support android < 6
         final byte[] sharedSecretBase64 = Base64.getDecoder().decode(sharedSecret);
 
-        // todo set up secret box opener -> pass the key
-        // todo make sure when unsubscribe we clear the text
-        // todo can we clear everything when the user disconnects totally
+        secretBoxOpener = new SecretBoxOpener(sharedSecretBase64);
+
+        // todo can we clear everything when the user disconnects totally?
     }
 
     /**
@@ -105,6 +109,10 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         } catch (final Exception e) {
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
         }
+    }
+
+    protected void tearDownChannel() {
+        secretBoxOpener.clearKey();
     }
 
     @Override
