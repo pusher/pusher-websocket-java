@@ -23,21 +23,15 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     private class PrivateEncryptedChannelData {
         final String auth;
-        final String sharedSecret;
         final String channelData;
 
-        protected PrivateEncryptedChannelData(String auth, String sharedSecret, String channelData) {
+        protected PrivateEncryptedChannelData(String auth, String channelData) {
             this.auth = auth;
-            this.sharedSecret = sharedSecret;
             this.channelData = channelData;
         }
 
         public String getAuth() {
             return auth;
-        }
-
-        public String getSharedSecret() {
-            return sharedSecret;
         }
 
         public String getChannelData() {
@@ -73,11 +67,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.bind(eventName, listener);
     }
 
-    private void saveSharedSecret() {
-        final String authResponse = getAuthResponse();
-        final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
-        final String sharedSecret = (String)authResponseMap.get("shared_secret");
-
+    private void saveSharedSecret(String sharedSecret) {
         //todo: fix this as it's java 1.8+ only, which won't support android < 6
         final byte[] sharedSecretBase64 = Base64.getDecoder().decode(sharedSecret);
 
@@ -101,10 +91,10 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
             if (authKey == null || sharedSecret == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields we expected " +
                         "from the Authorizer: " + authResponse);
+            } else {
+                authorizerData = new PrivateEncryptedChannelData(authKey, channelData);
+                saveSharedSecret(sharedSecret);
             }
-
-            authorizerData = new PrivateEncryptedChannelData(authKey, sharedSecret, channelData);
-            saveSharedSecret();
 
         } catch (final Exception e) {
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
