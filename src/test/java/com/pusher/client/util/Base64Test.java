@@ -2,6 +2,7 @@ package com.pusher.client.util;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.pusher.client.util.internal.Base64;
 import org.junit.Test;
 
 public class Base64Test {
