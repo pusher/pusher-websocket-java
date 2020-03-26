@@ -92,7 +92,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
             if (authKey == null || sharedSecret == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields we expected " +
-                        "from the Authorizer: " + authResponse);
+                        "from the Authorizer, expected an auth token and shared_secret but got: " + authResponse);
             } else {
                 authorizerData = new PrivateEncryptedChannelData(authKey, channelData);
                 saveSharedSecret(sharedSecret);
