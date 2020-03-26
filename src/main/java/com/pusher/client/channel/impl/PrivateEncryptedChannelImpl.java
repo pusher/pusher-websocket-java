@@ -10,6 +10,7 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.util.Factory;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,20 +23,24 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private SecretBoxOpener secretBoxOpener;
 
     private class PrivateEncryptedChannelData {
-        final String auth;
+        byte[] auth;
         final String channelData;
 
         protected PrivateEncryptedChannelData(String auth, String channelData) {
-            this.auth = auth;
+            this.auth = auth.getBytes();
             this.channelData = channelData;
         }
 
         public String getAuth() {
-            return auth;
+            return new String(auth);
         }
 
         public String getChannelData() {
             return channelData;
+        }
+
+        protected void clearAuthToken(){
+            Arrays.fill(auth, (byte)0);
         }
     }
 
@@ -103,6 +108,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     protected void tearDownChannel() {
         secretBoxOpener.clearKey();
+        authorizerData.clearAuthToken();
     }
 
     @Override
