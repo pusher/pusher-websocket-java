@@ -1,5 +1,6 @@
 package com.pusher.client.channel.impl;
 
+import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
@@ -10,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
@@ -68,6 +70,9 @@ public class PrivateEncryptedChannelImplTest {
         }
 
         assertNotNull(exception);
+        assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
+        assertThat(exception.getMessage()).isEqualTo("Didn't receive all the fields we expected " +
+                "from the Authorizer, expected an auth token and shared_secret but got: " + authorizer_missingAuthKey);
     }
 
     @Test
@@ -86,6 +91,9 @@ public class PrivateEncryptedChannelImplTest {
         }
 
         assertNotNull(exception);
+        assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
+        assertThat(exception.getMessage()).isEqualTo("Didn't receive all the fields we expected " +
+                "from the Authorizer, expected an auth token and shared_secret but got: " + authorizer_missingSharedSecret);
     }
 
     @Test
@@ -104,5 +112,7 @@ public class PrivateEncryptedChannelImplTest {
         }
 
         assertNotNull(exception);
+        assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
+        assertThat(exception.getMessage()).isEqualTo("Unable to parse response from Authorizer: " + authorizer_malformedJson);
     }
 }
