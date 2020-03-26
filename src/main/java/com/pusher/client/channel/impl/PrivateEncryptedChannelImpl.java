@@ -8,10 +8,10 @@ import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
+import com.pusher.client.util.Base64;
 import com.pusher.client.util.Factory;
 
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -73,10 +73,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     }
 
     private void saveSharedSecret(String sharedSecret) {
-        //todo: fix this as it's java 1.8+ only, which won't support android < 6
-        final byte[] sharedSecretBase64 = Base64.getDecoder().decode(sharedSecret);
-
-        secretBoxOpener = new SecretBoxOpener(sharedSecretBase64);
+        secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
 
         // todo can we clear everything when the user disconnects totally?
     }
