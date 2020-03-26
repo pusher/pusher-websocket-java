@@ -85,7 +85,6 @@ public class ChannelManager implements ConnectionEventListener {
         validateArgumentsAndBindEvents(channel, listener, eventNames);
         channelNameToChannelMap.put(channel.getName(), channel);
         sendOrQueueSubscribeMessage(channel);
-
     }
 
     public void unsubscribeFrom(final String channelName) {
