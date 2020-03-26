@@ -98,7 +98,10 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 saveSharedSecret(sharedSecret);
             }
 
+        } catch (final AuthorizationFailureException e) {
+            throw e; // pass this upwards
         } catch (final Exception e) {
+            // any other errors need to be captured properly and passed upwards
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
         }
     }
@@ -109,7 +112,6 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public String toSubscribeMessage() {
 
         // create the data part
