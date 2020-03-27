@@ -3,6 +3,7 @@ package com.pusher.client.channel.impl;
 import com.google.gson.Gson;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
+import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
@@ -69,15 +70,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.bind(eventName, listener);
     }
 
-    private void saveSharedSecret(String sharedSecret) {
-        secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
 
-        // todo can we clear everything when the user disconnects totally?
-    }
-
-    /**
-     * ensure we've got all the bits and pieces we need to continue
-     */
     protected void prepareChannel() {
         final String authResponse = getAuthResponse();
 
@@ -93,7 +86,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                         + authResponse);
             } else {
                 authorizerData = new PrivateEncryptedChannelData(authKey.getBytes(), channelData);
-                saveSharedSecret(sharedSecret);
+                secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
             }
 
         } catch (final AuthorizationFailureException e) {
@@ -105,13 +98,10 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         }
     }
 
-    protected void tearDownChannel() {
-        secretBoxOpener.clearKey();
-        authorizerData.clearAuthToken();
-    }
-
     @Override
     public String toSubscribeMessage() {
+
+        prepareChannel();
 
         // create the data part
         final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
@@ -128,6 +118,20 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         jsonObject.put("data", dataMap);
 
         return GSON.toJson(jsonObject);
+    }
+
+    @Override
+    public void updateState(ChannelState state) {
+        super.updateState(state);
+
+        if (state == ChannelState.UNSUBSCRIBED) {
+            tearDownChannel();
+        }
+    }
+
+    private void tearDownChannel() {
+        secretBoxOpener.clearKey();
+        authorizerData.clearAuthToken();
     }
 
     private String getAuthResponse() {
