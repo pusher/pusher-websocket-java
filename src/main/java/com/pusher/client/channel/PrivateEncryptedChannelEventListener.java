@@ -14,5 +14,5 @@ public interface PrivateEncryptedChannelEventListener extends ChannelEventListen
      */
     void onAuthenticationFailure(String message, Exception e);
 
-    // todo: handle not receiving the shared secret?
+    //  TODO: add onDecryptionFailure
 }
