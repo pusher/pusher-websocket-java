@@ -150,7 +150,7 @@ public class ChannelManager implements ConnectionEventListener {
                         connection.sendMessage(message);
                         channel.updateState(ChannelState.SUBSCRIBE_SENT);
                     } catch (final AuthorizationFailureException e) {
-                        clearDownSubscription(channel, e);
+                        handleAuthenticationFailure(channel, e);
                     }
                 }
             }
@@ -167,7 +167,7 @@ public class ChannelManager implements ConnectionEventListener {
         });
     }
 
-    private void clearDownSubscription(final InternalChannel channel, final Exception e) {
+    private void handleAuthenticationFailure(final InternalChannel channel, final Exception e) {
 
         channelNameToChannelMap.remove(channel.getName());
         channel.updateState(ChannelState.FAILED);
