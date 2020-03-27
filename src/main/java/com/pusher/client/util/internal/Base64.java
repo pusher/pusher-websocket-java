@@ -1,4 +1,4 @@
-package com.pusher.client.util;
+package com.pusher.client.util.internal;
 
 import static java.util.Arrays.fill;
 
