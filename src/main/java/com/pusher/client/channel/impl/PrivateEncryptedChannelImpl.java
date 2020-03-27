@@ -26,13 +26,13 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         byte[] auth;
         final String channelData;
 
-        protected PrivateEncryptedChannelData(String auth, String channelData) {
-            this.auth = auth.getBytes();
+        protected PrivateEncryptedChannelData(byte[] auth, String channelData) {
+            this.auth = auth;
             this.channelData = channelData;
         }
 
-        public String getAuth() {
-            return new String(auth);
+        public byte[] getAuth() {
+            return auth;
         }
 
         public String getChannelData() {
@@ -94,7 +94,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 throw new AuthorizationFailureException("Didn't receive all the fields we expected " +
                         "from the Authorizer, expected an auth token and shared_secret but got: " + authResponse);
             } else {
-                authorizerData = new PrivateEncryptedChannelData(authKey, channelData);
+                authorizerData = new PrivateEncryptedChannelData(authKey.getBytes(), channelData);
                 saveSharedSecret(sharedSecret);
             }
 
@@ -117,7 +117,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         // create the data part
         final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
         dataMap.put("channel", name);
-        dataMap.put("auth", authorizerData.getAuth());
+        dataMap.put("auth", new String(authorizerData.getAuth()));
         if (authorizerData.getChannelData() != null) {
             dataMap.put("channel_data", authorizerData.channelData);
         }
