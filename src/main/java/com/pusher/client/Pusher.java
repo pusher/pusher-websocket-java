@@ -306,7 +306,7 @@ public class Pusher implements Client {
         throwExceptionIfNoAuthorizerHasBeenSet();
 
         final PrivateEncryptedChannelImpl channel = factory.newPrivateEncryptedChannel(
-                        connection, channelName,pusherOptions.getAuthorizer());
+                        connection, channelName, pusherOptions.getAuthorizer());
         channelManager.subscribeTo(channel, listener, eventNames);
 
         return channel;
