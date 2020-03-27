@@ -55,9 +55,6 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         this.authorizer = authorizer;
     }
 
-    /* PrivateChannel implementation */
-
-
     /* Base class overrides */
 
     @Override
@@ -92,7 +89,8 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
             if (authKey == null || sharedSecret == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields we expected " +
-                        "from the Authorizer, expected an auth token and shared_secret but got: " + authResponse);
+                        "from the Authorizer, expected an auth token and shared_secret but got: "
+                        + authResponse);
             } else {
                 authorizerData = new PrivateEncryptedChannelData(authKey.getBytes(), channelData);
                 saveSharedSecret(sharedSecret);
@@ -102,7 +100,8 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
             throw e; // pass this upwards
         } catch (final Exception e) {
             // any other errors need to be captured properly and passed upwards
-            throw new AuthorizationFailureException("Unable to parse response from Authorizer: " + authResponse, e);
+            throw new AuthorizationFailureException("Unable to parse response from Authorizer: "
+                    + authResponse, e);
         }
     }
 

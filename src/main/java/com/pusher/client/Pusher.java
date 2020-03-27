@@ -293,10 +293,16 @@ public class Pusher implements Client {
      * requires authentication.
      *
      * @param channelName The name of the channel to subscribe to.
-     * @param listener A listener to be informed of both Pusher channel protocol events and subscription data events.
-     * @param eventNames An optional list of names of events to be bound to on the channel. The equivalent of calling {@link com.pusher.client.channel.Channel#bind(String, SubscriptionEventListener)} one or more times.
-     * @return A new {@link com.pusher.client.channel.PrivateEncryptedChannel} representing the subscription.
-     * @throws IllegalStateException if a {@link com.pusher.client.Authorizer} has not been set for the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
+     * @param listener A listener to be informed of both Pusher channel protocol events and
+     *                 subscription data events.
+     * @param eventNames An optional list of names of events to be bound to on the channel.
+     *                   The equivalent of calling
+     *                   {@link com.pusher.client.channel.Channel#bind(String, SubscriptionEventListener)}
+     *                   one or more times.
+     * @return A new {@link com.pusher.client.channel.PrivateEncryptedChannel} representing
+     *         the subscription.
+     * @throws IllegalStateException if a {@link com.pusher.client.Authorizer} has not been set for
+     *         the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
      */
     public PrivateEncryptedChannel subscribePrivateEncrypted(
             final String channelName,

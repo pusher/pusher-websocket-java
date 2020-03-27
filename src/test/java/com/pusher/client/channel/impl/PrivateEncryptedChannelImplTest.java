@@ -71,8 +71,10 @@ public class PrivateEncryptedChannelImplTest {
 
         assertNotNull(exception);
         assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
-        assertThat(exception.getMessage()).isEqualTo("Didn't receive all the fields we expected " +
-                "from the Authorizer, expected an auth token and shared_secret but got: " + authorizer_missingAuthKey);
+        assertThat(exception.getMessage()).isEqualTo(
+                "Didn't receive all the fields we expected from the Authorizer, " +
+                        "expected an auth token and shared_secret but got: "
+                        + authorizer_missingAuthKey);
     }
 
     @Test
@@ -92,8 +94,9 @@ public class PrivateEncryptedChannelImplTest {
 
         assertNotNull(exception);
         assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
-        assertThat(exception.getMessage()).isEqualTo("Didn't receive all the fields we expected " +
-                "from the Authorizer, expected an auth token and shared_secret but got: " + authorizer_missingSharedSecret);
+        assertThat(exception.getMessage()).isEqualTo("Didn't receive all the fields we " +
+                "expected  from the Authorizer, expected an auth token and shared_secret but got: "
+                + authorizer_missingSharedSecret);
     }
 
     @Test
@@ -113,6 +116,7 @@ public class PrivateEncryptedChannelImplTest {
 
         assertNotNull(exception);
         assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
-        assertThat(exception.getMessage()).isEqualTo("Unable to parse response from Authorizer: " + authorizer_malformedJson);
+        assertThat(exception.getMessage()).isEqualTo(
+                "Unable to parse response from Authorizer: " + authorizer_malformedJson);
     }
 }
