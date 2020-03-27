@@ -95,7 +95,7 @@ public class PrivateEncryptedChannelImplTest {
         assertNotNull(exception);
         assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
         assertThat(exception.getMessage()).isEqualTo("Didn't receive all the fields we " +
-                "expected  from the Authorizer, expected an auth token and shared_secret but got: "
+                "expected from the Authorizer, expected an auth token and shared_secret but got: "
                 + authorizer_missingSharedSecret);
     }
 
