@@ -2,17 +2,9 @@ package com.pusher.client.channel;
 
 /**
  * Interface to listen to private encrypted channel events.
+ * Note: This needs to extend the PrivateChannelEventListener because of the ChannelManager clearDownSubscription
  */
-public interface PrivateEncryptedChannelEventListener extends ChannelEventListener {
-    /**
-     * Called when an attempt to authenticate a private encrypted channel fails.
-     *
-     * @param message
-     *            A description of the problem.
-     * @param e
-     *            An associated exception, if available.
-     */
-    void onAuthenticationFailure(String message, Exception e);
+public interface PrivateEncryptedChannelEventListener extends PrivateChannelEventListener {
 
     //  TODO: add onDecryptionFailure
 }
