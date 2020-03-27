@@ -5,7 +5,5 @@ package com.pusher.client.channel;
  */
 public interface PrivateEncryptedChannel extends Channel {
 
-/**
- * it's not currently possible to send a message using encrypted private channels
- */
+    // it's not currently possible to send a message using private encrypted channels
 }
