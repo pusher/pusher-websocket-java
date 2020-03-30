@@ -11,9 +11,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,7 +39,7 @@ public class PrivateEncryptedChannelImplTest {
         channel.checkAuthentication();
     }
 
-    @Test
+    @Test(expected = AuthorizationFailureException.class)
     public void checkAuthenticationThrowsExceptionIfNoAuthKey() {
         when(mockedAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_missingAuthKey);
@@ -50,22 +47,10 @@ public class PrivateEncryptedChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockedInternalConnection, "private-encrypted-channel", mockedAuthorizer, mockedFactory);
 
-        Exception exception = null;
-        try {
-            channel.checkAuthentication();
-        } catch (Exception e) {
-            exception = e;
-        }
-
-        assertNotNull(exception);
-        assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
-        assertThat(exception.getMessage()).isEqualTo(
-                "Didn't receive all the fields we expected from the Authorizer, " +
-                        "expected an auth token and shared_secret but got: "
-                        + authorizer_missingAuthKey);
+        channel.checkAuthentication();
     }
 
-    @Test
+    @Test(expected = AuthorizationFailureException.class)
     public void checkAuthenticationThrowsExceptionIfNoSharedSecret() {
         when(mockedAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_missingSharedSecret);
@@ -73,21 +58,10 @@ public class PrivateEncryptedChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockedInternalConnection, "private-encrypted-channel", mockedAuthorizer, mockedFactory);
 
-        Exception exception = null;
-        try {
-            channel.checkAuthentication();
-        } catch (Exception e) {
-            exception = e;
-        }
-
-        assertNotNull(exception);
-        assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
-        assertThat(exception.getMessage()).isEqualTo("Didn't receive all the fields we " +
-                "expected from the Authorizer, expected an auth token and shared_secret but got: "
-                + authorizer_missingSharedSecret);
+        channel.checkAuthentication();
     }
 
-    @Test
+    @Test(expected = AuthorizationFailureException.class)
     public void checkAuthenticationThrowsExceptionIfMalformedJson() {
         when(mockedAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_malformedJson);
@@ -95,16 +69,6 @@ public class PrivateEncryptedChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockedInternalConnection, "private-encrypted-channel", mockedAuthorizer, mockedFactory);
 
-        Exception exception = null;
-        try {
-            channel.checkAuthentication();
-        } catch (Exception e) {
-            exception = e;
-        }
-
-        assertNotNull(exception);
-        assertThat(exception).isInstanceOf(AuthorizationFailureException.class);
-        assertThat(exception.getMessage()).isEqualTo(
-                "Unable to parse response from Authorizer: " + authorizer_malformedJson);
+        channel.checkAuthentication();
     }
 }
