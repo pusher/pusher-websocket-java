@@ -32,25 +32,18 @@ public class PrivateEncryptedChannelImplTest {
     Factory mockedFactory;
 
     @Test
-    public void testPrepareThrowsNoExceptionIfValidAuthorizer() {
+    public void checkAuthenticationSucceedsGivenValidAuthorizer() {
         when(mockedAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_valid);
 
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockedInternalConnection, "private-encrypted-channel", mockedAuthorizer, mockedFactory);
 
-        Exception exception = null;
-        try {
-            channel.checkAuthentication();
-        } catch (Exception e) {
-            exception = e;
-        }
-
-        assertNull(exception);
+        channel.checkAuthentication();
     }
 
     @Test
-    public void testPrepareThrowsExceptionIfNoAuthKey() {
+    public void checkAuthenticationThrowsExceptionIfNoAuthKey() {
         when(mockedAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_missingAuthKey);
 
@@ -73,7 +66,7 @@ public class PrivateEncryptedChannelImplTest {
     }
 
     @Test
-    public void testPrepareThrowsExceptionIfNoSharedSecret() {
+    public void checkAuthenticationThrowsExceptionIfNoSharedSecret() {
         when(mockedAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_missingSharedSecret);
 
@@ -95,7 +88,7 @@ public class PrivateEncryptedChannelImplTest {
     }
 
     @Test
-    public void testPrepareThrowsExceptionIfMalformedJson() {
+    public void checkAuthenticationThrowsExceptionIfMalformedJson() {
         when(mockedAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_malformedJson);
 
