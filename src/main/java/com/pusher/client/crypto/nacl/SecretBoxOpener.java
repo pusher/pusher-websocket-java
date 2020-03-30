@@ -24,6 +24,9 @@ IN THE SOFTWARE.
 
 package com.pusher.client.crypto.nacl;
 
+import static com.pusher.client.util.internal.Preconditions.checkArgument;
+import static com.pusher.client.util.internal.Preconditions.checkNotNull;
+
 import java.util.Arrays;
 
 public class SecretBoxOpener {
@@ -33,19 +36,14 @@ public class SecretBoxOpener {
     private byte[] key;
 
     public SecretBoxOpener(byte[] key) {
-        // TODO: add a a little preconditions lib/class for that
-        if (key == null) throw new IllegalArgumentException("null key passed");
-        if (key.length != 32) {
-            throw new IllegalArgumentException("key should be 32B, is: " + key.length + "B");
-        }
+        checkNotNull(key, "null key passed");
+        checkArgument(key.length == 32, "key should be 32B, is: " + key.length + "B");
 
         this.key = key;
     }
 
     public byte[] open(byte box[], byte nonce[]) throws AuthenticityException {
-        if (key == null) {
-            throw new IllegalStateException("key has been cleared, create new instance");
-        }
+        checkNotNull(key, "key has been cleared, create new instance");
 
         byte subKey[] = new byte[32];
         byte counter[] = new byte[16];
