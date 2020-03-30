@@ -55,9 +55,8 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
             final String sharedSecret = (String) authResponseMap.get("shared_secret");
 
             if (authKey == null || sharedSecret == null) {
-                throw new AuthorizationFailureException("Didn't receive all the fields we expected " +
-                        "from the Authorizer, expected an auth token and shared_secret but got: "
-                        + authResponse);
+                throw new AuthorizationFailureException("Didn't receive all the fields expected " +
+                        "from the Authorizer, expected an auth token and shared_secret.");
             } else {
                 secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
                 return authKey.getBytes();
@@ -68,7 +67,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         } catch (final Exception e) {
             // any other errors need to be captured properly and passed upwards
             throw new AuthorizationFailureException("Unable to parse response from Authorizer: "
-                    + authResponse, e);
+                    + e);
         }
     }
 
