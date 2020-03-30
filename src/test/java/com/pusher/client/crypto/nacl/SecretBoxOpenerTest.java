@@ -2,7 +2,7 @@ package com.pusher.client.crypto.nacl;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.pusher.client.util.Base64;
+import com.pusher.client.util.internal.Base64;
 import org.junit.Before;
 import org.junit.Test;
 
