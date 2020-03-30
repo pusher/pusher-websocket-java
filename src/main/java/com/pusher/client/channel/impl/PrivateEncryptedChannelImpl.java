@@ -9,8 +9,8 @@ import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
-import com.pusher.client.util.Base64;
 import com.pusher.client.util.Factory;
+import com.pusher.client.util.internal.Base64;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
