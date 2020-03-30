@@ -15,38 +15,12 @@ import com.pusher.client.util.internal.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static java.util.Arrays.fill;
-
 public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateEncryptedChannel {
 
     private static final Gson GSON = new Gson();
     private final InternalConnection connection;
     private final Authorizer authorizer;
     private SecretBoxOpener secretBoxOpener;
-
-    private class PrivateEncryptedChannelData {
-        byte[] auth;
-        final String channelData;
-
-        protected PrivateEncryptedChannelData(byte[] auth, String channelData) {
-            this.auth = auth;
-            this.channelData = channelData;
-        }
-
-        public byte[] getAuth() {
-            return auth;
-        }
-
-        public String getChannelData() {
-            return channelData;
-        }
-
-        protected void clearAuthToken() {
-            fill(auth, (byte) 0);
-        }
-    }
-
-    private PrivateEncryptedChannelData authorizerData;
 
     public PrivateEncryptedChannelImpl(final InternalConnection connection,
                                        final String channelName,
@@ -72,22 +46,21 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     }
 
 
-    protected void checkAuthentication() {
+    protected byte[] checkAuthentication() {
         final String authResponse = getAuthResponse();
 
         try {
             final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
             final String authKey = (String) authResponseMap.get("auth");
             final String sharedSecret = (String) authResponseMap.get("shared_secret");
-            final String channelData = (String)authResponseMap.get("channel_data");
 
             if (authKey == null || sharedSecret == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields we expected " +
                         "from the Authorizer, expected an auth token and shared_secret but got: "
                         + authResponse);
             } else {
-                authorizerData = new PrivateEncryptedChannelData(authKey.getBytes(), channelData);
                 secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
+                return authKey.getBytes();
             }
 
         } catch (final AuthorizationFailureException e) {
@@ -102,15 +75,12 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     @Override
     public String toSubscribeMessage() {
 
-        checkAuthentication();
+        byte[] authKey = checkAuthentication();
 
         // create the data part
         final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
         dataMap.put("channel", name);
-        dataMap.put("auth", new String(authorizerData.getAuth()));
-        if (authorizerData.getChannelData() != null) {
-            dataMap.put("channel_data", authorizerData.channelData);
-        }
+        dataMap.put("auth", new String(authKey));
 
         // create the wrapper part
         final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
@@ -132,7 +102,6 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     private void tearDownChannel() {
         secretBoxOpener.clearKey();
-        authorizerData.clearAuthToken();
     }
 
     private String getAuthResponse() {
