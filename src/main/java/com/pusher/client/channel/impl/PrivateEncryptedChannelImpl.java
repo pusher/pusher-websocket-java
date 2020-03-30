@@ -12,9 +12,10 @@ import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.internal.Base64;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static java.util.Arrays.fill;
 
 public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateEncryptedChannel {
 
@@ -41,7 +42,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         }
 
         protected void clearAuthToken() {
-            Arrays.fill(auth, (byte)0);
+            fill(auth, (byte) 0);
         }
     }
 
