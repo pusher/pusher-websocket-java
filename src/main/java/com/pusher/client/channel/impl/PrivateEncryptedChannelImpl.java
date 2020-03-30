@@ -40,7 +40,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
             return channelData;
         }
 
-        protected void clearAuthToken(){
+        protected void clearAuthToken() {
             Arrays.fill(auth, (byte)0);
         }
     }
