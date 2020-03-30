@@ -71,7 +71,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     }
 
 
-    protected void prepareChannel() {
+    protected void checkAuthentication() {
         final String authResponse = getAuthResponse();
 
         try {
@@ -101,7 +101,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     @Override
     public String toSubscribeMessage() {
 
-        prepareChannel();
+        checkAuthentication();
 
         // create the data part
         final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();

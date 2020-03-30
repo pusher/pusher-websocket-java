@@ -46,7 +46,7 @@ public class PrivateEncryptedChannelImplTest {
 
         Exception exception = null;
         try {
-            channel.prepareChannel();
+            channel.checkAuthentication();
         } catch (Exception e) {
             exception = e;
         }
@@ -64,7 +64,7 @@ public class PrivateEncryptedChannelImplTest {
 
         Exception exception = null;
         try {
-            channel.prepareChannel();
+            channel.checkAuthentication();
         } catch (Exception e) {
             exception = e;
         }
@@ -87,7 +87,7 @@ public class PrivateEncryptedChannelImplTest {
 
         Exception exception = null;
         try {
-            channel.prepareChannel();
+            channel.checkAuthentication();
         } catch (Exception e) {
             exception = e;
         }
@@ -109,7 +109,7 @@ public class PrivateEncryptedChannelImplTest {
 
         Exception exception = null;
         try {
-            channel.prepareChannel();
+            channel.checkAuthentication();
         } catch (Exception e) {
             exception = e;
         }
