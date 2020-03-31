@@ -1,6 +1,15 @@
 package com.pusher.client.channel.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.annotations.SerializedName;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelState;
@@ -12,12 +21,12 @@ import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.internal.Base64;
 
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateEncryptedChannel {
 
-    private static final Gson GSON = new Gson();
     private final InternalConnection connection;
     private final Authorizer authorizer;
     protected SecretBoxOpener secretBoxOpener;
@@ -45,21 +54,50 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.bind(eventName, listener);
     }
 
+    private class AuthResponse {
+        char[] auth;
+        @SerializedName("shared_secret")
+        char[] sharedSecret;
+
+        public char[] getAuth() {
+            return auth;
+        }
+
+        public char[] getSharedSecret() {
+            return sharedSecret;
+        }
+    }
+
+    //
+    public class GsonHelper {
+        public final Gson customGson = new GsonBuilder().registerTypeHierarchyAdapter(byte[].class,
+                new ByteArrayToBase64TypeAdapter()).create();
+
+        // Using Android's base64 libraries. This can be replaced with any base64 library.
+        private class ByteArrayToBase64TypeAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
+            public byte[] deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                return Base64.decode(json.getAsString());
+            }
+
+            public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
+                throw new UnsupportedOperationException("");
+            }
+        }
+    }
 
     protected byte[] checkAuthentication() {
-        final String authResponse = getAuthResponse();
 
         try {
-            final Map authResponseMap = GSON.fromJson(authResponse, Map.class);
-            final String authKey = (String) authResponseMap.get("auth");
-            final String sharedSecret = (String) authResponseMap.get("shared_secret");
+            final AuthResponse authResponse = GSON.fromJson(getAuthResponse(), AuthResponse.class);
+            final char[] authKey = authResponse.getAuth();
+            final char[] sharedSecret = authResponse.getSharedSecret();
 
-            if (authKey == null || sharedSecret == null) {
+            if (authKey == null || sharedSecret.length > 0) {
                 throw new AuthorizationFailureException("Didn't receive all the fields expected " +
                         "from the Authorizer, expected an auth token and shared_secret.");
             } else {
-                secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
-                return authKey.getBytes();
+                secretBoxOpener = new SecretBoxOpener(Base64.decode(new String(sharedSecret)));
+                return (new String(authKey).getBytes());
             }
 
         } catch (final AuthorizationFailureException e) {

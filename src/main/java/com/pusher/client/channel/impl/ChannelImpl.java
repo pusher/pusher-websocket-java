@@ -13,7 +13,7 @@ import com.pusher.client.channel.*;
 import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
-    private final Gson GSON;
+    protected final Gson GSON;
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
