@@ -12,7 +12,7 @@ import com.pusher.client.util.HttpAuthorizer;
 public class PrivateEncryptedChannelExampleApp implements
         ConnectionEventListener, PrivateEncryptedChannelEventListener {
 
-    private String apiKey = "FILL_ME_IN";
+    private String apiKey = "636a81ba7e7b15725c00";
     private String channelName = "private-encrypted-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
