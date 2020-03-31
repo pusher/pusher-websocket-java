@@ -131,21 +131,4 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 "\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\""+
                 "}}", channel.toSubscribeMessage());
     }
-
-//    @Override
-//    @Test(expected = IllegalStateException.class)
-//    public void testUnbindWhenInUnsubscribedStateThrowsException() {
-//        channel.bind(EVENT_NAME, mockListener);
-//        channel.updateState(ChannelState.UNSUBSCRIBED);
-//        channel.unbind(EVENT_NAME, mockListener);
-//    }
-//
-//    @Override
-//    @Test(expected = IllegalStateException.class)
-//    public void testBindWhenInUnsubscribedStateThrowsException() {
-//        channel.updateState(ChannelState.UNSUBSCRIBED);
-//        channel.bind(EVENT_NAME, mockListener);
-//    }
-
-
 }

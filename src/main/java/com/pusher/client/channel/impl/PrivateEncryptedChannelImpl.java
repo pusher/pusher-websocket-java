@@ -99,7 +99,9 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     }
 
     private void tearDownChannel() {
-        secretBoxOpener.clearKey();
+        if (secretBoxOpener != null) {
+            secretBoxOpener.clearKey();
+        }
     }
 
     private String getAuthResponse() {
