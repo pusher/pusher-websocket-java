@@ -57,8 +57,8 @@ public class Poly1305 {
         return (double) s * (double) m * Math.pow(2, e - 1075);
     }
 
-    public static boolean verify(byte mac[], byte m[], byte key[]) {
-        byte tmp[] = sum(m, key);
+    public static boolean verify(byte[] mac, byte[] m, byte[] key) {
+        byte[] tmp = sum(m, key);
         //Util.printHex("tmp", tmp);
         //Util.printHex("mac", mac);
         return Subtle.constantTimeCompare(tmp, mac);
@@ -67,9 +67,9 @@ public class Poly1305 {
     // Sum generates an authenticator for m using a one-time key and puts the
     // 16-byte result into out. Authenticating two different messages with the same
     // key allows an attacker to forge messages at will.
-    public static byte[] sum(byte m[], byte key[]) {
-        byte r[] = key.clone();
-        byte s[] = new byte[16];
+    public static byte[] sum(byte[] m, byte[] key) {
+        byte[] r = key.clone();
+        byte[] s = new byte[16];
         for (int i = 0; i < s.length; i++) {
             s[i] = key[i + 16];
         }
@@ -1516,7 +1516,7 @@ public class Poly1305 {
         f2 += (s23);
         f3 += s33;
 
-        byte out[] = new byte[16];
+        byte[] out = new byte[16];
         out[0] = (byte) (f0);
         f0 >>= 8;
         out[1] = (byte) (f0);
