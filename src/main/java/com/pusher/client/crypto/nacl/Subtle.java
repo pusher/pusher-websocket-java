@@ -24,7 +24,7 @@ IN THE SOFTWARE.
 package com.pusher.client.crypto.nacl;
 
 public class Subtle {
-    public static boolean constantTimeCompare(byte x[], byte y[]) {
+    public static boolean constantTimeCompare(byte[] x, byte[] y) {
         if (x.length != y.length) {
             return false;
         }

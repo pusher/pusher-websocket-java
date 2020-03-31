@@ -34,8 +34,8 @@ public class Salsa {
 
     // core applies the Salsa20 core function to 16-byte input in, 32-byte key k,
     // and 16-byte constant c, and puts the result into 64-byte array out.
-    public static byte[] core(byte in[], byte k[], byte c[]) {
-        byte out[] = new byte[64];
+    public static byte[] core(byte[] in, byte[] k, byte[] c) {
+        byte[] out = new byte[64];
         long mask = 0xFFFFFFFFl;
 
         long j0 = mask & (mask(c[0]) | mask(c[1]) << 8 | mask(c[2]) << 16 | mask(c[3]) << 24);
@@ -253,10 +253,10 @@ public class Salsa {
     // XORKeyStream crypts bytes from in to out using the given key and counters.
     // In and out may be the same slice but otherwise should not overlap. Counter
     // contains the raw salsa20 counter bytes (both nonce and block counter).
-    public static byte[] XORKeyStream(byte in[], byte counter[], byte key[]) {
-        byte out[] = in.clone();
-        byte block[];
-        byte counterCopy[] = counter.clone();
+    public static byte[] XORKeyStream(byte[] in, byte[] counter, byte[] key) {
+        byte[] out = in.clone();
+        byte[] block;
+        byte[] counterCopy = counter.clone();
 
         int count = 0;
         while (in.length >= 64) {
@@ -272,7 +272,7 @@ public class Salsa {
                 counterCopy[i] = (byte) (u);
                 u >>= 8;
             }
-            byte temp[] = in.clone();
+            byte[] temp = in.clone();
             in = new byte[in.length - 64];
             for (int i = 0; i < in.length; i++) {
                 in[i] = temp[i + 64];
@@ -388,7 +388,7 @@ public class Salsa {
             x15 ^= mask & (u << 18 | u >>> (32 - 18));
         }
 
-        byte out[] = new byte[32];
+        byte[] out = new byte[32];
         out[0] = (byte) x0;
         out[1] = (byte) (x0 >> 8);
         out[2] = (byte) (x0 >> 16);
