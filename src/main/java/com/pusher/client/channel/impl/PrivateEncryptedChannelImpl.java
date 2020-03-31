@@ -20,7 +20,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private static final Gson GSON = new Gson();
     private final InternalConnection connection;
     private final Authorizer authorizer;
-    private SecretBoxOpener secretBoxOpener;
+    protected SecretBoxOpener secretBoxOpener;
 
     public PrivateEncryptedChannelImpl(final InternalConnection connection,
                                        final String channelName,
@@ -101,6 +101,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private void tearDownChannel() {
         if (secretBoxOpener != null) {
             secretBoxOpener.clearKey();
+            secretBoxOpener = null;
         }
     }
 
