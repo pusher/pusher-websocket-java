@@ -54,50 +54,19 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.bind(eventName, listener);
     }
 
-    private class AuthResponse {
-        char[] auth;
-        @SerializedName("shared_secret")
-        char[] sharedSecret;
-
-        public char[] getAuth() {
-            return auth;
-        }
-
-        public char[] getSharedSecret() {
-            return sharedSecret;
-        }
-    }
-
-    //
-    public class GsonHelper {
-        public final Gson customGson = new GsonBuilder().registerTypeHierarchyAdapter(byte[].class,
-                new ByteArrayToBase64TypeAdapter()).create();
-
-        // Using Android's base64 libraries. This can be replaced with any base64 library.
-        private class ByteArrayToBase64TypeAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
-            public byte[] deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                return Base64.decode(json.getAsString());
-            }
-
-            public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
-                throw new UnsupportedOperationException("");
-            }
-        }
-    }
-
     protected byte[] checkAuthentication() {
 
         try {
-            final AuthResponse authResponse = GSON.fromJson(getAuthResponse(), AuthResponse.class);
-            final char[] authKey = authResponse.getAuth();
-            final char[] sharedSecret = authResponse.getSharedSecret();
+            final Map authResponseMap = GSON.fromJson(getAuthResponse(), Map.class);
+            final String authKey = (String) authResponseMap.get("auth");
+            final String sharedSecret = (String) authResponseMap.get("shared_secret");
 
-            if (authKey == null || sharedSecret.length > 0) {
+            if (authKey == null || sharedSecret == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields expected " +
                         "from the Authorizer, expected an auth token and shared_secret.");
             } else {
-                secretBoxOpener = new SecretBoxOpener(Base64.decode(new String(sharedSecret)));
-                return (new String(authKey).getBytes());
+                secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
+                return authKey.getBytes();
             }
 
         } catch (final AuthorizationFailureException e) {
