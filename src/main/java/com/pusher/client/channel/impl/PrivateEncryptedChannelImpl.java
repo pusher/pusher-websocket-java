@@ -66,8 +66,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
             throw e; // pass this upwards
         } catch (final Exception e) {
             // any other errors need to be captured properly and passed upwards
-            throw new AuthorizationFailureException("Unable to parse response from Authorizer: "
-                    + e);
+            throw new AuthorizationFailureException("Unable to parse response from Authorizer", e);
         }
     }
 
