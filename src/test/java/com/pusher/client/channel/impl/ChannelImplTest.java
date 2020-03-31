@@ -58,6 +58,11 @@ public class ChannelImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void testPrivateEncryptedChannelName() {
+        newInstance("private-encrypted-my-channel");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void testPresenceChannelName() {
         newInstance("presence-my-channel");
     }
