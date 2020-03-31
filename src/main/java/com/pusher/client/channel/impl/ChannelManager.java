@@ -48,7 +48,7 @@ public class ChannelManager implements ConnectionEventListener {
     }
 
     public PrivateEncryptedChannel getPrivateEncryptedChannel(String channelName) throws IllegalArgumentException{
-        if (!channelName.startsWith("private-encrypted")) {
+        if (!channelName.startsWith("private-encrypted-")) {
             throw new IllegalArgumentException("Encrypted private channels must begin with 'private-encrypted-'");
         } else {
             return (PrivateEncryptedChannel) findChannelInChannelMap(channelName);
