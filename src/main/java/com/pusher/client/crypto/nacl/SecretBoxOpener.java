@@ -45,6 +45,8 @@ public class SecretBoxOpener {
 
     public byte[] open(byte[] box, byte[] nonce) throws AuthenticityException {
         checkNotNull(key, "key has been cleared, create new instance");
+        checkArgument(nonce.length == 24, "nonce length must be 24 bytes, but is " +
+                key.length + " bytes");
 
         byte[] subKey = new byte[32];
         byte[] counter = new byte[16];
