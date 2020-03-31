@@ -60,35 +60,25 @@ public class SecretBoxOpener {
         firstBlock = Salsa.XORKeyStream(firstBlock, counter, subKey);
 
         byte[] poly1305Key = new byte[32];
-        for (int i = 0; i < poly1305Key.length; i++) {
-            poly1305Key[i] = firstBlock[i];
-        }
+        System.arraycopy(firstBlock, 0, poly1305Key, 0, poly1305Key.length);
         byte[] tag = new byte[Poly1305.TAG_SIZE];
-        for (int i = 0; i < tag.length; i++) {
-            tag[i] = box[i];
-        }
+        System.arraycopy(box, 0, tag, 0, tag.length);
 
         byte[] cipher = new byte[box.length - Poly1305.TAG_SIZE];
-        for (int i = 0; i < cipher.length; i++) {
-            cipher[i] = box[i + Poly1305.TAG_SIZE];
-        }
+        System.arraycopy(box, 0 + Poly1305.TAG_SIZE, cipher, 0, cipher.length);
         if (!Poly1305.verify(tag, cipher, poly1305Key)) {
             throw new AuthenticityException();
         }
 
         byte[] ret = new byte[box.length - OVERHEAD];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = box[i + OVERHEAD];
-        }
+        System.arraycopy(box, 0 + OVERHEAD, ret, 0, ret.length);
         // We XOR up to 32 bytes of box with the keystream generated from
         // the first block.
         byte[] firstMessageBlock = new byte[ret.length];
         if (ret.length > 32) {
             firstMessageBlock = new byte[32];
         }
-        for (int i = 0; i < firstMessageBlock.length; i++) {
-            firstMessageBlock[i] = ret[i];
-        }
+        System.arraycopy(ret, 0, firstMessageBlock, 0, firstMessageBlock.length);
         for (int i = 0; i < firstMessageBlock.length; i++) {
             ret[i] = (byte) (firstBlock[32 + i] ^ firstMessageBlock[i]);
         }
@@ -101,9 +91,9 @@ public class SecretBoxOpener {
         byte[] rest = Salsa.XORKeyStream(newbox, counter, subKey);
         // Now decrypt the rest.
 
-        for (int i = firstMessageBlock.length; i < ret.length; i++) {
-            ret[i] = rest[i - firstMessageBlock.length];
-        }
+        System.arraycopy(rest, 0, ret, firstMessageBlock.length,
+                ret.length - firstMessageBlock.length);
+
         return ret;
     }
 
@@ -122,16 +112,10 @@ public class SecretBoxOpener {
         // We use XSalsa20 for encryption so first we need to generate a
         // key and nonce with HSalsa20.
         byte[] hNonce = new byte[16];
-        for (int i = 0; i < hNonce.length; i++) {
-            hNonce[i] = nonce[i];
-        }
+        System.arraycopy(nonce, 0, hNonce, 0, hNonce.length);
         byte[] newSubKey = Salsa.HSalsa20(hNonce, key, Salsa.SIGMA);
-        for (int i = 0; i < subKey.length; i++) {
-            subKey[i] = newSubKey[i];
-        }
+        System.arraycopy(newSubKey, 0, subKey, 0, subKey.length);
 
-        for (int i = 0; i < nonce.length - 16; i++) {
-            counter[i] = nonce[i + 16];
-        }
+        System.arraycopy(nonce, 16, counter, 0, nonce.length - 16);
     }
 }
