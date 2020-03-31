@@ -37,7 +37,7 @@ public class SecretBoxOpener {
 
     public SecretBoxOpener(byte[] key) {
         checkNotNull(key, "null key passed");
-        checkArgument(key.length == 32, "key length should be 32 bytes, but is " +
+        checkArgument(key.length == 32, "key length must be 32 bytes, but is " +
                 key.length + " bytes");
 
         this.key = key;
