@@ -157,7 +157,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
      */
 
     @Test
-    public void secretBoxIsCleared() {
+    public void secretBoxOpenerIsCleared() {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection, getChannelName(), mockAuthorizer, mockedFactory);
 
