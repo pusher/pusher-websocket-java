@@ -14,6 +14,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -122,13 +123,15 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     public void testPrivateChannelName() {  newInstance("private-stuffchannel");  }
 
 
-//    @Override
-//    @Test
-//    public void testReturnsCorrectSubscribeMessage() {
-//        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName()
-//                + "\",\"auth\":\":636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\""
-//                + "}}", channel.toSubscribeMessage());
-//    }
+    @Override
+    @Test
+    public void testReturnsCorrectSubscribeMessage() {
+        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{" +
+                "\"channel\":\"" + getChannelName() + "\"," +
+                "\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\""+
+                "}}", channel.toSubscribeMessage());
+    }
+
 //    @Override
 //    @Test(expected = IllegalStateException.class)
 //    public void testUnbindWhenInUnsubscribedStateThrowsException() {

@@ -84,7 +84,6 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         // create the wrapper part
         final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
         jsonObject.put("event", "pusher:subscribe");
-        jsonObject.put("authorizerData", dataMap);
         jsonObject.put("data", dataMap);
 
         return GSON.toJson(jsonObject);
