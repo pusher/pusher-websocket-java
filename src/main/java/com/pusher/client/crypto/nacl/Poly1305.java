@@ -70,9 +70,7 @@ public class Poly1305 {
     public static byte[] sum(byte[] m, byte[] key) {
         byte[] r = key.clone();
         byte[] s = new byte[16];
-        for (int i = 0; i < s.length; i++) {
-            s[i] = key[i + 16];
-        }
+        System.arraycopy(key, 16, s, 0, s.length);
 
         double y7;
         double y6;

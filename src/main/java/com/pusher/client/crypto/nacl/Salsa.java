@@ -274,9 +274,7 @@ public class Salsa {
             }
             byte[] temp = in.clone();
             in = new byte[in.length - 64];
-            for (int i = 0; i < in.length; i++) {
-                in[i] = temp[i + 64];
-            }
+            System.arraycopy(temp, 64, in, 0, in.length);
 
             count++;
         }
