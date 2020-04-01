@@ -118,7 +118,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     @Override
     protected String[] getDisallowedNameExpressions() {
-        return new String[] { "^(?!private-encrypted).*" };
+        return new String[] { "^(?!private-encrypted-).*" };
     }
 
     @Override
