@@ -105,14 +105,14 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
      */
 
     @Test
-    public void checkAuthenticationSucceedsGivenValidAuthorizer() {
+    public void authenticationSucceedsGivenValidAuthorizer() {
         when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_valid);
 
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection, getChannelName(), mockAuthorizer, mockedFactory);
 
-        channel.checkAuthentication();
+        channel.toSubscribeMessage();
     }
 
     protected ChannelEventListener getEventListener() {
@@ -120,36 +120,36 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     }
 
     @Test(expected = AuthorizationFailureException.class)
-    public void checkAuthenticationThrowsExceptionIfNoAuthKey() {
+    public void authenticationThrowsExceptionIfNoAuthKey() {
         when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_missingAuthKey);
 
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection, getChannelName(), mockAuthorizer, mockedFactory);
 
-        channel.checkAuthentication();
+        channel.toSubscribeMessage();
     }
 
     @Test(expected = AuthorizationFailureException.class)
-    public void checkAuthenticationThrowsExceptionIfNoSharedSecret() {
+    public void authenticationThrowsExceptionIfNoSharedSecret() {
         when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_missingSharedSecret);
 
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection, getChannelName(), mockAuthorizer, mockedFactory);
 
-        channel.checkAuthentication();
+        channel.toSubscribeMessage();
     }
 
     @Test(expected = AuthorizationFailureException.class)
-    public void checkAuthenticationThrowsExceptionIfMalformedJson() {
+    public void authenticationThrowsExceptionIfMalformedJson() {
         when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(authorizer_malformedJson);
 
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection, getChannelName(), mockAuthorizer, mockedFactory);
 
-        channel.checkAuthentication();
+        channel.toSubscribeMessage();
     }
 
     /*

@@ -41,7 +41,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.bind(eventName, listener);
     }
 
-    protected byte[] checkAuthentication() {
+    private byte[] authenticate() {
 
         try {
             final Map authResponseMap = GSON.fromJson(getAuthResponse(), Map.class);
@@ -67,7 +67,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     @Override
     public String toSubscribeMessage() {
 
-        byte[] authKey = checkAuthentication();
+        byte[] authKey = authenticate();
 
         // create the data part
         final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
