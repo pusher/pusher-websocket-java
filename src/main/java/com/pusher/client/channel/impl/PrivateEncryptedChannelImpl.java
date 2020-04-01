@@ -45,7 +45,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.bind(eventName, listener);
     }
 
-    private byte[] authenticate() {
+    private String authenticate() {
 
         try {
             final Map authResponseMap = GSON.fromJson(getAuthResponse(), Map.class);
@@ -58,7 +58,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
             } else {
                 secretBoxOpener = secretBoxOpenerFactory.create(
                         Base64.decode(sharedSecret));
-                return auth.getBytes();
+                return auth;
             }
 
         } catch (final AuthorizationFailureException e) {
@@ -72,12 +72,12 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     @Override
     public String toSubscribeMessage() {
 
-        byte[] authKey = authenticate();
+        String authKey = authenticate();
 
         // create the data part
         final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
         dataMap.put("channel", name);
-        dataMap.put("auth", new String(authKey));
+        dataMap.put("auth", authKey);
 
         // create the wrapper part
         final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
