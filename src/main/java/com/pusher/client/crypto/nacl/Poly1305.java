@@ -1384,7 +1384,7 @@ public class Poly1305 {
         f0 = d0;
 
         f1 = d1;
-        bits32 = 0xFFFFFFFFFFFFFFFFl;
+        bits32 = 0xFFFFFFFFFFFFFFFFL;
 
         f2 = d2;
         bits32 >>>= 32;

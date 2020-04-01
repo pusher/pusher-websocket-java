@@ -29,14 +29,14 @@ public class Salsa {
     private static int rounds = 20;
 
     private static long mask(byte x) {
-        return 0xFFl & x;
+        return 0xFFL & x;
     }
 
     // core applies the Salsa20 core function to 16-byte input in, 32-byte key k,
     // and 16-byte constant c, and puts the result into 64-byte array out.
     public static byte[] core(byte[] in, byte[] k, byte[] c) {
         byte[] out = new byte[64];
-        long mask = 0xFFFFFFFFl;
+        long mask = 0xFFFFFFFFL;
 
         long j0 = mask & (mask(c[0]) | mask(c[1]) << 8 | mask(c[2]) << 16 | mask(c[3]) << 24);
         long j1 = mask & (mask(k[0]) | mask(k[1]) << 8 | mask(k[2]) << 16 | mask(k[3]) << 24);
@@ -311,7 +311,7 @@ public class Salsa {
         long x14 = mask(k[28]) | mask(k[29]) << 8 | mask(k[30]) << 16 | mask(k[31]) << 24;
         long x15 = mask(c[12]) | mask(c[13]) << 8 | mask(c[14]) << 16 | mask(c[15]) << 24;
 
-        long mask = 0xFFFFFFFFl;
+        long mask = 0xFFFFFFFFL;
         for (int i = 0; i < 20; i += 2) {
             long u = mask & (x0 + x12);
             x4 ^= mask & (u << 7 | u >>> (32 - 7));
