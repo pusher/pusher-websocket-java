@@ -1,15 +1,5 @@
 package com.pusher.client.channel.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import com.google.gson.annotations.SerializedName;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelState;
@@ -21,7 +11,6 @@ import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.internal.Base64;
 
-import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,8 +28,6 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         this.connection = connection;
         this.authorizer = authorizer;
     }
-
-    /* Base class overrides */
 
     @Override
     public void bind(final String eventName, final SubscriptionEventListener listener) {
