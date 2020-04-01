@@ -56,9 +56,6 @@ public class SecretBoxOpener {
         // Salsa20 works with 64-byte blocks, we also generate 32 bytes of
         // keystream as a side effect.
         byte[] firstBlock = new byte[64];
-        for (int i = 0; i < firstBlock.length; i++) {
-            firstBlock[i] = 0;
-        }
         firstBlock = Salsa.XORKeyStream(firstBlock, counter, subKey);
 
         byte[] poly1305Key = new byte[32];
