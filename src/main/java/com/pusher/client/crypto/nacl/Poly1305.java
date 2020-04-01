@@ -24,25 +24,25 @@ IN THE SOFTWARE.
 package com.pusher.client.crypto.nacl;
 
 public class Poly1305 {
-    public static int TAG_SIZE = 16;
+    public static final int TAG_SIZE = 16;
 
-    private static double alpham80 = 0.00000000558793544769287109375d;
-    private static double alpham48 = 24.0d;
-    private static double alpham16 = 103079215104.0d;
-    private static double alpha0 = 6755399441055744.0d;
-    private static double alpha18 = 1770887431076116955136.0d;
-    private static double alpha32 = 29014219670751100192948224.0d;
-    private static double alpha50 = 7605903601369376408980219232256.0d;
-    private static double alpha64 = 124615124604835863084731911901282304.0d;
-    private static double alpha82 = 32667107224410092492483962313449748299776.0d;
-    private static double alpha96 = 535217884764734955396857238543560676143529984.0d;
-    private static double alpha112 = 35076039295941670036888435985190792471742381031424.0d;
-    private static double alpha130 = 9194973245195333150150082162901855101712434733101613056.0d;
-    private static double scale = 0.0000000000000000000000000000000000000036734198463196484624023016788195177431833298649127735047148490821200539357960224151611328125d;
-    private static double offset0 = 6755408030990331.0d;
-    private static double offset1 = 29014256564239239022116864.0d;
-    private static double offset2 = 124615283061160854719918951570079744.0d;
-    private static double offset3 = 535219245894202480694386063513315216128475136.0d;
+    private static final double ALPHAM_80 = 0.00000000558793544769287109375d;
+    private static final double ALPHAM_48 = 24.0d;
+    private static final double ALPHAM_16 = 103079215104.0d;
+    private static final double ALPHA_0 = 6755399441055744.0d;
+    private static final double ALPHA_18 = 1770887431076116955136.0d;
+    private static final double ALPHA_32 = 29014219670751100192948224.0d;
+    private static final double ALPHA_50 = 7605903601369376408980219232256.0d;
+    private static final double ALPHA_64 = 124615124604835863084731911901282304.0d;
+    private static final double ALPHA_82 = 32667107224410092492483962313449748299776.0d;
+    private static final double ALPHA_96 = 535217884764734955396857238543560676143529984.0d;
+    private static final double ALPHA_112 = 35076039295941670036888435985190792471742381031424.0d;
+    private static final double ALPHA_130 = 9194973245195333150150082162901855101712434733101613056.0d;
+    private static final double SCALE = 0.0000000000000000000000000000000000000036734198463196484624023016788195177431833298649127735047148490821200539357960224151611328125d;
+    private static final double OFFSET_0 = 6755408030990331.0d;
+    private static final double OFFSET_1 = 29014256564239239022116864.0d;
+    private static final double OFFSET_2 = 124615283061160854719918951570079744.0d;
+    private static final double OFFSET_3 = 535219245894202480694386063513315216128475136.0d;
 
     private static long uint32(long x) {
         return 0xFFFFFFFF & x;
@@ -67,6 +67,7 @@ public class Poly1305 {
     // Sum generates an authenticator for m using a one-time key and puts the
     // 16-byte result into out. Authenticating two different messages with the same
     // key allows an attacker to forge messages at will.
+    @SuppressWarnings("SuspiciousNameCombination")
     public static byte[] sum(byte[] m, byte[] key) {
         byte[] r = key.clone();
         byte[] s = new byte[16];
@@ -274,87 +275,87 @@ public class Poly1305 {
         r3 += r32;
 
         r3 += r33;
-        double h0 = alpha32 - alpha32;
+        double h0 = ALPHA_32 - ALPHA_32;
 
         long d3 = r3;
-        double h1 = alpha32 - alpha32;
+        double h1 = ALPHA_32 - ALPHA_32;
 
-        double h2 = alpha32 - alpha32;
+        double h2 = ALPHA_32 - ALPHA_32;
 
-        double h3 = alpha32 - alpha32;
+        double h3 = ALPHA_32 - ALPHA_32;
 
-        double h4 = alpha32 - alpha32;
+        double h4 = ALPHA_32 - ALPHA_32;
 
         double r0low = Double.longBitsToDouble(d0);
-        double h5 = alpha32 - alpha32;
+        double h5 = ALPHA_32 - ALPHA_32;
 
         double r1low = longBitsToDouble(d1);
-        double h6 = alpha32 - alpha32;
+        double h6 = ALPHA_32 - ALPHA_32;
 
         double r2low = Double.longBitsToDouble(d2);
-        double h7 = alpha32 - alpha32;
+        double h7 = ALPHA_32 - ALPHA_32;
 
-        r0low -= alpha0;
+        r0low -= ALPHA_0;
 
-        r1low -= alpha32;
+        r1low -= ALPHA_32;
 
-        r2low -= alpha64;
+        r2low -= ALPHA_64;
 
-        double r0high = r0low + alpha18;
+        double r0high = r0low + ALPHA_18;
 
         double r3low = Double.longBitsToDouble(d3);
 
-        double r1high = r1low + alpha50;
-        double sr1low = scale * r1low;
+        double r1high = r1low + ALPHA_50;
+        double sr1low = SCALE * r1low;
 
-        double r2high = r2low + alpha82;
-        double sr2low = scale * r2low;
+        double r2high = r2low + ALPHA_82;
+        double sr2low = SCALE * r2low;
 
-        r0high -= alpha18;
+        r0high -= ALPHA_18;
         double r0high_stack = r0high;
 
-        r3low -= alpha96;
+        r3low -= ALPHA_96;
 
-        r1high -= alpha50;
+        r1high -= ALPHA_50;
         double r1high_stack = r1high;
 
-        double sr1high = sr1low + alpham80;
+        double sr1high = sr1low + ALPHAM_80;
 
         r0low -= r0high;
 
-        r2high -= alpha82;
-        sr3low = scale * r3low;
+        r2high -= ALPHA_82;
+        sr3low = SCALE * r3low;
 
-        double sr2high = sr2low + alpham48;
+        double sr2high = sr2low + ALPHAM_48;
 
         r1low -= r1high;
         double r1low_stack = r1low;
 
-        sr1high -= alpham80;
+        sr1high -= ALPHAM_80;
         double sr1high_stack = sr1high;
 
         r2low -= r2high;
         double r2low_stack = r2low;
 
-        sr2high -= alpham48;
+        sr2high -= ALPHAM_48;
         double sr2high_stack = sr2high;
 
-        double r3high = r3low + alpha112;
+        double r3high = r3low + ALPHA_112;
         double r0low_stack = r0low;
 
         sr1low -= sr1high;
         double sr1low_stack = sr1low;
 
-        double sr3high = sr3low + alpham16;
+        double sr3high = sr3low + ALPHAM_16;
         double r2high_stack = r2high;
 
         sr2low -= sr2high;
         double sr2low_stack = sr2low;
 
-        r3high -= alpha112;
+        r3high -= ALPHA_112;
         double r3high_stack = r3high;
 
-        sr3high -= alpham16;
+        sr3high -= ALPHAM_16;
         double sr3high_stack = sr3high;
 
         r3low -= r3high;
@@ -454,13 +455,13 @@ public class Poly1305 {
 
             z3 = Double.longBitsToDouble(d3);
 
-            z0 -= alpha0;
+            z0 -= ALPHA_0;
 
-            z1 -= alpha32;
+            z1 -= ALPHA_32;
 
-            z2 -= alpha64;
+            z2 -= ALPHA_64;
 
-            z3 -= alpha96;
+            z3 -= ALPHA_96;
 
             h0 += z0;
 
@@ -475,60 +476,60 @@ public class Poly1305 {
 
                 m2 = 2279;
                 m20 = 0xFF & (m[(int) p + 8]);
-                y7 = h7 + alpha130;
+                y7 = h7 + ALPHA_130;
 
                 m2 <<= 51;
                 m3 = 2343;
                 m21 = 0xFF & (m[(int) p + 9]);
-                y6 = h6 + alpha130;
+                y6 = h6 + ALPHA_130;
 
                 m3 <<= 51;
                 m0 = 2151;
                 m22 = 0xFF & (m[(int) p + 10]);
-                y1 = h1 + alpha32;
+                y1 = h1 + ALPHA_32;
 
                 m0 <<= 51;
                 m1 = 2215;
                 m23 = 0xFF & (m[(int) p + 11]);
-                y0 = h0 + alpha32;
+                y0 = h0 + ALPHA_32;
 
                 m1 <<= 51;
                 m30 = 0xFF & (m[(int) p + 12]);
-                y7 -= alpha130;
+                y7 -= ALPHA_130;
 
                 m21 <<= 8;
                 m2 += m20;
                 m31 = 0xFF & (m[(int) p + 13]);
-                y6 -= alpha130;
+                y6 -= ALPHA_130;
 
                 m22 <<= 16;
                 m2 += m21;
                 m32 = 0xFF & (m[(int) p + 14]);
-                y1 -= alpha32;
+                y1 -= ALPHA_32;
 
                 m23 <<= 24;
                 m2 += m22;
                 m33 = 0xFF & (m[(int) p + 15]);
-                y0 -= alpha32;
+                y0 -= ALPHA_32;
 
                 m2 += m23;
                 m00 = 0xFF & (m[(int) p]);
-                y5 = h5 + alpha96;
+                y5 = h5 + ALPHA_96;
 
                 m31 <<= 8;
                 m3 += m30;
                 m01 = 0xFF & (m[(int) p + 1]);
-                y4 = h4 + alpha96;
+                y4 = h4 + ALPHA_96;
 
                 m32 <<= 16;
                 m02 = 0xFF & (m[(int) p + 2]);
                 x7 = h7 - y7;
-                y7 *= scale;
+                y7 *= SCALE;
 
                 m33 += 256;
                 m03 = 0xFF & (m[(int) p + 3]);
                 x6 = h6 - y6;
-                y6 *= scale;
+                y6 *= SCALE;
 
                 m33 <<= 24;
                 m3 += m31;
@@ -543,12 +544,12 @@ public class Poly1305 {
                 m3 += m33;
                 m0 += m00;
                 m12 = 0xFF & (m[(int) p + 6]);
-                y5 -= alpha96;
+                y5 -= ALPHA_96;
 
                 m02 <<= 16;
                 m0 += m01;
                 m13 = 0xFF & (m[(int) p + 7]);
-                y4 -= alpha96;
+                y4 -= ALPHA_96;
 
                 m03 <<= 24;
                 m0 += m02;
@@ -570,20 +571,20 @@ public class Poly1305 {
 
                 m13 <<= 24;
                 m1 += m12;
-                y3 = h3 + alpha64;
+                y3 = h3 + ALPHA_64;
 
                 m1 += m13;
                 d1 = m1;
-                y2 = h2 + alpha64;
+                y2 = h2 + ALPHA_64;
 
                 x0 += x1;
 
                 x6 += x7;
 
-                y3 -= alpha64;
+                y3 -= ALPHA_64;
                 r3low = r3low_stack;
 
-                y2 -= alpha64;
+                y2 -= ALPHA_64;
                 r0low = r0low_stack;
 
                 x5 = h5 - y5;
@@ -649,13 +650,13 @@ public class Poly1305 {
                 sr3highx6 = sr3high * x6;
 
                 r1highx4 = r1high * x4;
-                z2 -= alpha64;
+                z2 -= ALPHA_64;
 
                 h4 = r2lowx0 + sr3lowx6;
                 r1lowx4 = r1low * x4;
 
                 r0highx4 = r0high * x4;
-                z3 -= alpha96;
+                z3 -= ALPHA_96;
 
                 h5 = r2highx0 + sr3highx6;
                 r0lowx4 = r0low * x4;
@@ -708,9 +709,9 @@ public class Poly1305 {
                 z0 = Double.longBitsToDouble(d0);
                 h1 += sr3highx2;
 
-                z1 -= alpha32;
+                z1 -= ALPHA_32;
 
-                z0 -= alpha0;
+                z0 -= ALPHA_0;
 
                 h5 += z3;
 
@@ -723,39 +724,39 @@ public class Poly1305 {
             }
 
             // multiplyaddatmost15bytes:
-            y7 = h7 + alpha130;
+            y7 = h7 + ALPHA_130;
 
-            y6 = h6 + alpha130;
+            y6 = h6 + ALPHA_130;
 
-            y1 = h1 + alpha32;
+            y1 = h1 + ALPHA_32;
 
-            y0 = h0 + alpha32;
+            y0 = h0 + ALPHA_32;
 
-            y7 -= alpha130;
+            y7 -= ALPHA_130;
 
-            y6 -= alpha130;
+            y6 -= ALPHA_130;
 
-            y1 -= alpha32;
+            y1 -= ALPHA_32;
 
-            y0 -= alpha32;
+            y0 -= ALPHA_32;
 
-            y5 = h5 + alpha96;
+            y5 = h5 + ALPHA_96;
 
-            y4 = h4 + alpha96;
+            y4 = h4 + ALPHA_96;
 
             x7 = h7 - y7;
-            y7 *= scale;
+            y7 *= SCALE;
 
             x6 = h6 - y6;
-            y6 *= scale;
+            y6 *= SCALE;
 
             x1 = h1 - y1;
 
             x0 = h0 - y0;
 
-            y5 -= alpha96;
+            y5 -= ALPHA_96;
 
-            y4 -= alpha96;
+            y4 -= ALPHA_96;
 
             x1 += y7;
 
@@ -765,18 +766,18 @@ public class Poly1305 {
 
             x6 += y4;
 
-            y3 = h3 + alpha64;
+            y3 = h3 + ALPHA_64;
 
-            y2 = h2 + alpha64;
+            y2 = h2 + ALPHA_64;
 
             x0 += x1;
 
             x6 += x7;
 
-            y3 -= alpha64;
+            y3 -= ALPHA_64;
             r3low = r3low_stack;
 
-            y2 -= alpha64;
+            y2 -= ALPHA_64;
             r0low = r0low_stack;
 
             x5 = h5 - y5;
@@ -1105,13 +1106,13 @@ public class Poly1305 {
 
             z0 = Double.longBitsToDouble(d0);
 
-            z3 -= alpha96;
+            z3 -= ALPHA_96;
 
-            z2 -= alpha64;
+            z2 -= ALPHA_64;
 
-            z1 -= alpha32;
+            z1 -= ALPHA_32;
 
-            z0 -= alpha0;
+            z0 -= ALPHA_0;
 
             h5 += z3;
 
@@ -1121,39 +1122,39 @@ public class Poly1305 {
 
             h0 += z0;
 
-            y7 = h7 + alpha130;
+            y7 = h7 + ALPHA_130;
 
-            y6 = h6 + alpha130;
+            y6 = h6 + ALPHA_130;
 
-            y1 = h1 + alpha32;
+            y1 = h1 + ALPHA_32;
 
-            y0 = h0 + alpha32;
+            y0 = h0 + ALPHA_32;
 
-            y7 -= alpha130;
+            y7 -= ALPHA_130;
 
-            y6 -= alpha130;
+            y6 -= ALPHA_130;
 
-            y1 -= alpha32;
+            y1 -= ALPHA_32;
 
-            y0 -= alpha32;
+            y0 -= ALPHA_32;
 
-            y5 = h5 + alpha96;
+            y5 = h5 + ALPHA_96;
 
-            y4 = h4 + alpha96;
+            y4 = h4 + ALPHA_96;
 
             x7 = h7 - y7;
-            y7 *= scale;
+            y7 *= SCALE;
 
             x6 = h6 - y6;
-            y6 *= scale;
+            y6 *= SCALE;
 
             x1 = h1 - y1;
 
             x0 = h0 - y0;
 
-            y5 -= alpha96;
+            y5 -= ALPHA_96;
 
-            y4 -= alpha96;
+            y4 -= ALPHA_96;
 
             x1 += y7;
 
@@ -1163,18 +1164,18 @@ public class Poly1305 {
 
             x6 += y4;
 
-            y3 = h3 + alpha64;
+            y3 = h3 + ALPHA_64;
 
-            y2 = h2 + alpha64;
+            y2 = h2 + ALPHA_64;
 
             x0 += x1;
 
             x6 += x7;
 
-            y3 -= alpha64;
+            y3 -= ALPHA_64;
             r3low = r3low_stack;
 
-            y2 -= alpha64;
+            y2 -= ALPHA_64;
             r0low = r0low_stack;
 
             x5 = h5 - y5;
@@ -1294,40 +1295,40 @@ public class Poly1305 {
 
         //nomorebytes:
 
-        y7 = h7 + alpha130;
+        y7 = h7 + ALPHA_130;
 
-        y0 = h0 + alpha32;
+        y0 = h0 + ALPHA_32;
 
-        y1 = h1 + alpha32;
+        y1 = h1 + ALPHA_32;
 
-        y2 = h2 + alpha64;
+        y2 = h2 + ALPHA_64;
 
-        y7 -= alpha130;
+        y7 -= ALPHA_130;
 
-        y3 = h3 + alpha64;
+        y3 = h3 + ALPHA_64;
 
-        y4 = h4 + alpha96;
+        y4 = h4 + ALPHA_96;
 
-        y5 = h5 + alpha96;
+        y5 = h5 + ALPHA_96;
 
         x7 = h7 - y7;
-        y7 *= scale;
+        y7 *= SCALE;
 
-        y0 -= alpha32;
+        y0 -= ALPHA_32;
 
-        y1 -= alpha32;
+        y1 -= ALPHA_32;
 
-        y2 -= alpha64;
+        y2 -= ALPHA_64;
 
         h6 += x7;
 
-        y3 -= alpha64;
+        y3 -= ALPHA_64;
 
-        y4 -= alpha96;
+        y4 -= ALPHA_96;
 
-        y5 -= alpha96;
+        y5 -= ALPHA_96;
 
-        y6 = h6 + alpha130;
+        y6 = h6 + ALPHA_130;
 
         x0 = h0 - y0;
 
@@ -1335,7 +1336,7 @@ public class Poly1305 {
 
         x2 = h2 - y2;
 
-        y6 -= alpha130;
+        y6 -= ALPHA_130;
 
         x0 += y7;
 
@@ -1347,7 +1348,7 @@ public class Poly1305 {
 
         x6 = h6 - y6;
 
-        y6 *= scale;
+        y6 *= SCALE;
 
         x2 += y0;
 
@@ -1369,16 +1370,16 @@ public class Poly1305 {
 
         x6 += y5;
 
-        x2 += offset1;
+        x2 += OFFSET_1;
         d1 = Double.doubleToLongBits(x2);
 
-        x0 += offset0;
+        x0 += OFFSET_0;
         d0 = Double.doubleToLongBits(x0);
 
-        x4 += offset2;
+        x4 += OFFSET_2;
         d2 = Double.doubleToLongBits(x4);
 
-        x6 += offset3;
+        x6 += OFFSET_3;
         d3 = Double.doubleToLongBits(x6);
 
         f0 = d0;

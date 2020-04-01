@@ -24,9 +24,9 @@ IN THE SOFTWARE.
 package com.pusher.client.crypto.nacl;
 
 public class Salsa {
-    public static byte[] SIGMA = {'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'};
+    public static final byte[] SIGMA = {'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'};
 
-    private static int rounds = 20;
+    private static final int ROUNDS = 20;
 
     private static long mask(byte x) {
         return 0xFFL & x;
@@ -60,7 +60,7 @@ public class Salsa {
         long x9 = j9, x10 = j10, x11 = j11, x12 = j12;
         long x13 = j13, x14 = j14, x15 = j15;
 
-        for (int i = 0; i < rounds; i += 2) {
+        for (int i = 0; i < ROUNDS; i += 2) {
             long u = mask & (x0 + x12);
             x4 ^= mask & (u << 7 | u >>> (32 - 7));
             u = mask & (x4 + x0);
