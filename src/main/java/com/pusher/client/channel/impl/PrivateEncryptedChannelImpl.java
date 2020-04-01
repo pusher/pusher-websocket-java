@@ -45,15 +45,15 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
         try {
             final Map authResponseMap = GSON.fromJson(getAuthResponse(), Map.class);
-            final String authKey = (String) authResponseMap.get("auth");
+            final String auth = (String) authResponseMap.get("auth");
             final String sharedSecret = (String) authResponseMap.get("shared_secret");
 
-            if (authKey == null || sharedSecret == null) {
+            if (auth == null || sharedSecret == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields expected " +
-                        "from the Authorizer, expected an auth token and shared_secret.");
+                        "from the Authorizer, expected an auth and shared_secret.");
             } else {
                 secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
-                return authKey.getBytes();
+                return auth.getBytes();
             }
 
         } catch (final AuthorizationFailureException e) {
