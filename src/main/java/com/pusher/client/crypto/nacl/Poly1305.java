@@ -1098,7 +1098,6 @@ public class Poly1305 {
             d3 = m3;
 
             z3 = Double.longBitsToDouble(d3);
-            ;
 
             z2 = Double.longBitsToDouble(d2);
 
