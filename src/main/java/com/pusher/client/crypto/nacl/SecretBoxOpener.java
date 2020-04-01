@@ -64,13 +64,13 @@ public class SecretBoxOpener {
         System.arraycopy(box, 0, tag, 0, tag.length);
 
         byte[] cipher = new byte[box.length - Poly1305.TAG_SIZE];
-        System.arraycopy(box, 0 + Poly1305.TAG_SIZE, cipher, 0, cipher.length);
+        System.arraycopy(box, Poly1305.TAG_SIZE, cipher, 0, cipher.length);
         if (!Poly1305.verify(tag, cipher, poly1305Key)) {
             throw new AuthenticityException();
         }
 
         byte[] ret = new byte[box.length - OVERHEAD];
-        System.arraycopy(box, 0 + OVERHEAD, ret, 0, ret.length);
+        System.arraycopy(box, OVERHEAD, ret, 0, ret.length);
         // We XOR up to 32 bytes of box with the keystream generated from
         // the first block.
         byte[] firstMessageBlock = new byte[ret.length];

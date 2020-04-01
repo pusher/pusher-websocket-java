@@ -512,7 +512,7 @@ public class Poly1305 {
                 y0 -= alpha32;
 
                 m2 += m23;
-                m00 = 0xFF & (m[(int) p + 0]);
+                m00 = 0xFF & (m[(int) p]);
                 y5 = h5 + alpha96;
 
                 m31 <<= 8;
@@ -904,7 +904,7 @@ public class Poly1305 {
             lbelow2 >>= 31;
             lbelow4 = l - 4;
 
-            m00 = 0xFF & (m[(int) p + 0]);
+            m00 = 0xFF & (m[(int) p]);
             lbelow3 >>= 31;
             p += lbelow2;
 
