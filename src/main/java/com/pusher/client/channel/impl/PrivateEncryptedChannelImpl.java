@@ -8,6 +8,7 @@ import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
+import com.pusher.client.crypto.nacl.SecretBoxOpenerFactory;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.internal.Base64;
 
@@ -18,15 +19,18 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     private final InternalConnection connection;
     private final Authorizer authorizer;
-    protected SecretBoxOpener secretBoxOpener;
+    private SecretBoxOpenerFactory secretBoxOpenerFactory;
+    private SecretBoxOpener secretBoxOpener;
 
     public PrivateEncryptedChannelImpl(final InternalConnection connection,
                                        final String channelName,
                                        final Authorizer authorizer,
-                                       final Factory factory) {
+                                       final Factory factory,
+                                       final SecretBoxOpenerFactory secretBoxOpenerFactory) {
         super(channelName, factory);
         this.connection = connection;
         this.authorizer = authorizer;
+        this.secretBoxOpenerFactory = secretBoxOpenerFactory;
     }
 
     @Override
@@ -52,7 +56,8 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 throw new AuthorizationFailureException("Didn't receive all the fields expected " +
                         "from the Authorizer, expected an auth and shared_secret.");
             } else {
-                secretBoxOpener = new SecretBoxOpener(Base64.decode(sharedSecret));
+                secretBoxOpener = secretBoxOpenerFactory.create(
+                        Base64.decode(sharedSecret));
                 return auth.getBytes();
             }
 
@@ -94,7 +99,6 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private void tearDownChannel() {
         if (secretBoxOpener != null) {
             secretBoxOpener.clearKey();
-            secretBoxOpener = null;
         }
     }
 
