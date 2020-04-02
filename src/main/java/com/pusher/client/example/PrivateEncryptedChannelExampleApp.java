@@ -12,7 +12,7 @@ import com.pusher.client.util.HttpAuthorizer;
 public class PrivateEncryptedChannelExampleApp implements
         ConnectionEventListener, PrivateEncryptedChannelEventListener {
 
-    private String apiKey = "FILL_ME_IN";
+    private String apiKey = "FILL_ME_IN"; // "key" at https://dashboard.pusher.com
     private String channelName = "private-encrypted-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
@@ -24,12 +24,11 @@ public class PrivateEncryptedChannelExampleApp implements
     }
 
     private PrivateEncryptedChannelExampleApp(final String[] args) {
-
-        if (args.length == 3) {
-            apiKey = args[0];
-            channelName = args[1];
-            eventName = args[2];
-            cluster = args[3];
+        switch (args.length) {
+            case 4: cluster = args[3];
+            case 3: eventName = args[2];
+            case 2: channelName = args[1];
+            case 0: apiKey = args[0];
         }
 
         final HttpAuthorizer authorizer = new HttpAuthorizer(
@@ -45,7 +44,10 @@ public class PrivateEncryptedChannelExampleApp implements
         // Keep main thread asleep while we watch for events or application will terminate
         while (true) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
+                pusher.disconnect(); // to put clearing of shared secret on disconnected to test
+                Thread.sleep(5000);
+                pusher.connect(this);
             }
             catch (final InterruptedException e) {
                 e.printStackTrace();
