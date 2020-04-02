@@ -11,8 +11,8 @@ public class SecretBoxOpenerTest {
 
     byte[] key = Base64.decode("6071zp2l/GPnDPDXNWTJDHyIZ8pZMvQrYsa4xuTKK2c=");
 
-    byte[] nonce = Base64.decode("xsbOS0KylAV2ziTDHrP/7rSFqpCOah3p");
     byte[] cipher = Base64.decode("tvttPE2PRQp0bWDmaPyiEU8YJGztmTvTN77OoPwftTNTdDgJXwxHQPE=");
+    byte[] nonce = Base64.decode("xsbOS0KylAV2ziTDHrP/7rSFqpCOah3p");
 
     SecretBoxOpener subject;
 
