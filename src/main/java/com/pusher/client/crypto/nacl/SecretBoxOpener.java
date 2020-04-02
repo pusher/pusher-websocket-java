@@ -26,8 +26,7 @@ package com.pusher.client.crypto.nacl;
 
 import static com.pusher.client.util.internal.Preconditions.checkArgument;
 import static com.pusher.client.util.internal.Preconditions.checkNotNull;
-
-import java.util.Arrays;
+import static java.util.Arrays.fill;
 
 public class SecretBoxOpener {
 
@@ -97,13 +96,12 @@ public class SecretBoxOpener {
     }
 
     public void clearKey() {
-        Arrays.fill(key, (byte) 0);
+        fill(key, (byte) 0);
         if (key[0] != 0) {
+            // so that hopefully the optimiser won't remove the clearing code (best sensible effort)
             throw new SecurityException("key not cleared correctly");
         }
         key = null;
-        // TODO: ensure implemented securely (so that the clearing code
-        //  is not removed by compiler's optimisations)
     }
 
     // subKey = byte[32], counter = byte[16], nonce = byte[24], key = byte[32]
