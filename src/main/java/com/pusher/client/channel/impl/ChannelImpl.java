@@ -17,11 +17,11 @@ public class ChannelImpl implements InternalChannel {
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
-    private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
+    protected final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
-    private final Factory factory;
-    private final Object lock = new Object();
+    protected final Factory factory;
+    protected final Object lock = new Object();
 
     public ChannelImpl(final String channelName, final Factory factory) {
         GsonBuilder gsonBldr = new GsonBuilder();

@@ -5,6 +5,7 @@ import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
@@ -12,8 +13,10 @@ import com.pusher.client.crypto.nacl.SecretBoxOpenerFactory;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.internal.Base64;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateEncryptedChannel {
 
@@ -100,6 +103,79 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         if (secretBoxOpener != null) {
             secretBoxOpener.clearKey();
         }
+    }
+
+    private class ReceivedMessage {
+        private String data;
+
+        public String getData() {
+            return data;
+        }
+    }
+
+    @Override
+    public void onMessage(String event, String message) {
+
+        if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
+            updateState(ChannelState.SUBSCRIBED);
+        } else {
+
+            final Set<SubscriptionEventListener> listeners;
+            synchronized (lock) {
+                final Set<SubscriptionEventListener> sharedListeners = eventNameToListenerMap.get(event);
+                if (sharedListeners != null) {
+                    listeners = new HashSet<>(sharedListeners);
+                } else {
+                    listeners = null;
+                }
+            }
+
+            if (listeners != null) {
+                try {
+                    // get the data part to decrypt
+                    ReceivedMessage receivedMessage = GSON.fromJson(message, ReceivedMessage.class);
+                    final String decryptedMessage = decryptMessage(receivedMessage.getData());
+
+                    // wrap it up as a PusherEvent to send to listeners
+                    PusherEvent pusherEventModified = GSON.fromJson(
+                            message, PusherEvent.class);
+                    pusherEventModified.setDecryptedData(decryptedMessage);
+
+                    // notify all the listeners
+                    for (final SubscriptionEventListener listener : listeners) {
+                        factory.queueOnEventThread(() -> listener.onEvent(pusherEventModified));
+                    }
+
+                } catch (IllegalArgumentException illegalArgumentException) {
+                    //todo - here we should notify that we failed to decrypt the message?
+                }
+
+            }
+        }
+    }
+
+    private class EncryptedReceivedData {
+        String nonce;
+        String ciphertext;
+
+        public byte[] getNonce() {
+            return Base64.decode(nonce);
+        }
+
+        public byte[] getCiphertext() {
+            return Base64.decode(ciphertext);
+        }
+    }
+
+    //todo: test what happens if this can't be decrypted
+    private String decryptMessage(String data) {
+
+        final EncryptedReceivedData encryptedReceivedData =
+                GSON.fromJson(data, EncryptedReceivedData.class);
+
+        return new String(secretBoxOpener.open(
+                encryptedReceivedData.getCiphertext(),
+                encryptedReceivedData.getNonce()));
     }
 
     private String getAuthResponse() {
