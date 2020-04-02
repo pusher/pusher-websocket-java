@@ -35,4 +35,11 @@ public class SecretBoxOpenerTest {
 
         subject.open(tamperedCipher, nonce);
     }
+
+    @Test(expected = NullPointerException.class)
+    public void openFailsAfterClearKey() {
+        subject.clearKey();
+
+        subject.open(cipher, nonce);
+    }
 }
