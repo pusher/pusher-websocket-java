@@ -143,7 +143,12 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
                     // notify all the listeners
                     for (final SubscriptionEventListener listener : listeners) {
-                        factory.queueOnEventThread(() -> listener.onEvent(pusherEventModified));
+                        factory.queueOnEventThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onEvent(pusherEventModified);
+                            }
+                        });
                     }
 
                 } catch (IllegalArgumentException illegalArgumentException) {
