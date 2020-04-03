@@ -90,7 +90,7 @@ public class ChannelImpl implements InternalChannel {
     /* InternalChannel implementation */
 
     @Override
-    public PusherEvent prepareMessage(String message) {
+    public PusherEvent prepareMessage(final String event, String message) {
         return GSON.fromJson(message, PusherEvent.class);
     }
 
@@ -113,7 +113,7 @@ public class ChannelImpl implements InternalChannel {
             }
 
             if (listeners != null) {
-                final PusherEvent pusherEvent = prepareMessage(message);
+                final PusherEvent pusherEvent = prepareMessage(event, message);
                 if (pusherEvent != null) {
                     for (final SubscriptionEventListener listener : listeners) {
                         factory.queueOnEventThread(new Runnable() {
