@@ -45,10 +45,10 @@ public class PrivateEncryptedChannelExampleApp implements
         for (int i = 0; ; i++) {
             try {
                 Thread.sleep(5000);
-                pusher.disconnect(); // to test clearing of shared secret
+                pusher.disconnect(); // to test clearing of shared secret (via tmp log)
                 pusher.connect(this);
                 Thread.sleep(5000);
-                pusher.unsubscribe(channelName); // to test clearing of shared secret
+                pusher.unsubscribe(channelName); // to test clearing of shared secret (via tmp log)
                 if (i % 2 == 0) { // to test disconnect on both unsubscribed/subscribed
                     channel = pusher.subscribePrivateEncrypted(channelName, this, eventName);
                 }
