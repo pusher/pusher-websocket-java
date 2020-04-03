@@ -15,8 +15,6 @@ import com.pusher.client.util.Factory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -38,9 +36,6 @@ public class PrivateEncryptedChannelClearsKeyTest {
     SecretBoxOpenerFactory mockSecretBoxOpenerFactory;
     @Mock
     SecretBoxOpener mockSecretBoxOpener;
-
-    @Captor
-    ArgumentCaptor<ConnectionEventListener> connectionEventListenerArgumentCaptor;
 
     PrivateEncryptedChannelImpl subject;
 
