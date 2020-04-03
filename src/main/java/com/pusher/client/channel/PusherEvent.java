@@ -39,11 +39,6 @@ public class PusherEvent {
     public String getEventName() { return (String)eventData.get("event"); }
     public String getData() { return (String)eventData.get("data"); }
 
-    // only to be used by the private encrypted channel to update the data part once decryption has happened
-    public void setDecryptedData(String decryptedData){
-        eventData.put("data", decryptedData );
-    }
-
     public String toString() {
         return eventData.toString();
     }

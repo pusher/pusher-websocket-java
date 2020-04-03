@@ -105,25 +105,19 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         }
     }
 
-    private class ReceivedMessage {
-        private String data;
-
-        public String getData() {
-            return data;
-        }
-    }
-
     @Override
     public PusherEvent prepareMessage(String message) {
-        ReceivedMessage receivedMessage = GSON.fromJson(message, ReceivedMessage.class);
-        final String decryptedMessage = decryptMessage(receivedMessage.getData());
+        try {
+            Map receivedMessage = GSON.fromJson(message, Map.class);
+            final String decryptedMessage = decryptMessage((String)receivedMessage.get("data"));
+            receivedMessage.replace("data", decryptedMessage);
 
-        // wrap it up as a PusherEvent to send to listeners
-        PusherEvent pusherEventModified = GSON.fromJson(
-                message, PusherEvent.class);
-        pusherEventModified.setDecryptedData(decryptedMessage);
-
-        return pusherEventModified;
+            return GSON.fromJson(
+                    GSON.toJson(receivedMessage), PusherEvent.class);
+        } catch (AuthorizationFailureException e1) {
+            //todo:
+        }
+        return null;
     }
 
     private class EncryptedReceivedData {
