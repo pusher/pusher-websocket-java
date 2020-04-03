@@ -180,7 +180,6 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         }
     }
 
-    //todo: test what happens if this can't be decrypted
     private String decryptMessage(String data) {
 
         final EncryptedReceivedData encryptedReceivedData =
