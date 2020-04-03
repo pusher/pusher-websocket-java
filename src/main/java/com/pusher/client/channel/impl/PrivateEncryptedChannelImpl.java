@@ -114,57 +114,16 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     }
 
     @Override
-    public void onMessage(String event, String message) {
+    public PusherEvent prepareMessage(String message) {
+        ReceivedMessage receivedMessage = GSON.fromJson(message, ReceivedMessage.class);
+        final String decryptedMessage = decryptMessage(receivedMessage.getData());
 
-        if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
-            updateState(ChannelState.SUBSCRIBED);
-        } else {
+        // wrap it up as a PusherEvent to send to listeners
+        PusherEvent pusherEventModified = GSON.fromJson(
+                message, PusherEvent.class);
+        pusherEventModified.setDecryptedData(decryptedMessage);
 
-            final Set<SubscriptionEventListener> listeners;
-            synchronized (lock) {
-                final Set<SubscriptionEventListener> sharedListeners = eventNameToListenerMap.get(event);
-                if (sharedListeners != null) {
-                    listeners = new HashSet<>(sharedListeners);
-                } else {
-                    listeners = null;
-                }
-            }
-
-            if (listeners != null) {
-                try {
-                    // get the data part to decrypt
-                    ReceivedMessage receivedMessage = GSON.fromJson(message, ReceivedMessage.class);
-                    final String decryptedMessage = decryptMessage(receivedMessage.getData());
-
-                    // wrap it up as a PusherEvent to send to listeners
-                    PusherEvent pusherEventModified = GSON.fromJson(
-                            message, PusherEvent.class);
-                    pusherEventModified.setDecryptedData(decryptedMessage);
-
-                    // notify all the listeners
-                    for (final SubscriptionEventListener listener : listeners) {
-                        factory.queueOnEventThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onEvent(pusherEventModified);
-                            }
-                        });
-                    }
-
-                } catch (Exception exception) {
-                    for (final SubscriptionEventListener listener : listeners) {
-                        factory.queueOnEventThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((PrivateEncryptedChannelEventListener)listener)
-                                        .onDecryptionFailure(exception);
-                            }
-                        });
-                    }
-                }
-
-            }
-        }
+        return pusherEventModified;
     }
 
     private class EncryptedReceivedData {
