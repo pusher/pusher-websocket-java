@@ -1,5 +1,6 @@
 package com.pusher.client.channel.impl;
 
+import com.google.gson.JsonSyntaxException;
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelState;
@@ -13,6 +14,8 @@ import com.pusher.client.util.internal.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -80,7 +83,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Test
     public void toStringIsAccurate() {
-        assertEquals("[Private Encrypted Channel: name="+getChannelName()+"]", channel.toString());
+        assertEquals("[Private Encrypted Channel: name=" + getChannelName() + "]", channel.toString());
     }
 
     
@@ -108,7 +111,9 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Override
     @Test(expected = IllegalArgumentException.class)
-    public void testPrivateChannelName() {  newInstance("private-stuffchannel");  }
+    public void testPrivateChannelName() {
+        newInstance("private-stuffchannel");
+    }
 
     /*
     TESTING SUBSCRIBE MESSAGE
@@ -119,7 +124,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     public void testReturnsCorrectSubscribeMessage() {
         assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{" +
                 "\"channel\":\"" + getChannelName() + "\"," +
-                "\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\""+
+                "\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\"" +
                 "}}", channel.toSubscribeMessage());
     }
 
@@ -267,6 +272,59 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
     }
 
+    @Captor
+    ArgumentCaptor<Exception> exceptionArgumentCaptor;
 
-    // todo: test no cyphertext and no nonce
+    @Test
+    public void onMessageHandlesNoNonceOrCypherText() {
+        PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
+                mockInternalConnection,
+                getChannelName(),
+                mockAuthorizer,
+                mockFactory,
+                mockSecretBoxOpenerFactory);
+
+        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+                .thenReturn(authorizer_valid);
+        when(mockSecretBoxOpenerFactory.create(any()))
+                .thenReturn(new SecretBoxOpener(Base64.decode(valid_sharedSecret)));
+
+        channel.toSubscribeMessage();
+
+        PrivateEncryptedChannelEventListener mockListener = mock(PrivateEncryptedChannelEventListener.class);
+
+        channel.bind("my-event", mockListener);
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{}\"}");
+
+        verify(mockListener, times(1)).onDecryptionFailure(
+                exceptionArgumentCaptor.capture());
+        assertEquals(exceptionArgumentCaptor.getValue().getClass(), NullPointerException.class);
+    }
+
+    @Test
+    public void onMessageHandlesInvalidJson() {
+        PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
+                mockInternalConnection,
+                getChannelName(),
+                mockAuthorizer,
+                mockFactory,
+                mockSecretBoxOpenerFactory);
+
+        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+                .thenReturn(authorizer_valid);
+        when(mockSecretBoxOpenerFactory.create(any()))
+                .thenReturn(new SecretBoxOpener(Base64.decode(valid_sharedSecret)));
+
+        channel.toSubscribeMessage();
+
+        PrivateEncryptedChannelEventListener mockListener = mock(PrivateEncryptedChannelEventListener.class);
+
+        channel.bind("my-event", mockListener);
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{potatoes}\"}");
+
+        verify(mockListener, times(1)).onDecryptionFailure(
+                exceptionArgumentCaptor.capture());
+        assertEquals(exceptionArgumentCaptor.getValue().getClass(), JsonSyntaxException.class);
+    }
+
 }

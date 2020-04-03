@@ -151,8 +151,16 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                         });
                     }
 
-                } catch (IllegalArgumentException illegalArgumentException) {
-                    //todo - here we should notify that we failed to decrypt the message?
+                } catch (Exception exception) {
+                    for (final SubscriptionEventListener listener : listeners) {
+                        factory.queueOnEventThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((PrivateEncryptedChannelEventListener)listener)
+                                        .onDecryptionFailure(exception);
+                            }
+                        });
+                    }
                 }
 
             }
