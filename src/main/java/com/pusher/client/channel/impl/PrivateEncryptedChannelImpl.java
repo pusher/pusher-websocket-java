@@ -28,7 +28,9 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     // For not hanging on to shared secret past the Pusher.disconnect() call,
     // i.e. when not necessary. Pusher.connect(...) call will trigger re-subscribe
     // and hence re-authenticate which creates a new secretBoxOpener.
-    private ConnectionEventListener onDisconnectedListener = new ConnectionEventListener() {
+    private ConnectionEventListener disposeSecretBoxOpenerOnDisconnectedListener =
+            new ConnectionEventListener() {
+
         @Override
         public void onConnectionStateChange(ConnectionStateChange change) {
             disposeSecretBoxOpener();
@@ -105,11 +107,12 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     private void createSecretBoxOpener(byte[] key) {
         secretBoxOpener = secretBoxOpenerFactory.create(key);
-        setListenerToClearSecretBoxOpenerOnDisconnected();
+        setListenerToDisposeSecretBoxOpenerOnDisconnected();
     }
 
-    private void setListenerToClearSecretBoxOpenerOnDisconnected() {
-        connection.bind(ConnectionState.DISCONNECTED, onDisconnectedListener);
+    private void setListenerToDisposeSecretBoxOpenerOnDisconnected() {
+        connection.bind(ConnectionState.DISCONNECTED,
+                disposeSecretBoxOpenerOnDisconnectedListener);
     }
 
     @Override
@@ -125,12 +128,13 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         if (secretBoxOpener != null) {
             secretBoxOpener.clearKey();
             secretBoxOpener = null;
-            removeListenerToClearSecretBoxOpenerOnDisconnected();
+            removeListenerToDisposeSecretBoxOpenerOnDisconnected();
         }
     }
 
-    private void removeListenerToClearSecretBoxOpenerOnDisconnected() {
-        connection.unbind(ConnectionState.DISCONNECTED, onDisconnectedListener);
+    private void removeListenerToDisposeSecretBoxOpenerOnDisconnected() {
+        connection.unbind(ConnectionState.DISCONNECTED,
+                disposeSecretBoxOpenerOnDisconnectedListener);
     }
 
     private String getAuthResponse() {
