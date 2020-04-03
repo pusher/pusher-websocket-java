@@ -28,7 +28,7 @@ public class PrivateEncryptedChannelExampleApp implements
             case 4: cluster = args[3];
             case 3: eventName = args[2];
             case 2: channelName = args[1];
-            case 0: apiKey = args[0];
+            case 1: apiKey = args[0];
         }
 
         final HttpAuthorizer authorizer = new HttpAuthorizer(
