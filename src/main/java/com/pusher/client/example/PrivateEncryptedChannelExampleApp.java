@@ -17,7 +17,7 @@ public class PrivateEncryptedChannelExampleApp implements
     private String eventName = "my-event";
     private String cluster = "eu";
 
-    private final PrivateEncryptedChannel channel;
+    private PrivateEncryptedChannel channel;
 
     public static void main(final String[] args) {
         new PrivateEncryptedChannelExampleApp(args);
@@ -42,12 +42,16 @@ public class PrivateEncryptedChannelExampleApp implements
         channel = pusher.subscribePrivateEncrypted(channelName, this, eventName);
 
         // Keep main thread asleep while we watch for events or application will terminate
-        while (true) {
+        for (int i = 0; ; i++) {
             try {
                 Thread.sleep(5000);
-                pusher.disconnect(); // to put clearing of shared secret on disconnected to test
-                Thread.sleep(5000);
+                pusher.disconnect(); // to test clearing of shared secret
                 pusher.connect(this);
+                Thread.sleep(5000);
+                pusher.unsubscribe(channelName); // to test clearing of shared secret
+                if (i % 2 == 0) { // to test disconnect on both unsubscribed/subscribed
+                    channel = pusher.subscribePrivateEncrypted(channelName, this, eventName);
+                }
             }
             catch (final InterruptedException e) {
                 e.printStackTrace();

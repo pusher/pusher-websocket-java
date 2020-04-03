@@ -25,6 +25,21 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private SecretBoxOpenerFactory secretBoxOpenerFactory;
     private SecretBoxOpener secretBoxOpener;
 
+    // For not hanging on to shared secret past the Pusher.disconnect() call,
+    // i.e. when not necessary. Pusher.connect(...) call will trigger re-subscribe
+    // and hence re-authenticate which creates a new secretBoxOpener.
+    private ConnectionEventListener onDisconnectedListener = new ConnectionEventListener() {
+        @Override
+        public void onConnectionStateChange(ConnectionStateChange change) {
+            disposeSecretBoxOpener();
+        }
+
+        @Override
+        public void onError(String message, String code, Exception e) {
+            // nop
+        }
+    };
+
     public PrivateEncryptedChannelImpl(final InternalConnection connection,
                                        final String channelName,
                                        final Authorizer authorizer,
@@ -77,8 +92,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 throw new AuthorizationFailureException("Didn't receive all the fields expected " +
                         "from the Authorizer, expected an auth and shared_secret.");
             } else {
-                secretBoxOpener = secretBoxOpenerFactory.create(Base64.decode(sharedSecret));
-                setListenerToClearSecretBoxOpenerOnDisconnected();
+                createSecretBoxOpener(Base64.decode(sharedSecret));
                 return auth;
             }
         } catch (final AuthorizationFailureException e) {
@@ -89,22 +103,13 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         }
     }
 
-    private void setListenerToClearSecretBoxOpenerOnDisconnected() {
-        // For not hanging on to shared secret past the Pusher.disconnect() call,
-        // i.e. when not necessary. Pusher.connect(...) call will trigger re-subscribe
-        // and hence re-authenticate which creates a new secretBoxOpener.
-        connection.bind(ConnectionState.DISCONNECTED, new ConnectionEventListener() {
-            @Override
-            public void onConnectionStateChange(ConnectionStateChange change) {
-                tearDownChannel(); // clears & nulls secretBoxOpener
-                connection.unbind(ConnectionState.DISCONNECTED, this);
-            }
+    private void createSecretBoxOpener(byte[] key) {
+        secretBoxOpener = secretBoxOpenerFactory.create(key);
+        setListenerToClearSecretBoxOpenerOnDisconnected();
+    }
 
-            @Override
-            public void onError(String message, String code, Exception e) {
-                // nop
-            }
-        });
+    private void setListenerToClearSecretBoxOpenerOnDisconnected() {
+        connection.bind(ConnectionState.DISCONNECTED, onDisconnectedListener);
     }
 
     @Override
@@ -112,15 +117,20 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.updateState(state);
 
         if (state == ChannelState.UNSUBSCRIBED) {
-            tearDownChannel();
+            disposeSecretBoxOpener();
         }
     }
 
-    private void tearDownChannel() {
+    private void disposeSecretBoxOpener() {
         if (secretBoxOpener != null) {
             secretBoxOpener.clearKey();
             secretBoxOpener = null;
+            removeListenerToClearSecretBoxOpenerOnDisconnected();
         }
+    }
+
+    private void removeListenerToClearSecretBoxOpenerOnDisconnected() {
+        connection.unbind(ConnectionState.DISCONNECTED, onDisconnectedListener);
     }
 
     private String getAuthResponse() {
