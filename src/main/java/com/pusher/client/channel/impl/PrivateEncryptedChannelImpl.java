@@ -138,23 +138,18 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 return decryptMessage(message);
             } catch (AuthenticityException e1) {
 
-                retryDecryptingMessage(event, message);
+                // retry once only.
+                disposeSecretBoxOpener();
+                authenticate();
+
+                try {
+                    return decryptMessage(message);
+                } catch (AuthenticityException e2) {
+                    disposeSecretBoxOpener();
+                    notifyListenersOfDecryptFailure(event, "Failed to decrypt message.");
+                }
             }
 
-        }
-        return null;
-    }
-
-    private PusherEvent retryDecryptingMessage(String event, String message) {
-
-        disposeSecretBoxOpener();
-        authenticate();
-
-        try {
-            return decryptMessage(message);
-        } catch (AuthenticityException e2) {
-            disposeSecretBoxOpener();
-            notifyListenersOfDecryptFailure(event, "Failed to decrypt message.");
         }
         return null;
     }
