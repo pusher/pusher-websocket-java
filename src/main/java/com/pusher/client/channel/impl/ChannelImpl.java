@@ -99,19 +99,8 @@ public class ChannelImpl implements InternalChannel {
 
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
-        }
-        else {
-            final Set<SubscriptionEventListener> listeners;
-            synchronized (lock) {
-                final Set<SubscriptionEventListener> sharedListeners = eventNameToListenerMap.get(event);
-                if (sharedListeners != null) {
-                    listeners = new HashSet<SubscriptionEventListener>(sharedListeners);
-                }
-                else {
-                    listeners = null;
-                }
-            }
-
+        } else {
+            final Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
             if (listeners != null) {
                 final PusherEvent pusherEvent = prepareEvent(event, message);
                 if (pusherEvent != null) {
@@ -219,5 +208,18 @@ public class ChannelImpl implements InternalChannel {
             throw new IllegalStateException(
                     "Cannot bind or unbind to events on a channel that has been unsubscribed. Call Pusher.subscribe() to resubscribe to this channel");
         }
+    }
+
+    protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
+        final Set<SubscriptionEventListener> listeners;
+        synchronized (lock) {
+            final Set<SubscriptionEventListener> sharedListeners = eventNameToListenerMap.get(event);
+            if (sharedListeners != null) {
+                listeners = new HashSet<SubscriptionEventListener>(sharedListeners);
+            } else {
+                listeners = null;
+            }
+        }
+        return listeners;
     }
 }
