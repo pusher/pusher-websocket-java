@@ -136,12 +136,12 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
             try {
 
-                Map receivedMessage = GSON.fromJson(message, Map.class);
+                Map<String, Object> receivedMessage =
+                        GSON.<Map<String, Object>>fromJson(message, Map.class);
                 final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
                 receivedMessage.replace("data", decryptedMessage);
 
-                return GSON.fromJson(
-                        GSON.toJson(receivedMessage), PusherEvent.class);
+                return new PusherEvent(receivedMessage);
 
             } catch (AuthenticityException e1) {
 
@@ -150,12 +150,12 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 authenticate();
 
                 try {
-                    Map receivedMessage = GSON.fromJson(message, Map.class);
+                    Map<String, Object> receivedMessage =
+                            GSON.<Map<String, Object>>fromJson(message, Map.class);
                     final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
                     receivedMessage.replace("data", decryptedMessage);
 
-                    return GSON.fromJson(
-                            GSON.toJson(receivedMessage), PusherEvent.class);
+                    return new PusherEvent(receivedMessage);
                 } catch (AuthenticityException e2) {
                     disposeSecretBoxOpener();
                     notifyListenersOfDecryptFailure(event, "Failed to decrypt message.");
