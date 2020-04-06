@@ -30,6 +30,7 @@ This README covers the following topics:
 - [Subscribing to channels](#subscribing-to-channels)
 	- [Public channels](#public-channels)
 	- [Private channels](#private-channels)
+	- [Private encrypted channels](#private-encrypted-channels)
 	- [Presence channels](#presence-channels)
 		- [The User object](#the-user-object)
 - [Binding and handling events](#binding-and-handling-events)
@@ -270,6 +271,38 @@ PrivateChannel channel = pusher.subscribePrivate("private-channel",
         // Other ChannelEventListener methods
     });
 ```
+
+### Private encrypted channels
+
+Similar to Private channels, you can also subscribe to a
+[private encrypted channel](https://pusher.com/docs/channels/using_channels/encrypted-channels)
+which means the data passed through Pusher is encrypted and only possible to
+decrypt using the shared secret you provide.
+
+Like the private channel, you must provide your own authentication endpoint,
+with your own encryption master key. There is a
+[demonstration endpoint to look at using nodejs](https://github.com/pusher/pusher-channels-auth-example#using-e2e-encryption).
+
+To get started you need to subscribe to your channel, provide a `PrivateEncryptedChannelEventListener`
+listener, and a list of the events you are interested in:
+
+```java
+PrivateEncryptedChannel privateEncryptedChannel =
+	pusher.subscribePrivateEncrypted("private-encrypted-channel", listener, "my-event");
+```
+
+In addition to the events that are possible on public channels the
+`PrivateEncryptedChannelEventListener` also has the following methods:
+* `onAuthenticationFailure(String message, Exception e)` - This is called if
+the `Authorizer` does not successfully authenticate the subscription:
+* `onDecryptionFailure(Exception e);` - This is called if the message cannot be
+decrypted. The decryption will attempt to refresh the shared secret key once
+from the `Authorizer`.
+
+There is a
+[working example in the repo](https://github.com/pusher/pusher-websocket-java/blob/master/src/main/java/com/pusher/client/example/PrivateEncryptedChannelExampleApp.java)
+which you can use with the
+[demonstration authorization endpoint](https://github.com/pusher/pusher-channels-auth-example#using-e2e-encryption)
 
 ### Presence channels
 
