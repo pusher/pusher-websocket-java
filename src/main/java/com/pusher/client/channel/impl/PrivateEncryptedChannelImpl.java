@@ -135,14 +135,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         } else {
 
             try {
-
-                Map<String, Object> receivedMessage =
-                        GSON.<Map<String, Object>>fromJson(message, Map.class);
-                final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
-                receivedMessage.replace("data", decryptedMessage);
-
-                return new PusherEvent(receivedMessage);
-
+                return decryptMessage(message);
             } catch (AuthenticityException e1) {
 
                 // retry once only.
@@ -150,12 +143,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 authenticate();
 
                 try {
-                    Map<String, Object> receivedMessage =
-                            GSON.<Map<String, Object>>fromJson(message, Map.class);
-                    final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
-                    receivedMessage.replace("data", decryptedMessage);
-
-                    return new PusherEvent(receivedMessage);
+                    return decryptMessage(message);
                 } catch (AuthenticityException e2) {
                     disposeSecretBoxOpener();
                     notifyListenersOfDecryptFailure(event, "Failed to decrypt message.");
@@ -189,14 +177,21 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         }
     }
 
-    private String decryptMessage(String data) {
+    private PusherEvent decryptMessage(String message) {
+
+        Map<String, Object> receivedMessage =
+                GSON.<Map<String, Object>>fromJson(message, Map.class);
 
         final EncryptedReceivedData encryptedReceivedData =
-                GSON.fromJson(data, EncryptedReceivedData.class);
+                GSON.fromJson((String)receivedMessage.get("data"), EncryptedReceivedData.class);
 
-        return new String(secretBoxOpener.open(
+        String decryptedData = new String(secretBoxOpener.open(
                 encryptedReceivedData.getCiphertext(),
                 encryptedReceivedData.getNonce()));
+
+        receivedMessage.replace("data", decryptedData);
+
+        return new PusherEvent(receivedMessage);
     }
 
     private void disposeSecretBoxOpener() {
