@@ -6,6 +6,9 @@ import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.SubscriptionEventListener;
+import com.pusher.client.connection.ConnectionEventListener;
+import com.pusher.client.connection.ConnectionState;
+import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.crypto.nacl.SecretBoxOpenerFactory;
@@ -21,6 +24,23 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private final Authorizer authorizer;
     private SecretBoxOpenerFactory secretBoxOpenerFactory;
     private SecretBoxOpener secretBoxOpener;
+
+    // For not hanging on to shared secret past the Pusher.disconnect() call,
+    // i.e. when not necessary. Pusher.connect(...) call will trigger re-subscribe
+    // and hence re-authenticate which creates a new secretBoxOpener.
+    private ConnectionEventListener disposeSecretBoxOpenerOnDisconnectedListener =
+            new ConnectionEventListener() {
+
+        @Override
+        public void onConnectionStateChange(ConnectionStateChange change) {
+            disposeSecretBoxOpener();
+        }
+
+        @Override
+        public void onError(String message, String code, Exception e) {
+            // nop
+        }
+    };
 
     public PrivateEncryptedChannelImpl(final InternalConnection connection,
                                        final String channelName,
@@ -45,22 +65,38 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.bind(eventName, listener);
     }
 
-    private String authenticate() {
+    @Override
+    public String toSubscribeMessage() {
+        String authKey = authenticate();
 
+        // create the data part
+        final Map<Object, Object> dataMap = new LinkedHashMap<>();
+        dataMap.put("channel", name);
+        dataMap.put("auth", authKey);
+
+        // create the wrapper part
+        final Map<Object, Object> jsonObject = new LinkedHashMap<>();
+        jsonObject.put("event", "pusher:subscribe");
+        jsonObject.put("data", dataMap);
+
+        return GSON.toJson(jsonObject);
+    }
+
+    private String authenticate() {
         try {
-            final Map authResponseMap = GSON.fromJson(getAuthResponse(), Map.class);
-            final String auth = (String) authResponseMap.get("auth");
-            final String sharedSecret = (String) authResponseMap.get("shared_secret");
+            @SuppressWarnings("rawtypes") // anything goes in JS
+            final Map authResponse = GSON.fromJson(getAuthResponse(), Map.class);
+
+            final String auth = (String) authResponse.get("auth");
+            final String sharedSecret = (String) authResponse.get("shared_secret");
 
             if (auth == null || sharedSecret == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields expected " +
                         "from the Authorizer, expected an auth and shared_secret.");
             } else {
-                secretBoxOpener = secretBoxOpenerFactory.create(
-                        Base64.decode(sharedSecret));
+                createSecretBoxOpener(Base64.decode(sharedSecret));
                 return auth;
             }
-
         } catch (final AuthorizationFailureException e) {
             throw e; // pass this upwards
         } catch (final Exception e) {
@@ -69,22 +105,14 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         }
     }
 
-    @Override
-    public String toSubscribeMessage() {
+    private void createSecretBoxOpener(byte[] key) {
+        secretBoxOpener = secretBoxOpenerFactory.create(key);
+        setListenerToDisposeSecretBoxOpenerOnDisconnected();
+    }
 
-        String authKey = authenticate();
-
-        // create the data part
-        final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
-        dataMap.put("channel", name);
-        dataMap.put("auth", authKey);
-
-        // create the wrapper part
-        final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
-        jsonObject.put("event", "pusher:subscribe");
-        jsonObject.put("data", dataMap);
-
-        return GSON.toJson(jsonObject);
+    private void setListenerToDisposeSecretBoxOpenerOnDisconnected() {
+        connection.bind(ConnectionState.DISCONNECTED,
+                disposeSecretBoxOpenerOnDisconnectedListener);
     }
 
     @Override
@@ -92,14 +120,21 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         super.updateState(state);
 
         if (state == ChannelState.UNSUBSCRIBED) {
-            tearDownChannel();
+            disposeSecretBoxOpener();
         }
     }
 
-    private void tearDownChannel() {
+    private void disposeSecretBoxOpener() {
         if (secretBoxOpener != null) {
             secretBoxOpener.clearKey();
+            secretBoxOpener = null;
+            removeListenerToDisposeSecretBoxOpenerOnDisconnected();
         }
+    }
+
+    private void removeListenerToDisposeSecretBoxOpenerOnDisconnected() {
+        connection.unbind(ConnectionState.DISCONNECTED,
+                disposeSecretBoxOpenerOnDisconnectedListener);
     }
 
     private String getAuthResponse() {

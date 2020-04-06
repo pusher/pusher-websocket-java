@@ -12,24 +12,23 @@ import com.pusher.client.util.HttpAuthorizer;
 public class PrivateEncryptedChannelExampleApp implements
         ConnectionEventListener, PrivateEncryptedChannelEventListener {
 
-    private String apiKey = "FILL_ME_IN";
+    private String apiKey = "FILL_ME_IN"; // "key" at https://dashboard.pusher.com
     private String channelName = "private-encrypted-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
 
-    private final PrivateEncryptedChannel channel;
+    private PrivateEncryptedChannel channel;
 
     public static void main(final String[] args) {
         new PrivateEncryptedChannelExampleApp(args);
     }
 
     private PrivateEncryptedChannelExampleApp(final String[] args) {
-
-        if (args.length == 3) {
-            apiKey = args[0];
-            channelName = args[1];
-            eventName = args[2];
-            cluster = args[3];
+        switch (args.length) {
+            case 4: cluster = args[3];
+            case 3: eventName = args[2];
+            case 2: channelName = args[1];
+            case 1: apiKey = args[0];
         }
 
         final HttpAuthorizer authorizer = new HttpAuthorizer(
