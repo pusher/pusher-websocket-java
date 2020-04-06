@@ -129,43 +129,49 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     @Override
     public PusherEvent prepareEvent(String event, String message) {
-        try {
 
-            Map receivedMessage = GSON.fromJson(message, Map.class);
-            final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
-            receivedMessage.replace("data", decryptedMessage);
-
-            return GSON.fromJson(
-                    GSON.toJson(receivedMessage), PusherEvent.class);
-
-        } catch (AuthenticityException e1) {
-
-            // retry once only.
-            disposeSecretBoxOpener();
-            authenticate();
+        if (secretBoxOpener == null) {
+            notifyListenersOfDecryptFailure(event, "Too many failed attempts to decrypt a previous message.");
+        } else {
 
             try {
+
                 Map receivedMessage = GSON.fromJson(message, Map.class);
                 final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
                 receivedMessage.replace("data", decryptedMessage);
 
                 return GSON.fromJson(
                         GSON.toJson(receivedMessage), PusherEvent.class);
-            } catch (AuthenticityException e2) {
+
+            } catch (AuthenticityException e1) {
+
+                // retry once only.
                 disposeSecretBoxOpener();
-                notifyListenersOfDecryptFailure(event);
+                authenticate();
+
+                try {
+                    Map receivedMessage = GSON.fromJson(message, Map.class);
+                    final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
+                    receivedMessage.replace("data", decryptedMessage);
+
+                    return GSON.fromJson(
+                            GSON.toJson(receivedMessage), PusherEvent.class);
+                } catch (AuthenticityException e2) {
+                    disposeSecretBoxOpener();
+                    notifyListenersOfDecryptFailure(event, "Failed to decrypt message.");
+                }
             }
+
         }
-        
         return null;
     }
 
-    private void notifyListenersOfDecryptFailure(final String event) {
+    private void notifyListenersOfDecryptFailure(final String event, final String reason) {
         Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
         if (listeners != null) {
             for (SubscriptionEventListener listener : listeners) {
                 ((PrivateEncryptedChannelEventListener)listener).onDecryptionFailure(
-                        new Exception("Failed to decrypt message"));
+                        event, reason);
             }
         }
     }

@@ -88,8 +88,8 @@ public class PrivateEncryptedChannelExampleApp implements
     }
 
     @Override
-    public void onDecryptionFailure(Exception e) {
+    public void onDecryptionFailure(String event, String reason) {
         System.out.println(String.format(
-                "An error was received decrypting message - exception: [%s]", e));
+                "An error was received decrypting message for event:[%s] - reason: [%s]", event, reason));
     }
 }

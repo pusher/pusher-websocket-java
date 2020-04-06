@@ -1,14 +1,5 @@
 package com.pusher.client.channel.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelEventListener;
@@ -21,11 +12,18 @@ import com.pusher.client.util.internal.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
@@ -44,9 +42,6 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     Authorizer mockAuthorizer;
     @Mock
     SecretBoxOpenerFactory mockSecretBoxOpenerFactory;
-
-    @Captor
-    ArgumentCaptor<Exception> exceptionArgumentCaptor;
 
     @Override
     @Before
@@ -255,7 +250,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
                 "}\"}");
 
-        verify(mockListener1).onDecryptionFailure(exceptionArgumentCaptor.capture());
+        verify(mockListener1).onDecryptionFailure(anyString(), anyString());
     }
 
     @Test
@@ -286,6 +281,45 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         verify(mockListener1).onEvent(argCaptor.capture());
         assertEquals("event1", argCaptor.getValue().getEventName());
         assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
+    }
+
+    @Test
+    public void twoEventsReceivedWithIncorrectSharedSecret() {
+
+        PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
+                mockInternalConnection,
+                getChannelName(),
+                mockAuthorizer,
+                factory,
+                mockSecretBoxOpenerFactory);
+
+        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+                .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
+                .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
+                .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET);
+        when(mockSecretBoxOpenerFactory.create(any()))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET_INCORRECT)))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET_INCORRECT)))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET_INCORRECT)));
+
+        channel.toSubscribeMessage();
+
+        PrivateEncryptedChannelEventListener mockListener1 = mock(PrivateEncryptedChannelEventListener.class);
+        channel.bind("my-event", mockListener1);
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
+                "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
+                "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
+                "}\"}");
+
+        verify(mockListener1).onDecryptionFailure("my-event", "Failed to decrypt message.");
+
+        // send a second message
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
+                "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
+                "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
+                "}\"}");
+
+        verify(mockListener1).onDecryptionFailure("my-event", "Too many failed attempts to decrypt a previous message.");
     }
 
 }
