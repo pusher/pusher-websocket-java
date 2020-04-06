@@ -5,18 +5,22 @@ import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.crypto.nacl.AuthenticityException;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.crypto.nacl.SecretBoxOpenerFactory;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.internal.Base64;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateEncryptedChannel {
 
@@ -122,6 +126,72 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         if (state == ChannelState.UNSUBSCRIBED) {
             disposeSecretBoxOpener();
         }
+    }
+
+    @Override
+    public PusherEvent prepareEvent(String event, String message) {
+        try {
+
+            Map receivedMessage = GSON.fromJson(message, Map.class);
+            final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
+            receivedMessage.replace("data", decryptedMessage);
+
+            return GSON.fromJson(
+                    GSON.toJson(receivedMessage), PusherEvent.class);
+
+        } catch (AuthenticityException e1) {
+
+            // retry once only.
+            disposeSecretBoxOpener();
+            authenticate();
+
+            try {
+                Map receivedMessage = GSON.fromJson(message, Map.class);
+                final String decryptedMessage = decryptMessage((String) receivedMessage.get("data"));
+                receivedMessage.replace("data", decryptedMessage);
+
+                return GSON.fromJson(
+                        GSON.toJson(receivedMessage), PusherEvent.class);
+            } catch (AuthenticityException e2) {
+                disposeSecretBoxOpener();
+                notifyListenersOfDecryptFailure(event);
+            }
+        }
+        
+        return null;
+    }
+
+    private void notifyListenersOfDecryptFailure(final String event) {
+        Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
+        if (listeners != null) {
+            for (SubscriptionEventListener listener : listeners) {
+                ((PrivateEncryptedChannelEventListener)listener).onDecryptionFailure(
+                        new Exception("Failed to decrypt message"));
+            }
+        }
+    }
+
+    private class EncryptedReceivedData {
+        String nonce;
+        String ciphertext;
+
+        public byte[] getNonce() {
+            return Base64.decode(nonce);
+        }
+
+        public byte[] getCiphertext() {
+            return Base64.decode(ciphertext);
+        }
+    }
+
+    private String decryptMessage(String data) {
+
+        final EncryptedReceivedData encryptedReceivedData =
+                GSON.fromJson(data, EncryptedReceivedData.class);
+
+        return new String(secretBoxOpener.open(
+                encryptedReceivedData.getCiphertext(),
+                encryptedReceivedData.getNonce()));
     }
 
     private void disposeSecretBoxOpener() {

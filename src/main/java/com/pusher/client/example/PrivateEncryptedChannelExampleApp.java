@@ -86,4 +86,10 @@ public class PrivateEncryptedChannelExampleApp implements
                 code,
                 e));
     }
+
+    @Override
+    public void onDecryptionFailure(Exception e) {
+        System.out.println(String.format(
+                "An error was received decrypting message - exception: [%s]", e));
+    }
 }

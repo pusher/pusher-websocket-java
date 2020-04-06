@@ -1,9 +1,12 @@
 package com.pusher.client.channel.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.pusher.client.AuthorizationFailureException;
@@ -11,7 +14,10 @@ import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.crypto.nacl.SecretBoxOpenerFactory;
+import com.pusher.client.util.internal.Base64;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +32,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     final String AUTH_RESPONSE_MISSING_AUTH = "{\"shared_secret\":\"iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5doo=\"}";
     final String AUTH_RESPONSE_MISSING_SHARED_SECRET = "{\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\"}";
     final String AUTH_RESPONSE_INVALID_JSON = "potatoes";
+    final String SHARED_SECRET = "iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5doo=";
 
     @Mock
     InternalConnection mockInternalConnection;
@@ -147,5 +154,72 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         PrivateEncryptedChannelImpl channel = newInstance();
 
         channel.toSubscribeMessage();
+    }
+
+    /*
+    ON MESSAGE
+     */
+    @Test
+    public void testDataIsExtractedFromMessageAndPassedToSingleListener() {
+        PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
+                mockInternalConnection,
+                getChannelName(),
+                mockAuthorizer,
+                factory,
+                mockSecretBoxOpenerFactory);
+
+        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+                .thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any()))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
+
+        channel.toSubscribeMessage();
+
+        PrivateEncryptedChannelEventListener mockListener = mock(PrivateEncryptedChannelEventListener.class);
+
+        channel.bind("my-event", mockListener);
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
+                "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
+                "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
+                "}\"}");
+
+        verify(mockListener, times(1)).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
+    }
+
+    @Test
+    public void testDataIsExtractedFromMessageAndPassedToMultipleListeners() {
+        PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
+                mockInternalConnection,
+                getChannelName(),
+                mockAuthorizer,
+                factory,
+                mockSecretBoxOpenerFactory);
+
+        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+                .thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any()))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
+
+        channel.toSubscribeMessage();
+
+        PrivateEncryptedChannelEventListener mockListener1 = mock(PrivateEncryptedChannelEventListener.class);
+        PrivateEncryptedChannelEventListener mockListener2 = mock(PrivateEncryptedChannelEventListener.class);
+
+        channel.bind("my-event", mockListener1);
+        channel.bind("my-event", mockListener2);
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
+                "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
+                "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
+                "}\"}");
+
+        verify(mockListener1).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
+
+        verify(mockListener2).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
     }
 }
