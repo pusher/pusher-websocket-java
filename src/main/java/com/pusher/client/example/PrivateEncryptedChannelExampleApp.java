@@ -30,7 +30,7 @@ https://github.com/pusher/pusher-websocket-java#private-encrypted-channels
 public class PrivateEncryptedChannelExampleApp implements
         ConnectionEventListener, PrivateEncryptedChannelEventListener {
 
-    private String key = "FILL_ME_IN";
+    private String channelsKey = "FILL_ME_IN";
     private String channelName = "private-encrypted-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
@@ -47,7 +47,7 @@ public class PrivateEncryptedChannelExampleApp implements
             case 4: cluster = args[3];
             case 3: eventName = args[2];
             case 2: channelName = args[1];
-            case 1: key = args[0];
+            case 1: channelsKey = args[0];
         }
 
         final HttpAuthorizer authorizer = new HttpAuthorizer(
@@ -55,7 +55,7 @@ public class PrivateEncryptedChannelExampleApp implements
         final PusherOptions options = new PusherOptions().setAuthorizer(authorizer).setEncrypted(true);
         options.setCluster(cluster);
 
-        Pusher pusher = new Pusher(key, options);
+        Pusher pusher = new Pusher(channelsKey, options);
         pusher.connect(this);
 
         channel = pusher.subscribePrivateEncrypted(channelName, this, eventName);
