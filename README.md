@@ -276,10 +276,7 @@ PrivateChannel channel = pusher.subscribePrivate("private-channel",
 
 Similar to Private channels, you can also subscribe to a
 [private encrypted channel](https://pusher.com/docs/channels/using_channels/encrypted-channels).
-Pusher fully supports end-to-end encryption of these private encrypted channels.
-which means the data passed through Pusher is encrypted and only possible to
-decrypt using the shared secret you have. This means that only you and your
-connected clients will be able to read your messages. Pusher cannot decrypt them.
+This library now fully supports end-to-end encryption. This means that only you and your connected clients will be able to read your messages. Pusher cannot decrypt them.
 
 Like the private channel, you must provide your own authentication endpoint,
 with your own encryption master key. There is a
