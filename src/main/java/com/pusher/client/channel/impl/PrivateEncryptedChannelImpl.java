@@ -130,27 +130,23 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     @Override
     public PusherEvent prepareEvent(String event, String message) {
 
-        if (secretBoxOpener == null) {
-            notifyListenersOfDecryptFailure(event, "Too many failed attempts to decrypt a previous message.");
-        } else {
+        try {
+            return decryptMessage(message);
+        } catch (AuthenticityException e1) {
+
+            // retry once only.
+            disposeSecretBoxOpener();
+            authenticate();
 
             try {
                 return decryptMessage(message);
-            } catch (AuthenticityException e1) {
-
-                // retry once only.
-                disposeSecretBoxOpener();
-                authenticate();
-
-                try {
-                    return decryptMessage(message);
-                } catch (AuthenticityException e2) {
-                    disposeSecretBoxOpener();
-                    notifyListenersOfDecryptFailure(event, "Failed to decrypt message.");
-                }
+            } catch (AuthenticityException e2) {
+                // deliberately not destroying the secretBoxOpener so the next message
+                // has an opportunity to fetch a new key and decrypt
+                notifyListenersOfDecryptFailure(event, "Failed to decrypt message.");
             }
-
         }
+
         return null;
     }
 

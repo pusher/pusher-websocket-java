@@ -284,6 +284,47 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     }
 
     @Test
+    public void twoEventsReceivedWithSecondRetryCorrect() {
+
+        PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
+                mockInternalConnection,
+                getChannelName(),
+                mockAuthorizer,
+                factory,
+                mockSecretBoxOpenerFactory);
+
+        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+                .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
+                .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
+                .thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any()))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET_INCORRECT)))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET_INCORRECT)))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
+
+        channel.toSubscribeMessage();
+
+        PrivateEncryptedChannelEventListener mockListener1 = mock(PrivateEncryptedChannelEventListener.class);
+        channel.bind("my-event", mockListener1);
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
+                "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
+                "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
+                "}\"}");
+
+        verify(mockListener1).onDecryptionFailure("my-event", "Failed to decrypt message.");
+
+        // send a second message
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
+                "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
+                "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
+                "}\"}");
+
+        verify(mockListener1).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
+    }
+
+    @Test
     public void twoEventsReceivedWithIncorrectSharedSecret() {
 
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
@@ -310,16 +351,14 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
                 "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
                 "}\"}");
-
-        verify(mockListener1).onDecryptionFailure("my-event", "Failed to decrypt message.");
-
         // send a second message
         channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
                 "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
                 "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
                 "}\"}");
 
-        verify(mockListener1).onDecryptionFailure("my-event", "Too many failed attempts to decrypt a previous message.");
+        verify(mockListener1, times(2))
+                .onDecryptionFailure("my-event", "Failed to decrypt message.");
     }
 
 }
