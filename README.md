@@ -277,14 +277,14 @@ PrivateChannel channel = pusher.subscribePrivate("private-channel",
 Similar to Private channels, you can also subscribe to a
 [private encrypted channel](https://pusher.com/docs/channels/using_channels/encrypted-channels)
 which means the data passed through Pusher is encrypted and only possible to
-decrypt using the shared secret you have have.
+decrypt using the shared secret you have.
 
 Like the private channel, you must provide your own authentication endpoint,
 with your own encryption master key. There is a
 [demonstration endpoint to look at using nodejs](https://github.com/pusher/pusher-channels-auth-example#using-e2e-encryption).
 
-To get started you need to subscribe to your channel, provide a `PrivateEncryptedChannelEventListener`
-listener, and a list of the events you are interested in, for example:
+To get started you need to subscribe to your channel, provide a `PrivateEncryptedChannelEventListener`, and a list of the events you are
+interested in, for example:
 
 ```java
 PrivateEncryptedChannel privateEncryptedChannel =
