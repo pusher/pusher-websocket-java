@@ -212,7 +212,15 @@ public class ChannelImpl implements InternalChannel {
 
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
         synchronized (lock) {
-            return eventNameToListenerMap.get(event);
+
+            final Set<SubscriptionEventListener> sharedListeners =
+                    eventNameToListenerMap.get(event);
+
+            if (sharedListeners == null) {
+                return null;
+            }
+
+            return new HashSet<>(sharedListeners);
         }
     }
 }
