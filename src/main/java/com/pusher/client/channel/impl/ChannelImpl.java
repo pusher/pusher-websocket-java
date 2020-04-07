@@ -90,32 +90,28 @@ public class ChannelImpl implements InternalChannel {
     /* InternalChannel implementation */
 
     @Override
+    public PusherEvent prepareEvent(String event, String message) {
+        return GSON.fromJson(message, PusherEvent.class);
+    }
+
+    @Override
     public void onMessage(final String event, final String message) {
 
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
-        }
-        else {
-            final Set<SubscriptionEventListener> listeners;
-            synchronized (lock) {
-                final Set<SubscriptionEventListener> sharedListeners = eventNameToListenerMap.get(event);
-                if (sharedListeners != null) {
-                    listeners = new HashSet<SubscriptionEventListener>(sharedListeners);
-                }
-                else {
-                    listeners = null;
-                }
-            }
-
+        } else {
+            final Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
             if (listeners != null) {
-                for (final SubscriptionEventListener listener : listeners) {
-                    final PusherEvent e = GSON.fromJson(message, PusherEvent.class);
-                    factory.queueOnEventThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onEvent(e);
-                        }
-                    });
+                final PusherEvent pusherEvent = prepareEvent(event, message);
+                if (pusherEvent != null) {
+                    for (final SubscriptionEventListener listener : listeners) {
+                        factory.queueOnEventThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onEvent(pusherEvent);
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -211,6 +207,20 @@ public class ChannelImpl implements InternalChannel {
         if (state == ChannelState.UNSUBSCRIBED) {
             throw new IllegalStateException(
                     "Cannot bind or unbind to events on a channel that has been unsubscribed. Call Pusher.subscribe() to resubscribe to this channel");
+        }
+    }
+
+    protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
+        synchronized (lock) {
+
+            final Set<SubscriptionEventListener> sharedListeners =
+                    eventNameToListenerMap.get(event);
+
+            if (sharedListeners == null) {
+                return null;
+            }
+
+            return new HashSet<>(sharedListeners);
         }
     }
 }

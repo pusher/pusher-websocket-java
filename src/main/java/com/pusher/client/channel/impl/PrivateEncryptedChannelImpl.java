@@ -5,11 +5,13 @@ import com.pusher.client.Authorizer;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.crypto.nacl.AuthenticityException;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.crypto.nacl.SecretBoxOpenerFactory;
 import com.pusher.client.util.Factory;
@@ -17,6 +19,7 @@ import com.pusher.client.util.internal.Base64;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateEncryptedChannel {
 
@@ -122,6 +125,69 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         if (state == ChannelState.UNSUBSCRIBED) {
             disposeSecretBoxOpener();
         }
+    }
+
+    @Override
+    public PusherEvent prepareEvent(String event, String message) {
+
+        try {
+            return decryptMessage(message);
+        } catch (AuthenticityException e1) {
+
+            // retry once only.
+            disposeSecretBoxOpener();
+            authenticate();
+
+            try {
+                return decryptMessage(message);
+            } catch (AuthenticityException e2) {
+                // deliberately not destroying the secretBoxOpener so the next message
+                // has an opportunity to fetch a new key and decrypt
+                notifyListenersOfDecryptFailure(event, "Failed to decrypt message.");
+            }
+        }
+
+        return null;
+    }
+
+    private void notifyListenersOfDecryptFailure(final String event, final String reason) {
+        Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
+        if (listeners != null) {
+            for (SubscriptionEventListener listener : listeners) {
+                ((PrivateEncryptedChannelEventListener)listener).onDecryptionFailure(
+                        event, reason);
+            }
+        }
+    }
+
+    private class EncryptedReceivedData {
+        String nonce;
+        String ciphertext;
+
+        public byte[] getNonce() {
+            return Base64.decode(nonce);
+        }
+
+        public byte[] getCiphertext() {
+            return Base64.decode(ciphertext);
+        }
+    }
+
+    private PusherEvent decryptMessage(String message) {
+
+        Map<String, Object> receivedMessage =
+                GSON.<Map<String, Object>>fromJson(message, Map.class);
+
+        final EncryptedReceivedData encryptedReceivedData =
+                GSON.fromJson((String)receivedMessage.get("data"), EncryptedReceivedData.class);
+
+        String decryptedData = new String(secretBoxOpener.open(
+                encryptedReceivedData.getCiphertext(),
+                encryptedReceivedData.getNonce()));
+
+        receivedMessage.replace("data", decryptedData);
+
+        return new PusherEvent(receivedMessage);
     }
 
     private void disposeSecretBoxOpener() {
