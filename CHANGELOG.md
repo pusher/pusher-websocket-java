@@ -1,6 +1,8 @@
 # pusher-websocket-java changelog
 
-This Changelog is no longer being updated. For any further changes please see the Releases section on this Github repository - https://github.com/pusher/pusher-websocket-java/releases
+## Version 2.1.0 - 8th April 2020
+
+* Added support for [private encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels)
 
 ## Version 2.0.2
 
