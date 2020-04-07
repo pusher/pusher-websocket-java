@@ -9,13 +9,32 @@ import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpAuthorizer;
 
+/*
+This app demonstrates how to use Private Encrypted Channels.
+
+Please ensure you update this relevant parts below with your Pusher credentials before running.
+and ensure you have set up an authorization endpoint with end to end encryption. Your Pusher credentials
+can be found at https://dashboard.pusher.com, selecting the channels project, and visiting the App Keys
+tab.
+
+A demonstration authorization endpoint using nodejs can be found
+https://github.com/pusher/pusher-channels-auth-example#using-e2e-encryption
+
+For more information on private encrypted channels please read
+https://pusher.com/docs/channels/using_channels/encrypted-channels
+
+For more pecific information on how to use private encrypted channels check out
+https://github.com/pusher/pusher-websocket-java#private-encrypted-channels
+ */
+
 public class PrivateEncryptedChannelExampleApp implements
         ConnectionEventListener, PrivateEncryptedChannelEventListener {
 
-    private String apiKey = "FILL_ME_IN"; // "key" at https://dashboard.pusher.com
+    private String channelsKey = "FILL_ME_IN";
     private String channelName = "private-encrypted-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
+    private String authorizationEndpoint = "http://localhost:3030/pusher/auth";
 
     private PrivateEncryptedChannel channel;
 
@@ -28,15 +47,15 @@ public class PrivateEncryptedChannelExampleApp implements
             case 4: cluster = args[3];
             case 3: eventName = args[2];
             case 2: channelName = args[1];
-            case 1: apiKey = args[0];
+            case 1: channelsKey = args[0];
         }
 
         final HttpAuthorizer authorizer = new HttpAuthorizer(
-                "http://localhost:3030/pusher/auth");
+                authorizationEndpoint);
         final PusherOptions options = new PusherOptions().setAuthorizer(authorizer).setEncrypted(true);
         options.setCluster(cluster);
 
-        Pusher pusher = new Pusher(apiKey, options);
+        Pusher pusher = new Pusher(channelsKey, options);
         pusher.connect(this);
 
         channel = pusher.subscribePrivateEncrypted(channelName, this, eventName);
