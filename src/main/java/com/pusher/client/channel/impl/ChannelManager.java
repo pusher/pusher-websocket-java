@@ -8,6 +8,7 @@ import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
@@ -43,6 +44,14 @@ public class ChannelManager implements ConnectionEventListener {
             throw new IllegalArgumentException("Private channels must begin with 'private-'");
         } else {
             return (PrivateChannel) findChannelInChannelMap(channelName);
+        }
+    }
+
+    public PrivateEncryptedChannel getPrivateEncryptedChannel(String channelName) throws IllegalArgumentException{
+        if (!channelName.startsWith("private-encrypted-")) {
+            throw new IllegalArgumentException("Encrypted private channels must begin with 'private-encrypted-'");
+        } else {
+            return (PrivateEncryptedChannel) findChannelInChannelMap(channelName);
         }
     }
 
@@ -141,7 +150,7 @@ public class ChannelManager implements ConnectionEventListener {
                         connection.sendMessage(message);
                         channel.updateState(ChannelState.SUBSCRIBE_SENT);
                     } catch (final AuthorizationFailureException e) {
-                        clearDownSubscription(channel, e);
+                        handleAuthenticationFailure(channel, e);
                     }
                 }
             }
@@ -158,7 +167,7 @@ public class ChannelManager implements ConnectionEventListener {
         });
     }
 
-    private void clearDownSubscription(final InternalChannel channel, final Exception e) {
+    private void handleAuthenticationFailure(final InternalChannel channel, final Exception e) {
 
         channelNameToChannelMap.remove(channel.getName());
         channel.updateState(ChannelState.FAILED);

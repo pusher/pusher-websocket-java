@@ -22,7 +22,7 @@ apply plugin: 'signing'
 apply plugin: 'jacoco'
 
 group = "com.pusher"
-version = "2.0.2"
+version = "2.1.0"
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
@@ -45,9 +45,12 @@ repositories {
 dependencies {
 	compile "com.google.code.gson:gson:2.2.2"
 	compile "org.java-websocket:Java-WebSocket:1.4.0"
+
 	testCompile "org.mockito:mockito-all:1.8.5"
 	testCompile "org.powermock:powermock-module-junit4:1.4.11"
 	testCompile "org.powermock:powermock-api-mockito:1.4.11"
+
+	testImplementation "com.google.truth:truth:1.0.1"
 }
 
 
@@ -64,11 +67,13 @@ javadoc {
 	options.overview = file("src/main/javadoc/overview.html")
 	// uncomment this to use the custom javadoc styles
 	//options.stylesheetFile = file("src/main/javadoc/css/styles.css")
-	exclude "**/com/pusher/client/channel/impl/*"
-	exclude "**/com/pusher/client/connection/impl/*"
-	exclude "**/com/pusher/client/connection/websocket/*"
-	exclude "**/org/java_websocket/*"
-	exclude "**/com/pusher/client/example/*"
+	exclude "com/pusher/client/channel/impl/*"
+	exclude "com/pusher/client/connection/impl/*"
+	exclude "com/pusher/client/connection/websocket/*"
+	exclude "com/pusher/client/crypto/nacl/*"
+	exclude "com/pusher/client/util/internal/*"
+	exclude "org/java_websocket/*"
+	exclude "com/pusher/client/example/*"
 	options.linkSource = true
 }
 

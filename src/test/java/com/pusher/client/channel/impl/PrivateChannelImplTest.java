@@ -65,6 +65,12 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     }
 
     @Override
+    @Test(expected = IllegalArgumentException.class)
+    public void testPrivateEncryptedChannelName() {
+        newInstance("private-encrypted-stuffchannel");
+    }
+
+    @Override
     @Test
     public void testPrivateChannelName() {
         newInstance("private-stuffchannel");

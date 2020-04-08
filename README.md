@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/pusher/pusher-websocket-java.svg?branch=master)](https://travis-ci.org/pusher/pusher-websocket-java)
 [![codecov](https://codecov.io/gh/pusher/pusher-websocket-java/branch/master/graph/badge.svg)](https://codecov.io/gh/pusher/pusher-websocket-java)
+[![Maven Central](https://img.shields.io/maven-central/v/com.pusher/pusher-java-client.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.pusher%22%20AND%20a:%22pusher-java-client%22)
 
 Pusher Channels client library for Java targeting **Android** and general Java.
 
@@ -30,6 +31,7 @@ This README covers the following topics:
 - [Subscribing to channels](#subscribing-to-channels)
 	- [Public channels](#public-channels)
 	- [Private channels](#private-channels)
+	- [Private encrypted channels [BETA]](#private-encrypted-channels)
 	- [Presence channels](#presence-channels)
 		- [The User object](#the-user-object)
 - [Binding and handling events](#binding-and-handling-events)
@@ -59,7 +61,7 @@ The pusher-java-client is available in Maven Central.
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>2.0.2</version>
+      <version>2.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -68,7 +70,7 @@ The pusher-java-client is available in Maven Central.
 
 ```groovy
 dependencies {
-  compile 'com.pusher:pusher-java-client:2.0.2'
+  compile 'com.pusher:pusher-java-client:2.1.0'
 }
 ```
 
@@ -270,6 +272,37 @@ PrivateChannel channel = pusher.subscribePrivate("private-channel",
         // Other ChannelEventListener methods
     });
 ```
+
+### Private encrypted channels [BETA]
+
+Similar to Private channels, you can also subscribe to a
+[private encrypted channel](https://pusher.com/docs/channels/using_channels/encrypted-channels).
+This library now fully supports end-to-end encryption. This means that only you and your connected clients will be able to read your messages. Pusher cannot decrypt them.
+
+Like the private channel, you must provide your own authentication endpoint,
+with your own encryption master key. There is a
+[demonstration endpoint to look at using nodejs](https://github.com/pusher/pusher-channels-auth-example#using-e2e-encryption).
+
+To get started you need to subscribe to your channel, provide a `PrivateEncryptedChannelEventListener`, and a list of the events you are
+interested in, for example:
+
+```java
+PrivateEncryptedChannel privateEncryptedChannel =
+	pusher.subscribePrivateEncrypted("private-encrypted-channel", listener, "my-event");
+```
+
+In addition to the events that are possible on public channels the
+`PrivateEncryptedChannelEventListener` also has the following methods:
+* `onAuthenticationFailure(String message, Exception e)` - This is called if
+the `Authorizer` does not successfully authenticate the subscription:
+* `onDecryptionFailure(String event, String reason);` - This is called if the message cannot be
+decrypted. The decryption will attempt to refresh the shared secret key once
+from the `Authorizer`.
+
+There is a
+[working example in the repo](https://github.com/pusher/pusher-websocket-java/blob/master/src/main/java/com/pusher/client/example/PrivateEncryptedChannelExampleApp.java)
+which you can use with the
+[demonstration authorization endpoint](https://github.com/pusher/pusher-channels-auth-example#using-e2e-encryption)
 
 ### Presence channels
 
