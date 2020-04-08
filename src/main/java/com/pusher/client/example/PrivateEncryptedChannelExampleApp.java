@@ -10,7 +10,7 @@ import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpAuthorizer;
 
 /*
-This app demonstrates how to use Private Encrypted Channels.
+This app demonstrates how to use Private Encrypted Channels [BETA].
 
 Please ensure you update this relevant parts below with your Pusher credentials before running.
 and ensure you have set up an authorization endpoint with end to end encryption. Your Pusher credentials

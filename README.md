@@ -31,7 +31,7 @@ This README covers the following topics:
 - [Subscribing to channels](#subscribing-to-channels)
 	- [Public channels](#public-channels)
 	- [Private channels](#private-channels)
-	- [Private encrypted channels](#private-encrypted-channels)
+	- [Private encrypted channels [BETA]](#private-encrypted-channels)
 	- [Presence channels](#presence-channels)
 		- [The User object](#the-user-object)
 - [Binding and handling events](#binding-and-handling-events)
@@ -273,7 +273,7 @@ PrivateChannel channel = pusher.subscribePrivate("private-channel",
     });
 ```
 
-### Private encrypted channels
+### Private encrypted channels [BETA]
 
 Similar to Private channels, you can also subscribe to a
 [private encrypted channel](https://pusher.com/docs/channels/using_channels/encrypted-channels).
