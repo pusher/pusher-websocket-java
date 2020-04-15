@@ -403,7 +403,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
                     underlyingConnection.removeWebSocketListener();
 
-                    disconnect();
+                    underlyingConnection.close();
 
                     // Proceed immediately to handle the close
                     // The WebSocketClient will attempt a graceful WebSocket shutdown by exchanging the close frames
