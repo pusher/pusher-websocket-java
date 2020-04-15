@@ -1,5 +1,10 @@
 # pusher-websocket-java changelog
 
+## Version 2.1.1 - 15th April 2020
+
+* Fix a case where multiple websocket connections could be opened at once
+  if reconnection was triggered by an activity timeout.
+
 ## Version 2.1.0 - 8th April 2020
 
 * Added support for [private encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels)
