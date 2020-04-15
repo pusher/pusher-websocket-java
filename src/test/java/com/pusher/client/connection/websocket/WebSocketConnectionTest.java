@@ -298,21 +298,13 @@ public class WebSocketConnectionTest {
     }
 
     @Test
-    public void testPongTimeoutResultsInDisconnect() throws InterruptedException {
+    public void testPongTimeoutResultsInClosingConnection() throws InterruptedException {
         when(factory.getTimers()).thenReturn(new ScheduledThreadPoolExecutor(2));
 
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
         verify(mockUnderlyingConnection, timeout((int) (ACTIVITY_TIMEOUT + PONG_TIMEOUT))).close();
-
-        verify(mockEventListener).onConnectionStateChange(
-                new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING));
-
-        verify(mockEventListener).onConnectionStateChange(
-                new ConnectionStateChange(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED));
-
-        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
     }
 
     @Test
