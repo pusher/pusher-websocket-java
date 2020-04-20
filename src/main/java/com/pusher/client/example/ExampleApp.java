@@ -16,9 +16,8 @@ import com.pusher.client.connection.ConnectionStateChange;
 This app demonstrates how to use a standard Pusher channel.
 
 Please ensure you update this relevant parts below with your Pusher credentials before running.
-and ensure you have set up an authorization endpoint with end to end encryption. Your Pusher credentials
-can be found at https://dashboard.pusher.com, selecting the channels project, and visiting the App Keys
-tab.
+Your Pusher credentials can be found at https://dashboard.pusher.com, selecting the channels project,
+and visiting the App Keys tab.
 
 For more specific information on how to use channels check out
 https://pusher.com/docs/channels/using_channels/channels
