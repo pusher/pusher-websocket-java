@@ -6,17 +6,31 @@ import com.google.gson.Gson;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.Channel;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionStateChange;
 
-public class ExampleApp implements ConnectionEventListener, ChannelEventListener {
+/*
+This app demonstrates how to use a standard Pusher channel.
 
-    private final Pusher pusher;
-    private final String channelName;
-    private final String eventName;
-    private final long startTime = System.currentTimeMillis();
+Please ensure you update this relevant parts below with your Pusher credentials before running.
+and ensure you have set up an authorization endpoint with end to end encryption. Your Pusher credentials
+can be found at https://dashboard.pusher.com, selecting the channels project, and visiting the App Keys
+tab.
+
+For more specific information on how to use channels check out
+https://pusher.com/docs/channels/using_channels/channels
+*/
+
+public class ExampleApp {
+
+    // make sure the following variables are configured for your instance:
+    private String channelsKey = "FILL_ME_IN";
+    private String channelName = "my-channel";
+    private String eventName = "my-event";
+    private String cluster = "eu";
 
     public static void main(final String[] args) {
         new ExampleApp(args);
@@ -24,18 +38,58 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
 
     public ExampleApp(final String[] args) {
 
-        final String apiKey = args.length > 0 ? args[0] : "161717a55e65825bacf1";
-        channelName = args.length > 1 ? args[1] : "my-channel";
-        eventName = args.length > 2 ? args[2] : "my-event";
+        // if using from the command line, these variables need to be passed
+        switch (args.length) {
+            case 4: cluster = args[3];
+            case 3: eventName = args[2];
+            case 2: channelName = args[1];
+            case 1: channelsKey = args[0];
+        }
 
-        final PusherOptions options = new PusherOptions().setEncrypted(true);
-        pusher = new Pusher(apiKey, options);
-        pusher.connect(this);
+        // configure your Pusher connection with the options you want
+        final PusherOptions options = new PusherOptions()
+                .setEncrypted(true)
+                .setCluster(cluster);
+        Pusher pusher = new Pusher(channelsKey, options);
 
-        pusher.subscribe(channelName, this, eventName);
+        // set up a ConnectionEventListener to listen for connection changes to Pusher
+        ConnectionEventListener connectionEventListener = new ConnectionEventListener() {
+            @Override
+            public void onConnectionStateChange(ConnectionStateChange change) {
+                System.out.println(String.format("Connection state changed from [%s] to [%s]",
+                        change.getPreviousState(), change.getCurrentState()));
+            }
 
-        // Keep main thread asleep while we watch for events or application will
-        // terminate
+            @Override
+            public void onError(String message, String code, Exception e) {
+                System.out.println(String.format("An error was received with message [%s], code [%s], exception [%s]",
+                        message, code, e));
+            }
+        };
+
+        // connect to Pusher
+        pusher.connect(connectionEventListener);
+
+        // set up a ChannelEventListener to listen for messages to the channel and event we are interested in
+        ChannelEventListener channelEventListener = new ChannelEventListener() {
+            @Override
+            public void onSubscriptionSucceeded(String channelName) {
+                System.out.println(String.format(
+                        "Subscription to channel [%s] succeeded", channelName));
+            }
+
+            @Override
+            public void onEvent(PusherEvent event) {
+                System.out.println(String.format(
+                        "Received event [%s]", event.toString()));
+            }
+        };
+
+        // subscribe to the channel and with the event listener for the event name
+        Channel channel = pusher.subscribe(channelName, channelEventListener, eventName);
+
+
+        // Keep main thread asleep while we watch for events or application will terminate
         while (true) {
             try {
                 Thread.sleep(1000);
@@ -44,43 +98,5 @@ public class ExampleApp implements ConnectionEventListener, ChannelEventListener
                 e.printStackTrace();
             }
         }
-    }
-
-    /* ConnectionEventListener implementation */
-
-    @Override
-    public void onConnectionStateChange(final ConnectionStateChange change) {
-
-        System.out.println(String.format("[%d] Connection state changed from [%s] to [%s]", timestamp(),
-                change.getPreviousState(), change.getCurrentState()));
-    }
-
-    @Override
-    public void onError(final String message, final String code, final Exception e) {
-
-        System.out.println(String.format("[%d] An error was received with message [%s], code [%s], exception [%s]",
-                timestamp(), message, code, e));
-    }
-
-    /* ChannelEventListener implementation */
-
-    @Override
-    public void onEvent(final PusherEvent event) {
-        System.out.println(String.format("[%d] Received event [%s]", timestamp(), event.toString()));
-
-        final Gson gson = new Gson();
-        @SuppressWarnings("unchecked")
-        final Map<String, String> jsonObject = gson.fromJson(event.getData(), Map.class);
-        System.out.println(jsonObject);
-    }
-
-    @Override
-    public void onSubscriptionSucceeded(final String channelName) {
-
-        System.out.println(String.format("[%d] Subscription to channel [%s] succeeded", timestamp(), channelName));
-    }
-
-    private long timestamp() {
-        return System.currentTimeMillis() - startTime;
     }
 }
