@@ -23,7 +23,7 @@ https://github.com/pusher/pusher-channels-auth-example#using-e2e-encryption
 For more information on private encrypted channels please read
 https://pusher.com/docs/channels/using_channels/encrypted-channels
 
-For more pecific information on how to use private encrypted channels check out
+For more specific information on how to use private encrypted channels check out
 https://github.com/pusher/pusher-websocket-java#private-encrypted-channels
  */
 
