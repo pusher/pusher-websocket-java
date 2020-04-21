@@ -60,7 +60,7 @@ public class PrivateEncryptedChannelExampleApp {
         final PusherOptions options = new PusherOptions()
                 .setCluster(cluster)
                 .setAuthorizer(authorizer)
-                .setEncrypted(true);
+                .setForceTLS(true);
         Pusher pusher = new Pusher(channelsKey, options);
 
         // set up a ConnectionEventListener to listen for connection changes to Pusher
