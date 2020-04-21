@@ -2,6 +2,8 @@ package com.pusher.client.example;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.channel.Channel;
+import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
@@ -9,11 +11,27 @@ import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpAuthorizer;
 
-public class PrivateChannelExampleApp implements ConnectionEventListener, PrivateChannelEventListener {
+/*
+This app demonstrates how to use Private Channels.
 
-    private final Pusher pusher;
-    private final String channelName;
-    private final String eventName;
+Please ensure you update this relevant parts below with your Pusher credentials before running.
+Your Pusher credentials can be found at https://dashboard.pusher.com, selecting the channels project,
+and visiting the App Keys tab.
+
+A demonstration authorization endpoint using nodejs can be found
+https://github.com/pusher/pusher-channels-auth-example
+
+For more information on private encrypted channels please read
+https://pusher.com/docs/channels/using_channels/private-channels
+*/
+public class PrivateChannelExampleApp {
+
+    // make sure the following variables are configured for your instance:
+    private String channelsKey = "FILL_ME_IN";
+    private String channelName = "my-channel";
+    private String eventName = "my-event";
+    private String cluster = "eu";
+    private String authorizationEndpoint = "http://localhost:3030/pusher/auth";
 
     private final PrivateChannel channel;
 
@@ -21,23 +39,69 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
         new PrivateChannelExampleApp(args);
     }
 
-    public PrivateChannelExampleApp(final String[] args) {
+    PrivateChannelExampleApp(final String[] args) {
 
-        final String apiKey = args.length > 0 ? args[0] : "a87fe72c6f36272aa4b1";
-        channelName = args.length > 1 ? args[1] : "private-my-channel";
-        eventName = args.length > 2 ? args[2] : "my-event";
+        // if using from the command line, these variables need to be passed
+        switch (args.length) {
+            case 4: cluster = args[3];
+            case 3: eventName = args[2];
+            case 2: channelName = args[1];
+            case 1: channelsKey = args[0];
+        }
 
-        final HttpAuthorizer authorizer = new HttpAuthorizer(
-                "http://www.leggetter.co.uk/pusher/pusher-examples/php/authentication/src/private_auth.php");
-        final PusherOptions options = new PusherOptions().setAuthorizer(authorizer);
+        // create a HttpAuthorizer that points to your authorization server
+        final HttpAuthorizer authorizer = new HttpAuthorizer(authorizationEndpoint);
 
-        pusher = new Pusher(apiKey, options);
-        pusher.connect(this);
+        // configure your Pusher connection with the options you want
+        final PusherOptions options = new PusherOptions()
+                .setEncrypted(true)
+                .setCluster(cluster)
+                .setAuthorizer(authorizer);
+        Pusher pusher = new Pusher(channelsKey, options);
 
-        channel = pusher.subscribePrivate(channelName, this, eventName);
+        // set up a ConnectionEventListener to listen for connection changes to Pusher
+        ConnectionEventListener connectionEventListener = new ConnectionEventListener() {
+            @Override
+            public void onConnectionStateChange(ConnectionStateChange change) {
+                System.out.println(String.format("Connection state changed from [%s] to [%s]",
+                        change.getPreviousState(), change.getCurrentState()));
+            }
 
-        // Keep main thread asleep while we watch for events or application will
-        // terminate
+            @Override
+            public void onError(String message, String code, Exception e) {
+                System.out.println(String.format("An error was received with message [%s], code [%s], exception [%s]",
+                        message, code, e));
+            }
+        };
+
+        // connect to Pusher
+        pusher.connect(connectionEventListener);
+
+        // set up a PrivateChannelEventListener to listen for messages to the channel and event we are interested in
+        PrivateChannelEventListener privateChannelEventListener = new PrivateChannelEventListener() {
+            @Override
+            public void onSubscriptionSucceeded(String channelName) {
+                System.out.println(String.format(
+                        "Subscription to channel [%s] succeeded", channelName));
+            }
+
+            @Override
+            public void onEvent(PusherEvent event) {
+                System.out.println(String.format(
+                        "Received event [%s]", event.toString()));
+            }
+
+            @Override
+            public void onAuthenticationFailure(String message, Exception e) {
+                System.out.println(String.format(
+                        "Authentication failure due to [%s], exception was [%s]", message, e));
+            }
+        };
+
+        // subscribe to the channel and with the event listener for the event name
+        channel = pusher.subscribePrivate(channelName, privateChannelEventListener, eventName);
+
+        // Keep main thread asleep while we watch for events or application will terminate
         while (true) {
             try {
                 Thread.sleep(1000);
@@ -46,43 +110,5 @@ public class PrivateChannelExampleApp implements ConnectionEventListener, Privat
                 e.printStackTrace();
             }
         }
-    }
-
-    /* ConnectionEventListener implementation */
-
-    @Override
-    public void onConnectionStateChange(final ConnectionStateChange change) {
-
-        System.out.println(String.format("Connection state changed from [%s] to [%s]", change.getPreviousState(),
-                change.getCurrentState()));
-    }
-
-    @Override
-    public void onError(final String message, final String code, final Exception e) {
-
-        System.out.println(String.format("An error was received with message [%s], code [%s], exception [%s]", message,
-                code, e));
-    }
-
-    /* PrivateChannelEventListener implementation */
-
-    @Override
-    public void onEvent(final PusherEvent event) {
-
-        System.out.println(String.format("Received event [%s] on channel [%s] with data [%s] and event [%s]", event.getEventName(), event.getChannelName(), event.getData(), event.toString()));
-    }
-
-    @Override
-    public void onSubscriptionSucceeded(final String channelName) {
-
-        System.out.println(String.format("Subscription to channel [%s] succeeded", channel.getName()));
-
-        channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
-    }
-
-    @Override
-    public void onAuthenticationFailure(final String message, final Exception e) {
-
-        System.out.println(String.format("Authentication failure due to [%s], exception was [%s]", message, e));
     }
 }
