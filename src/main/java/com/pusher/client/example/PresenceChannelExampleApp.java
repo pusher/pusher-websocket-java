@@ -56,7 +56,7 @@ public class PresenceChannelExampleApp {
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
-                .setEncrypted(true)
+                .setForceTLS(true)
                 .setCluster(cluster)
                 .setAuthorizer(authorizer);
         Pusher pusher = new Pusher(channelsKey, options);
