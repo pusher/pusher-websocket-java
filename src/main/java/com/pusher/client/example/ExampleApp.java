@@ -47,7 +47,7 @@ public class ExampleApp {
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
-                .setForceTLS(true)
+                .setUseTLS(true)
                 .setCluster(cluster);
         Pusher pusher = new Pusher(channelsKey, options);
 
