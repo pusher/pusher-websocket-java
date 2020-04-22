@@ -4,7 +4,6 @@ import java.util.Set;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
@@ -56,7 +55,7 @@ public class PresenceChannelExampleApp {
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
-                .setForceTLS(true)
+                .setUseTLS(true)
                 .setCluster(cluster)
                 .setAuthorizer(authorizer);
         Pusher pusher = new Pusher(channelsKey, options);

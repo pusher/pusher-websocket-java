@@ -1,9 +1,5 @@
 package com.pusher.client.example;
 
-import java.util.Map;
-
-import com.google.gson.Gson;
-
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.Channel;
@@ -47,7 +43,7 @@ public class ExampleApp {
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
-                .setForceTLS(true)
+                .setUseTLS(true)
                 .setCluster(cluster);
         Pusher pusher = new Pusher(channelsKey, options);
 

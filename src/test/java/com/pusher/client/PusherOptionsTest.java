@@ -32,8 +32,8 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testForceTLSInitializedAsTrue() {
-        assert pusherOptions.isForceTLS();
+    public void testUseTLSInitializedAsTrue() {
+        assert pusherOptions.isUseTLS();
     }
 
     @Test
@@ -54,9 +54,9 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testForceTLSCanBeSetToTrue() {
-        pusherOptions.setForceTLS(true);
-        assertSame(true, pusherOptions.isForceTLS());
+    public void testUseTLSCanBeSetToTrue() {
+        pusherOptions.setUseTLS(true);
+        assertSame(true, pusherOptions.isUseTLS());
     }
 
     @Test
@@ -70,8 +70,8 @@ public class PusherOptionsTest {
     }
 
     @Test
-    public void testSetForceTLSReturnsSelf() {
-        assertSame(pusherOptions, pusherOptions.setForceTLS(true));
+    public void testSetUseTLSReturnsSelf() {
+        assertSame(pusherOptions, pusherOptions.setUseTLS(true));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class PusherOptionsTest {
 
     @Test
     public void testNonSSLURLIsCorrect() {
-        pusherOptions.setForceTLS(false);
+        pusherOptions.setUseTLS(false);
         assertEquals(pusherOptions.buildUrl(API_KEY), "ws://ws.pusherapp.com:80/app/" + API_KEY
                 + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
     }
@@ -96,7 +96,7 @@ public class PusherOptionsTest {
 
     @Test
     public void testClusterSetNonSSLURLIsCorrect() {
-        pusherOptions.setCluster("eu").setForceTLS(false);
+        pusherOptions.setCluster("eu").setUseTLS(false);
         assertEquals(pusherOptions.buildUrl(API_KEY), "ws://ws-eu.pusher.com:80/app/" + API_KEY
                 + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
     }
@@ -110,7 +110,7 @@ public class PusherOptionsTest {
 
     @Test
     public void testCustomHostAndPortNonSSLURLIsCorrect() {
-        pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181).setForceTLS(false);
+        pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181).setUseTLS(false);
         assertEquals(pusherOptions.buildUrl(API_KEY), "ws://subdomain.example.com:8080/app/" + API_KEY
                 + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
     }

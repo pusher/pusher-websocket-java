@@ -34,7 +34,7 @@ public class PusherOptions {
     private String host = "ws.pusherapp.com";
     private int wsPort = WS_PORT;
     private int wssPort = WSS_PORT;
-    private boolean forceTLS = true;
+    private boolean useTLS = true;
     private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
     private Authorizer authorizer;
@@ -44,20 +44,20 @@ public class PusherOptions {
 
     /**
      * @deprecated
-     * Please use isForceTLS
+     * Please use isUseTLS
      */
     @Deprecated
     public boolean isEncrypted() {
-        return forceTLS;
+        return useTLS;
     }
 
     /**
      * @deprecated
-     * Please use setForceTLS
+     * Please use setUseTLS
      */
     @Deprecated
     public PusherOptions setEncrypted(final boolean encrypted) {
-        this.forceTLS = encrypted;
+        this.useTLS = encrypted;
         return this;
     }
 
@@ -65,17 +65,17 @@ public class PusherOptions {
      *
      * @return whether the connection to Pusher should use TLS
      */
-    public boolean isForceTLS() {
-        return forceTLS;
+    public boolean isUseTLS() {
+        return useTLS;
     }
 
     /**
      * Sets whether the connection to Pusher should be use TLS.
-     * @param forceTLS whether the connection should use TLS, by default this is true
+     * @param useTLS whether the connection should use TLS, by default this is true
      * @return this, for chaining
      */
-    public PusherOptions setForceTLS(final boolean forceTLS) {
-        this.forceTLS = forceTLS;
+    public PusherOptions setUseTLS(final boolean useTLS) {
+        this.useTLS = useTLS;
         return this;
     }
 
@@ -237,7 +237,7 @@ public class PusherOptions {
      * @return the WebSocket URL
      */
     public String buildUrl(final String apiKey) {
-        return String.format("%s://%s:%s/app/%s%s", forceTLS ? WSS_SCHEME : WS_SCHEME, host, forceTLS ? wssPort
+        return String.format("%s://%s:%s/app/%s%s", useTLS ? WSS_SCHEME : WS_SCHEME, host, useTLS ? wssPort
                 : wsPort, apiKey, URI_SUFFIX);
     }
 
