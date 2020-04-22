@@ -74,7 +74,7 @@ public class PusherOptions {
      * @param forceTLS whether the connection should use TLS, by default this is true
      * @return this, for chaining
      */
-    public PusherOptions setForceTLS(boolean forceTLS) {
+    public PusherOptions setForceTLS(final boolean forceTLS) {
         this.forceTLS = forceTLS;
         return this;
     }
