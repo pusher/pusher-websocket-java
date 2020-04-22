@@ -2,8 +2,6 @@ package com.pusher.client.example;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.Channel;
-import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
@@ -54,7 +52,7 @@ public class PrivateChannelExampleApp {
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
-                .setForceTLS(true)
+                .setUseTLS(true)
                 .setCluster(cluster)
                 .setAuthorizer(authorizer);
         Pusher pusher = new Pusher(channelsKey, options);

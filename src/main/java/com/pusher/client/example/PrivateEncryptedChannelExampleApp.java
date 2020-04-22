@@ -2,7 +2,6 @@ package com.pusher.client.example;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.PrivateChannelEventListener;
 import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
@@ -60,7 +59,7 @@ public class PrivateEncryptedChannelExampleApp {
         final PusherOptions options = new PusherOptions()
                 .setCluster(cluster)
                 .setAuthorizer(authorizer)
-                .setForceTLS(true);
+                .setUseTLS(true);
         Pusher pusher = new Pusher(channelsKey, options);
 
         // set up a ConnectionEventListener to listen for connection changes to Pusher
