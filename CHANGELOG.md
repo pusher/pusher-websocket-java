@@ -1,5 +1,9 @@
 # pusher-websocket-java changelog
 
+### Version 2.2.1 - 22nd April 2020
+
+* Changed PusherOptions `setForceTLS` and `isForceTLS` to `setUseTLS` and `isUseTLS` to align with the other client SDKs.
+
 ## Version 2.2.0 - 22nd April 2020
 
 * Changed PusherOptions `setEncrypted` and `isEncrypted` to `setForceTLS` and `isForceTLS` to reduce confusion between this option and private encrypted channels.
