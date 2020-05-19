@@ -61,7 +61,7 @@ public class EndToEndTest {
         pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setEncrypted(false);
 
         connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, pusherOptions.getMaxReconnectionAttempts(),
-				pusherOptions.getMaxReconnectGapInSeconds(), proxy, factory);
+                pusherOptions.getMaxReconnectGapInSeconds(), proxy, factory);
 
         doAnswer(new Answer() {
             @Override

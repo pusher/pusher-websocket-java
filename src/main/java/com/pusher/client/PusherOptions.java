@@ -12,7 +12,7 @@ public class PusherOptions {
 
     private static final String SRC_LIB_DEV_VERSION = "@version@";
     private static final String LIB_DEV_VERSION = "0.0.0-dev";
-	public static final String LIB_VERSION = readVersionFromProperties();
+    public static final String LIB_VERSION = readVersionFromProperties();
 
     private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
@@ -205,7 +205,7 @@ public class PusherOptions {
     /**
      * Number of reconnect attempts when websocket connection failed
      * @param maxReconnectionAttempts
-	 * 				number of max reconnection attempts, default = {@link #MAX_RECONNECTION_ATTEMPTS} 6
+     *                 number of max reconnection attempts, default = {@link #MAX_RECONNECTION_ATTEMPTS} 6
      * @return this, for chaining
      */
     public PusherOptions setMaxReconnectionAttempts(int maxReconnectionAttempts) {
@@ -213,19 +213,19 @@ public class PusherOptions {
         return this;
     }
 
-	/**
-	 * The delay in two reconnection extends exponentially (1, 2, 4, .. seconds) This property sets the maximum in between two
-	 * reconnection attempts.
-	 * @param maxReconnectGapInSeconds
-	 * 				time in seconds of the maximum gab between two reconnection attempts, default = {@link #MAX_RECONNECT_GAP_IN_SECONDS} 30s
-	 * @return this, for chaining
-	 */
-	public PusherOptions setMaxReconnectGapInSeconds(int maxReconnectGapInSeconds) {
-		this.maxReconnectGapInSeconds = maxReconnectGapInSeconds;
-		return this;
-	}
+    /**
+     * The delay in two reconnection extends exponentially (1, 2, 4, .. seconds) This property sets the maximum in between two
+     * reconnection attempts.
+     * @param maxReconnectGapInSeconds
+     *                 time in seconds of the maximum gab between two reconnection attempts, default = {@link #MAX_RECONNECT_GAP_IN_SECONDS} 30s
+     * @return this, for chaining
+     */
+    public PusherOptions setMaxReconnectGapInSeconds(int maxReconnectGapInSeconds) {
+        this.maxReconnectGapInSeconds = maxReconnectGapInSeconds;
+        return this;
+    }
 
-	public long getPongTimeout() {
+    public long getPongTimeout() {
         return pongTimeout;
     }
 
@@ -264,21 +264,21 @@ public class PusherOptions {
         return this.proxy;
     }
 
-	/**
-	 * @return the maximum reconnection attempts
-	 */
-	public int getMaxReconnectionAttempts() {
-		return maxReconnectionAttempts;
-	}
+    /**
+     * @return the maximum reconnection attempts
+     */
+    public int getMaxReconnectionAttempts() {
+        return maxReconnectionAttempts;
+    }
 
-	/**
-	 * @return the maximum reconnection gap in seconds
-	 */
-	public int getMaxReconnectGapInSeconds() {
-		return maxReconnectGapInSeconds;
-	}
+    /**
+     * @return the maximum reconnection gap in seconds
+     */
+    public int getMaxReconnectGapInSeconds() {
+        return maxReconnectGapInSeconds;
+    }
 
-	private static String readVersionFromProperties() {
+    private static String readVersionFromProperties() {
         InputStream inStream = null;
         try {
             final Properties p = new Properties();
@@ -290,7 +290,7 @@ public class PusherOptions {
             // from source then replace with a dev indicator. Otherwise the Pusher
             // Socket API will reject the connection.
             if(version.equals(SRC_LIB_DEV_VERSION)) {
-            	version = LIB_DEV_VERSION;
+                version = LIB_DEV_VERSION;
             }
 
             if (version != null && version.length() > 0) {
