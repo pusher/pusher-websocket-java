@@ -202,3 +202,10 @@ jacocoTestReport {
 	reports.html.enabled = false
 	reports.csv.enabled = false
 }
+
+// Test Logging - https://stackoverflow.com/a/42425815/2623314
+test {
+	testLogging {
+		showStandardStreams = true
+	}
+}
