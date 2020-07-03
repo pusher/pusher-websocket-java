@@ -7,7 +7,7 @@ public abstract class Sodium {
 
     private static LazySodiumJava lazySodium = null;
 
-    public static LazySodiumJava getInstance() {
+    public static synchronized LazySodiumJava getInstance() {
         if (lazySodium == null) {
             lazySodium = new LazySodiumJava(new SodiumJava());
         }
