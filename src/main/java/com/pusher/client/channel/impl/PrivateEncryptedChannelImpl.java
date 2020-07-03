@@ -181,9 +181,9 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
         final EncryptedReceivedData encryptedReceivedData =
                 GSON.fromJson((String)receivedMessage.get("data"), EncryptedReceivedData.class);
 
-        String decryptedData = new String(secretBoxOpener.open(
+        String decryptedData = secretBoxOpener.open(
                 encryptedReceivedData.getCiphertext(),
-                encryptedReceivedData.getNonce()));
+                encryptedReceivedData.getNonce());
 
         receivedMessage.replace("data", decryptedData);
 

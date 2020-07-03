@@ -26,9 +26,9 @@ public class SecretBoxOpenerTest {
 
     @Test
     public void open() {
-        byte[] clearText = subject.open(cipher, nonce);
+        String clearText = subject.open(cipher, nonce);
 
-        assertThat(new String(clearText)).isEqualTo("{\"message\":\"hello world\"}");
+        assertThat(clearText).isEqualTo("{\"message\":\"hello world\"}");
     }
 
     @Test
@@ -63,14 +63,13 @@ public class SecretBoxOpenerTest {
 
         for (int i = 0; i < ciphers.size(); i++) {
             try {
-                byte[] clearTest = subject.open(
+                String clearTest = subject.open(
                         Base64.decode(ciphers.get(i)),
                         Base64.decode(nonces.get(i))
                 );
 
-                assertThat(new String(clearTest)).isEqualTo("{\"message\":\"\"}");
-            }
-            catch (Exception e) {
+                assertThat(clearTest).isEqualTo("{\"message\":\"\"}");
+            } catch (Exception e) {
                 System.out.println("Failed " + i);
                 System.out.println(e.getLocalizedMessage());
                 assertThat(e).isNull();
