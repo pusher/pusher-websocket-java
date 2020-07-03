@@ -40,11 +40,15 @@ ext.sharedManifest = manifest {
 
 repositories {
 	mavenCentral()
+	jcenter()
 }
 
 dependencies {
 	compile "com.google.code.gson:gson:2.2.2"
 	compile "org.java-websocket:Java-WebSocket:1.4.0"
+
+	implementation "com.goterl.lazycode:lazysodium-java:4.2.6"
+	implementation "net.java.dev.jna:jna:5.5.0"
 
 	testCompile "org.mockito:mockito-all:1.8.5"
 	testCompile "org.powermock:powermock-module-junit4:1.4.11"
