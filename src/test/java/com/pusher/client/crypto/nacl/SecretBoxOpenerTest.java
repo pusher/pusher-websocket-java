@@ -62,18 +62,17 @@ public class SecretBoxOpenerTest {
         );
 
         for (int i = 0; i < ciphers.size(); i++) {
+            String decryptedMessage = null;
             try {
-                String clearTest = subject.open(
+                decryptedMessage = subject.open(
                         Base64.decode(ciphers.get(i)),
                         Base64.decode(nonces.get(i))
                 );
-
-                assertThat(clearTest).isEqualTo("{\"message\":\"\"}");
             } catch (Exception e) {
-                System.out.println("Failed " + i);
                 System.out.println(e.getLocalizedMessage());
-                assertThat(e).isNull();
             }
+
+            assertThat(decryptedMessage).isEqualTo("{\"message\":\"\"}");
         }
 
     }
