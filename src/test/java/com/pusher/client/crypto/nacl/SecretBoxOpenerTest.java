@@ -72,6 +72,8 @@ public class SecretBoxOpenerTest {
             }
             catch (Exception e) {
                 System.out.println("Failed " + i);
+                System.out.println(e.getLocalizedMessage());
+                assertThat(e).isNull();
             }
         }
 
