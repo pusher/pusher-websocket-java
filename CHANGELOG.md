@@ -1,5 +1,9 @@
 # pusher-websocket-java changelog
 
+### Version 2.2.2 - 6th July 2020
+
+* Fixed an issue where some private encrypted messages were not decrypted accurately by swapping our implementation of SecretBoxOpener for one provided by [Lazy Sodium](https://github.com/terl/lazysodium-java)
+
 ### Version 2.2.1 - 22nd April 2020
 
 * Changed PusherOptions `setForceTLS` and `isForceTLS` to `setUseTLS` and `isUseTLS` to align with the other client SDKs.
