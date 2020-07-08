@@ -24,13 +24,6 @@ IN THE SOFTWARE.
 
 package com.pusher.client.crypto.nacl;
 
-import com.goterl.lazycode.lazysodium.LazySodiumJava;
-import com.goterl.lazycode.lazysodium.SodiumJava;
-import com.goterl.lazycode.lazysodium.exceptions.SodiumException;
-import com.goterl.lazycode.lazysodium.interfaces.Helpers;
-import com.goterl.lazycode.lazysodium.interfaces.SecretBox;
-import com.goterl.lazycode.lazysodium.utils.Key;
-
 import static com.pusher.client.util.internal.Preconditions.checkArgument;
 import static com.pusher.client.util.internal.Preconditions.checkNotNull;
 import static java.util.Arrays.fill;
@@ -52,14 +45,11 @@ public class SecretBoxOpener {
         checkNotNull(key, "key has been cleared, create new instance");
         checkArgument(nonce.length == 24, "nonce length must be 24 bytes, but is " +
                 key.length + " bytes");
-
-
-        SecretBox.Lazy secretBoxLazy = (SecretBox.Lazy) Sodium.getInstance();
-
         try {
-            return secretBoxLazy.cryptoSecretBoxOpenEasy(
-                    Sodium.getInstance().sodiumBin2Hex(cypher), nonce, Key.fromBytes(key));
-        } catch (SodiumException e) {
+            TweetNaclFast.SecretBox secretBox = new TweetNaclFast.SecretBox(key);
+            byte[] result = secretBox.open(cypher, nonce);
+            return new String(result);
+        } catch (Exception e) {
             throw new AuthenticityException();
         }
     }
