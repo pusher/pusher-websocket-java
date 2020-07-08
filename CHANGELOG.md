@@ -1,5 +1,9 @@
 # pusher-websocket-java changelog
 
+### Version 2.2.3 - 8th July 2020
+
+* Fixed LazySodium causing a crash on Android devices by swapping it out for [TweetNaCl](https://github.com/InstantWebP2P/tweetnacl-java)
+
 ### Version 2.2.2 - 6th July 2020
 
 * Fixed an issue where some private encrypted messages were not decrypted accurately by swapping our implementation of SecretBoxOpener for one provided by [Lazy Sodium](https://github.com/terl/lazysodium-java)

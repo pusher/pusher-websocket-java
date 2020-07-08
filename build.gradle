@@ -22,7 +22,7 @@ apply plugin: 'signing'
 apply plugin: 'jacoco'
 
 group = "com.pusher"
-version = "2.2.2"
+version = "2.2.3"
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
