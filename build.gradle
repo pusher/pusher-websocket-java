@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 buildscript {
 	repositories {
 		mavenCentral()
@@ -56,7 +58,7 @@ dependencies {
 
 
 processResources {
-	filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+	filter(ReplaceTokens, tokens: [
 		version: project.version
 	] )
 }
@@ -90,23 +92,23 @@ task fatJar(type: Jar, dependsOn:configurations.runtime) {
 	manifest = project.manifest {
 		from sharedManifest
 	}
-	baseName = project.name + '-with-dependencies'
+	archiveBaseName.set(project.name + '-with-dependencies')
 	from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
 	with jar
-	classifier = 'jar-with-dependencies'
+	archiveClassifier.set('jar-with-dependencies')
 }
 assemble.dependsOn fatJar
 
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = 'sources'
+	archiveClassifier.set('sources')
 	from sourceSets.main.allSource
 }
 assemble.dependsOn sourcesJar
 
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-	classifier = 'javadoc'
+	archiveClassifier.set('javadoc')
 	from javadoc.destinationDir
 }
 assemble.dependsOn javadocJar
