@@ -7,19 +7,19 @@ buildscript {
 	}
 }
 
+plugins {
+	id "java"
+	id "maven"
+	id "signing"
+	id "jacoco"
+}
+
 def getProperty = { property ->
 	if (!project.hasProperty(property)) {
 		throw new GradleException("${property} property must be set")
 	}
 	return project.property(property)
 }
-
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'eclipse'
-apply plugin: 'org.ajoberstar.github-pages'
-apply plugin: 'signing'
-apply plugin: 'jacoco'
 
 group = "com.pusher"
 version = "2.2.3"
@@ -112,19 +112,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 assemble.dependsOn javadocJar
 
 
-githubPages {
-	repoUri = 'https://github.com/pusher/pusher-websocket-java.git'
-	pages {
-		from javadoc.outputs.files
-	}
-	commitMessage = "JavaDoc gh-pages for ${version}"
-	credentials {
-		username = { getProperty("github.username") }
-		password = { getProperty("github.password") }
-	}
-}
-
-
 signing {
 	required { gradle.taskGraph.hasTask("uploadArchives") }
 	sign configurations.archives
@@ -188,10 +175,6 @@ task createPublishTarget {
 			}
 		}}}
 	}
-}
-
-wrapper {
-	gradleVersion = '5.5.1'
 }
 
 jacoco {
