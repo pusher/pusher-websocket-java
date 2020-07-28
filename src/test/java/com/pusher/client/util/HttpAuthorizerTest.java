@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import com.pusher.client.AuthorizationFailureException;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class HttpAuthorizerTest {
 
     @Test(expected = IllegalArgumentException.class)
@@ -16,13 +19,13 @@ public class HttpAuthorizerTest {
     @Test
     public void testHTTPURLIsIdentifiedAsSSL() {
         final HttpAuthorizer auth = new HttpAuthorizer("http://example.com/auth");
-        Assert.assertFalse(auth.isSSL());
+        assertFalse(auth.isSSL());
     }
 
     @Test
     public void testHTTPSURLIsIdentifiedAsSSL() {
         final HttpAuthorizer auth = new HttpAuthorizer("https://example.com/auth");
-        Assert.assertTrue(auth.isSSL());
+        assertTrue(auth.isSSL());
     }
 
     @Test(expected = AuthorizationFailureException.class)
