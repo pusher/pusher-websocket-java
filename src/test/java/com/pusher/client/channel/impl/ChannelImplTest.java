@@ -260,7 +260,6 @@ public class ChannelImplTest {
      * to use the appropriate listener subclass.
      */
     protected ChannelEventListener getEventListener() {
-        final ChannelEventListener listener = mock(ChannelEventListener.class);
-        return listener;
+        return mock(ChannelEventListener.class);
     }
 }
