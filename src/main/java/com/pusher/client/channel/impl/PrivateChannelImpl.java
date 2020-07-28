@@ -35,7 +35,6 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     /* PrivateChannel implementation */
 
     @Override
-    @SuppressWarnings("rawtypes")
     public void trigger(final String eventName, final String data) {
 
         if (eventName == null || !eventName.startsWith(CLIENT_EVENT_PREFIX)) {
