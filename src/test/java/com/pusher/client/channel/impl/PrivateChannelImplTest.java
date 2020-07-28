@@ -215,7 +215,6 @@ public class PrivateChannelImplTest extends ChannelImplTest {
 
     @Override
     protected ChannelEventListener getEventListener() {
-        final PrivateChannelEventListener listener = mock(PrivateChannelEventListener.class);
-        return listener;
+        return mock(PrivateChannelEventListener.class);
     }
 }
