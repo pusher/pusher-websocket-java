@@ -1,7 +1,6 @@
 package com.pusher.client.connection.websocket;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.net.InetSocketAddress;
