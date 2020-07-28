@@ -65,7 +65,7 @@ public class EndToEndTest {
 
         doAnswer(new Answer() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Object answer(InvocationOnMock invocation) {
                 final Runnable r = (Runnable) invocation.getArguments()[0];
                 r.run();
                 return null;
@@ -89,7 +89,7 @@ public class EndToEndTest {
 
         when(factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
             @Override
-            public ChannelManager answer(final InvocationOnMock invocation) throws Throwable {
+            public ChannelManager answer(final InvocationOnMock invocation) {
                 return new ChannelManager(factory);
             }
         });

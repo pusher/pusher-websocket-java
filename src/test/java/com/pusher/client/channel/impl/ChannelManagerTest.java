@@ -55,7 +55,7 @@ public class ChannelManagerTest {
 
         doAnswer(new Answer() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Object answer(InvocationOnMock invocation) {
                 final Runnable r = (Runnable) invocation.getArguments()[0];
                 r.run();
                 return null;
@@ -80,7 +80,7 @@ public class ChannelManagerTest {
 
         doAnswer(new Answer() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Object answer(InvocationOnMock invocation) {
                 final Runnable r = (Runnable) invocation.getArguments()[0];
                 r.run();
                 return null;
