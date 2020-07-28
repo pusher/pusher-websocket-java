@@ -62,7 +62,7 @@ public class WebSocketConnectionTest {
                 mockUnderlyingConnection);
         doAnswer(new Answer() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Object answer(InvocationOnMock invocation) {
                 final Runnable r = (Runnable) invocation.getArguments()[0];
                 r.run();
                 return null;
@@ -297,7 +297,7 @@ public class WebSocketConnectionTest {
     }
 
     @Test
-    public void testPongTimeoutResultsInClosingConnection() throws InterruptedException {
+    public void testPongTimeoutResultsInClosingConnection() {
         when(factory.getTimers()).thenReturn(new ScheduledThreadPoolExecutor(2));
 
         connection.connect();
@@ -307,7 +307,7 @@ public class WebSocketConnectionTest {
     }
 
     @Test
-    public void stateIsReconnectingAfterOnCloseWithoutTheUserDisconnecting() throws InterruptedException, SSLException {
+    public void stateIsReconnectingAfterOnCloseWithoutTheUserDisconnecting() {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
@@ -317,7 +317,7 @@ public class WebSocketConnectionTest {
     }
 
     @Test
-    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4000() throws InterruptedException, SSLException {
+    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4000() {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
@@ -327,7 +327,7 @@ public class WebSocketConnectionTest {
     }
 
     @Test
-    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4099() throws InterruptedException, SSLException {
+    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4099() {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
@@ -337,7 +337,7 @@ public class WebSocketConnectionTest {
     }
 
     @Test
-    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4100() throws InterruptedException, SSLException {
+    public void stateIsDisconnectedAfterOnCloseWithoutTheUserDisconnectingCode4100() {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
@@ -347,7 +347,7 @@ public class WebSocketConnectionTest {
     }
 
     @Test
-    public void stateIsReconnectingAfterTryingToConnectForTheFirstTime() throws InterruptedException, SSLException {
+    public void stateIsReconnectingAfterTryingToConnectForTheFirstTime() {
         connection.connect();
 
         connection.onClose(500, "reason", true);
@@ -357,12 +357,12 @@ public class WebSocketConnectionTest {
 
     @Test
     @SuppressWarnings("rawtypes")
-    public void testStopsReconnectingAfterMaxReconnectionAttemptsIsReached() throws URISyntaxException, InterruptedException, SSLException {
+    public void testStopsReconnectingAfterMaxReconnectionAttemptsIsReached() throws URISyntaxException {
         when(factory.getTimers()).thenReturn(scheduledExecutorService);
         // Run the reconnect functionality synchronously
         doAnswer(new Answer() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Object answer(InvocationOnMock invocation) {
                 final Runnable r = (Runnable) invocation.getArguments()[0];
                 r.run();
                 return null;
