@@ -14,13 +14,13 @@ public class HttpAuthorizerTest {
     }
 
     @Test
-    public void testHTTPURLIsIdentfiedAsSSL() {
+    public void testHTTPURLIsIdentifiedAsSSL() {
         final HttpAuthorizer auth = new HttpAuthorizer("http://example.com/auth");
         Assert.assertFalse(auth.isSSL());
     }
 
     @Test
-    public void testHTTPSURLIsIdentfiedAsSSL() {
+    public void testHTTPSURLIsIdentifiedAsSSL() {
         final HttpAuthorizer auth = new HttpAuthorizer("https://example.com/auth");
         Assert.assertTrue(auth.isSSL());
     }
