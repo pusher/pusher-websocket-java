@@ -75,7 +75,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     @Override
     public void bind(final String eventName, final SubscriptionEventListener listener) {
 
-        if (listener instanceof PresenceChannelEventListener == false) {
+        if (!(listener instanceof PresenceChannelEventListener)) {
             throw new IllegalArgumentException(
                     "Only instances of PresenceChannelEventListener can be bound to a presence channel");
         }

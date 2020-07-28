@@ -74,7 +74,7 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     @Override
     public void bind(final String eventName, final SubscriptionEventListener listener) {
 
-        if (listener instanceof PrivateChannelEventListener == false) {
+        if (!(listener instanceof PrivateChannelEventListener)) {
             throw new IllegalArgumentException(
                     "Only instances of PrivateChannelEventListener can be bound to a private channel");
         }
