@@ -34,7 +34,7 @@ public class WebSocketConnectionTest {
 
     private static final long ACTIVITY_TIMEOUT = 500;
     private static final long PONG_TIMEOUT = 500;
-    private static final int MAX_RECONNECTIONS = 6;
+    private static final int MAX_RECONNECTION_ATTEMPTS = 6;
     private static final int MAX_GAP = 30;
     private static final String URL = "ws://ws.example.com/";
     private static final String EVENT_NAME = "my-event";
@@ -71,14 +71,14 @@ public class WebSocketConnectionTest {
         }).when(factory).queueOnEventThread(any(Runnable.class));
         when(factory.getTimers()).thenReturn(new DoNothingExecutor());
 
-        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTIONS, MAX_GAP, PROXY, factory);
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTION_ATTEMPTS, MAX_GAP, PROXY, factory);
         connection.bind(ConnectionState.ALL, mockEventListener);
     }
 
     @Test
     public void testUnbindingWhenNotAlreadyBoundReturnsFalse() throws URISyntaxException {
         final ConnectionEventListener listener = mock(ConnectionEventListener.class);
-        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTIONS, MAX_GAP,
+        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTION_ATTEMPTS, MAX_GAP,
                 PROXY, factory);
         final boolean unbound = connection.unbind(ConnectionState.ALL, listener);
         assertEquals(false, unbound);
@@ -87,7 +87,7 @@ public class WebSocketConnectionTest {
     @Test
     public void testUnbindingWhenBoundReturnsTrue() throws URISyntaxException {
         final ConnectionEventListener listener = mock(ConnectionEventListener.class);
-        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTIONS, MAX_GAP,
+        final WebSocketConnection connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTION_ATTEMPTS, MAX_GAP,
                 PROXY, factory);
 
         connection.bind(ConnectionState.ALL, listener);
@@ -126,7 +126,7 @@ public class WebSocketConnectionTest {
 
     @Test
     public void testListenerDoesNotReceiveConnectingEventIfItIsOnlyBoundToTheConnectedEvent() throws URISyntaxException {
-        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTIONS, MAX_GAP,
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTION_ATTEMPTS, MAX_GAP,
                 PROXY, factory);
         connection.bind(ConnectionState.CONNECTED, mockEventListener);
         connection.connect();
@@ -228,7 +228,7 @@ public class WebSocketConnectionTest {
 
     @Test
     public void testOnCloseCallbackDoesNotCallListenerIfItIsNotBoundToDisconnectedEvent() throws URISyntaxException {
-        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTIONS, MAX_GAP,
+        connection = new WebSocketConnection(URL, ACTIVITY_TIMEOUT, PONG_TIMEOUT, MAX_RECONNECTION_ATTEMPTS, MAX_GAP,
                 PROXY, factory);
         connection.bind(ConnectionState.CONNECTED, mockEventListener);
 
@@ -249,7 +249,7 @@ public class WebSocketConnectionTest {
     }
 
     @Test
-    public void testDisonnectCallIsDelegatedToUnderlyingConnection() {
+    public void testDisconnectCallIsDelegatedToUnderlyingConnection() {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
