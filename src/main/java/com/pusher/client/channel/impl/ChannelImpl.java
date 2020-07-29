@@ -10,6 +10,8 @@ import com.google.gson.Gson;
 
 import com.google.gson.GsonBuilder;
 import com.pusher.client.channel.*;
+import com.pusher.client.channel.impl.message.SubscribeMessage;
+import com.pusher.client.channel.impl.message.UnsubscribeMessage;
 import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
@@ -141,29 +143,13 @@ public class ChannelImpl implements InternalChannel {
 
     @Override
     public String toSubscribeMessage() {
-
-        final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
-        jsonObject.put("event", "pusher:subscribe");
-
-        final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
-        dataMap.put("channel", name);
-
-        jsonObject.put("data", dataMap);
-
-        return GSON.toJson(jsonObject);
+        return GSON.toJson(new SubscribeMessage(name));
     }
 
     @Override
     public String toUnsubscribeMessage() {
-        final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
-        jsonObject.put("event", "pusher:unsubscribe");
-
-        final Map<Object, Object> dataMap = new LinkedHashMap<Object, Object>();
-        dataMap.put("channel", name);
-
-        jsonObject.put("data", dataMap);
-
-        return GSON.toJson(jsonObject);
+        return GSON.toJson(
+                new UnsubscribeMessage(name));
     }
 
     @Override
@@ -234,7 +220,7 @@ public class ChannelImpl implements InternalChannel {
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
         synchronized (lock) {
             Set<SubscriptionEventListener> listeners = new HashSet<SubscriptionEventListener>();
-            
+
             final Set<SubscriptionEventListener> sharedListeners =
                     eventNameToListenerMap.get(event);
 

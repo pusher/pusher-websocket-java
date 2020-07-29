@@ -21,7 +21,7 @@ import com.pusher.client.connection.impl.InternalConnection;
 public class PrivateChannelImplTest extends ChannelImplTest {
 
     private static final String AUTH_RESPONSE = "\"auth\":\"a87fe72c6f36272aa4b1:41dce43734b18bb\"";
-    private static final String AUTH_RESPONSE_WITH_CHANNEL_DATA = "\"auth\":\"a87fe72c6f36272aa4b1:41dce43734b18bb\",\"channel_data\":\"{\\\"user_id\\\":\\\"51169fc47abac\\\"}\"";
+    private static final String AUTH_RESPONSE_CHANNEL_DATA = "\"channel_data\":\"{\\\"user_id\\\":\\\"51169fc47abac\\\"}\"";
 
     @Mock
     protected InternalConnection mockConnection;
@@ -78,17 +78,22 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Test
     @Override
     public void testReturnsCorrectSubscribeMessage() {
-        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"," + AUTH_RESPONSE
-                + "}}", channel.toSubscribeMessage());
+        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{"
+                + AUTH_RESPONSE
+                + ",\"channel\":\"" + getChannelName() + "\"}}",
+                channel.toSubscribeMessage());
     }
 
     @Test
     public void testReturnsCorrectSubscribeMessageWithChannelData() {
         when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(
-                "{" + AUTH_RESPONSE_WITH_CHANNEL_DATA + "}");
+                "{" + AUTH_RESPONSE + "," + AUTH_RESPONSE_CHANNEL_DATA + "}");
 
-        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"," + AUTH_RESPONSE_WITH_CHANNEL_DATA
-                + "}}", channel.toSubscribeMessage());
+        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{"
+                + AUTH_RESPONSE_CHANNEL_DATA + ","
+                + AUTH_RESPONSE
+                + ",\"channel\":\"" + getChannelName() + "\"" + "}}",
+                channel.toSubscribeMessage());
     }
 
     @Test(expected = AuthorizationFailureException.class)
