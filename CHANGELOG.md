@@ -1,5 +1,9 @@
 # pusher-websocket-java changelog
 
+### Version 2.2.4 - 3rd August 2020
+* Removed unnecessary code in the TweetNaClFast implementation
+* Updated the Java-WebSocket library to 1.5.1 as the [current version 1.4.0 has a known critical vulnerablity.](https://github.com/pusher/pusher-websocket-java/issues/279)
+
 ### Version 2.2.3 - 8th July 2020
 
 * Fixed LazySodium causing a crash on Android devices by swapping it out for [TweetNaCl](https://github.com/InstantWebP2P/tweetnacl-java)
