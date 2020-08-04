@@ -1,5 +1,14 @@
 package com.pusher.client.connection.websocket;
 
+import com.google.gson.Gson;
+import com.pusher.client.connection.ConnectionEventListener;
+import com.pusher.client.connection.ConnectionState;
+import com.pusher.client.connection.ConnectionStateChange;
+import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.util.Factory;
+
+import org.java_websocket.handshake.ServerHandshake;
+
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,16 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLException;
-
-import org.java_websocket.handshake.ServerHandshake;
-
-import com.google.gson.Gson;
-
-import com.pusher.client.connection.ConnectionEventListener;
-import com.pusher.client.connection.ConnectionState;
-import com.pusher.client.connection.ConnectionStateChange;
-import com.pusher.client.connection.impl.InternalConnection;
-import com.pusher.client.util.Factory;
+import javax.net.ssl.SSLSocketFactory;
 
 public class WebSocketConnection implements InternalConnection, WebSocketListener {
     private static final Logger log = Logger.getLogger(WebSocketConnection.class.getName());
@@ -36,6 +36,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final Map<ConnectionState, Set<ConnectionEventListener>> eventListeners = new ConcurrentHashMap<ConnectionState, Set<ConnectionEventListener>>();
     private final URI webSocketUri;
     private final Proxy proxy;
+    private final SSLSocketFactory sslSocketFactory;
     private final int maxReconnectionAttempts;
     private final int maxReconnectionGap;
 
@@ -52,6 +53,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             int maxReconnectionAttempts,
             int maxReconnectionGap,
             final Proxy proxy,
+            final SSLSocketFactory sslSocketFactory,
             final Factory factory) throws URISyntaxException {
         webSocketUri = new URI(url);
         activityTimer = new ActivityTimer(activityTimeout, pongTimeout);
@@ -59,6 +61,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         this.maxReconnectionGap = maxReconnectionGap;
         this.proxy = proxy;
         this.factory = factory;
+        this.sslSocketFactory = sslSocketFactory;
 
         for (final ConnectionState state : ConnectionState.values()) {
             eventListeners.put(state, Collections.newSetFromMap(new ConcurrentHashMap<ConnectionEventListener, Boolean>()));
@@ -83,7 +86,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private void tryConnecting(){
         try {
             underlyingConnection = factory
-                    .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
+                    .newWebSocketClientWrapper(webSocketUri, proxy, sslSocketFactory, WebSocketConnection.this);
             updateState(ConnectionState.CONNECTING);
             underlyingConnection.connect();
         }

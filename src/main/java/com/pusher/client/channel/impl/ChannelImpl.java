@@ -1,16 +1,19 @@
 package com.pusher.client.channel.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PusherEvent;
+import com.pusher.client.channel.PusherEventDeserializer;
+import com.pusher.client.channel.SubscriptionEventListener;
+import com.pusher.client.util.Factory;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.gson.Gson;
-
-import com.google.gson.GsonBuilder;
-import com.pusher.client.channel.*;
-import com.pusher.client.util.Factory;
 
 public class ChannelImpl implements InternalChannel {
     protected final Gson GSON;
@@ -87,6 +90,16 @@ public class ChannelImpl implements InternalChannel {
         return state == ChannelState.SUBSCRIBED;
     }
 
+    @Override
+    public boolean isInitial() {
+        return state == ChannelState.INITIAL;
+    }
+
+    @Override
+    public ChannelState getState() {
+        return state;
+    }
+
     /* InternalChannel implementation */
 
     @Override
@@ -119,7 +132,7 @@ public class ChannelImpl implements InternalChannel {
 
 
     @Override
-    public String toSubscribeMessage() {
+    public String toSubscribeMessage(String authResponse) {
 
         final Map<Object, Object> jsonObject = new LinkedHashMap<Object, Object>();
         jsonObject.put("event", "pusher:subscribe");

@@ -109,4 +109,9 @@ public class PrivateChannelExampleApp {
             }
         }
     }
+
+	@Override
+	public void onChannelDataReceived(String data) {
+
+	}
 }

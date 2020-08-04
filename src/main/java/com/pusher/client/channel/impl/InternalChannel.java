@@ -7,7 +7,7 @@ import com.pusher.client.channel.PusherEvent;
 
 public interface InternalChannel extends Channel, Comparable<InternalChannel> {
 
-    String toSubscribeMessage();
+    String toSubscribeMessage(String authResponse);
 
     String toUnsubscribeMessage();
 
@@ -16,6 +16,8 @@ public interface InternalChannel extends Channel, Comparable<InternalChannel> {
     void onMessage(String event, String message);
 
     void updateState(ChannelState state);
+
+    ChannelState getState();
 
     void setEventListener(ChannelEventListener listener);
 

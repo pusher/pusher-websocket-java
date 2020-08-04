@@ -398,7 +398,8 @@ There are two types of events that occur on channel subscriptions.
 
 ### ChannelEventListener
 
-The `ChannelEventListener` is an interface that is informed of both protocol related events and application data events. A `ChannelEventListener` can be used when initially subscribing to a channel.
+The `ChannelEventListener` is an interface that is informed of both protocol related events and application data events. A `ChannelEventListener` can be used when
+initially subscribing to a channel.
 
 ```java
 Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {

@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class UrlEncodedConnectionFactory extends ConnectionFactory {
 
-    private Map<String, String> mQueryStringParameters = new HashMap<String, String>();
+    protected Map<String, String> mQueryStringParameters = new HashMap<String, String>();
 
     /**
      * Create a Form URL-encoded factory

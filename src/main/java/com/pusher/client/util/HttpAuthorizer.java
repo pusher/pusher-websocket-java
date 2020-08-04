@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Used to authenticate a {@link com.pusher.client.channel.PrivateChannel
@@ -31,9 +32,9 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class HttpAuthorizer implements Authorizer {
 
-    private final URL endPoint;
-    private Map<String, String> mHeaders = new HashMap<String, String>();
-    private ConnectionFactory mConnectionFactory = null;
+    protected final URL endPoint;
+    protected Map<String, String> mHeaders = new HashMap<>();
+    protected ConnectionFactory mConnectionFactory;
 
     /**
      * Creates a new authorizer.
@@ -49,6 +50,10 @@ public class HttpAuthorizer implements Authorizer {
         catch (final MalformedURLException e) {
             throw new IllegalArgumentException("Could not parse authentication end point into a valid URL", e);
         }
+    }
+
+    public void setSSLSocketFactory(SSLSocketFactory sslSocketFactory) {
+        this.mConnectionFactory.setSslSocketFactory(sslSocketFactory);
     }
 
     /**
@@ -97,6 +102,7 @@ public class HttpAuthorizer implements Authorizer {
             HttpURLConnection connection;
             if (isSSL()) {
                 connection = (HttpsURLConnection)endPoint.openConnection();
+                ((HttpsURLConnection) connection).setSSLSocketFactory(mConnectionFactory.getSslSocketFactory());
             }
             else {
                 connection = (HttpURLConnection)endPoint.openConnection();

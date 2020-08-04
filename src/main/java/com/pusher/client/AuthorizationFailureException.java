@@ -17,11 +17,11 @@ public class AuthorizationFailureException extends RuntimeException {
         super(msg);
     }
 
-    public AuthorizationFailureException(final Exception cause) {
+    public AuthorizationFailureException(final Throwable cause) {
         super(cause);
     }
 
-    public AuthorizationFailureException(final String msg, final Exception cause) {
+    public AuthorizationFailureException(final String msg, final Throwable cause) {
         super(msg, cause);
     }
 }

@@ -2,8 +2,14 @@ package com.pusher.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
+
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Configuration for a {@link com.pusher.client.Pusher} instance.
@@ -39,8 +45,52 @@ public class PusherOptions {
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
     private Authorizer authorizer;
     private Proxy proxy = Proxy.NO_PROXY;
+    private SSLSocketFactory sslSocketFactory;
     private int maxReconnectionAttempts = MAX_RECONNECTION_ATTEMPTS;
     private int maxReconnectGapInSeconds = MAX_RECONNECT_GAP_IN_SECONDS;
+
+    private URL authEndPoint;
+    private Long authDelay;
+    private ArrayList<String> mCriticalChannelPrefixList = new ArrayList<>();
+
+    private int maxRequestPerBatch = 1;
+
+    public URL getAuthEndPoint() {
+        return authEndPoint;
+    }
+
+    public void setAuthEndPoint(String authEndPoint) {
+        try {
+            this.authEndPoint = new URL(authEndPoint);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Could not parse authentication end point into a valid URL", e);
+        }
+    }
+
+	public Long getAuthDelay() {
+		return authDelay;
+	}
+
+	public void setAuthDelay(Long authDelay) {
+		this.authDelay = authDelay;
+	}
+
+	public ArrayList<String> getCriticalChannelPrefixList() {
+	    return mCriticalChannelPrefixList;
+    }
+
+    public void setCriticalChannelPrefixList(ArrayList<String> criticalChannelList) {
+        this.mCriticalChannelPrefixList = criticalChannelList;
+    }
+
+    public int getMaxRequestPerBatch() {
+        return maxRequestPerBatch;
+    }
+
+    public void setMaxRequestPerBatch(int maxRequestPerBatch) {
+        this.maxRequestPerBatch = maxRequestPerBatch;
+    }
+
 
     /**
      * @deprecated
@@ -311,5 +361,16 @@ public class PusherOptions {
             }
         }
         return "0.0.0";
+    }
+
+    public SSLSocketFactory getSslSocketFactory() {
+        return sslSocketFactory;
+    }
+
+    public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+        this.sslSocketFactory = sslSocketFactory;
+    }
+
+    public static class Headers extends HashMap<String, String> {
     }
 }

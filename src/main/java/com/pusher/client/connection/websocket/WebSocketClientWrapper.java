@@ -24,31 +24,35 @@ public class WebSocketClientWrapper extends WebSocketClient {
     private static final String WSS_SCHEME = "wss";
     private WebSocketListener webSocketListener;
 
-    public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
+    public WebSocketClientWrapper(final URI uri, final Proxy proxy,final SSLSocketFactory sslSocketFactory, final WebSocketListener webSocketListener) throws SSLException {
         super(uri);
 
         if (uri.getScheme().equals(WSS_SCHEME)) {
-            try {
-                SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, null, null); // will use java's default
-                                                   // key and trust store which
-                                                   // is sufficient unless you
-                                                   // deal with self-signed
-                                                   // certificates
+            if (sslSocketFactory != null) {
+                setSocketFactory(sslSocketFactory);
+            } else {
+                try {
+                    SSLContext sslContext = SSLContext.getInstance("TLS");
+                    sslContext.init(null, null, null); // will use java's default
+                    // key and trust store which
+                    // is sufficient unless you
+                    // deal with self-signed
+                    // certificates
 
-                final SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory)
-                                                                               // SSLSocketFactory.getDefault();
+                    final SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory)
+                    // SSLSocketFactory.getDefault();
 
-                setSocket(factory.createSocket());
-            }
-            catch (final IOException e) {
-                throw new SSLException(e);
-            }
-            catch (final NoSuchAlgorithmException e) {
-                throw new SSLException(e);
-            }
-            catch (final KeyManagementException e) {
-                throw new SSLException(e);
+                    setSocket(factory.createSocket());
+                }
+                catch (final IOException e) {
+                    throw new SSLException(e);
+                }
+                catch (final NoSuchAlgorithmException e) {
+                    throw new SSLException(e);
+                }
+                catch (final KeyManagementException e) {
+                    throw new SSLException(e);
+                }
             }
         }
         this.webSocketListener = webSocketListener;

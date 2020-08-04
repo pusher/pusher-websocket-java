@@ -11,4 +11,6 @@ public interface PrivateChannelEventListener extends ChannelEventListener {
      * @param e An associated exception, if available.
      */
     void onAuthenticationFailure(String message, Exception e);
+
+    void onChannelDataReceived(String data);
 }

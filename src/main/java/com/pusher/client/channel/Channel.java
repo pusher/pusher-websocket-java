@@ -85,4 +85,6 @@ public interface Channel {
      * @return Whether or not the channel is subscribed.
      */
     boolean isSubscribed();
+
+    boolean isInitial();
 }

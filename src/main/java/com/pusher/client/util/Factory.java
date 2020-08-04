@@ -1,15 +1,5 @@
 package com.pusher.client.util;
 
-import java.net.Proxy;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
-import javax.net.ssl.SSLException;
-
 import com.pusher.client.Authorizer;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.channel.impl.ChannelImpl;
@@ -22,6 +12,17 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
 import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
+
+import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * This is a lightweight way of doing dependency injection and enabling classes
@@ -59,6 +60,7 @@ public class Factory {
                         options.getMaxReconnectionAttempts(),
                         options.getMaxReconnectGapInSeconds(),
                         options.getProxy(),
+                        options.getSslSocketFactory(),
                         this);
             }
             catch (final URISyntaxException e) {
@@ -68,8 +70,8 @@ public class Factory {
         return connection;
     }
 
-    public WebSocketClientWrapper newWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
-        return new WebSocketClientWrapper(uri, proxy, webSocketListener);
+    public WebSocketClientWrapper newWebSocketClientWrapper(final URI uri, final Proxy proxy, final SSLSocketFactory sslSocketFactory, final WebSocketListener webSocketListener) throws SSLException {
+        return new WebSocketClientWrapper(uri, proxy, sslSocketFactory, webSocketListener);
     }
 
     public synchronized ScheduledExecutorService getTimers() {

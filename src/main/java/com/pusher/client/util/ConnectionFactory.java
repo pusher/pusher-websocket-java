@@ -1,5 +1,7 @@
 package com.pusher.client.util;
 
+import javax.net.ssl.SSLSocketFactory;
+
 /**
  * Abstract factory to be used for
  * building HttpAuthorizer connections
@@ -7,6 +9,7 @@ package com.pusher.client.util;
 public abstract class ConnectionFactory {
     private String channelName;
     private String socketId;
+    private SSLSocketFactory sslSocketFactory;
 
     public ConnectionFactory() {
     }
@@ -31,5 +34,13 @@ public abstract class ConnectionFactory {
 
     public void setSocketId(String socketId) {
         this.socketId = socketId;
+    }
+
+    public SSLSocketFactory getSslSocketFactory() {
+        return sslSocketFactory;
+    }
+
+    public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+        this.sslSocketFactory = sslSocketFactory;
     }
 }
