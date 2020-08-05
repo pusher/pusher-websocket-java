@@ -94,5 +94,10 @@ public class WebSocketClientWrapper extends WebSocketClient {
     @Override
     protected void onSetSSLParameters(SSLParameters sslParameters) {
         // https://github.com/TooTallNate/Java-WebSocket/wiki/No-such-method-error-setEndpointIdentificationAlgorithm
+        try {
+            super.onSetSSLParameters(sslParameters);
+        } catch (NoSuchMethodError error) {
+            // if this is being called on an android device pre-24 this api isn't available
+        }
     }
 }
