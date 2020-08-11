@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.java_websocket.client.WebSocketClient;
@@ -88,5 +89,15 @@ public class WebSocketClientWrapper extends WebSocketClient {
      */
     public void removeWebSocketListener() {
         webSocketListener = null;
+    }
+
+    @Override
+    protected void onSetSSLParameters(SSLParameters sslParameters) {
+        // https://github.com/TooTallNate/Java-WebSocket/wiki/No-such-method-error-setEndpointIdentificationAlgorithm
+        try {
+            super.onSetSSLParameters(sslParameters);
+        } catch (NoSuchMethodError error) {
+            // if this is being called on an android device pre-24 this api isn't available
+        }
     }
 }

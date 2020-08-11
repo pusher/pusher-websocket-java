@@ -185,7 +185,7 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 encryptedReceivedData.getCiphertext(),
                 encryptedReceivedData.getNonce());
 
-        receivedMessage.replace("data", decryptedData);
+        receivedMessage.put("data", decryptedData);
 
         return new PusherEvent(receivedMessage);
     }
