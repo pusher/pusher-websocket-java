@@ -11,7 +11,7 @@ Pusher Channels client library for Java targeting **Android** and general Java.
 * Java SE - supports versions 8, 9, 10 and 11.
 * Oracle JDK
 * OpenJDK
-* [Android, via this wrapper SDK](https://github.com/pusher/pusher-websocket-android)
+* Android
 
 ## TOC
 
