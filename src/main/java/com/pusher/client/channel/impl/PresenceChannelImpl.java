@@ -95,9 +95,20 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void handleSubscriptionSuccessfulMessage(final String message) {
+        final ChannelEventListener listener = getEventListener();
 
         // extract data from the JSON message
         final PresenceData presenceData = extractPresenceDataFrom(message);
+        if (presenceData == null) {
+            if (listener != null) {
+                listener.onError(
+                    "Subscription failed: Presence data not found",
+                    null
+                );
+            }
+            return;
+        }
+
         final List<String> ids = presenceData.ids;
         final Map<String, Object> hash = presenceData.hash;
 
@@ -109,7 +120,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
                 idToUserMap.put(id, user);
             }
         }
-        final ChannelEventListener listener = getEventListener();
+
         if (listener != null) {
             final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
             presenceListener.onUsersInformationReceived(getName(), getUsers());
