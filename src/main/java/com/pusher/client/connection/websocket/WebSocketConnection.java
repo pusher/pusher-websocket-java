@@ -150,7 +150,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     /* implementation detail */
 
     private void updateState(final ConnectionState newState) {
-        log.fine("State transition requested, current [" + state + "], new [" + newState + "]");
+        log.info("State transition requested, current [" + state + "], new [" + newState + "]");
 
         final ConnectionStateChange change = new ConnectionStateChange(state, newState);
         state = newState;
