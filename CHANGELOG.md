@@ -1,5 +1,8 @@
 # pusher-websocket-java changelog
 
+### Version 2.2.6 - 17th March 2021
+* Fixed an [issue causing a NullPointerException if event data on a Presence channel was malformed or missing](https://github.com/pusher/pusher-websocket-java/pull/290)
+
 ### Version 2.2.5 - 11th August 2020
 * Fixed an [issue with the Java-WebSocket library with android pre-sdk24 devices causing a NoSuchMethod exception](https://github.com/pusher/pusher-websocket-java/pull/284)
 
