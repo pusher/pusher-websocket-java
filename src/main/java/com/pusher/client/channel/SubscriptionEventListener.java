@@ -33,4 +33,18 @@ public interface SubscriptionEventListener {
      *            See {@linkplain PusherEvent} for more.
      */
     void onEvent(final PusherEvent event);
+
+    /**
+     * Callback that is fired whenever an unexpected error occurs processing
+     * for this {@linkplain SubscriptionEventListener}.
+     *
+     * @param message
+     *            A description of the problem.
+     * @param e
+     *            An associated exception, if available.
+     */
+    default void onError(String message, Exception e) {
+        // No-op
+        return;
+    };
 }

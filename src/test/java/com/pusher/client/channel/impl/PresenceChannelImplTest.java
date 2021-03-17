@@ -30,6 +30,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     private static final String AUTH_RESPONSE = "\"auth\":\"a87fe72c6f36272aa4b1:f9db294eae7\",\"channel_data\":\"{\\\"user_id\\\":\\\"5116a4519575b\\\",\\\"user_info\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}\"";
     private static final String AUTH_RESPONSE_NUMERIC_ID = "\"auth\":\"a87fe72c6f36272aa4b1:f9db294eae7\",\"channel_data\":\"{\\\"user_id\\\":51169,\\\"user_info\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}\"";
     private static final String USER_ID = "5116a4519575b";
+    private static final String ERROR_NO_PRESENCE_DATA = "Subscription failed: Presence data not found";
 
     @Mock
     private PresenceChannelEventListener mockEventListener;
@@ -75,6 +76,17 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
         channel.onMessage("pusher_internal:subscription_succeeded",
                 "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{\\\"presence\\\":{\\\"count\\\":1,\\\"ids\\\":[\\\"5116a4519575b\\\"],\\\"hash\\\":{\\\"5116a4519575b\\\":{\\\"name\\\":\\\"Phil Leggetter\\\",\\\"twitter_id\\\":\\\"@leggetter\\\"}}}}\",\"channel\":\"presence-myChannel\"}");
         assertTrue(channel.isSubscribed());
+    }
+
+    @Test
+    public void testInternalSubscriptionSucceededMessageWithNoPresenceDataReturnsError(){
+        final String eventName = "pusher_internal:subscription_succeeded";
+        final Map<String, Object> data = new LinkedHashMap<String, Object>();
+
+        channel.onMessage(eventName, eventJson(eventName, data, getChannelName()));
+
+        final InOrder inOrder = inOrder(mockEventListener);
+        inOrder.verify(mockEventListener).onError(eq(ERROR_NO_PRESENCE_DATA), eq(null));
     }
 
     @Test
