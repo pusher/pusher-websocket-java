@@ -21,4 +21,4 @@ jobs:
           java-version: "${{ matrix.java-version }}"
           distribution: "adopt"
       - name: Build & Test
-        run: mvn --batch-mode --update-snapshots verify
+        run: ./gradlew jacocoTestReport test
