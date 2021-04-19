@@ -22,3 +22,5 @@ jobs:
           distribution: "adopt"
       - name: Build & Test
         run: ./gradlew jacocoTestReport test
+      - name: Code coverage
+        run: bash <(curl -s https://codecov.io/bash)
