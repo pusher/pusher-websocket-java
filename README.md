@@ -76,7 +76,7 @@ dependencies {
 
 ### Download
 
-You can download a version of the `.jar` directly from <http://repo1.maven.org/maven2/com/pusher/pusher-java-client/>
+You can download a version of the `.jar` directly from <https://repo1.maven.org/maven2/com/pusher/pusher-java-client/>
 
 ### Source
 
