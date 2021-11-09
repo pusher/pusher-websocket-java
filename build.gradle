@@ -44,7 +44,7 @@ repositories {
 }
 
 dependencies {
-	compile "com.google.code.gson:gson:2.2.2"
+	compile "com.google.code.gson:gson:2.8.9"
 	compile "org.java-websocket:Java-WebSocket:1.5.1"
 
 	testCompile "org.mockito:mockito-all:1.8.5"
