@@ -17,36 +17,49 @@ Pusher Channels client library for Java targeting **Android** and general Java.
 
 This README covers the following topics:
 
-- [Installation](#installation)
-	- [Maven](#maven)
-	- [Gradle](#gradle)
-	- [Download](#download)
-	- [Source](#source)
-- [API Overview](#api-overview)
-- [The Pusher constructor](#the-pusher-constructor)
-- [Connecting](#connecting)
-- [Reconnecting](#reconnecting)
-- [Disconnecting](#disconnecting)
-- [Listening to connection events](#listening-to-connection-events)
-- [Subscribing to channels](#subscribing-to-channels)
-	- [Public channels](#public-channels)
-	- [Private channels](#private-channels)
-	- [Private encrypted channels](#private-encrypted-channels)
-	- [Presence channels](#presence-channels)
-		- [The User object](#the-user-object)
-- [Binding and handling events](#binding-and-handling-events)
-- [Triggering events](#triggering-events)
-- [Accessing the connection socket ID](#accessing-the-connection-socket-id)
-- [Helper Methods](#helper-methods)
-	- [Getting a channel from string](#getting-a-channel-from-string)
-	- [Check if a channel has subscribed](#check-if-a-channel-has-subscribed)
-- [JavaDocs](#javadocs)
-- [Library Development Environment](#library-development-environment)
-	- [Prerequisites](#prerequisites)
-	- [Cloning the project](#cloning-the-project)
-	- [Eclipse Project](#eclipse-project)
-	- [Build](#build)
-	- [Run the Example Application](#run-the-example-application)
+- [Pusher Channels Java Client](#pusher-channels-java-client)
+  - [Supported platforms](#supported-platforms)
+  - [TOC](#toc)
+  - [Installation](#installation)
+    - [Maven](#maven)
+    - [Gradle](#gradle)
+    - [Download](#download)
+    - [Source](#source)
+  - [API Overview](#api-overview)
+  - [The Pusher constructor](#the-pusher-constructor)
+  - [Connecting](#connecting)
+  - [The PusherOptions object](#the-pusheroptions-object)
+  - [Reconnecting](#reconnecting)
+  - [Disconnecting](#disconnecting)
+  - [Listening to connection events](#listening-to-connection-events)
+  - [Subscribing to channels](#subscribing-to-channels)
+    - [Public channels](#public-channels)
+    - [Private channels](#private-channels)
+    - [Private encrypted channels](#private-encrypted-channels)
+    - [Presence channels](#presence-channels)
+      - [The User object](#the-user-object)
+      - [Client event authenticity](#client-event-authenticity)
+  - [Binding and handling events](#binding-and-handling-events)
+    - [ChannelEventListener](#channeleventlistener)
+    - [SubscriptionEventListener](#subscriptioneventlistener)
+    - [Unbinding event listeners](#unbinding-event-listeners)
+    - [Example](#example)
+  - [Triggering events](#triggering-events)
+  - [Accessing the connection socket ID](#accessing-the-connection-socket-id)
+  - [Helper Methods](#helper-methods)
+    - [Getting a channel from string](#getting-a-channel-from-string)
+      - [Basic channels](#basic-channels)
+      - [Private channels](#private-channels-1)
+      - [Presence channels](#presence-channels-1)
+    - [Check if a channel has subscribed](#check-if-a-channel-has-subscribed)
+  - [JavaDocs](#javadocs)
+  - [Library Development Environment](#library-development-environment)
+    - [Prerequisites](#prerequisites)
+    - [Cloning the project](#cloning-the-project)
+    - [Android Studio](#android-studio)
+    - [Eclipse Project](#eclipse-project)
+    - [Build](#build)
+    - [Run the Example Application](#run-the-example-application)
 
 ## Installation
 
@@ -61,7 +74,7 @@ The pusher-java-client is available in Maven Central.
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>2.2.6</version>
+      <version>2.2.7</version>
     </dependency>
 </dependencies>
 ```
@@ -70,7 +83,7 @@ The pusher-java-client is available in Maven Central.
 
 ```groovy
 dependencies {
-  compile 'com.pusher:pusher-java-client:2.2.6'
+  compile 'com.pusher:pusher-java-client:2.2.7'
 }
 ```
 
