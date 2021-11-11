@@ -1,5 +1,8 @@
 # pusher-websocket-java changelog
 
+### Version 2.2.7 - 11th November 2021
+* Fixed an [issue Vulnerability with legacy Gson dependency](https://github.com/pusher/pusher-websocket-java/issues/305)
+
 ### Version 2.2.6 - 17th March 2021
 * Fixed an [issue causing a NullPointerException if event data on a Presence channel was malformed or missing](https://github.com/pusher/pusher-websocket-java/pull/290)
 
