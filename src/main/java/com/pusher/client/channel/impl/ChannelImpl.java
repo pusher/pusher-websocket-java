@@ -17,6 +17,7 @@ public class ChannelImpl implements InternalChannel {
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
+    private Set<SubscriptionEventListener> globalListners = new HashSet<SubscriptionEventListener>();
     private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
@@ -67,6 +68,18 @@ public class ChannelImpl implements InternalChannel {
     }
 
     @Override
+    public void bind_global(SubscriptionEventListener listener) {
+        validateArguments("", listener);
+
+        synchronized(lock) {
+            if (globalListners == null) {
+                globalListners = new HashSet<SubscriptionEventListener>();
+            }
+            globalListners.add(listener);
+        }
+    }
+
+    @Override
     public void unbind(final String eventName, final SubscriptionEventListener listener) {
 
         validateArguments(eventName, listener);
@@ -78,6 +91,17 @@ public class ChannelImpl implements InternalChannel {
                 if (listeners.isEmpty()) {
                     eventNameToListenerMap.remove(eventName);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void unbind_global(SubscriptionEventListener listener) {
+        validateArguments("", listener);
+
+        synchronized(lock) {
+            if (globalListners != null) {
+                globalListners.remove(listener);
             }
         }
     }
@@ -220,7 +244,10 @@ public class ChannelImpl implements InternalChannel {
                 return null;
             }
 
-            return new HashSet<>(sharedListeners);
+            return new HashSet<SubscriptionEventListener>(){{
+                addAll(sharedListeners);
+                addAll(globalListners);
+            }};
         }
     }
 }
