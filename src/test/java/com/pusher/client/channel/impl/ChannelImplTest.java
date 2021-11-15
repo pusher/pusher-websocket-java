@@ -163,6 +163,15 @@ public class ChannelImplTest {
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }
+    @Test
+    public void testEventIsNotPassedOnIfListenerHasUnboundFromGlobalEvent() {
+
+        channel.bind_global(mockListener);
+        channel.unbind_global(mockListener);
+        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+
+        verify(mockListener, never()).onEvent(any(PusherEvent.class));
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testBindWithNullEventNameThrowsException() {
