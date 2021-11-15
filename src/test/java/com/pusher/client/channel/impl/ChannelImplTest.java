@@ -120,6 +120,15 @@ public class ChannelImplTest {
         assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
     @Test
+    public void testDataIsExtractedFromMessageAndPassedToSingleListenerGlobalEvent() {
+        channel.bind_global(mockListener);
+        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+
+        verify(mockListener, times(1)).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
+    }
+    @Test
     public void testDataIsExtractedFromMessageAndPassedToMultipleListeners() {
         final ChannelEventListener mockListener2 = getEventListener();
 

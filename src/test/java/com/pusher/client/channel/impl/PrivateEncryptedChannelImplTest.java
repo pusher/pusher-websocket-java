@@ -191,6 +191,36 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     }
 
     @Test
+    public void testDataIsExtractedFromMessageAndPassedToSingleListenerGlobalEvent() {
+        PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
+                mockInternalConnection,
+                getChannelName(),
+                mockAuthorizer,
+                factory,
+                mockSecretBoxOpenerFactory);
+
+        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+                .thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any()))
+                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
+
+        channel.toSubscribeMessage();
+
+        PrivateEncryptedChannelEventListener mockListener = mock(PrivateEncryptedChannelEventListener.class);
+
+        channel.bind_global(mockListener);
+
+        channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
+                "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +
+                "\\\"ciphertext\\\": \\\"/GMESnFGlbNn01BuBjp31XYa3i9vZsGKR8fgR9EDhXKx3lzGiUD501A=\\\"" +
+                "}\"}");
+
+        verify(mockListener, times(1)).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
+    }
+
+    @Test
     public void testDataIsExtractedFromMessageAndPassedToMultipleListeners() {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection,
