@@ -63,7 +63,7 @@ public interface Channel {
      *             {@link com.pusher.client.Pusher#subscribe(String, ChannelEventListener, String...)}
      *             again to receive a fresh {@linkplain Channel} instance.
      */
-    void bind_global(SubscriptionEventListener listener);
+    void bindGlobal(SubscriptionEventListener listener);
 
     /**
      * <p>
@@ -129,7 +129,7 @@ public interface Channel {
      *             {@link com.pusher.client.Pusher#subscribe(String, ChannelEventListener, String...)}
      *             again to receive a fresh {@linkplain Channel} instance.
      */
-    void unbind_global(SubscriptionEventListener listener);
+    void unbindGlobal(SubscriptionEventListener listener);
 
     /**
      *

@@ -208,7 +208,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         PrivateEncryptedChannelEventListener mockListener = mock(PrivateEncryptedChannelEventListener.class);
 
-        channel.bind_global(mockListener);
+        channel.bindGlobal(mockListener);
 
         channel.onMessage("my-event", "{\"event\":\"event1\",\"data\":\"{" +
                 "\\\"nonce\\\": \\\"4sVYwy4j/8dCcjyxtPCWyk19GaaViaW9\\\"," +

@@ -121,7 +121,7 @@ public class ChannelImplTest {
     }
     @Test
     public void testDataIsExtractedFromMessageAndPassedToSingleListenerGlobalEvent() {
-        channel.bind_global(mockListener);
+        channel.bindGlobal(mockListener);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
         verify(mockListener, times(1)).onEvent(argCaptor.capture());
@@ -166,8 +166,8 @@ public class ChannelImplTest {
     @Test
     public void testEventIsNotPassedOnIfListenerHasUnboundFromGlobalEvent() {
 
-        channel.bind_global(mockListener);
-        channel.unbind_global(mockListener);
+        channel.bindGlobal(mockListener);
+        channel.unbindGlobal(mockListener);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));

@@ -17,7 +17,7 @@ public class ChannelImpl implements InternalChannel {
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
-    private Set<SubscriptionEventListener> globalListners = new HashSet<SubscriptionEventListener>();
+    private Set<SubscriptionEventListener> globalListeners = new HashSet<SubscriptionEventListener>();
     private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
@@ -68,14 +68,11 @@ public class ChannelImpl implements InternalChannel {
     }
 
     @Override
-    public void bind_global(SubscriptionEventListener listener) {
+    public void bindGlobal(SubscriptionEventListener listener) {
         validateArguments("", listener);
 
         synchronized(lock) {
-            if (globalListners == null) {
-                globalListners = new HashSet<SubscriptionEventListener>();
-            }
-            globalListners.add(listener);
+            globalListeners.add(listener);
         }
     }
 
@@ -96,12 +93,12 @@ public class ChannelImpl implements InternalChannel {
     }
 
     @Override
-    public void unbind_global(SubscriptionEventListener listener) {
+    public void unbindGlobal(SubscriptionEventListener listener) {
         validateArguments("", listener);
 
         synchronized(lock) {
-            if (globalListners != null) {
-                globalListners.remove(listener);
+            if (globalListeners != null) {
+                globalListeners.remove(listener);
             }
         }
     }
@@ -244,8 +241,8 @@ public class ChannelImpl implements InternalChannel {
             if (sharedListeners != null ) {
                 listners.addAll(sharedListeners);
             }
-            if (!globalListners.isEmpty()) {
-                listners.addAll(globalListners);
+            if (!globalListeners.isEmpty()) {
+                listners.addAll(globalListeners);
             }
 
             if (listners.isEmpty()){
