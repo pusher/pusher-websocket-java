@@ -233,23 +233,23 @@ public class ChannelImpl implements InternalChannel {
 
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
         synchronized (lock) {
-            Set<SubscriptionEventListener> listners = new HashSet<SubscriptionEventListener>();
+            Set<SubscriptionEventListener> listeners = new HashSet<SubscriptionEventListener>();
             
             final Set<SubscriptionEventListener> sharedListeners =
                     eventNameToListenerMap.get(event);
 
             if (sharedListeners != null ) {
-                listners.addAll(sharedListeners);
+                listeners.addAll(sharedListeners);
             }
             if (!globalListeners.isEmpty()) {
-                listners.addAll(globalListeners);
+                listeners.addAll(globalListeners);
             }
 
-            if (listners.isEmpty()){
+            if (listeners.isEmpty()){
                 return null;
             }
 
-            return listners;
+            return listeners;
         }
     }
 }
