@@ -120,6 +120,15 @@ public class ChannelImplTest {
         assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
     @Test
+    public void testDataIsExtractedFromMessageAndPassedToSingleListenerGlobalEvent() {
+        channel.bindGlobal(mockListener);
+        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+
+        verify(mockListener, times(1)).onEvent(argCaptor.capture());
+        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
+    }
+    @Test
     public void testDataIsExtractedFromMessageAndPassedToMultipleListeners() {
         final ChannelEventListener mockListener2 = getEventListener();
 
@@ -150,6 +159,15 @@ public class ChannelImplTest {
 
         channel.bind(EVENT_NAME, mockListener);
         channel.unbind(EVENT_NAME, mockListener);
+        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+
+        verify(mockListener, never()).onEvent(any(PusherEvent.class));
+    }
+    @Test
+    public void testEventIsNotPassedOnIfListenerHasUnboundFromGlobalEvent() {
+
+        channel.bindGlobal(mockListener);
+        channel.unbindGlobal(mockListener);
         channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));

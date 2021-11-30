@@ -17,6 +17,7 @@ public class ChannelImpl implements InternalChannel {
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected final String name;
+    private Set<SubscriptionEventListener> globalListeners = new HashSet<SubscriptionEventListener>();
     private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
@@ -67,6 +68,15 @@ public class ChannelImpl implements InternalChannel {
     }
 
     @Override
+    public void bindGlobal(SubscriptionEventListener listener) {
+        validateArguments("", listener);
+
+        synchronized(lock) {
+            globalListeners.add(listener);
+        }
+    }
+
+    @Override
     public void unbind(final String eventName, final SubscriptionEventListener listener) {
 
         validateArguments(eventName, listener);
@@ -78,6 +88,17 @@ public class ChannelImpl implements InternalChannel {
                 if (listeners.isEmpty()) {
                     eventNameToListenerMap.remove(eventName);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void unbindGlobal(SubscriptionEventListener listener) {
+        validateArguments("", listener);
+
+        synchronized(lock) {
+            if (globalListeners != null) {
+                globalListeners.remove(listener);
             }
         }
     }
@@ -212,15 +233,23 @@ public class ChannelImpl implements InternalChannel {
 
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
         synchronized (lock) {
-
+            Set<SubscriptionEventListener> listeners = new HashSet<SubscriptionEventListener>();
+            
             final Set<SubscriptionEventListener> sharedListeners =
                     eventNameToListenerMap.get(event);
 
-            if (sharedListeners == null) {
+            if (sharedListeners != null ) {
+                listeners.addAll(sharedListeners);
+            }
+            if (!globalListeners.isEmpty()) {
+                listeners.addAll(globalListeners);
+            }
+
+            if (listeners.isEmpty()){
                 return null;
             }
 
-            return new HashSet<>(sharedListeners);
+            return listeners;
         }
     }
 }

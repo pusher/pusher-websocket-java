@@ -45,6 +45,27 @@ public interface Channel {
     void bind(String eventName, SubscriptionEventListener listener);
 
     /**
+     * Binds a {@link SubscriptionEventListener} to all events. The
+     * {@link SubscriptionEventListener} will be notified whenever an
+     * event is received on this channel.
+     *
+     * @param listener
+     *            A listener to receive notifications when the event is
+     *            received.
+     * @throws IllegalArgumentException
+     *             If the {@link SubscriptionEventListener} is null.
+     * @throws IllegalStateException
+     *             If the channel has been unsubscribed by calling
+     *             {@link com.pusher.client.Pusher#unsubscribe(String)}. This
+     *             puts the {@linkplain Channel} in a terminal state from which
+     *             it can no longer be used. To resubscribe, call
+     *             {@link com.pusher.client.Pusher#subscribe(String)} or
+     *             {@link com.pusher.client.Pusher#subscribe(String, ChannelEventListener, String...)}
+     *             again to receive a fresh {@linkplain Channel} instance.
+     */
+    void bindGlobal(SubscriptionEventListener listener);
+
+    /**
      * <p>
      * Unbinds a previously bound {@link SubscriptionEventListener} from an
      * event. The {@link SubscriptionEventListener} will no longer be notified
@@ -79,6 +100,36 @@ public interface Channel {
      *             again to receive a fresh {@linkplain Channel} instance.
      */
     void unbind(String eventName, SubscriptionEventListener listener);
+
+    /**
+     * <p>
+     * Unbinds a previously bound {@link SubscriptionEventListener} from global
+     * events. The {@link SubscriptionEventListener} will no longer be notified
+     * whenever the any event is received on this channel.
+     * </p>
+     *
+     * <p>
+     * Calling this method does not unsubscribe from the channel even if there
+     * are no more {@link SubscriptionEventListener}s bound to it. If you want
+     * to unsubscribe from the channel completely, call
+     * {@link com.pusher.client.Pusher#unsubscribe(String)}. It is not necessary
+     * to unbind your {@link SubscriptionEventListener}s first.
+     * </p>
+     *
+     * @param listener
+     *            The listener to unbind from the event.
+     * @throws IllegalArgumentException
+     *             If the {@link SubscriptionEventListener} is null.
+     * @throws IllegalStateException
+     *             If the channel has been unsubscribed by calling
+     *             {@link com.pusher.client.Pusher#unsubscribe(String)}. This
+     *             puts the {@linkplain Channel} in a terminal state from which
+     *             it can no longer be used. To resubscribe, call
+     *             {@link com.pusher.client.Pusher#subscribe(String)} or
+     *             {@link com.pusher.client.Pusher#subscribe(String, ChannelEventListener, String...)}
+     *             again to receive a fresh {@linkplain Channel} instance.
+     */
+    void unbindGlobal(SubscriptionEventListener listener);
 
     /**
      *
