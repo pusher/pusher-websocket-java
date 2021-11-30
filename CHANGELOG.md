@@ -1,5 +1,8 @@
 # pusher-websocket-java changelog
 
+### Version 2.2.8 - 30th November 2021
+* Add global [event listner](https://github.com/pusher/pusher-websocket-java/issues/305)
+
 ### Version 2.2.7 - 11th November 2021
 * Fixed an [issue Vulnerability with legacy Gson dependency](https://github.com/pusher/pusher-websocket-java/issues/305)
 
