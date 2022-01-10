@@ -551,7 +551,7 @@ For more information on how and why there is a `socket_id` see the documentation
 Channel channel = pusher.getChannel("my-channel");
 ```
 
-The library will raise an exception if the parameter to `Pusher#getPrivateChannel` is prefixed with `"private-"` or `"presence-"`.
+The library will raise an exception if the parameter to `Pusher#getChannel` is prefixed with `"private-"` or `"presence-"`.
 
 #### Private channels
 
