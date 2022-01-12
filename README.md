@@ -627,8 +627,8 @@ From the top level directory execute:
 
 ### Run the Example Application
 
-After running `gradlew clean assemble` change to the `build/libs` directory and run `java -jar pusher-java-client-<version>-jar-with-dependencies.jar`. This will run the example application.
+After running `gradlew clean assemble` change to the `build/libs` directory and run `java -jar pusher-websocket-java-with-dependencies-<version>-jar-with-dependencies.jar`. This will run the example application.
 
 By default the example will connect to a sample application and subscribe to the channel `my-channel`, listening to events on `my-event`. If you want to change these defaults, they can be specified on the command line:
 
-`java -jar pusher-java-client-<version>-jar-with-dependencies.jar [appKey] [channelName] [eventName]`
+`java -jar pusher-websocket-java-with-dependencies-<version>-jar-with-dependencies.jar [appKey] [channelName] [eventName]`
