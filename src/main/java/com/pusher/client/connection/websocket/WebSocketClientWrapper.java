@@ -40,10 +40,7 @@ public class WebSocketClientWrapper extends WebSocketClient {
                 final SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory)
                                                                                // SSLSocketFactory.getDefault();
 
-                setSocket(factory.createSocket());
-            }
-            catch (final IOException e) {
-                throw new SSLException(e);
+                setSocketFactory(factory);
             }
             catch (final NoSuchAlgorithmException e) {
                 throw new SSLException(e);
@@ -57,9 +54,9 @@ public class WebSocketClientWrapper extends WebSocketClient {
     }
 
     @Override
-    public void onOpen(final ServerHandshake handshakedata) {
+    public void onOpen(final ServerHandshake handshakeData) {
         if (webSocketListener != null) {
-            webSocketListener.onOpen(handshakedata);
+            webSocketListener.onOpen(handshakeData);
         }
     }
 
