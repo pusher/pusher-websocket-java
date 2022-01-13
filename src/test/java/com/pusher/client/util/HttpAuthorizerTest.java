@@ -1,7 +1,5 @@
 package com.pusher.client.util;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.pusher.client.AuthorizationFailureException;
