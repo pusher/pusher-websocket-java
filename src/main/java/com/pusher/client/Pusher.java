@@ -48,13 +48,13 @@ public class Pusher implements Client {
      *
      * <p>
      * Note that if you use this constructor you will not be able to subscribe
-     * to private or presence channels because no {@link Authorizer} has been
+     * to private or presence channels because no {@link ChannelAuthorizer} has been
      * set. If you want to use private or presence channels:
      * <ul>
-     * <li>Create an implementation of the {@link Authorizer} interface, or use
-     * the {@link com.pusher.client.util.HttpAuthorizer} provided.</li>
+     * <li>Create an implementation of the {@link ChannelAuthorizer} interface, or use
+     * the {@link com.pusher.client.util.HttpChannelAuthorizer} provided.</li>
      * <li>Create an instance of {@link PusherOptions} and set the authorizer on
-     * it by calling {@link PusherOptions#setAuthorizer(Authorizer)}.</li>
+     * it by calling {@link PusherOptions#setChannelAuthorizer(ChannelAuthorizer)}.</li>
      * <li>Use the {@link #Pusher(String, PusherOptions)} constructor to create
      * an instance of Pusher.</li>
      * </ul>
@@ -257,7 +257,7 @@ public class Pusher implements Client {
      * @return A new {@link com.pusher.client.channel.PrivateChannel}
      *         representing the subscription.
      * @throws IllegalStateException
-     *             if a {@link com.pusher.client.Authorizer} has not been set
+     *             if a {@link com.pusher.client.ChannelAuthorizer} has not been set
      *             for the {@link Pusher} instance via
      *             {@link #Pusher(String, PusherOptions)}.
      */
@@ -273,15 +273,15 @@ public class Pusher implements Client {
      * @param listener A listener to be informed of both Pusher channel protocol events and subscription data events.
      * @param eventNames An optional list of names of events to be bound to on the channel. The equivalent of calling {@link com.pusher.client.channel.Channel#bind(String, SubscriptionEventListener)} one or more times.
      * @return A new {@link com.pusher.client.channel.PrivateChannel} representing the subscription.
-     * @throws IllegalStateException if a {@link com.pusher.client.Authorizer} has not been set for the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
+     * @throws IllegalStateException if a {@link com.pusher.client.ChannelAuthorizer} has not been set for the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
      */
     public PrivateChannel subscribePrivate(final String channelName, final PrivateChannelEventListener listener,
             final String... eventNames) {
 
-        throwExceptionIfNoAuthorizerHasBeenSet();
+        throwExceptionIfNoChannelAuthorizerHasBeenSet();
 
         final PrivateChannelImpl channel = factory.newPrivateChannel(connection, channelName,
-                pusherOptions.getAuthorizer());
+                pusherOptions.getChannelAuthorizer());
         channelManager.subscribeTo(channel, listener, eventNames);
 
         return channel;
@@ -301,7 +301,7 @@ public class Pusher implements Client {
      *                   one or more times.
      * @return A new {@link com.pusher.client.channel.PrivateEncryptedChannel} representing
      *         the subscription.
-     * @throws IllegalStateException if a {@link com.pusher.client.Authorizer} has not been set for
+     * @throws IllegalStateException if a {@link com.pusher.client.ChannelAuthorizer} has not been set for
      *         the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
      */
     public PrivateEncryptedChannel subscribePrivateEncrypted(
@@ -309,10 +309,10 @@ public class Pusher implements Client {
             final PrivateEncryptedChannelEventListener listener,
             final String... eventNames) {
 
-        throwExceptionIfNoAuthorizerHasBeenSet();
+        throwExceptionIfNoChannelAuthorizerHasBeenSet();
 
         final PrivateEncryptedChannelImpl channel = factory.newPrivateEncryptedChannel(
-                        connection, channelName, pusherOptions.getAuthorizer());
+                        connection, channelName, pusherOptions.getChannelAuthorizer());
         channelManager.subscribeTo(channel, listener, eventNames);
 
         return channel;
@@ -328,7 +328,7 @@ public class Pusher implements Client {
      * @return A new {@link com.pusher.client.channel.PresenceChannel}
      *         representing the subscription.
      * @throws IllegalStateException
-     *             if a {@link com.pusher.client.Authorizer} has not been set
+     *             if a {@link com.pusher.client.ChannelAuthorizer} has not been set
      *             for the {@link Pusher} instance via
      *             {@link #Pusher(String, PusherOptions)}.
      */
@@ -344,15 +344,15 @@ public class Pusher implements Client {
      * @param listener A listener to be informed of Pusher channel protocol, including presence-specific events, and subscription data events.
      * @param eventNames An optional list of names of events to be bound to on the channel. The equivalent of calling {@link com.pusher.client.channel.Channel#bind(String, SubscriptionEventListener)} one or more times.
      * @return A new {@link com.pusher.client.channel.PresenceChannel} representing the subscription.
-     * @throws IllegalStateException if a {@link com.pusher.client.Authorizer} has not been set for the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
+     * @throws IllegalStateException if a {@link com.pusher.client.ChannelAuthorizer} has not been set for the {@link Pusher} instance via {@link #Pusher(String, PusherOptions)}.
      */
     public PresenceChannel subscribePresence(final String channelName, final PresenceChannelEventListener listener,
             final String... eventNames) {
 
-        throwExceptionIfNoAuthorizerHasBeenSet();
+        throwExceptionIfNoChannelAuthorizerHasBeenSet();
 
         final PresenceChannelImpl channel = factory.newPresenceChannel(connection, channelName,
-                pusherOptions.getAuthorizer());
+                pusherOptions.getChannelAuthorizer());
         channelManager.subscribeTo(channel, listener, eventNames);
 
         return channel;
@@ -371,10 +371,10 @@ public class Pusher implements Client {
 
     /* implementation detail */
 
-    private void throwExceptionIfNoAuthorizerHasBeenSet() {
-        if (pusherOptions.getAuthorizer() == null) {
+    private void throwExceptionIfNoChannelAuthorizerHasBeenSet() {
+        if (pusherOptions.getChannelAuthorizer() == null) {
             throw new IllegalStateException(
-                    "Cannot subscribe to a private or presence channel because no Authorizer has been set. Call PusherOptions.setAuthorizer() before connecting to Pusher");
+                    "Cannot subscribe to a private or presence channel because no ChannelAuthorizer has been set. Call PusherOptions.setChannelAuthorizer() before connecting to Pusher");
         }
     }
 

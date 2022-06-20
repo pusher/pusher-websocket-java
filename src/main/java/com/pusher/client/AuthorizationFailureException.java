@@ -3,7 +3,7 @@ package com.pusher.client;
 /**
  * Used to indicate an authorization failure.
  *
- * @see com.pusher.client.Authorizer
+ * @see com.pusher.client.ChannelAuthorizer
  */
 public class AuthorizationFailureException extends RuntimeException {
 

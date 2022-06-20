@@ -46,7 +46,7 @@ public class EndToEndTest {
 
     private static final Proxy proxy = Proxy.NO_PROXY;
 
-    private @Mock Authorizer mockAuthorizer;
+    private @Mock ChannelAuthorizer mockChannelAuthorizer;
     private @Mock ConnectionEventListener mockConnectionEventListener;
     private @Mock ServerHandshake mockServerHandshake;
     private @Mock Factory factory;
@@ -57,7 +57,7 @@ public class EndToEndTest {
 
     @Before
     public void setUp() throws Exception {
-        pusherOptions = new PusherOptions().setAuthorizer(mockAuthorizer).setUseTLS(false);
+        pusherOptions = new PusherOptions().setChannelAuthorizer(mockChannelAuthorizer).setUseTLS(false);
 
         connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, pusherOptions.getMaxReconnectionAttempts(),
                 pusherOptions.getMaxReconnectGapInSeconds(), proxy, factory);
@@ -99,7 +99,7 @@ public class EndToEndTest {
                 .thenCallRealMethod();
         when(factory.newPublicChannel(anyString())).thenCallRealMethod();
 
-        when(mockAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
+        when(mockChannelAuthorizer.authorize(anyString(), anyString())).thenReturn("{\"auth\":\"" + AUTH_KEY + "\"}");
 
         pusher = new Pusher(API_KEY, pusherOptions, factory);
     }
@@ -134,20 +134,20 @@ public class EndToEndTest {
     public void testForQueuedSubscriptionsAuthorizerIsNotCalledUntilTimeToSubscribe() {
 
         pusher.subscribePrivate(PRIVATE_CHANNEL_NAME);
-        verify(mockAuthorizer, never()).authorize(anyString(), anyString());
+        verify(mockChannelAuthorizer, never()).authorize(anyString(), anyString());
 
         establishConnection();
-        verify(mockAuthorizer).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
+        verify(mockChannelAuthorizer).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
     }
 
     @Test
     public void testSubscriptionsAreResubscribedWithFreshAuthTokensEveryTimeTheConnectionComesUp() {
 
         pusher.subscribePrivate(PRIVATE_CHANNEL_NAME);
-        verify(mockAuthorizer, never()).authorize(anyString(), anyString());
+        verify(mockChannelAuthorizer, never()).authorize(anyString(), anyString());
 
         establishConnection();
-        verify(mockAuthorizer).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
+        verify(mockChannelAuthorizer).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
         testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
         testWebsocket.assertNumberOfMessagesSentIs(1);
 
@@ -156,7 +156,7 @@ public class EndToEndTest {
         testWebsocket
                 .onMessage("{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"23048.689386\\\"}\"}");
 
-        verify(mockAuthorizer, times(2)).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
+        verify(mockChannelAuthorizer, times(2)).authorize(eq(PRIVATE_CHANNEL_NAME), anyString());
         testWebsocket.assertLatestMessageWas(OUTGOING_SUBSCRIBE_PRIVATE_MESSAGE);
         testWebsocket.assertNumberOfMessagesSentIs(2);
     }

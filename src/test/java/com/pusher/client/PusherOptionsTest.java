@@ -21,6 +21,8 @@ public class PusherOptionsTest {
 
     private PusherOptions pusherOptions;
     private @Mock Authorizer mockAuthorizer;
+    private @Mock ChannelAuthorizer mockChannelAuthorizer;
+    private @Mock UserAuthenticator mockUserAuthenticator;
 
     @Before
     public void setUp() {
@@ -46,6 +48,29 @@ public class PusherOptionsTest {
     public void testAuthorizerCanBeSet() {
         pusherOptions.setAuthorizer(mockAuthorizer);
         assertSame(mockAuthorizer, pusherOptions.getAuthorizer());
+        assertSame(mockAuthorizer, pusherOptions.getChannelAuthorizer());
+    }
+
+    @Test
+    public void testChannelAuthorizerIsInitiallyNull() {
+        assertNull(pusherOptions.getChannelAuthorizer());
+    }
+
+    @Test
+    public void testChannelAuthorizerCanBeSet() {
+        pusherOptions.setChannelAuthorizer(mockChannelAuthorizer);
+        assertSame(mockChannelAuthorizer, pusherOptions.getChannelAuthorizer());
+    }
+
+    @Test
+    public void testUserAuthenticatorIsInitiallyNull() {
+        assertNull(pusherOptions.getUserAuthenticator());
+    }
+
+    @Test
+    public void testUserAuthenticatorBeSet() {
+        pusherOptions.setUserAuthenticator(mockUserAuthenticator);
+        assertSame(mockUserAuthenticator, pusherOptions.getUserAuthenticator());
     }
 
     @Test
@@ -63,6 +88,16 @@ public class PusherOptionsTest {
     @Test
     public void testSetAuthorizerReturnsSelf() {
         assertSame(pusherOptions, pusherOptions.setAuthorizer(mockAuthorizer));
+    }
+
+    @Test
+    public void testSetChannelAuthorizerReturnsSelf() {
+        assertSame(pusherOptions, pusherOptions.setChannelAuthorizer(mockChannelAuthorizer));
+    }
+
+    @Test
+    public void testSetUserAuthenticatorReturnsSelf() {
+        assertSame(pusherOptions, pusherOptions.setUserAuthenticator(mockUserAuthenticator));
     }
 
     @Test

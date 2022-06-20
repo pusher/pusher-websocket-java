@@ -47,7 +47,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     public void setUp() {
         super.setUp();
         channel.setEventListener(mockEventListener);
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "," + AUTH_RESPONSE_CHANNEL_DATA + "}");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "," + AUTH_RESPONSE_CHANNEL_DATA + "}");
     }
 
     @Test
@@ -63,7 +63,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
     @Test
     public void testReturnsCorrectSubscribeMessageWhenNumericId() {
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(
                 "{" + AUTH_RESPONSE_NUMERIC_ID + "," + AUTH_RESPONSE_NUMERIC_ID_CHANNEL_DATA + "}");
 
         final String message = channel.toSubscribeMessage();
@@ -269,7 +269,7 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
 
     @Override
     protected ChannelImpl newInstance(final String channelName) {
-        return new PresenceChannelImpl(mockConnection, channelName, mockAuthorizer, factory);
+        return new PresenceChannelImpl(mockConnection, channelName, mockChannelAuthorizer, factory);
     }
 
     @Override

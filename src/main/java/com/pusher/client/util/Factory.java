@@ -10,8 +10,10 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.net.ssl.SSLException;
 
-import com.pusher.client.Authorizer;
+import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.UserAuthenticator;
+import com.pusher.client.Pusher;
 import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.PrivateEncryptedChannelImpl;
@@ -84,21 +86,21 @@ public class Factory {
     }
 
     public PrivateChannelImpl newPrivateChannel(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer) {
-        return new PrivateChannelImpl(connection, channelName, authorizer, this);
+            final ChannelAuthorizer channelAuthorizer) {
+        return new PrivateChannelImpl(connection, channelName, channelAuthorizer, this);
     }
 
     public PrivateEncryptedChannelImpl newPrivateEncryptedChannel(
             final InternalConnection connection,
             final String channelName,
-            final Authorizer authorizer) {
-        return new PrivateEncryptedChannelImpl(connection, channelName, authorizer, this,
+            final ChannelAuthorizer channelAuthorizer) {
+        return new PrivateEncryptedChannelImpl(connection, channelName, channelAuthorizer, this,
                 new SecretBoxOpenerFactory());
     }
 
     public PresenceChannelImpl newPresenceChannel(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer) {
-        return new PresenceChannelImpl(connection, channelName, authorizer, this);
+            final ChannelAuthorizer channelAuthorizer) {
+        return new PresenceChannelImpl(connection, channelName, channelAuthorizer, this);
     }
 
     public synchronized ChannelManager getChannelManager() {

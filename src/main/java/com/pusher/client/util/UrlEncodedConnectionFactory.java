@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Form URL-Encoded Connection Factory
  *
- * Allows HttpAuthorizer to write URL parameters to the connection
+ * Allows HttpChannelAuthorizer to write URL parameters to the connection
  */
 public class UrlEncodedConnectionFactory extends ConnectionFactory {
 
@@ -42,8 +42,10 @@ public class UrlEncodedConnectionFactory extends ConnectionFactory {
     public String getBody() {
         final StringBuffer urlParameters = new StringBuffer();
         try {
-            urlParameters.append("channel_name=").append(URLEncoder.encode(getChannelName(), getCharset()));
-            urlParameters.append("&socket_id=").append(URLEncoder.encode(getSocketId(), getCharset()));
+            urlParameters.append("socket_id=").append(URLEncoder.encode(getSocketId(), getCharset()));
+            if (getChannelName() != null) {
+                urlParameters.append("&channel_name=").append(URLEncoder.encode(getChannelName(), getCharset()));
+            }
 
             // Adding extra parameters supplied to be added to query string.
             for (final String parameterName : mQueryStringParameters.keySet()) {

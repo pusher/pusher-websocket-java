@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import com.pusher.client.AuthorizationFailureException;
-import com.pusher.client.Authorizer;
+import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannel;
 import com.pusher.client.channel.PrivateChannelEventListener;
@@ -21,15 +21,15 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     private static final Gson GSON = new Gson();
     private static final String CLIENT_EVENT_PREFIX = "client-";
     private final InternalConnection connection;
-    private final Authorizer authorizer;
+    private final ChannelAuthorizer channelAuthorizer;
 
     protected String channelData;
 
     public PrivateChannelImpl(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer, final Factory factory) {
+            final ChannelAuthorizer channelAuthorizer, final Factory factory) {
         super(channelName, factory);
         this.connection = connection;
-        this.authorizer = authorizer;
+        this.channelAuthorizer = channelAuthorizer;
     }
 
     /* PrivateChannel implementation */
@@ -70,14 +70,14 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
         super.bind(eventName, listener);
     }
 
-    private String authenticate() {
+    private String authorize() {
         try {
-            final AuthResponse authResponse = GSON.fromJson(getAuthResponse(), AuthResponse.class);
+            final AuthResponse authResponse = GSON.fromJson(getAuthorizationResponse(), AuthResponse.class);
             channelData = (String) authResponse.getChannelData();
 
             if (authResponse.getAuth() == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields expected " +
-                        "from the Authorizer, expected an auth and shared_secret.");
+                        "from the ChannelAuthorizer, expected an auth and shared_secret.");
             } else {
                 return authResponse.getAuth();
             }
@@ -89,7 +89,7 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     @Override
     public String toSubscribeMessage() {
         return GSON.toJson(
-                new SubscribeMessage(name, authenticate(), channelData));
+                new SubscribeMessage(name, authorize(), channelData));
     }
 
     @Override
@@ -100,12 +100,9 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
         };
     }
 
-    /**
-     * Protected access because this is also used by PresenceChannelImpl.
-     */
-    protected String getAuthResponse() {
+    private String getAuthorizationResponse() {
         final String socketId = connection.getSocketId();
-        return authorizer.authorize(getName(), socketId);
+        return channelAuthorizer.authorize(getName(), socketId);
     }
 
     @Override

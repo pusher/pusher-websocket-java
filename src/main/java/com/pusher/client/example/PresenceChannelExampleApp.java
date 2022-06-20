@@ -10,7 +10,7 @@ import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.User;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionStateChange;
-import com.pusher.client.util.HttpAuthorizer;
+import com.pusher.client.util.HttpChannelAuthorizer;
 
 /*
 This app demonstrates how to use Presence Channels.
@@ -32,7 +32,7 @@ public class PresenceChannelExampleApp {
     private String channelName = "my-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
-    private String authorizationEndpoint = "http://localhost:3030/pusher/auth";
+    private String channelAuthorizationEndpoint = "http://localhost:3030/pusher/auth";
 
     private final PresenceChannel channel;
 
@@ -50,14 +50,14 @@ public class PresenceChannelExampleApp {
             case 1: channelsKey = args[0];
         }
 
-        // create a HttpAuthorizer that points to your authorization server
-        final HttpAuthorizer authorizer = new HttpAuthorizer(authorizationEndpoint);
+        // create a HttpChannelAuthorizer that points to your channel authorization server
+        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(channelAuthorizationEndpoint);
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
                 .setUseTLS(true)
                 .setCluster(cluster)
-                .setAuthorizer(authorizer);
+                .setChannelAuthorizer(channelAuthorizer);
         Pusher pusher = new Pusher(channelsKey, options);
 
         // set up a ConnectionEventListener to listen for connection changes to Pusher
@@ -95,7 +95,7 @@ public class PresenceChannelExampleApp {
             @Override
             public void onAuthenticationFailure(String message, Exception e) {
                 System.out.println(String.format(
-                        "Authentication failure due to [%s], exception was [%s]", message, e));
+                        "Authorization failure due to [%s], exception was [%s]", message, e));
             }
 
             @Override

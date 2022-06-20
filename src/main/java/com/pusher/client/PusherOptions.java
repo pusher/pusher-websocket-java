@@ -37,6 +37,8 @@ public class PusherOptions {
     private boolean useTLS = true;
     private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
+    private UserAuthenticator userAuthenticator;
+    private ChannelAuthorizer channelAuthorizer;
     private Authorizer authorizer;
     private Proxy proxy = Proxy.NO_PROXY;
     private int maxReconnectionAttempts = MAX_RECONNECTION_ATTEMPTS;
@@ -80,26 +82,66 @@ public class PusherOptions {
     }
 
     /**
-     * Gets the authorizer to be used when authenticating private and presence
+     * Gets the user authenticator to be used when signing in.
+     *
+     * @return the user authenticator
+     */
+    public UserAuthenticator getUserAuthenticator() {
+        return userAuthenticator;
+    }
+
+    /**
+     * Sets the user authenticator to be used when signing in.
+     *
+     * @param userAuthenticator
+     *            The user authenticator to be used.
+     * @return this, for chaining
+     */
+    public PusherOptions setUserAuthenticator(final UserAuthenticator userAuthenticator) {
+        this.userAuthenticator = userAuthenticator;
+        return this;
+    }
+
+    /**
+     * Gets the channel authorizer to be used when authorizing private and presence
      * channels.
      *
-     * @return the authorizer
+     * @return the channel authorizer
      */
+    public ChannelAuthorizer getChannelAuthorizer() {
+        return channelAuthorizer;
+    }
+
+    /**
+     * Sets the channel authorizer to be used when authorizing private and presence
+     * channels.
+     *
+     * @param channelAuthorizer
+     *            The channel authorizer to be used.
+     * @return this, for chaining
+     */
+    public PusherOptions setChannelAuthorizer(final ChannelAuthorizer channelAuthorizer) {
+        this.channelAuthorizer = channelAuthorizer;
+        return this;
+    }
+
+    /**
+     * @deprecated
+     * Please use getChannelauthorizer
+     */
+    @Deprecated
     public Authorizer getAuthorizer() {
         return authorizer;
     }
 
     /**
-     * Sets the authorizer to be used when authenticating private and presence
-     * channels.
-     *
-     * @param authorizer
-     *            The authorizer to be used.
-     * @return this, for chaining
+     * @deprecated
+     * Please use setChannelauthorizer
      */
+    @Deprecated
     public PusherOptions setAuthorizer(final Authorizer authorizer) {
         this.authorizer = authorizer;
-        return this;
+        return setChannelAuthorizer(authorizer);
     }
 
     /**

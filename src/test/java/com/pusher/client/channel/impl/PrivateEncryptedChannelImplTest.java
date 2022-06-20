@@ -1,7 +1,7 @@
 package com.pusher.client.channel.impl;
 
 import com.pusher.client.AuthorizationFailureException;
-import com.pusher.client.Authorizer;
+import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.connection.impl.InternalConnection;
@@ -39,7 +39,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     @Mock
     InternalConnection mockInternalConnection;
     @Mock
-    Authorizer mockAuthorizer;
+    ChannelAuthorizer mockChannelAuthorizer;
     @Mock
     SecretBoxOpenerFactory mockSecretBoxOpenerFactory;
 
@@ -47,17 +47,17 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     @Before
     public void setUp() {
         super.setUp();
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(AUTH_RESPONSE);
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(AUTH_RESPONSE);
     }
 
     protected PrivateEncryptedChannelImpl newInstance() {
         return new PrivateEncryptedChannelImpl(mockInternalConnection, getChannelName(),
-                mockAuthorizer, factory, mockSecretBoxOpenerFactory);
+                mockChannelAuthorizer, factory, mockSecretBoxOpenerFactory);
     }
 
     @Override
     protected ChannelImpl newInstance(final String channelName) {
-        return new PrivateEncryptedChannelImpl(mockInternalConnection, channelName, mockAuthorizer,
+        return new PrivateEncryptedChannelImpl(mockInternalConnection, channelName, mockChannelAuthorizer,
                 factory, mockSecretBoxOpenerFactory);
     }
 
@@ -115,8 +115,8 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
      */
 
     @Test
-    public void authenticationSucceedsGivenValidAuthorizer() {
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+    public void authenticationSucceedsGivenValidChannelAuthorizer() {
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE);
 
         PrivateEncryptedChannelImpl channel = newInstance();
@@ -130,7 +130,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Test(expected = AuthorizationFailureException.class)
     public void authenticationThrowsExceptionIfNoAuthKey() {
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_MISSING_AUTH);
 
         PrivateEncryptedChannelImpl channel = newInstance();
@@ -140,7 +140,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Test(expected = AuthorizationFailureException.class)
     public void authenticationThrowsExceptionIfNoSharedSecret() {
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_MISSING_SHARED_SECRET);
 
         PrivateEncryptedChannelImpl channel = newInstance();
@@ -150,7 +150,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Test(expected = AuthorizationFailureException.class)
     public void authenticationThrowsExceptionIfMalformedJson() {
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INVALID_JSON);
 
         PrivateEncryptedChannelImpl channel = newInstance();
@@ -166,11 +166,11 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection,
                 getChannelName(),
-                mockAuthorizer,
+                mockChannelAuthorizer,
                 factory,
                 mockSecretBoxOpenerFactory);
 
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE);
         when(mockSecretBoxOpenerFactory.create(any()))
                 .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
@@ -195,11 +195,11 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection,
                 getChannelName(),
-                mockAuthorizer,
+                mockChannelAuthorizer,
                 factory,
                 mockSecretBoxOpenerFactory);
 
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE);
         when(mockSecretBoxOpenerFactory.create(any()))
                 .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
@@ -225,11 +225,11 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection,
                 getChannelName(),
-                mockAuthorizer,
+                mockChannelAuthorizer,
                 factory,
                 mockSecretBoxOpenerFactory);
 
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE);
         when(mockSecretBoxOpenerFactory.create(any()))
                 .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
@@ -260,11 +260,11 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection,
                 getChannelName(),
-                mockAuthorizer,
+                mockChannelAuthorizer,
                 factory,
                 mockSecretBoxOpenerFactory);
 
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET);
         when(mockSecretBoxOpenerFactory.create(any()))
@@ -288,11 +288,11 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection,
                 getChannelName(),
-                mockAuthorizer,
+                mockChannelAuthorizer,
                 factory,
                 mockSecretBoxOpenerFactory);
 
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE);
         when(mockSecretBoxOpenerFactory.create(any()))
@@ -319,11 +319,11 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection,
                 getChannelName(),
-                mockAuthorizer,
+                mockChannelAuthorizer,
                 factory,
                 mockSecretBoxOpenerFactory);
 
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE);
@@ -360,11 +360,11 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         PrivateEncryptedChannelImpl channel = new PrivateEncryptedChannelImpl(
                 mockInternalConnection,
                 getChannelName(),
-                mockAuthorizer,
+                mockChannelAuthorizer,
                 factory,
                 mockSecretBoxOpenerFactory);
 
-        when(mockAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET);
