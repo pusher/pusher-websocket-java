@@ -18,6 +18,7 @@ public class ChannelImpl implements InternalChannel {
     protected final Gson GSON;
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
+    protected static final String SUBSCRIPTION_COUNT_EVENT = "pusher_internal:subscription_count";
     protected final String name;
     private Set<SubscriptionEventListener> globalListeners = new HashSet<SubscriptionEventListener>();
     private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
@@ -122,6 +123,8 @@ public class ChannelImpl implements InternalChannel {
 
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
+        } else if (event.equals(SUBSCRIPTION_COUNT_EVENT)) {
+            onMessage("pusher:subscription_count", message)
         } else {
             final Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
             if (listeners != null) {
