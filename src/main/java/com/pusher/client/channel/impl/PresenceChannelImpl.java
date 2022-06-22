@@ -3,7 +3,7 @@ package com.pusher.client.channel.impl;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.pusher.client.AuthorizationFailureException;
-import com.pusher.client.Authorizer;
+import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
@@ -34,8 +34,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     private String myUserID;
 
     public PresenceChannelImpl(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer, final Factory factory) {
-        super(connection, channelName, authorizer, factory);
+            final ChannelAuthorizer channelAuthorizer, final Factory factory) {
+        super(connection, channelName, channelAuthorizer, factory);
     }
 
     /* PresenceChannel implementation */
@@ -171,15 +171,15 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
             ChannelData data = GSON.fromJson(channelDataString, ChannelData.class);
 
             if (data.getUserId() == null) {
-                throw new AuthorizationFailureException("Invalid response from Authorizer: no user_id key in channel_data object: " + channelDataString);
+                throw new AuthorizationFailureException("Invalid response from ChannelAuthorizer: no user_id key in channel_data object: " + channelDataString);
             }
 
             return data.getUserId();
 
         } catch (final JsonSyntaxException e) {
-            throw new AuthorizationFailureException("Invalid response from Authorizer: unable to parse channel_data object: " + channelDataString, e);
+            throw new AuthorizationFailureException("Invalid response from ChannelAuthorizer: unable to parse channel_data object: " + channelDataString, e);
         } catch (final NullPointerException e) {
-            throw new AuthorizationFailureException("Invalid response from Authorizer: no user_id key in channel_data object: " + channelDataString);
+            throw new AuthorizationFailureException("Invalid response from ChannelAuthorizer: no user_id key in channel_data object: " + channelDataString);
         }
 
     }

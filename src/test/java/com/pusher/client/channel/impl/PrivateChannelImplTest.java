@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pusher.client.AuthorizationFailureException;
-import com.pusher.client.Authorizer;
+import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateChannelEventListener;
@@ -26,13 +26,13 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Mock
     protected InternalConnection mockConnection;
     @Mock
-    protected Authorizer mockAuthorizer;
+    protected ChannelAuthorizer mockChannelAuthorizer;
 
     @Override
     @Before
     public void setUp() {
         super.setUp();
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "}");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "}");
     }
 
     @Test
@@ -86,7 +86,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
 
     @Test
     public void testReturnsCorrectSubscribeMessageWithChannelData() {
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(
                 "{" + AUTH_RESPONSE + "," + AUTH_RESPONSE_CHANNEL_DATA + "}");
 
         assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{"
@@ -98,26 +98,26 @@ public class PrivateChannelImplTest extends ChannelImplTest {
 
     @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerThrowsException() {
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenThrow(
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenThrow(
                 new AuthorizationFailureException("Unable to contact auth server"));
         channel.toSubscribeMessage();
     }
 
     @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsBasicString() {
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("I'm a string");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("I'm a string");
         channel.toSubscribeMessage();
     }
 
     @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsInvalidJSON() {
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{\"auth\":\"");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{\"auth\":\"");
         channel.toSubscribeMessage();
     }
 
     @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsJSONWithoutAnAuthToken() {
-        when(mockAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{\"fish\":\"chips\"");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{\"fish\":\"chips\"");
         channel.toSubscribeMessage();
     }
 
@@ -210,7 +210,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
 
     @Override
     protected ChannelImpl newInstance(final String channelName) {
-        return new PrivateChannelImpl(mockConnection, channelName, mockAuthorizer, factory);
+        return new PrivateChannelImpl(mockConnection, channelName, mockChannelAuthorizer, factory);
     }
 
     @Override

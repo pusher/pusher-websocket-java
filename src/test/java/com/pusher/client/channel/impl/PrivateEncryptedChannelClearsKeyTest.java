@@ -2,7 +2,7 @@ package com.pusher.client.channel.impl;
 
 import static org.mockito.Mockito.*;
 
-import com.pusher.client.Authorizer;
+import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -27,7 +27,7 @@ public class PrivateEncryptedChannelClearsKeyTest {
     @Mock
     InternalConnection mockInternalConnection;
     @Mock
-    Authorizer mockAuthorizer;
+    ChannelAuthorizer mockChannelAuthorizer;
     @Mock
     Factory mockFactory;
 
@@ -40,11 +40,11 @@ public class PrivateEncryptedChannelClearsKeyTest {
 
     @Before
     public void setUp() {
-        when(mockAuthorizer.authorize(eq(CHANNEL_NAME), anyString())).thenReturn(AUTH_RESPONSE);
+        when(mockChannelAuthorizer.authorize(eq(CHANNEL_NAME), anyString())).thenReturn(AUTH_RESPONSE);
         when(mockSecretBoxOpenerFactory.create(any())).thenReturn(mockSecretBoxOpener);
 
         subject = new PrivateEncryptedChannelImpl(mockInternalConnection, CHANNEL_NAME,
-                mockAuthorizer, mockFactory, mockSecretBoxOpenerFactory);
+                mockChannelAuthorizer, mockFactory, mockSecretBoxOpenerFactory);
     }
 
     @Test

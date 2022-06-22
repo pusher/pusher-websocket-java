@@ -148,15 +148,15 @@ PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
-If you are going to use [private](https://pusher.com/docs/channels/using_channels/private-channels) or [presence](https://pusher.com/docs/channels/using_channels/presence-channels) channels then you will need to provide an `Authorizer` to be used when authenticating subscriptions. In order to do this you need to pass in a `PusherOptions` object which has had an `Authorizer` set.
+If you are going to use [private](https://pusher.com/docs/channels/using_channels/private-channels) or [presence](https://pusher.com/docs/channels/using_channels/presence-channels) channels then you will need to provide an `ChannelAuthorizer` to be used when authenticating subscriptions. In order to do this you need to pass in a `PusherOptions` object which has had an `ChannelAuthorizer` set.
 
 ```java
-HttpAuthorizer authorizer = new HttpAuthorizer("http://example.com/some_auth_endpoint");
-PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER).setAuthorizer(authorizer);
+HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer("http://example.com/some_auth_endpoint");
+PusherOptions options = new PusherOptions().setCluster(YOUR_APP_CLUSTER).setChannelAuthorizer(channelAuthorizer);
 Pusher pusher = new Pusher(YOUR_APP_KEY, options);
 ```
 
-See the documentation on [Authenticating Users](https://pusher.com/docs/channels/server_api/authenticating-users) for more information.
+See the documentation on [Authorizing Users](https://pusher.com/docs/channels/server_api/authorizing-users) for more information.
 
 If you need finer control over the endpoint then the setHost, setWsPort and setWssPort methods can be employed.
 ## Connecting
@@ -178,7 +178,7 @@ methods you can call.
 | Method                      | Parameter         | Description                                                                                                                                   |
 |-----------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | setEncrypted                | Boolean           | Sets whether the connection should be made with TLS or not.                                                                                   |
-| setAuthorizer               | Pusher Authorizer | Sets the authorizer to be used when authenticating private and presence channels.                                                             |
+| setChannelAuthorizer        | ChannelAuthorizer | Sets the channel authorizer to be used when authorizing private and presence channels.                                                        |
 | setHost                     | String            | The host to which connections will be made.                                                                                                   |
 | setWsPort                   | int               | The port to which unencrypted connections will be made. Automatically set correctly.                                                          |
 | setWssPort                  | int               | The port to which encrypted connections will be made. Automatically set correctly.                                                            |
@@ -260,9 +260,9 @@ Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
 
 ### Private channels
 
-It's possible to subscribe to [private channels](https://pusher.com/docs/channels/using_channels/private-channels) that provide a mechanism for [authenticating channel subscriptions](https://pusher.com/docs/channels/server_api/authenticating-users). In order to do this you need to provide an `Authorizer` when creating the `Pusher` instance (see **The Pusher constructor** above).
+It's possible to subscribe to [private channels](https://pusher.com/docs/channels/using_channels/private-channels) that provide a mechanism for [authorizing channel subscriptions](https://pusher.com/docs/channels/server_api/authorizing-users). In order to do this you need to provide a `ChannelAuthorizer` when creating the `Pusher` instance (see **The Pusher constructor** above).
 
-The library provides a `HttpAuthorizer` implementation of `Authorizer` which makes an HTTP `POST` request to an authenticating endpoint. However, you can implement your own authentication mechanism if required.
+The library provides a `HttpChannelAuthorizer` implementation of `ChannelAuthorizer` which makes an HTTP `POST` request to an authorization endpoint. However, you can implement your own authorization mechanism if required.
 
 Private channels are subscribed to as follows:
 
@@ -270,7 +270,7 @@ Private channels are subscribed to as follows:
 PrivateChannel privateChannel = pusher.subscribePrivate( "private-channel" );
 ```
 
-In addition to the events that are possible on public channels a private channel exposes an `onAuthenticationFailure`. This is called if the `Authorizer` does not successfully authenticate the subscription:
+In addition to the events that are possible on public channels a private channel exposes an `onAuthenticationFailure`. This is called if the `ChannelAuthorizer` does not successfully authorize the subscription:
 
 ```java
 PrivateChannel channel = pusher.subscribePrivate("private-channel",
@@ -292,7 +292,7 @@ Similar to Private channels, you can also subscribe to a
 [private encrypted channel](https://pusher.com/docs/channels/using_channels/encrypted-channels).
 This library now fully supports end-to-end encryption. This means that only you and your connected clients will be able to read your messages. Pusher cannot decrypt them.
 
-Like the private channel, you must provide your own authentication endpoint,
+Like the private channel, you must provide your own authorization endpoint,
 with your own encryption master key. There is a
 [demonstration endpoint to look at using nodejs](https://github.com/pusher/pusher-channels-auth-example#using-e2e-encryption).
 
@@ -307,10 +307,10 @@ PrivateEncryptedChannel privateEncryptedChannel =
 In addition to the events that are possible on public channels the
 `PrivateEncryptedChannelEventListener` also has the following methods:
 * `onAuthenticationFailure(String message, Exception e)` - This is called if
-the `Authorizer` does not successfully authenticate the subscription:
+the `ChannelAuthorizer` does not successfully authorize the subscription:
 * `onDecryptionFailure(String event, String reason);` - This is called if the message cannot be
 decrypted. The decryption will attempt to refresh the shared secret key once
-from the `Authorizer`.
+from the `ChannelAuthorizer`.
 
 There is a
 [working example in the repo](https://github.com/pusher/pusher-websocket-java/blob/master/src/main/java/com/pusher/client/example/PrivateEncryptedChannelExampleApp.java)
@@ -319,7 +319,7 @@ which you can use with the
 
 ### Presence channels
 
-[Presence channels](https://pusher.com/docs/channels/using_channels/presence-channels) are private channels which provide additional events exposing who is currently subscribed to the channel. Since they extend private channels they also need to be authenticated (see [authenticating channel subscriptions](https://pusher.com/docs/channels/server_api/authenticating-users)).
+[Presence channels](https://pusher.com/docs/channels/using_channels/presence-channels) are private channels which provide additional events exposing who is currently subscribed to the channel. Since they extend private channels they also need to be authorized (see [authorizing channel subscriptions](https://pusher.com/docs/channels/server_api/authorizing-users)).
 
 Presence channels can be subscribed to as follows:
 
@@ -385,11 +385,11 @@ Gson gson = new Gson();
 UserInfo info = gson.fromJson(jsonInfo, UserInfo.class);
 ```
 
-For more information on defining the user id and user info on the server see [Implementing the auth endpoint for a presence channel](https://pusher.com/docs/channels/server_api/authenticating-users#implementing-the-auth-endpoint-for-a-presence-channel) documentation.
+For more information on defining the user id and user info on the server see [Implementing the authorization endpoint for a presence channel](https://pusher.com/docs/channels/server_api/authorizing-users#implementing-the-authorization-endpoint-for-a-presence-channel) documentation.
 
 #### Client event authenticity
 
-Channels now provides a 'user-id' with client events sent from the server. With presence channels, your authentication endpoint provides your user with a user-id. Previously, it was up to you to include this user-id in every client-event triggered by your clients. Now, when a client of yours triggers a client event, Channels will append their user-id to their triggered message, so that the other clients in the channel receive it. This allows you to trust that a given user really did trigger a given payload.
+Channels now provides a 'user-id' with client events sent from the server. With presence channels, your authorization endpoint provides your user with a user-id. Previously, it was up to you to include this user-id in every client-event triggered by your clients. Now, when a client of yours triggers a client event, Channels will append their user-id to their triggered message, so that the other clients in the channel receive it. This allows you to trust that a given user really did trigger a given payload.
 
 If you’d like to make use of this feature, you’ll need to extract the user-id from the message delivered by Channels. To do this, call getUserId() on the event payload your event handler gets called with, like so:
 
@@ -503,7 +503,7 @@ public class Example implements ChannelEventListener {
 
 ## Triggering events
 
-Once a [private](https://pusher.com/docs/channels/using_channels/private-channels) or [presence](https://pusher.com/docs/channels/using_channels/presence-channels) subscription has been authorized (see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users)) and the subscription has succeeded, it is possible to trigger events on those channels.
+Once a [private](https://pusher.com/docs/channels/using_channels/private-channels) or [presence](https://pusher.com/docs/channels/using_channels/presence-channels) subscription has been authorized (see [authorizing users](https://pusher.com/docs/channels/server_api/authorizing-users)) and the subscription has succeeded, it is possible to trigger events on those channels.
 
 ```java
 channel.trigger("client-myEvent", "{\"myName\":\"Bob\"}");
@@ -539,7 +539,7 @@ You can access the value **once the connection has been established** as follows
 String socketId = pusher.getConnection().getSocketId();
 ```
 
-For more information on how and why there is a `socket_id` see the documentation on [authenticating users](ttps://pusher.com/docs/channels/server_api/authenticating-users) and [excluding recipients](https://pusher.com/docs/channels/server_api/excluding-event-recipients).
+For more information on how and why there is a `socket_id` see the documentation on [authorizing users](ttps://pusher.com/docs/channels/server_api/authorizing-users) and [excluding recipients](https://pusher.com/docs/channels/server_api/excluding-event-recipients).
 
 ## Helper Methods
 

@@ -2,7 +2,7 @@ package com.pusher.client.util;
 
 /**
  * Abstract factory to be used for
- * building HttpAuthorizer connections
+ * building HttpChannelAuthorizer connections
  */
 public abstract class ConnectionFactory {
     private String channelName;

@@ -2,7 +2,7 @@ package com.pusher.client.channel.impl;
 
 import com.google.gson.JsonSyntaxException;
 import com.pusher.client.AuthorizationFailureException;
-import com.pusher.client.Authorizer;
+import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
@@ -27,7 +27,7 @@ import java.util.Set;
 public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateEncryptedChannel {
 
     private final InternalConnection connection;
-    private final Authorizer authorizer;
+    private final ChannelAuthorizer channelAuthorizer;
     private SecretBoxOpenerFactory secretBoxOpenerFactory;
     private SecretBoxOpener secretBoxOpener;
 
@@ -50,12 +50,12 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     public PrivateEncryptedChannelImpl(final InternalConnection connection,
                                        final String channelName,
-                                       final Authorizer authorizer,
+                                       final ChannelAuthorizer channelAuthorizer,
                                        final Factory factory,
                                        final SecretBoxOpenerFactory secretBoxOpenerFactory) {
         super(channelName, factory);
         this.connection = connection;
-        this.authorizer = authorizer;
+        this.channelAuthorizer = channelAuthorizer;
         this.secretBoxOpenerFactory = secretBoxOpenerFactory;
     }
 
@@ -79,11 +79,11 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
 
     private String authenticate() {
         try {
-            final AuthResponse authResponse = GSON.fromJson(getAuthResponse(), AuthResponse.class);
+            final AuthResponse authResponse = GSON.fromJson(getAuthorizationResponse(), AuthResponse.class);
             if (authResponse.getAuth() == null
                     || authResponse.getSharedSecret() == null) {
                 throw new AuthorizationFailureException("Didn't receive all the fields expected " +
-                        "from the Authorizer, expected an auth and shared_secret.");
+                        "from the ChannelAuthorizer, expected an auth and shared_secret.");
             } else {
                 createSecretBoxOpener(Base64.decode(authResponse.getSharedSecret()));
                 return authResponse.getAuth();
@@ -176,9 +176,9 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
                 disposeSecretBoxOpenerOnDisconnectedListener);
     }
 
-    private String getAuthResponse() {
+    private String getAuthorizationResponse() {
         final String socketId = connection.getSocketId();
-        return authorizer.authorize(getName(), socketId);
+        return channelAuthorizer.authorize(getName(), socketId);
     }
 
     @Override

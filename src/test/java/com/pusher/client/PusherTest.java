@@ -22,7 +22,7 @@ import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.HttpAuthorizer;
+import com.pusher.client.util.HttpChannelAuthorizer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PusherTest {
@@ -34,7 +34,7 @@ public class PusherTest {
 
     private Pusher pusher;
     private PusherOptions options;
-    private Authorizer authorizer;
+    private ChannelAuthorizer channelAuthorizer;
     private @Mock InternalConnection mockConnection;
     private @Mock ChannelManager mockChannelManager;
     private @Mock ConnectionEventListener mockConnectionEventListener;
@@ -48,15 +48,15 @@ public class PusherTest {
 
     @Before
     public void setUp() {
-        authorizer = new HttpAuthorizer("http://www.example.com");
-        options = new PusherOptions().setAuthorizer(authorizer);
+        channelAuthorizer = new HttpChannelAuthorizer("http://www.example.com");
+        options = new PusherOptions().setChannelAuthorizer(channelAuthorizer);
 
         when(factory.getConnection(eq(API_KEY), any(PusherOptions.class))).thenReturn(mockConnection);
         when(factory.getChannelManager()).thenReturn(mockChannelManager);
         when(factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
-        when(factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, authorizer))
+        when(factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, channelAuthorizer))
                 .thenReturn(mockPrivateChannel);
-        when(factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, authorizer)).thenReturn(
+        when(factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, channelAuthorizer)).thenReturn(
                 mockPresenceChannel);
         doAnswer(new Answer() {
             @Override
@@ -226,9 +226,9 @@ public class PusherTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testSubscribePresenceIfPusherOptionsHaveBeenPassedButNoAuthorizerHasBeenSetThrowsException() {
+    public void testSubscribePresenceIfPusherOptionsHaveBeenPassedButNoChannelAuthorizerHasBeenSetThrowsException() {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-        options.setAuthorizer(null);
+        options.setChannelAuthorizer(null);
         pusher = new Pusher(API_KEY, options);
 
         pusher.subscribePresence(PRESENCE_CHANNEL_NAME, mockPresenceChannelEventListener);
@@ -277,9 +277,9 @@ public class PusherTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testSubscribePrivateIfPusherOptionsHaveBeenPassedButNoAuthorizerHasBeenSetThrowsException() {
+    public void testSubscribePrivateIfPusherOptionsHaveBeenPassedButNoChannelAuthorizerHasBeenSetThrowsException() {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-        options.setAuthorizer(null);
+        options.setChannelAuthorizer(null);
         pusher = new Pusher(API_KEY, options);
 
         pusher.subscribePrivate(PRIVATE_CHANNEL_NAME, mockPrivateChannelEventListener);
