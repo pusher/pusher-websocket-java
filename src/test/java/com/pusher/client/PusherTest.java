@@ -21,8 +21,12 @@ import com.pusher.client.channel.impl.PrivateChannelImpl;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.user.impl.InternalUser;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.HttpChannelAuthorizer;
+import com.pusher.client.util.HttpUserAuthenticator;
+
+import java.util.function.BiConsumer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PusherTest {
@@ -35,6 +39,7 @@ public class PusherTest {
     private Pusher pusher;
     private PusherOptions options;
     private ChannelAuthorizer channelAuthorizer;
+    private @Mock InternalUser mockUser;
     private @Mock InternalConnection mockConnection;
     private @Mock ChannelManager mockChannelManager;
     private @Mock ConnectionEventListener mockConnectionEventListener;
@@ -49,15 +54,16 @@ public class PusherTest {
     @Before
     public void setUp() {
         channelAuthorizer = new HttpChannelAuthorizer("http://www.example.com");
-        options = new PusherOptions().setChannelAuthorizer(channelAuthorizer);
+        options = new PusherOptions().setChannelAuthorizer(channelAuthorizer).setUserAuthenticator(new HttpUserAuthenticator("http://user-auth.com"));
 
-        when(factory.getConnection(eq(API_KEY), any(PusherOptions.class))).thenReturn(mockConnection);
+        when(factory.getConnection(eq(API_KEY), any(PusherOptions.class), any(BiConsumer.class))).thenReturn(mockConnection);
         when(factory.getChannelManager()).thenReturn(mockChannelManager);
         when(factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
         when(factory.newPrivateChannel(mockConnection, PRIVATE_CHANNEL_NAME, channelAuthorizer))
                 .thenReturn(mockPrivateChannel);
         when(factory.newPresenceChannel(mockConnection, PRESENCE_CHANNEL_NAME, channelAuthorizer)).thenReturn(
                 mockPresenceChannel);
+        when(factory.newUser(eq(mockConnection), any(UserAuthenticator.class))).thenReturn(mockUser);
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -310,4 +316,17 @@ public class PusherTest {
         verify(mockChannelManager).unsubscribeFrom(PUBLIC_CHANNEL_NAME);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testSigninThrowsIfUserAuthenticatorIsNotSet() {
+        options.setUserAuthenticator(null);
+        pusher = new Pusher(API_KEY, options);
+        pusher.signin();
+    }
+
+    @Test
+    public void testSigninCallsUserSignin() {
+        doNothing().when(mockUser).signin();
+        pusher.signin();
+        verify(mockUser).signin();
+    }
 }

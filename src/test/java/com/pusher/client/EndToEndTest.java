@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.Proxy;
 import java.net.URI;
+import java.util.function.BiConsumer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -60,7 +61,7 @@ public class EndToEndTest {
         pusherOptions = new PusherOptions().setChannelAuthorizer(mockChannelAuthorizer).setUseTLS(false);
 
         connection = new WebSocketConnection(pusherOptions.buildUrl(API_KEY), ACTIVITY_TIMEOUT, PONG_TIMEOUT, pusherOptions.getMaxReconnectionAttempts(),
-                pusherOptions.getMaxReconnectGapInSeconds(), proxy, factory);
+                 pusherOptions.getMaxReconnectGapInSeconds(), proxy, (event, wholeMessage) -> {}, factory);
 
         doAnswer(new Answer() {
             @Override
@@ -84,7 +85,7 @@ public class EndToEndTest {
                     }
                 });
 
-        when(factory.getConnection(API_KEY, pusherOptions)).thenReturn(connection);
+        when(factory.getConnection(eq(API_KEY), eq(pusherOptions), any(BiConsumer.class))).thenReturn(connection);
 
         when(factory.getChannelManager()).thenAnswer(new Answer<ChannelManager>() {
             @Override

@@ -18,6 +18,8 @@ import com.pusher.client.connection.Connection;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.user.User;
+import com.pusher.client.user.impl.InternalUser;
 import com.pusher.client.util.Factory;
 
 /**
@@ -42,6 +44,7 @@ public class Pusher implements Client {
     private final InternalConnection connection;
     private final ChannelManager channelManager;
     private final Factory factory;
+    private final InternalUser user;
 
     /**
      * Creates a new instance of Pusher.
@@ -102,9 +105,15 @@ public class Pusher implements Client {
 
         this.pusherOptions = pusherOptions;
         this.factory = factory;
-        connection = factory.getConnection(apiKey, this.pusherOptions);
+        connection = factory.getConnection(apiKey, this.pusherOptions, this::handleEvent);
         channelManager = factory.getChannelManager();
+        user = factory.newUser(connection, pusherOptions.getUserAuthenticator());
         channelManager.setConnection(connection);
+    }
+
+    private void handleEvent(String event, String wholeMessage) {
+        user.handleEvent(event, wholeMessage);
+        channelManager.onMessage(event, wholeMessage);
     }
 
     /* Connection methods */
@@ -190,6 +199,28 @@ public class Pusher implements Client {
         if (connection.getState() == ConnectionState.CONNECTED) {
             connection.disconnect();
         }
+    }
+
+    /**
+     *
+     * @return The {@link com.pusher.client.user.User} associated with this Pusher connection.
+     */
+    public User user() {
+        return user;
+    }
+
+    /**
+     * Signs in on the Pusher connection as the current user.
+     *
+     * <p>
+     * Requires {@link PusherOptions#setUserAuthenticator} to have been called.
+     * </p>
+     *
+     * @throws IllegalStateException if no {@link UserAuthenticator} has been set.
+     */
+    public void signin() {
+        throwExceptionIfNoUserAuthenticatorHasBeenSet();
+        user.signin();
     }
 
     /* Subscription methods */
@@ -375,6 +406,13 @@ public class Pusher implements Client {
         if (pusherOptions.getChannelAuthorizer() == null) {
             throw new IllegalStateException(
                     "Cannot subscribe to a private or presence channel because no ChannelAuthorizer has been set. Call PusherOptions.setChannelAuthorizer() before connecting to Pusher");
+        }
+    }
+
+    private void throwExceptionIfNoUserAuthenticatorHasBeenSet() {
+        if (pusherOptions.getUserAuthenticator() == null) {
+            throw new IllegalStateException(
+                    "Cannot sign in because no UserAuthenticator has been set. Call PusherOptions.setUserAuthenticator() before connecting to Pusher");
         }
     }
 

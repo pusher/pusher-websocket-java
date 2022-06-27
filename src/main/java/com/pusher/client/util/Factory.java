@@ -7,11 +7,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.BiConsumer;
 
 import javax.net.ssl.SSLException;
 
 import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.PusherOptions;
+import com.pusher.client.user.impl.InternalUser;
 import com.pusher.client.UserAuthenticator;
 import com.pusher.client.Pusher;
 import com.pusher.client.channel.impl.ChannelImpl;
@@ -51,7 +53,7 @@ public class Factory {
     private ScheduledExecutorService timers;
     private static final Object eventLock = new Object();
 
-    public synchronized InternalConnection getConnection(final String apiKey, final PusherOptions options) {
+    public synchronized InternalConnection getConnection(final String apiKey, final PusherOptions options, BiConsumer<String, String> eventHandler) {
         if (connection == null) {
             try {
                 connection = new WebSocketConnection(
@@ -61,6 +63,7 @@ public class Factory {
                         options.getMaxReconnectionAttempts(),
                         options.getMaxReconnectGapInSeconds(),
                         options.getProxy(),
+                        eventHandler,
                         this);
             }
             catch (final URISyntaxException e) {
@@ -101,6 +104,10 @@ public class Factory {
     public PresenceChannelImpl newPresenceChannel(final InternalConnection connection, final String channelName,
             final ChannelAuthorizer channelAuthorizer) {
         return new PresenceChannelImpl(connection, channelName, channelAuthorizer, this);
+    }
+
+    public InternalUser newUser(InternalConnection connection, UserAuthenticator userAuthenticator) {
+        return new InternalUser(connection, userAuthenticator, this);
     }
 
     public synchronized ChannelManager getChannelManager() {

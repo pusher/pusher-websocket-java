@@ -82,7 +82,7 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
                 return authResponse.getAuth();
             }
         }  catch (JsonSyntaxException e) {
-            throw new AuthorizationFailureException("Unable to parse response from Authorizer");
+            throw new AuthorizationFailureException("Unable to parse response from ChannelAuthorizer");
         }
     }
 
