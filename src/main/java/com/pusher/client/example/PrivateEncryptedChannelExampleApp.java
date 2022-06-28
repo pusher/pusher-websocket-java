@@ -106,6 +106,12 @@ public class PrivateEncryptedChannelExampleApp {
                 System.out.println(String.format(
                         "An error was received decrypting message for event:[%s] - reason: [%s]", event, reason));
             }
+
+            @Override
+            public void onSubscriptionCountChange(String channelName, int count) {
+                System.out.println(String.format(
+                        "Count for channel [%s], changed to [%d]", channelName, count));
+            }
         };
 
         // subscribe to the channel and with the event listener for the event name
