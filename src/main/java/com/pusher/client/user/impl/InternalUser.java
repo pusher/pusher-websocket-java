@@ -117,7 +117,7 @@ public class InternalUser implements User {
         String response = userAuthenticator.authenticate(connection.getSocketId());
         try {
             AuthenticationResponse authenticationResponse = GSON.fromJson(response, AuthenticationResponse.class);
-            if (authenticationResponse.getAuth() == null && authenticationResponse.getUserData() == null) {
+            if (authenticationResponse.getAuth() == null || authenticationResponse.getUserData() == null) {
                 throw new AuthenticationFailureException("Didn't receive all the fields expected from the UserAuthenticator. Expected auth and user_data");
             }
             return authenticationResponse;
