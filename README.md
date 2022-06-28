@@ -262,7 +262,7 @@ If you wish to be informed for subscription count events, pass an implementation
 ```java
 Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
     @Override
-    public void onSubscriptionCountChange(String channelName, int count) {
+    public void onSubscriptionCountChanged(String channelName, int count) {
         System.out.println("Members in channel: " + channelName + " are: " + count);
     }
 

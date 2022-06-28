@@ -54,5 +54,5 @@ public interface ChannelEventListener extends SubscriptionEventListener {
      * @param count
      *            The latest count of subscribers on the channel.
      */
-    void onSubscriptionCountChange(String channelName, int count);
+    void onSubscriptionCountChanged(String channelName, int count);
 }

@@ -108,7 +108,7 @@ public class PrivateEncryptedChannelExampleApp {
             }
 
             @Override
-            public void onSubscriptionCountChange(String channelName, int count) {
+            public void onSubscriptionCountChanged(String channelName, int count) {
                 System.out.println(String.format(
                         "Count for channel [%s], changed to [%d]", channelName, count));
             }
