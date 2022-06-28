@@ -257,6 +257,20 @@ Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
     // Other ChannelEventListener methods
 });
 ```
+If you wish to be informed for subscription count events, pass an implementation of the `ChannelEventListener` interface:
+
+```java
+Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
+    @Override
+    public void onSubscriptionCountChange(String channelName, int count) {
+        System.out.println("Members in channel: " + channelName + " are: " + count);
+    }
+
+    // Other ChannelEventListener methods
+});
+
+```
+To know more about how to enbale subscription count events visit [here](https://www.pusher.com)
 
 ### Private channels
 
