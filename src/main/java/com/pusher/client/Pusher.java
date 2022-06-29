@@ -196,7 +196,7 @@ public class Pusher implements Client {
      * </p>
      */
     public void disconnect() {
-        if (connection.getState() == ConnectionState.CONNECTED) {
+        if (connection.getState() != ConnectionState.DISCONNECTING && connection.getState() != ConnectionState.DISCONNECTED) {
             connection.disconnect();
         }
     }

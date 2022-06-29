@@ -274,15 +274,6 @@ public class WebSocketConnectionTest {
         verify(mockEventListener, times(0)).onConnectionStateChange(any(ConnectionStateChange.class));
     }
 
-    @Test
-    public void testDisconnectInConnectingStateIsIgnored() {
-        connection.connect();
-
-        connection.disconnect();
-
-        verify(mockUnderlyingConnection, times(0)).close();
-        verify(mockEventListener, times(1)).onConnectionStateChange(any(ConnectionStateChange.class));
-    }
 
     @Test
     public void testDisconnectInDisconnectingStateIsIgnored() {

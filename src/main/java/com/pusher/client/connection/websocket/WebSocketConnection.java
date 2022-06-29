@@ -99,7 +99,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
-                if (state == ConnectionState.CONNECTED) {
+                if (state != ConnectionState.DISCONNECTING && state != ConnectionState.DISCONNECTED) {
                     updateState(ConnectionState.DISCONNECTING);
                     underlyingConnection.close();
                 }
@@ -294,8 +294,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.getTimers().schedule(new Runnable() {
             @Override
             public void run() {
-                underlyingConnection.removeWebSocketListener();
-                tryConnecting();
+                if (state == ConnectionState.RECONNECTING) {
+                    underlyingConnection.removeWebSocketListener();
+                    tryConnecting();
+                }
             }
         }, reconnectInterval, TimeUnit.SECONDS);
     }

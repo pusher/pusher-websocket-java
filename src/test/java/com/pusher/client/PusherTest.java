@@ -119,14 +119,6 @@ public class PusherTest {
     }
 
     @Test
-    public void testDisconnectCallDoesNothingIfStateIsConnecting() {
-        when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTING);
-
-        pusher.disconnect();
-        verify(mockConnection, never()).disconnect();
-    }
-
-    @Test
     public void testDisconnectCallDoesNothingIfStateIsDisconnecting() {
         when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTING);
 
