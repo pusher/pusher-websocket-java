@@ -223,19 +223,6 @@ public class ChannelImplTest {
         verify(mockListener).onSubscriptionSucceeded(getChannelName());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testBindWhenInUnsubscribedStateThrowsException() {
-        channel.updateState(ChannelState.UNSUBSCRIBED);
-        channel.bind(EVENT_NAME, mockListener);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testUnbindWhenInUnsubscribedStateThrowsException() {
-        channel.bind(EVENT_NAME, mockListener);
-        channel.updateState(ChannelState.UNSUBSCRIBED);
-        channel.unbind(EVENT_NAME, mockListener);
-    }
-
     /* end of tests */
 
     /**

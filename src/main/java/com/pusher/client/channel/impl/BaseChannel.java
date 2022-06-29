@@ -182,11 +182,6 @@ public abstract class BaseChannel implements InternalChannel {
             throw new IllegalArgumentException("Cannot bind or unbind channel " + getName()
                     + " with an internal event name such as " + eventName);
         }
-
-        if (state == ChannelState.UNSUBSCRIBED) {
-            throw new IllegalStateException(
-                    "Cannot bind or unbind to events on a channel that has been unsubscribed. Call Pusher.subscribe() to resubscribe to this channel");
-        }
     }
 
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
