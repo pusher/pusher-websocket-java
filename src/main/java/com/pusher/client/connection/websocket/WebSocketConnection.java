@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLException;
@@ -28,7 +29,6 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private static final Logger log = Logger.getLogger(WebSocketConnection.class.getName());
     private static final Gson GSON = new Gson();
 
-    private static final String INTERNAL_EVENT_PREFIX = "pusher:";
     private static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
 
     private final Factory factory;
@@ -38,12 +38,12 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     private final Proxy proxy;
     private final int maxReconnectionAttempts;
     private final int maxReconnectionGap;
+    private final BiConsumer<String, String> eventHandler;
 
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClientWrapper underlyingConnection;
     private String socketId;
     private int reconnectAttempts = 0;
-
 
     public WebSocketConnection(
             final String url,
@@ -52,6 +52,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             int maxReconnectionAttempts,
             int maxReconnectionGap,
             final Proxy proxy,
+            final BiConsumer<String, String> eventHandler,
             final Factory factory) throws URISyntaxException {
         webSocketUri = new URI(url);
         activityTimer = new ActivityTimer(activityTimeout, pongTimeout);
@@ -59,6 +60,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         this.maxReconnectionGap = maxReconnectionGap;
         this.proxy = proxy;
         this.factory = factory;
+        this.eventHandler = eventHandler;
 
         for (final ConnectionState state : ConnectionState.values()) {
             eventListeners.put(state, Collections.newSetFromMap(new ConcurrentHashMap<ConnectionEventListener, Boolean>()));
@@ -170,21 +172,12 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
     }
 
     private void handleEvent(final String event, final String wholeMessage) {
-        if (event.startsWith(INTERNAL_EVENT_PREFIX)) {
-            handleInternalEvent(event, wholeMessage);
-        }
-        else {
-            factory.getChannelManager().onMessage(event, wholeMessage);
-        }
-    }
-
-    private void handleInternalEvent(final String event, final String wholeMessage) {
         if (event.equals("pusher:connection_established")) {
             handleConnectionMessage(wholeMessage);
-        }
-        else if (event.equals("pusher:error")) {
+        } else if (event.equals("pusher:error")) {
             handleError(wholeMessage);
         }
+        eventHandler.accept(event, wholeMessage);
     }
 
     @SuppressWarnings("rawtypes")

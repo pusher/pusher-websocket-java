@@ -2,7 +2,6 @@ package com.pusher.client.channel.impl.message;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class SubscribeMessage {
     private String event = "pusher:subscribe";
