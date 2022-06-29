@@ -18,6 +18,13 @@ public interface Channel {
     String getName();
 
     /**
+     * Gets the current subscription count of the subscribed channel.
+     * 
+     * @return Count of subscriptions
+     */
+    int getCount();
+
+    /**
      * Binds a {@link SubscriptionEventListener} to an event. The
      * {@link SubscriptionEventListener} will be notified whenever the specified
      * event is received on this channel.
