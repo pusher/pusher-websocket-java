@@ -75,7 +75,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
             @Override
             public void run() {
-                if (state == ConnectionState.DISCONNECTED || state == ConnectionState.DISCONNECTING) {
+                if (canConnect()) {
                     tryConnecting();
                 }
             }
@@ -99,7 +99,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
-                if (state != ConnectionState.DISCONNECTING && state != ConnectionState.DISCONNECTED) {
+                if (canDisconnect()) {
                     updateState(ConnectionState.DISCONNECTING);
                     underlyingConnection.close();
                 }
@@ -336,6 +336,14 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 sendErrorToAllListeners("An exception was thrown by the websocket", null, ex);
             }
         });
+    }
+
+    private boolean canConnect() {
+        return state == ConnectionState.DISCONNECTING || state == ConnectionState.DISCONNECTED;
+    }
+
+    private boolean canDisconnect() {
+        return state != ConnectionState.DISCONNECTING && state != ConnectionState.DISCONNECTED;
     }
 
     private class ActivityTimer {
