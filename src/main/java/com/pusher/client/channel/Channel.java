@@ -22,7 +22,7 @@ public interface Channel {
      * 
      * @return Count of subscriptions
      */
-    int getCount();
+    Integer getCount();
 
     /**
      * Binds a {@link SubscriptionEventListener} to an event. The
