@@ -114,6 +114,16 @@ public class WebSocketConnectionTest {
     }
 
     @Test
+    public void testConnectAfterDisconnect() {
+        connection.connect();
+        connection.disconnect();
+        assertEquals(ConnectionState.DISCONNECTING, connection.getState());
+        connection.connect();
+        assertEquals(ConnectionState.CONNECTING, connection.getState());
+        verify(mockUnderlyingConnection, times(2)).connect();
+    }
+
+    @Test
     public void testConnectDoesNotCallConnectOnUnderlyingConnectionIfAlreadyInConnectingState() {
         connection.connect();
         connection.connect();

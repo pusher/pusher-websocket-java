@@ -82,7 +82,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         });
     }
 
-    private void tryConnecting(){
+    private void tryConnecting() {
         try {
             underlyingConnection = factory
                     .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
