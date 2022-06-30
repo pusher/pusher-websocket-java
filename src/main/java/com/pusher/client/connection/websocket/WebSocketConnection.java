@@ -75,14 +75,14 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
             @Override
             public void run() {
-                if (state == ConnectionState.DISCONNECTED) {
+                if (canConnect()) {
                     tryConnecting();
                 }
             }
         });
     }
 
-    private void tryConnecting(){
+    private void tryConnecting() {
         try {
             underlyingConnection = factory
                     .newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
@@ -99,7 +99,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
-                if (state == ConnectionState.CONNECTED) {
+                if (canDisconnect()) {
                     updateState(ConnectionState.DISCONNECTING);
                     underlyingConnection.close();
                 }
@@ -294,8 +294,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.getTimers().schedule(new Runnable() {
             @Override
             public void run() {
-                underlyingConnection.removeWebSocketListener();
-                tryConnecting();
+                if (state == ConnectionState.RECONNECTING) {
+                    underlyingConnection.removeWebSocketListener();
+                    tryConnecting();
+                }
             }
         }, reconnectInterval, TimeUnit.SECONDS);
     }
@@ -312,8 +314,10 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         factory.queueOnEventThread(new Runnable() {
             @Override
             public void run() {
-                updateState(ConnectionState.DISCONNECTED);
-                factory.shutdownThreads();
+                if (state == ConnectionState.DISCONNECTING) {
+                    updateState(ConnectionState.DISCONNECTED);
+                    factory.shutdownThreads();
+                }
             }
         });
         reconnectAttempts = 0;
@@ -332,6 +336,14 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
                 sendErrorToAllListeners("An exception was thrown by the websocket", null, ex);
             }
         });
+    }
+
+    private boolean canConnect() {
+        return state == ConnectionState.DISCONNECTING || state == ConnectionState.DISCONNECTED;
+    }
+
+    private boolean canDisconnect() {
+        return state != ConnectionState.DISCONNECTING && state != ConnectionState.DISCONNECTED;
     }
 
     private class ActivityTimer {

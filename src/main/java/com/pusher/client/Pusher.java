@@ -134,7 +134,7 @@ public class Pusher implements Client {
      * {@link Connection#bind(ConnectionState, ConnectionEventListener)} method
      * will receive connection events.
      *
-     * <p>Calls are ignored (a connection is not attempted) if the {@link Connection#getState()} is not {@link com.pusher.client.connection.ConnectionState#DISCONNECTED}.</p>
+     * <p>Calls are ignored (a connection is not attempted) if the {@link Connection#getState()} is not {@link com.pusher.client.connection.ConnectionState#DISCONNECTED} or  {@link com.pusher.client.connection.ConnectionState#DISCONNECTING}.</p>
      */
     public void connect() {
         connect(null);
@@ -191,12 +191,12 @@ public class Pusher implements Client {
      * Disconnect from Pusher.
      *
      * <p>
-     * Calls are ignored if the {@link Connection#getState()}, retrieved from {@link Pusher#getConnection}, is not
-     * {@link com.pusher.client.connection.ConnectionState#CONNECTED}.
+     * Calls are ignored if the {@link Connection#getState()}, retrieved from {@link Pusher#getConnection}, is
+     * {@link com.pusher.client.connection.ConnectionState#DISCONNECTING} or  {@link com.pusher.client.connection.ConnectionState#DISCONNECTED}.
      * </p>
      */
     public void disconnect() {
-        if (connection.getState() == ConnectionState.CONNECTED) {
+        if (connection.getState() != ConnectionState.DISCONNECTING && connection.getState() != ConnectionState.DISCONNECTED) {
             connection.disconnect();
         }
     }
