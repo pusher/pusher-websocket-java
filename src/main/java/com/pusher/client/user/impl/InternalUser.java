@@ -143,7 +143,9 @@ public class InternalUser implements User {
     }
 
     private void disconnect() {
-        channelManager.unsubscribeFrom(serverToUserChannel.getName());
+        if (serverToUserChannel.isSubscribed()) {
+            channelManager.unsubscribeFrom(serverToUserChannel.getName());
+        }
         userId = null;
     }
 
