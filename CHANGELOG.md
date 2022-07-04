@@ -1,5 +1,10 @@
 # pusher-websocket-java changelog
 
+### Version 2.3.0 - 4th July 2022
+* Added support for user sign in and server to user messages
+* Fixed issue with calling disconnect while the client is attempting reconnection
+* Fixed issue with calling connect while the client is disconnecting
+
 ### Version 2.2.8 - 30th November 2021
 * Add global [event listner](https://github.com/pusher/pusher-websocket-java/issues/305)
 
