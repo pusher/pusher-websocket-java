@@ -26,7 +26,7 @@ def getProperty = { property ->
 }
 
 group = "com.pusher"
-version = "2.2.8"
+version = "2.3.0-beta"
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
