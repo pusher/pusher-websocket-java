@@ -41,7 +41,6 @@ ext.sharedManifest = manifest {
     )
 }
 
-
 repositories {
     mavenCentral()
 }
@@ -126,6 +125,11 @@ githubPages {
 
 artifacts {
     archives jar, fatJar, sourcesJar, javadocJar
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 publishing {
