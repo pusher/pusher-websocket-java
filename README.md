@@ -83,7 +83,7 @@ The pusher-java-client is available in Maven Central.
 
 ```groovy
 dependencies {
-  compile 'com.pusher:pusher-java-client:2.3.1'
+  compile 'com.pusher:pusher-java-client:2.4.0'
 }
 ```
 
