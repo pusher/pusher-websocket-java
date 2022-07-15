@@ -270,7 +270,6 @@ Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
 });
 
 ```
-To know more about how to enbale subscription count events visit [here](https://www.pusher.com)
 
 ### Private channels
 
