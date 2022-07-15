@@ -194,7 +194,7 @@ public abstract class BaseChannel implements InternalChannel {
     }
 
     private void handleSubscriptionCountEvent(final String message) {
-        String channelName = this.getName();
+        String channelName = getName();
         final SubscriptionCountData subscriptionCountMessage = GSON.fromJson(message, SubscriptionCountData.class);
         subscriptionCount = subscriptionCountMessage.getCount();
         if (eventListener != null ) {
