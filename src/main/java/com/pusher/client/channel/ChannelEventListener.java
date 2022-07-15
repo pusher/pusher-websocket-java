@@ -40,19 +40,4 @@ public interface ChannelEventListener extends SubscriptionEventListener {
      *            The name of the channel that was successfully subscribed.
      */
     void onSubscriptionSucceeded(String channelName);
-
-    /**
-     * <p>
-     * Callback fired when a subscription success count
-     * of a channel changes
-     * </p>
-     *
-     *
-     * @param channelName
-     *            The name of the channel for which the count changed.
-     * 
-     * @param count
-     *            The latest count of subscribers on the channel.
-     */
-    void onSubscriptionCountChanged(String channelName, int count);
 }

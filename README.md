@@ -257,16 +257,16 @@ Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
     // Other ChannelEventListener methods
 });
 ```
-If you wish to be informed for subscription count events, pass an implementation of the `ChannelEventListener` interface:
+If you wish to be informed for subscription count events, use the `bind` function to listen to event type `pusher:subscription_count`:
 
 ```java
-Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
+Channel channel = pusher.subscribe("my-channel");
+channel.bind("pusher:subscription_count", new SubscriptionEventListener() {
     @Override
-    public void onSubscriptionCountChanged(String channelName, int count) {
-        System.out.println("Members in channel: " + channelName + " are: " + count);
+    public void onEvent(PusherEvent event) {
+        System.out.println("Received event with data: " + event.toString());
+        System.out.println("Subscription Count is: " + channel.getCount());
     }
-
-    // Other ChannelEventListener methods
 });
 
 ```

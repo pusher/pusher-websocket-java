@@ -94,12 +94,6 @@ public class PrivateChannelExampleApp {
                 System.out.println(String.format(
                         "Authorization failure due to [%s], exception was [%s]", message, e));
             }
-
-            @Override
-            public void onSubscriptionCountChanged(String channelName, int count) {
-                System.out.println(String.format(
-                        "Count for channel [%s], changed to [%d]", channelName, count));
-            }
         };
 
         // subscribe to the channel and with the event listener for the event name

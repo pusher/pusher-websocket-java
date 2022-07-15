@@ -115,12 +115,6 @@ public class PresenceChannelExampleApp {
                 System.out.println(String.format("A user has left channel [%s]: %s", channelName, user));
                 printCurrentlySubscribedUsers();
             }
-
-            @Override
-            public void onSubscriptionCountChanged(String channelName, int count) {
-                System.out.println(String.format(
-                        "Count for channel [%s], changed to [%d]", channelName, count));
-            }
         };
 
         // subscribe to the channel and with the event listener for the event name

@@ -19,6 +19,7 @@ public abstract class BaseChannel implements InternalChannel {
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected static final String SUBSCRIPTION_COUNT_EVENT = "pusher_internal:subscription_count";
+    protected static final String PUBLIC_SUBSCRIPTION_COUNT_EVENT = "pusher:subscription_count";
     private Set<SubscriptionEventListener> globalListeners = new HashSet<SubscriptionEventListener>();
     private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
@@ -194,17 +195,9 @@ public abstract class BaseChannel implements InternalChannel {
     }
 
     private void handleSubscriptionCountEvent(final String message) {
-        String channelName = getName();
         final SubscriptionCountData subscriptionCountMessage = GSON.fromJson(message, SubscriptionCountData.class);
         subscriptionCount = subscriptionCountMessage.getCount();
-        if (eventListener != null ) {
-            factory.queueOnEventThread(new Runnable() {
-                @Override
-                public void run() {
-                    eventListener.onSubscriptionCountChanged(channelName, subscriptionCountMessage.getCount());
-                }
-            });
-        }
+        onMessage(PUBLIC_SUBSCRIPTION_COUNT_EVENT, message);
     }
 
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
