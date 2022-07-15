@@ -2,7 +2,6 @@ package com.pusher.client.channel.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.pusher.client.channel.*;
 import com.pusher.client.channel.impl.message.SubscribeMessage;
+import com.pusher.client.channel.impl.message.SubscriptionCountData;
 import com.pusher.client.channel.impl.message.UnsubscribeMessage;
 import com.pusher.client.util.Factory;
 
@@ -18,12 +18,15 @@ public abstract class BaseChannel implements InternalChannel {
     protected final Gson GSON;
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
+    protected static final String SUBSCRIPTION_COUNT_EVENT = "pusher_internal:subscription_count";
+    protected static final String PUBLIC_SUBSCRIPTION_COUNT_EVENT = "pusher:subscription_count";
     private Set<SubscriptionEventListener> globalListeners = new HashSet<SubscriptionEventListener>();
     private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
     private final Factory factory;
     private final Object lock = new Object();
+    private Integer subscriptionCount;
 
     public BaseChannel(final Factory factory) {
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -36,6 +39,11 @@ public abstract class BaseChannel implements InternalChannel {
 
     @Override
     abstract public String getName();
+
+    @Override
+    public Integer getCount() {
+        return subscriptionCount;
+    }
 
     @Override
     public void bind(final String eventName, final SubscriptionEventListener listener) {
@@ -112,6 +120,8 @@ public abstract class BaseChannel implements InternalChannel {
     public void onMessage(String event, String message) {
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
+        }else if (event.equals(SUBSCRIPTION_COUNT_EVENT)) {
+            handleSubscriptionCountEvent(message);
         } else {
             final Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
             if (listeners != null) {
@@ -182,6 +192,12 @@ public abstract class BaseChannel implements InternalChannel {
             throw new IllegalArgumentException("Cannot bind or unbind channel " + getName()
                     + " with an internal event name such as " + eventName);
         }
+    }
+
+    private void handleSubscriptionCountEvent(final String message) {
+        final SubscriptionCountData subscriptionCountMessage = GSON.fromJson(message, SubscriptionCountData.class);
+        subscriptionCount = subscriptionCountMessage.getCount();
+        onMessage(PUBLIC_SUBSCRIPTION_COUNT_EVENT, message);
     }
 
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {

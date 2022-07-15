@@ -74,7 +74,7 @@ The pusher-java-client is available in Maven Central.
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>2.3.0-beta</version>
+      <version>2.4.0</version>
     </dependency>
 </dependencies>
 ```
@@ -83,7 +83,7 @@ The pusher-java-client is available in Maven Central.
 
 ```groovy
 dependencies {
-  compile 'com.pusher:pusher-java-client:2.3.0-beta'
+  compile 'com.pusher:pusher-java-client:2.4.0'
 }
 ```
 
@@ -256,6 +256,19 @@ Channel channel = pusher.subscribe("my-channel", new ChannelEventListener() {
 
     // Other ChannelEventListener methods
 });
+```
+If you wish to be informed for subscription count events, use the `bind` function to listen to event type `pusher:subscription_count`:
+
+```java
+Channel channel = pusher.subscribe("my-channel");
+channel.bind("pusher:subscription_count", new SubscriptionEventListener() {
+    @Override
+    public void onEvent(PusherEvent event) {
+        System.out.println("Received event with data: " + event.toString());
+        System.out.println("Subscription Count is: " + channel.getCount());
+    }
+});
+
 ```
 
 ### Private channels
