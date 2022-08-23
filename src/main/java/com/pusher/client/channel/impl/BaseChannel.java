@@ -1,18 +1,21 @@
 package com.pusher.client.channel.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.gson.Gson;
-
 import com.google.gson.GsonBuilder;
-import com.pusher.client.channel.*;
+import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PusherEvent;
+import com.pusher.client.channel.PusherEventDeserializer;
+import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.impl.message.SubscribeMessage;
 import com.pusher.client.channel.impl.message.SubscriptionCountData;
 import com.pusher.client.channel.impl.message.UnsubscribeMessage;
 import com.pusher.client.util.Factory;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseChannel implements InternalChannel {
     protected final Gson GSON;
@@ -20,7 +23,7 @@ public abstract class BaseChannel implements InternalChannel {
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected static final String SUBSCRIPTION_COUNT_EVENT = "pusher_internal:subscription_count";
     protected static final String PUBLIC_SUBSCRIPTION_COUNT_EVENT = "pusher:subscription_count";
-    private Set<SubscriptionEventListener> globalListeners = new HashSet<SubscriptionEventListener>();
+    private final Set<SubscriptionEventListener> globalListeners = new HashSet<SubscriptionEventListener>();
     private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
@@ -63,7 +66,7 @@ public abstract class BaseChannel implements InternalChannel {
     public void bindGlobal(SubscriptionEventListener listener) {
         validateArguments("", listener);
 
-        synchronized(lock) {
+        synchronized (lock) {
             globalListeners.add(listener);
         }
     }
@@ -87,7 +90,7 @@ public abstract class BaseChannel implements InternalChannel {
     public void unbindGlobal(SubscriptionEventListener listener) {
         validateArguments("", listener);
 
-        synchronized(lock) {
+        synchronized (lock) {
             if (globalListeners != null) {
                 globalListeners.remove(listener);
             }
@@ -116,26 +119,31 @@ public abstract class BaseChannel implements InternalChannel {
         return GSON.fromJson(message, PusherEvent.class);
     }
 
+    public void emit(PusherEvent pusherEvent) {
+        final Set<SubscriptionEventListener> listeners = getInterestedListeners(pusherEvent.getEventName());
+        if (listeners != null) {
+            for (final SubscriptionEventListener listener : listeners) {
+                factory.queueOnEventThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onEvent(pusherEvent);
+                    }
+                });
+            }
+        }
+    }
+
     @Override
     public void onMessage(String event, String message) {
         if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
-        }else if (event.equals(SUBSCRIPTION_COUNT_EVENT)) {
-            handleSubscriptionCountEvent(message);
         } else {
-            final Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
-            if (listeners != null) {
-                final PusherEvent pusherEvent = prepareEvent(event, message);
-                if (pusherEvent != null) {
-                    for (final SubscriptionEventListener listener : listeners) {
-                        factory.queueOnEventThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    listener.onEvent(pusherEvent);
-                                }
-                            });
-                    }
+            final PusherEvent pusherEvent = prepareEvent(event, message);
+            if (pusherEvent != null) {
+                if (event.equals(SUBSCRIPTION_COUNT_EVENT)) {
+                    handleSubscriptionCountEvent(pusherEvent);
                 }
+                emit(pusherEvent);
             }
         }
     }
@@ -146,11 +154,11 @@ public abstract class BaseChannel implements InternalChannel {
 
         if (state == ChannelState.SUBSCRIBED && eventListener != null) {
             factory.queueOnEventThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        eventListener.onSubscriptionSucceeded(getName());
-                    }
-                });
+                @Override
+                public void run() {
+                    eventListener.onSubscriptionSucceeded(getName());
+                }
+            });
         }
     }
 
@@ -178,7 +186,7 @@ public abstract class BaseChannel implements InternalChannel {
         return String.format("[Channel: name=%s]", getName());
     }
 
-     private void validateArguments(final String eventName, final SubscriptionEventListener listener) {
+    private void validateArguments(final String eventName, final SubscriptionEventListener listener) {
 
         if (eventName == null) {
             throw new IllegalArgumentException("Cannot bind or unbind to channel " + getName() + " with a null event name");
@@ -194,10 +202,16 @@ public abstract class BaseChannel implements InternalChannel {
         }
     }
 
-    private void handleSubscriptionCountEvent(final String message) {
-        final SubscriptionCountData subscriptionCountMessage = GSON.fromJson(message, SubscriptionCountData.class);
+    private void handleSubscriptionCountEvent(final PusherEvent event) {
+        final SubscriptionCountData subscriptionCountMessage = GSON.fromJson(event.getData(), SubscriptionCountData.class);
         subscriptionCount = subscriptionCountMessage.getCount();
-        onMessage(PUBLIC_SUBSCRIPTION_COUNT_EVENT, message);
+        final PusherEvent publicEvent = new PusherEvent(new HashMap<String, Object>() {{
+            put("data", event.getData());
+            put("event", PUBLIC_SUBSCRIPTION_COUNT_EVENT);
+            put("channel", event.getChannelName());
+            put("user_id", event.getUserId());
+        }});
+        emit(publicEvent);
     }
 
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
@@ -207,14 +221,14 @@ public abstract class BaseChannel implements InternalChannel {
             final Set<SubscriptionEventListener> sharedListeners =
                     eventNameToListenerMap.get(event);
 
-            if (sharedListeners != null ) {
+            if (sharedListeners != null) {
                 listeners.addAll(sharedListeners);
             }
             if (!globalListeners.isEmpty()) {
                 listeners.addAll(globalListeners);
             }
 
-            if (listeners.isEmpty()){
+            if (listeners.isEmpty()) {
                 return null;
             }
 
