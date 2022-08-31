@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PresenceSubscriptionData {
+
     @SerializedName("presence")
     public PresenceData presence;
 
@@ -17,11 +18,14 @@ public class PresenceSubscriptionData {
         return presence.hash;
     }
 
-     static class PresenceData {
+    static class PresenceData {
+
         @SerializedName("count")
         public Integer count;
+
         @SerializedName("ids")
         public List<String> ids;
+
         @SerializedName("hash")
         public Map<String, Object> hash;
     }

@@ -10,47 +10,54 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Base class for {@link com.pusher.client.util.HttpChannelAuthorizer} and {@link com.pusher.client.util.HttpUserAuthenticator}
- *
  */
 
 abstract class BaseHttpAuthClient {
 
     private final URL endPoint;
-    private Map<String, String> mHeaders = new HashMap<String, String>();
-    protected ConnectionFactory mConnectionFactory = null;
+    private Map<String, String> mHeaders = new HashMap<>();
+    protected ConnectionFactory mConnectionFactory;
 
     /**
      * Creates a new auth client.
      *
-     * @param endPoint
-     *            The endpoint to be called when authorizing or authenticating.
+     * @param endPoint The endpoint to be called when authorizing or authenticating.
      */
     public BaseHttpAuthClient(final String endPoint) {
         try {
             this.endPoint = new URL(endPoint);
             this.mConnectionFactory = new UrlEncodedConnectionFactory();
-        }
-        catch (final MalformedURLException e) {
-            throw new IllegalArgumentException("Could not parse channel authorization end point into a valid URL", e);
+        } catch (final MalformedURLException e) {
+            throw new IllegalArgumentException(
+                    "Could not parse channel authorization end point into a valid URL",
+                    e
+            );
         }
     }
 
     /**
      * Creates a new auth client.
      *
-     * @param endPoint The endpoint to be called when authorizing or authenticating.
+     * @param endPoint          The endpoint to be called when authorizing or authenticating.
      * @param connectionFactory a custom connection factory to be used for building the connection
      */
-    public BaseHttpAuthClient(final String endPoint, final ConnectionFactory connectionFactory) {
+    public BaseHttpAuthClient(
+            final String endPoint,
+            final ConnectionFactory connectionFactory
+    ) {
         try {
             this.endPoint = new URL(endPoint);
             this.mConnectionFactory = connectionFactory;
         } catch (final MalformedURLException e) {
-            throw new IllegalArgumentException("Could not parse channel authorization end point into a valid URL", e);
+            throw new IllegalArgumentException(
+                    "Could not parse channel authorization end point into a valid URL",
+                    e
+            );
         }
     }
 
@@ -65,6 +72,7 @@ abstract class BaseHttpAuthClient {
 
     /**
      * Identifies if the HTTP request will be sent over HTTPS.
+     *
      * @return true if the endpoint protocol is 'https'
      */
     public Boolean isSSL() {
@@ -73,10 +81,10 @@ abstract class BaseHttpAuthClient {
 
     /**
      * Performs an HTTP request to the endpoint provided on construction.
-     *
+     * <p>
      * The request shall include the headers and parameters provided by
      * the connectionFactory.
-     *
+     * <p>
      * Child classes must provide the connection parameters to the
      * connectionFactory before calling this method.
      *
@@ -86,16 +94,15 @@ abstract class BaseHttpAuthClient {
         try {
             String body = mConnectionFactory.getBody();
 
-            final HashMap<String, String> defaultHeaders = new HashMap<String, String>();
+            final HashMap<String, String> defaultHeaders = new HashMap<>();
             defaultHeaders.put("Content-Type", mConnectionFactory.getContentType());
             defaultHeaders.put("charset", mConnectionFactory.getCharset());
 
             HttpURLConnection connection;
             if (isSSL()) {
-                connection = (HttpsURLConnection)endPoint.openConnection();
-            }
-            else {
-                connection = (HttpURLConnection)endPoint.openConnection();
+                connection = (HttpsURLConnection) endPoint.openConnection();
+            } else {
+                connection = (HttpURLConnection) endPoint.openConnection();
             }
             connection.setDoOutput(true);
             connection.setDoInput(true);
@@ -105,7 +112,7 @@ abstract class BaseHttpAuthClient {
             // Add in the user defined headers
             defaultHeaders.putAll(mHeaders);
             // Add in the Content-Length, so it can't be overwritten by mHeaders
-            defaultHeaders.put("Content-Length","" + body.getBytes().length);
+            defaultHeaders.put("Content-Length", "" + body.getBytes().length);
 
             for (final String headerName : defaultHeaders.keySet()) {
                 final String headerValue = defaultHeaders.get(headerName);
@@ -115,7 +122,9 @@ abstract class BaseHttpAuthClient {
             connection.setUseCaches(false);
 
             // Send request
-            final DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+            final DataOutputStream wr = new DataOutputStream(
+                    connection.getOutputStream()
+            );
             wr.writeBytes(body);
             wr.flush();
             wr.close();
@@ -124,7 +133,7 @@ abstract class BaseHttpAuthClient {
             final InputStream is = connection.getInputStream();
             final BufferedReader rd = new BufferedReader(new InputStreamReader(is));
             String line;
-            final StringBuffer response = new StringBuffer();
+            final StringBuilder response = new StringBuilder();
             while ((line = rd.readLine()) != null) {
                 response.append(line);
             }
@@ -141,6 +150,7 @@ abstract class BaseHttpAuthClient {
         }
     }
 
-    abstract protected RuntimeException authFailureException(String msg);
-    abstract protected RuntimeException authFailureException(IOException e);
+    protected abstract RuntimeException authFailureException(String msg);
+
+    protected abstract RuntimeException authFailureException(IOException e);
 }

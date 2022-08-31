@@ -3,13 +3,15 @@ package com.pusher.client.util;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.pusher.client.util.internal.Base64;
+
 import org.junit.Test;
 
 public class Base64Test {
 
     @Test
     public void decodeValidChars() {
-        String validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        String validChars =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         assertThat(Base64.decode(validChars)).isNotEmpty();
     }
 
@@ -24,5 +26,4 @@ public class Base64Test {
     public void failDecodingUnderscoreChar() {
         Base64.decode("_");
     }
-
 }

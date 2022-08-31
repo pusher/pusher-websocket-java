@@ -7,6 +7,7 @@ import com.google.gson.Gson;
  * {@link com.pusher.client.channel.PresenceChannel PresenceChannel}.
  */
 public class User {
+
     private static final Gson GSON = new Gson();
     private final String id;
     private final String jsonData;
@@ -16,7 +17,7 @@ public class User {
      * Users are created within the library and represent subscriptions to
      * presence channels.
      *
-     * @param id The user id
+     * @param id       The user id
      * @param jsonData The user JSON data
      */
     public User(final String id, final String jsonData) {
@@ -36,7 +37,7 @@ public class User {
     /**
      * Custom additional information about a user as a String encoding a JSON
      * hash
-     * 
+     *
      * @return The user info as a JSON string
      */
     public String getInfo() {
@@ -73,10 +74,9 @@ public class User {
      * info.getNumber() // returns 9
      * </pre>
      *
-     * @param <V> The class of the info
-     * @param clazz
-     *            the class into which the user info JSON representation should
-     *            be parsed.
+     * @param <V>   The class of the info
+     * @param clazz the class into which the user info JSON representation should
+     *              be parsed.
      * @return V An instance of clazz, populated with the user info
      */
     public <V> V getInfo(final Class<V> clazz) {
@@ -95,10 +95,12 @@ public class User {
 
     @Override
     public boolean equals(final Object other) {
-
         if (other instanceof User) {
-            final User otherUser = (User)other;
-            return getId().equals(otherUser.getId()) && this.getInfo().equals(otherUser.getInfo());
+            final User otherUser = (User) other;
+            return (
+                    getId().equals(otherUser.getId()) &&
+                            this.getInfo().equals(otherUser.getInfo())
+            );
         }
 
         return false;

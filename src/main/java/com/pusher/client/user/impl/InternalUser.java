@@ -1,39 +1,33 @@
 package com.pusher.client.user.impl;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-
-import com.pusher.client.UserAuthenticator;
 import com.pusher.client.AuthenticationFailureException;
+import com.pusher.client.UserAuthenticator;
 import com.pusher.client.channel.PusherEvent;
-import com.pusher.client.channel.PusherEventDeserializer;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
-import com.pusher.client.connection.impl.message.AuthenticationResponse;
-import com.pusher.client.connection.impl.message.SigninMessage;
 import com.pusher.client.user.User;
+import com.pusher.client.user.impl.message.AuthenticationResponse;
+import com.pusher.client.user.impl.message.SigninMessage;
 import com.pusher.client.util.Factory;
 
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class InternalUser implements User {
-    private static final Gson GSON;
+
+    private static final Gson GSON = new Gson();
     private static final Logger log = Logger.getLogger(User.class.getName());
 
-    static {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(PusherEvent.class, new PusherEventDeserializer());
-        GSON = gsonBuilder.create();
-    }
+    private static class ConnectionStateChangeHandler
+            implements ConnectionEventListener {
 
-    private static class ConnectionStateChangeHandler implements ConnectionEventListener {
-        private InternalUser user;
+        private final InternalUser user;
 
         public ConnectionStateChangeHandler(InternalUser user) {
             this.user = user;
@@ -42,15 +36,15 @@ public class InternalUser implements User {
         @Override
         public void onConnectionStateChange(ConnectionStateChange change) {
             switch (change.getCurrentState()) {
-            case CONNECTED:
-                user.attemptSignin();
-                break;
-            case CONNECTING:
-            case DISCONNECTED:
-                user.disconnect();
-                break;
-            default:
-                // NOOP
+                case CONNECTED:
+                    user.attemptSignin();
+                    break;
+                case CONNECTING:
+                case DISCONNECTED:
+                    user.disconnect();
+                    break;
+                default:
+                    // NOOP
             }
         }
 
@@ -64,17 +58,24 @@ public class InternalUser implements User {
     private final UserAuthenticator userAuthenticator;
     private final ChannelManager channelManager;
     private boolean signinRequested;
-    private ServerToUserChannel serverToUserChannel;
+    private final ServerToUserChannel serverToUserChannel;
     private String userId;
 
-    public InternalUser(InternalConnection connection, UserAuthenticator userAuthenticator, Factory factory) {
+    public InternalUser(
+            InternalConnection connection,
+            UserAuthenticator userAuthenticator,
+            Factory factory
+    ) {
         this.connection = connection;
         this.userAuthenticator = userAuthenticator;
         this.channelManager = factory.getChannelManager();
         this.signinRequested = false;
         this.serverToUserChannel = new ServerToUserChannel(this, factory);
 
-        connection.bind(ConnectionState.ALL, new ConnectionStateChangeHandler(this));
+        connection.bind(
+                ConnectionState.ALL,
+                new ConnectionStateChangeHandler(this)
+        );
     }
 
     public void signin() throws AuthenticationFailureException {
@@ -86,9 +87,9 @@ public class InternalUser implements User {
         attemptSignin();
     }
 
-    public void handleEvent(String event, String wholeMessage) {
-        if (event.equals("pusher:signin_success")) {
-            onSigninSuccess(GSON.fromJson(wholeMessage, PusherEvent.class));
+    public void handleEvent(PusherEvent event) {
+        if (event.getEventName().equals("pusher:signin_success")) {
+            onSigninSuccess(event);
         }
     }
 
@@ -103,32 +104,51 @@ public class InternalUser implements User {
         }
 
         AuthenticationResponse authenticationResponse = getAuthenticationResponse();
-        connection.sendMessage(authenticationResponseToSigninMessage(authenticationResponse));
+        connection.sendMessage(
+                authenticationResponseToSigninMessage(authenticationResponse)
+        );
     }
 
-    private static String authenticationResponseToSigninMessage(AuthenticationResponse authenticationResponse) {
-        return GSON.toJson(new SigninMessage(
-            authenticationResponse.getAuth(),
-            authenticationResponse.getUserData()
-        ));
+    private static String authenticationResponseToSigninMessage(
+            AuthenticationResponse authenticationResponse
+    ) {
+        return GSON.toJson(
+                new SigninMessage(
+                        authenticationResponse.getAuth(),
+                        authenticationResponse.getUserData()
+                )
+        );
     }
 
-    private AuthenticationResponse getAuthenticationResponse() throws AuthenticationFailureException {
+    private AuthenticationResponse getAuthenticationResponse()
+            throws AuthenticationFailureException {
         String response = userAuthenticator.authenticate(connection.getSocketId());
         try {
-            AuthenticationResponse authenticationResponse = GSON.fromJson(response, AuthenticationResponse.class);
-            if (authenticationResponse.getAuth() == null || authenticationResponse.getUserData() == null) {
-                throw new AuthenticationFailureException("Didn't receive all the fields expected from the UserAuthenticator. Expected auth and user_data");
+            AuthenticationResponse authenticationResponse = GSON.fromJson(
+                    response,
+                    AuthenticationResponse.class
+            );
+            if (
+                    authenticationResponse.getAuth() == null ||
+                            authenticationResponse.getUserData() == null
+            ) {
+                throw new AuthenticationFailureException(
+                        "Didn't receive all the fields expected from the UserAuthenticator. Expected auth and user_data"
+                );
             }
             return authenticationResponse;
         } catch (JsonSyntaxException e) {
-            throw new AuthenticationFailureException("Unable to parse response from AuthenticationResponse");
+            throw new AuthenticationFailureException(
+                    "Unable to parse response from AuthenticationResponse"
+            );
         }
     }
 
     private void onSigninSuccess(PusherEvent event) {
         try {
-            String userData = (String) GSON.fromJson(event.getData(), Map.class).get("user_data");
+            String userData = (String) GSON
+                    .fromJson(event.getData(), Map.class)
+                    .get("user_data");
             userId = (String) GSON.fromJson(userData, Map.class).get("id");
         } catch (Exception e) {
             log.severe("Failed parsing user data after signin");

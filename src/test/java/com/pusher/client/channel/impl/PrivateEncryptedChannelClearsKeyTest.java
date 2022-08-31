@@ -1,6 +1,11 @@
 package com.pusher.client.channel.impl;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.channel.ChannelState;
@@ -11,6 +16,7 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.crypto.nacl.SecretBoxOpener;
 import com.pusher.client.crypto.nacl.SecretBoxOpenerFactory;
 import com.pusher.client.util.Factory;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,17 +28,21 @@ import org.mockito.stubbing.Answer;
 public class PrivateEncryptedChannelClearsKeyTest {
 
     final String CHANNEL_NAME = "private-encrypted-unit-test-channel";
-    final String AUTH_RESPONSE = "{\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\",\"shared_secret\":\"iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5doo=\"}";
+    final String AUTH_RESPONSE =
+            "{\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\",\"shared_secret\":\"iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5doo=\"}";
 
     @Mock
     InternalConnection mockInternalConnection;
+
     @Mock
     ChannelAuthorizer mockChannelAuthorizer;
+
     @Mock
     Factory mockFactory;
 
     @Mock
     SecretBoxOpenerFactory mockSecretBoxOpenerFactory;
+
     @Mock
     SecretBoxOpener mockSecretBoxOpener;
 
@@ -40,11 +50,19 @@ public class PrivateEncryptedChannelClearsKeyTest {
 
     @Before
     public void setUp() {
-        when(mockChannelAuthorizer.authorize(eq(CHANNEL_NAME), anyString())).thenReturn(AUTH_RESPONSE);
-        when(mockSecretBoxOpenerFactory.create(any())).thenReturn(mockSecretBoxOpener);
+        when(mockChannelAuthorizer.authorize(eq(CHANNEL_NAME), anyString()))
+                .thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any()))
+                .thenReturn(mockSecretBoxOpener);
 
-        subject = new PrivateEncryptedChannelImpl(mockInternalConnection, CHANNEL_NAME,
-                mockChannelAuthorizer, mockFactory, mockSecretBoxOpenerFactory);
+        subject =
+                new PrivateEncryptedChannelImpl(
+                        mockInternalConnection,
+                        CHANNEL_NAME,
+                        mockChannelAuthorizer,
+                        mockFactory,
+                        mockSecretBoxOpenerFactory
+                );
     }
 
     @Test
@@ -58,14 +76,20 @@ public class PrivateEncryptedChannelClearsKeyTest {
 
     @Test
     public void secretBoxOpenerIsClearedOnDisconnected() {
-        doAnswer((Answer<Void>) invocation -> {
-            ConnectionEventListener l = (ConnectionEventListener) invocation.getArguments()[1];
-            l.onConnectionStateChange(new ConnectionStateChange(
-                    ConnectionState.DISCONNECTING,
-                    ConnectionState.DISCONNECTED
-            ));
-            return null;
-        }).when(mockInternalConnection).bind(eq(ConnectionState.DISCONNECTED), any());
+        doAnswer(
+                (Answer<Void>) invocation -> {
+                    ConnectionEventListener l = (ConnectionEventListener) invocation.getArguments()[1];
+                    l.onConnectionStateChange(
+                            new ConnectionStateChange(
+                                    ConnectionState.DISCONNECTING,
+                                    ConnectionState.DISCONNECTED
+                            )
+                    );
+                    return null;
+                }
+        )
+                .when(mockInternalConnection)
+                .bind(eq(ConnectionState.DISCONNECTED), any());
         subject.toSubscribeMessage();
 
         verify(mockSecretBoxOpener).clearKey();
@@ -73,17 +97,23 @@ public class PrivateEncryptedChannelClearsKeyTest {
 
     @Test
     public void secretBoxOpenerIsClearedOnceOnUnsubscribedAndThenDisconnected() {
-        doAnswer((Answer<Void>) invocation -> {
-            subject.updateState(ChannelState.UNSUBSCRIBED);
+        doAnswer(
+                (Answer<Void>) invocation -> {
+                    subject.updateState(ChannelState.UNSUBSCRIBED);
 
-            ConnectionEventListener l = (ConnectionEventListener) invocation.getArguments()[1];
-            l.onConnectionStateChange(new ConnectionStateChange(
-                    ConnectionState.DISCONNECTING,
-                    ConnectionState.DISCONNECTED
-            ));
+                    ConnectionEventListener l = (ConnectionEventListener) invocation.getArguments()[1];
+                    l.onConnectionStateChange(
+                            new ConnectionStateChange(
+                                    ConnectionState.DISCONNECTING,
+                                    ConnectionState.DISCONNECTED
+                            )
+                    );
 
-            return null;
-        }).when(mockInternalConnection).bind(eq(ConnectionState.DISCONNECTED), any());
+                    return null;
+                }
+        )
+                .when(mockInternalConnection)
+                .bind(eq(ConnectionState.DISCONNECTED), any());
         subject.toSubscribeMessage();
 
         verify(mockSecretBoxOpener).clearKey();

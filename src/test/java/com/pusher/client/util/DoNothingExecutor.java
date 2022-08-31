@@ -13,30 +13,39 @@ import java.util.concurrent.TimeoutException;
 public class DoNothingExecutor implements ScheduledExecutorService {
 
     @Override
-    public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
+    public boolean awaitTermination(final long timeout, final TimeUnit unit)
+            throws InterruptedException {
         return false;
     }
 
     @Override
-    public <T> List<Future<T>> invokeAll(final Collection<? extends Callable<T>> tasks) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(
+            final Collection<? extends Callable<T>> tasks
+    ) throws InterruptedException {
         return null;
     }
 
     @Override
-    public <T> List<Future<T>> invokeAll(final Collection<? extends Callable<T>> tasks, final long timeout,
-            final TimeUnit unit) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(
+            final Collection<? extends Callable<T>> tasks,
+            final long timeout,
+            final TimeUnit unit
+    ) throws InterruptedException {
         return null;
     }
 
     @Override
-    public <T> T invokeAny(final Collection<? extends Callable<T>> tasks) throws InterruptedException,
-            ExecutionException {
+    public <T> T invokeAny(final Collection<? extends Callable<T>> tasks)
+            throws InterruptedException, ExecutionException {
         return null;
     }
 
     @Override
-    public <T> T invokeAny(final Collection<? extends Callable<T>> tasks, final long timeout, final TimeUnit unit)
-            throws InterruptedException, ExecutionException, TimeoutException {
+    public <T> T invokeAny(
+            final Collection<? extends Callable<T>> tasks,
+            final long timeout,
+            final TimeUnit unit
+    ) throws InterruptedException, ExecutionException, TimeoutException {
         return null;
     }
 
@@ -79,25 +88,40 @@ public class DoNothingExecutor implements ScheduledExecutorService {
     }
 
     @Override
-    public ScheduledFuture<?> schedule(final Runnable command, final long delay, final TimeUnit unit) {
+    public ScheduledFuture<?> schedule(
+            final Runnable command,
+            final long delay,
+            final TimeUnit unit
+    ) {
         return null;
     }
 
     @Override
-    public <V> ScheduledFuture<V> schedule(final Callable<V> callable, final long delay, final TimeUnit unit) {
+    public <V> ScheduledFuture<V> schedule(
+            final Callable<V> callable,
+            final long delay,
+            final TimeUnit unit
+    ) {
         return null;
     }
 
     @Override
-    public ScheduledFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period,
-            final TimeUnit unit) {
+    public ScheduledFuture<?> scheduleAtFixedRate(
+            final Runnable command,
+            final long initialDelay,
+            final long period,
+            final TimeUnit unit
+    ) {
         return null;
     }
 
     @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay,
-            final TimeUnit unit) {
+    public ScheduledFuture<?> scheduleWithFixedDelay(
+            final Runnable command,
+            final long initialDelay,
+            final long delay,
+            final TimeUnit unit
+    ) {
         return null;
     }
-
 }

@@ -1,16 +1,16 @@
 package com.pusher.client.example;
 
-import java.util.Set;
-
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.User;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.HttpChannelAuthorizer;
+
+import java.util.Set;
 
 /*
 This app demonstrates how to use Presence Channels.
@@ -32,7 +32,8 @@ public class PresenceChannelExampleApp {
     private String channelName = "my-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
-    private String channelAuthorizationEndpoint = "http://localhost:3030/pusher/auth";
+    private final String channelAuthorizationEndpoint =
+            "http://localhost:3030/pusher/auth";
 
     private final PresenceChannel channel;
 
@@ -41,17 +42,22 @@ public class PresenceChannelExampleApp {
     }
 
     private PresenceChannelExampleApp(final String[] args) {
-
         // if using from the command line, these variables need to be passed
         switch (args.length) {
-            case 4: cluster = args[3];
-            case 3: eventName = args[2];
-            case 2: channelName = args[1];
-            case 1: channelsKey = args[0];
+            case 4:
+                cluster = args[3];
+            case 3:
+                eventName = args[2];
+            case 2:
+                channelName = args[1];
+            case 1:
+                channelsKey = args[0];
         }
 
         // create a HttpChannelAuthorizer that points to your channel authorization server
-        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(channelAuthorizationEndpoint);
+        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(
+                channelAuthorizationEndpoint
+        );
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
@@ -64,14 +70,21 @@ public class PresenceChannelExampleApp {
         ConnectionEventListener connectionEventListener = new ConnectionEventListener() {
             @Override
             public void onConnectionStateChange(ConnectionStateChange change) {
-                System.out.println(String.format("Connection state changed from [%s] to [%s]",
-                        change.getPreviousState(), change.getCurrentState()));
+                System.out.printf(
+                        "Connection state changed from [%s] to [%s]%n",
+                        change.getPreviousState(),
+                        change.getCurrentState()
+                );
             }
 
             @Override
             public void onError(String message, String code, Exception e) {
-                System.out.println(String.format("An error was received with message [%s], code [%s], exception [%s]",
-                        message, code, e));
+                System.out.printf(
+                        "An error was received with message [%s], code [%s], exception [%s]%n",
+                        message,
+                        code,
+                        e
+                );
             }
         };
 
@@ -82,58 +95,71 @@ public class PresenceChannelExampleApp {
         PresenceChannelEventListener presenceChannelEventListener = new PresenceChannelEventListener() {
             @Override
             public void onSubscriptionSucceeded(String channelName) {
-                System.out.println(String.format(
-                        "Subscription to channel [%s] succeeded", channelName));
+                System.out.printf("Subscription to channel [%s] succeeded%n", channelName);
             }
 
             @Override
             public void onEvent(PusherEvent event) {
-                System.out.println(String.format(
-                        "Received event [%s]", event.toString()));
+                System.out.printf("Received event [%s]%n", event.toString());
             }
 
             @Override
             public void onAuthenticationFailure(String message, Exception e) {
-                System.out.println(String.format(
-                        "Authorization failure due to [%s], exception was [%s]", message, e));
+                System.out.printf(
+                        "Authorization failure due to [%s], exception was [%s]%n",
+                        message,
+                        e
+                );
             }
 
             @Override
-            public void onUsersInformationReceived(String channelName, Set<User> users) {
+            public void onUsersInformationReceived(
+                    String channelName,
+                    Set<User> users
+            ) {
                 System.out.println("Received user information");
                 printCurrentlySubscribedUsers();
             }
 
             @Override
             public void userSubscribed(String channelName, User user) {
-                System.out.println(String.format("A new user has joined channel [%s]: %s", channelName, user.toString()));
+                System.out.printf(
+                        "A new user has joined channel [%s]: %s%n",
+                        channelName,
+                        user.toString()
+                );
                 printCurrentlySubscribedUsers();
             }
 
             @Override
             public void userUnsubscribed(String channelName, User user) {
-                System.out.println(String.format("A user has left channel [%s]: %s", channelName, user));
+                System.out.printf("A user has left channel [%s]: %s%n", channelName, user);
                 printCurrentlySubscribedUsers();
             }
         };
 
         // subscribe to the channel and with the event listener for the event name
-        channel = pusher.subscribePresence(channelName, presenceChannelEventListener, eventName);
-
+        channel =
+                pusher.subscribePresence(
+                        channelName,
+                        presenceChannelEventListener,
+                        eventName
+                );
 
         // Keep main thread asleep while we watch for events or application will terminate
         while (true) {
             try {
                 Thread.sleep(1000);
-            }
-            catch (final InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
     private void printCurrentlySubscribedUsers() {
-        final StringBuilder sb = new StringBuilder("Users now subscribed to the channel:");
+        final StringBuilder sb = new StringBuilder(
+                "Users now subscribed to the channel:"
+        );
         for (final User user : channel.getUsers()) {
             sb.append("\n\t");
             sb.append(user.toString());
@@ -143,6 +169,6 @@ public class PresenceChannelExampleApp {
             }
         }
 
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
 }

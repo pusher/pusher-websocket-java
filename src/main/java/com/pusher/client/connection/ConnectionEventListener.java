@@ -20,7 +20,6 @@ package com.pusher.client.connection;
  * </p>
  */
 public interface ConnectionEventListener {
-
     /**
      * Callback that is fired whenever the {@link ConnectionState} of the
      * {@link Connection} changes. The state typically changes during connection
@@ -34,8 +33,8 @@ public interface ConnectionEventListener {
      * </p>
      *
      * @param change An object that contains the previous state of the connection
-     *            and the new state. The new state can be retrieved by calling
-     *            {@link ConnectionStateChange#getCurrentState()}.
+     *               and the new state. The new state can be retrieved by calling
+     *               {@link ConnectionStateChange#getCurrentState()}.
      */
     void onConnectionStateChange(ConnectionStateChange change);
 
@@ -54,12 +53,9 @@ public interface ConnectionEventListener {
      * status changes.
      * </p>
      *
-     * @param message
-     *            A message indicating the cause of the error.
-     * @param code
-     *            The error code for the message. Can be null.
-     * @param e
-     *            The exception that was thrown, if any. Can be null.
+     * @param message A message indicating the cause of the error.
+     * @param code    The error code for the message. Can be null.
+     * @param e       The exception that was thrown, if any. Can be null.
      */
     void onError(String message, String code, Exception e);
 }

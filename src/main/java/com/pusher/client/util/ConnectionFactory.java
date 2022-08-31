@@ -5,6 +5,7 @@ package com.pusher.client.util;
  * building HttpChannelAuthorizer connections
  */
 public abstract class ConnectionFactory {
+
     private String channelName;
     private String socketId;
 

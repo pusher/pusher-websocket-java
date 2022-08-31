@@ -5,10 +5,10 @@ import static java.util.Arrays.fill;
 // copied from: https://stackoverflow.com/a/4265472/501940 and improved (naming, char validation)
 public class Base64 {
 
-    private final static char[] CHAR_INDEX_TABLE =
+    private static final char[] CHAR_INDEX_TABLE =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
 
-    private static int[] charToIndexSparseMappingArray = new int[128];
+    private static final int[] charToIndexSparseMappingArray = new int[128];
 
     static {
         fill(charToIndexSparseMappingArray, -1);
@@ -19,12 +19,16 @@ public class Base64 {
 
     private static int toInt(char character) {
         int retVal = charToIndexSparseMappingArray[character];
-        if (retVal == -1) throw new IllegalArgumentException("invalid char: " + character);
+        if (retVal == -1) throw new IllegalArgumentException(
+                "invalid char: " + character
+        );
         return retVal;
     }
 
     public static byte[] decode(String base64String) {
-        int paddingSize = base64String.endsWith("==") ? 2 : base64String.endsWith("=") ? 1 : 0;
+        int paddingSize = base64String.endsWith("==")
+                ? 2
+                : base64String.endsWith("=") ? 1 : 0;
         byte[] retVal = new byte[base64String.length() * 3 / 4 - paddingSize];
         int mask = 0xFF;
         int index = 0;

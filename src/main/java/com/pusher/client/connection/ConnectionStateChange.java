@@ -7,7 +7,9 @@ import java.util.logging.Logger;
  */
 public class ConnectionStateChange {
 
-    private static final Logger log = Logger.getLogger(ConnectionStateChange.class.getName());
+    private static final Logger log = Logger.getLogger(
+            ConnectionStateChange.class.getName()
+    );
     private final ConnectionState previousState;
     private final ConnectionState currentState;
 
@@ -16,13 +18,17 @@ public class ConnectionStateChange {
      * used as part of the API.
      *
      * @param previousState The previous connection state
-     * @param currentState The current connection state
+     * @param currentState  The current connection state
      */
-    public ConnectionStateChange(final ConnectionState previousState, final ConnectionState currentState) {
-
+    public ConnectionStateChange(
+            final ConnectionState previousState,
+            final ConnectionState currentState
+    ) {
         if (previousState == currentState) {
-        log.fine("Attempted to create an connection state update where both previous and current state are: "
-             + currentState);
+            log.fine(
+                    "Attempted to create an connection state update where both previous and current state are: " +
+                            currentState
+            );
         }
 
         this.previousState = previousState;
@@ -56,9 +62,12 @@ public class ConnectionStateChange {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj != null && obj instanceof ConnectionStateChange) {
-            final ConnectionStateChange other = (ConnectionStateChange)obj;
-            return currentState == other.currentState && previousState == other.previousState;
+        if (obj instanceof ConnectionStateChange) {
+            final ConnectionStateChange other = (ConnectionStateChange) obj;
+            return (
+                    currentState == other.currentState &&
+                            previousState == other.previousState
+            );
         }
 
         return false;

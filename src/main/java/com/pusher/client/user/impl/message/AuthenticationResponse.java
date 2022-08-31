@@ -1,8 +1,9 @@
-package com.pusher.client.connection.impl.message;
+package com.pusher.client.user.impl.message;
 
 import com.google.gson.annotations.SerializedName;
 
 public class AuthenticationResponse {
+
     private String auth;
 
     @SerializedName("user_data")

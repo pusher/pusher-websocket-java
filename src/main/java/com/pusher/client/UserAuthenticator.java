@@ -11,17 +11,14 @@ package com.pusher.client;
  * </p>
  */
 public interface UserAuthenticator {
-
     /**
      * Called when a user is to be authenticated.
      *
-     * @param socketId
-     *            A unique socket connection ID to be used with the
-     *            authentication. This uniquely identifies the connection that
-     *            on which the user is being authenticated.
+     * @param socketId A unique socket connection ID to be used with the
+     *                 authentication. This uniquely identifies the connection that
+     *                 on which the user is being authenticated.
      * @return A user authentication token.
-     * @throws AuthenticationFailureException
-     *            if the authentication fails.
+     * @throws AuthenticationFailureException if the authentication fails.
      */
     String authenticate(String socketId) throws AuthenticationFailureException;
 }

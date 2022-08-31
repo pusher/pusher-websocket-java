@@ -32,12 +32,12 @@ targetCompatibility = "1.8"
 
 ext.sharedManifest = manifest {
     attributes(
-        'Created-By'            : 'Pusher',
-        'Implementation-Vendor' : 'Pusher',
-        'Implementation-Title'  : 'Pusher Java Websocket API Example',
-        'Implementation-Version': version,
-        'Package'               : 'com.pusher.client.example',
-        'Main-Class'            : 'com.pusher.client.example.ExampleApp'
+            'Created-By': 'Pusher',
+            'Implementation-Vendor': 'Pusher',
+            'Implementation-Title': 'Pusher Java Websocket API Example',
+            'Implementation-Version': version,
+            'Package': 'com.pusher.client.example',
+            'Main-Class': 'com.pusher.client.example.ExampleApp'
     )
 }
 
@@ -58,8 +58,8 @@ dependencies {
 
 processResources {
     filter(ReplaceTokens, tokens: [
-        version: project.version
-    ] )
+            version: project.version
+    ])
 }
 
 
@@ -86,7 +86,7 @@ jar {
     }
 }
 
-task fatJar(type: Jar, dependsOn:configurations.runtimeClasspath) {
+task fatJar(type: Jar, dependsOn: configurations.runtimeClasspath) {
     manifest = project.manifest {
         from sharedManifest
     }
