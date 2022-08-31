@@ -13,11 +13,7 @@ public class SimpleWebSocket extends WebSocketClient {
     }
 
     public SimpleWebSocket() throws URISyntaxException {
-        super(
-                new URI(
-                        "ws://ws.pusherapp.com/app/387954142406c3c9cc13?protocol=6&client=js&version=0.1.2&flash=false"
-                )
-        );
+        super(new URI("ws://ws.pusherapp.com/app/387954142406c3c9cc13?protocol=6&client=js&version=0.1.2&flash=false"));
         System.out.println("SimpleWebSocket");
 
         connect();
@@ -34,11 +30,7 @@ public class SimpleWebSocket extends WebSocketClient {
     }
 
     @Override
-    public void onClose(
-            final int code,
-            final String reason,
-            final boolean remote
-    ) {
+    public void onClose(final int code, final String reason, final boolean remote) {
         System.out.println("onClose");
     }
 

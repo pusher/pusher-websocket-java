@@ -20,11 +20,8 @@ public class TestWebSocketClientWrapper extends WebSocketClientWrapper {
     private final List<String> messagesSent = new ArrayList<String>();
     private boolean connectCalled = false;
 
-    public TestWebSocketClientWrapper(
-            final URI uri,
-            final Proxy proxy,
-            final WebSocketListener webSocketListener
-    ) throws SSLException {
+    public TestWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener)
+            throws SSLException {
         super(uri, proxy, webSocketListener);
     }
 

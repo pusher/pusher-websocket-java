@@ -97,10 +97,7 @@ public class User {
     public boolean equals(final Object other) {
         if (other instanceof User) {
             final User otherUser = (User) other;
-            return (
-                    getId().equals(otherUser.getId()) &&
-                            this.getInfo().equals(otherUser.getInfo())
-            );
+            return (getId().equals(otherUser.getId()) && this.getInfo().equals(otherUser.getInfo()));
         }
 
         return false;

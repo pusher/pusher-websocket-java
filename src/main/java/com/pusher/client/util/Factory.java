@@ -69,10 +69,7 @@ public class Factory {
                                 this
                         );
             } catch (final URISyntaxException e) {
-                throw new IllegalArgumentException(
-                        "Failed to initialise connection",
-                        e
-                );
+                throw new IllegalArgumentException("Failed to initialise connection", e);
             }
         }
         return connection;
@@ -88,10 +85,7 @@ public class Factory {
 
     public synchronized ScheduledExecutorService getTimers() {
         if (timers == null) {
-            timers =
-                    Executors.newSingleThreadScheduledExecutor(
-                            new DaemonThreadFactory("timers")
-                    );
+            timers = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("timers"));
         }
         return timers;
     }
@@ -105,12 +99,7 @@ public class Factory {
             final String channelName,
             final ChannelAuthorizer channelAuthorizer
     ) {
-        return new PrivateChannelImpl(
-                connection,
-                channelName,
-                channelAuthorizer,
-                this
-        );
+        return new PrivateChannelImpl(connection, channelName, channelAuthorizer, this);
     }
 
     public PrivateEncryptedChannelImpl newPrivateEncryptedChannel(
@@ -118,13 +107,7 @@ public class Factory {
             final String channelName,
             final ChannelAuthorizer channelAuthorizer
     ) {
-        return new PrivateEncryptedChannelImpl(
-                connection,
-                channelName,
-                channelAuthorizer,
-                this,
-                new SecretBoxOpenerFactory()
-        );
+        return new PrivateEncryptedChannelImpl(connection, channelName, channelAuthorizer, this, new SecretBoxOpenerFactory());
     }
 
     public PresenceChannelImpl newPresenceChannel(
@@ -132,18 +115,10 @@ public class Factory {
             final String channelName,
             final ChannelAuthorizer channelAuthorizer
     ) {
-        return new PresenceChannelImpl(
-                connection,
-                channelName,
-                channelAuthorizer,
-                this
-        );
+        return new PresenceChannelImpl(connection, channelName, channelAuthorizer, this);
     }
 
-    public InternalUser newUser(
-            InternalConnection connection,
-            UserAuthenticator userAuthenticator
-    ) {
+    public InternalUser newUser(InternalConnection connection, UserAuthenticator userAuthenticator) {
         return new InternalUser(connection, userAuthenticator, this);
     }
 
@@ -156,18 +131,13 @@ public class Factory {
 
     public synchronized void queueOnEventThread(final Runnable r) {
         if (eventQueue == null) {
-            eventQueue =
-                    Executors.newSingleThreadExecutor(
-                            new DaemonThreadFactory("eventQueue")
-                    );
+            eventQueue = Executors.newSingleThreadExecutor(new DaemonThreadFactory("eventQueue"));
         }
-        eventQueue.execute(
-                () -> {
-                    synchronized (eventLock) {
-                        r.run();
-                    }
-                }
-        );
+        eventQueue.execute(() -> {
+            synchronized (eventLock) {
+                r.run();
+            }
+        });
     }
 
     public synchronized void shutdownThreads() {

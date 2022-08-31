@@ -43,12 +43,7 @@ public class PusherEvent {
         this.data = data;
     }
 
-    public PusherEvent(
-            String event,
-            String channel,
-            String userId,
-            Map<String, Object> data
-    ) {
+    public PusherEvent(String event, String channel, String userId, Map<String, Object> data) {
         this(event, channel, userId, new Gson().toJson(data));
     }
 

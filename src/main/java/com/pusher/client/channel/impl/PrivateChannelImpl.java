@@ -41,21 +41,13 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     public void trigger(final String eventName, final String data) {
         if (eventName == null || !eventName.startsWith(CLIENT_EVENT_PREFIX)) {
             throw new IllegalArgumentException(
-                    "Cannot trigger event " +
-                            eventName +
-                            ": client events must start with \"client-\""
+                    "Cannot trigger event " + eventName + ": client events must start with \"client-\""
             );
         }
 
         if (state != ChannelState.SUBSCRIBED) {
             throw new IllegalStateException(
-                    "Cannot trigger event " +
-                            eventName +
-                            " because channel " +
-                            name +
-                            " is in " +
-                            state.toString() +
-                            " state"
+                    "Cannot trigger event " + eventName + " because channel " + name + " is in " + state.toString() + " state"
             );
         }
 
@@ -69,18 +61,13 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
             );
         }
 
-        connection.sendMessage(
-                new PusherEvent(eventName, name, null, data).toJson()
-        );
+        connection.sendMessage(new PusherEvent(eventName, name, null, data).toJson());
     }
 
     /* Base class overrides */
 
     @Override
-    public void bind(
-            final String eventName,
-            final SubscriptionEventListener listener
-    ) {
+    public void bind(final String eventName, final SubscriptionEventListener listener) {
         if (!(listener instanceof PrivateChannelEventListener)) {
             throw new IllegalArgumentException(
                     "Only instances of PrivateChannelEventListener can be bound to a private channel"
@@ -92,10 +79,7 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
 
     private String authorize() {
         try {
-            final AuthResponse authResponse = GSON.fromJson(
-                    getAuthorizationResponse(),
-                    AuthResponse.class
-            );
+            final AuthResponse authResponse = GSON.fromJson(getAuthorizationResponse(), AuthResponse.class);
             channelData = authResponse.getChannelData();
 
             if (authResponse.getAuth() == null) {
@@ -107,9 +91,7 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
                 return authResponse.getAuth();
             }
         } catch (JsonSyntaxException e) {
-            throw new AuthorizationFailureException(
-                    "Unable to parse response from ChannelAuthorizer"
-            );
+            throw new AuthorizationFailureException("Unable to parse response from ChannelAuthorizer");
         }
     }
 

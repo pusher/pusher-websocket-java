@@ -93,9 +93,7 @@ public class ChannelImplTest {
     @Test
     public void testReturnsCorrectSubscribeMessage() {
         assertEquals(
-                "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" +
-                        getChannelName() +
-                        "\"}}",
+                "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}",
                 channel.toSubscribeMessage()
         );
     }
@@ -103,9 +101,7 @@ public class ChannelImplTest {
     @Test
     public void testReturnsCorrectUnsubscribeMessage() {
         assertEquals(
-                "{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\"" +
-                        getChannelName() +
-                        "\"}}",
+                "{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}",
                 channel.toUnsubscribeMessage()
         );
     }
@@ -144,11 +140,7 @@ public class ChannelImplTest {
 
         channel.bind(EVENT_NAME, mockListener);
         channel.handleEvent(
-                PusherEvent.fromJson(
-                        "{\"event\":\"" +
-                                EVENT_NAME +
-                                "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}"
-                )
+                PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}")
         );
 
         verify(mockListener, times(1)).onEvent(argCaptor.capture());
@@ -160,11 +152,7 @@ public class ChannelImplTest {
     public void testDataIsExtractedFromMessageAndPassedToSingleListenerGlobalEvent() {
         channel.bindGlobal(mockListener);
         channel.handleEvent(
-                PusherEvent.fromJson(
-                        "{\"event\":\"" +
-                                EVENT_NAME +
-                                "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}"
-                )
+                PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}")
         );
 
         verify(mockListener, times(1)).onEvent(argCaptor.capture());
@@ -180,11 +168,7 @@ public class ChannelImplTest {
         channel.bind(EVENT_NAME, mockListener2);
 
         channel.handleEvent(
-                PusherEvent.fromJson(
-                        "{\"event\":\"" +
-                                EVENT_NAME +
-                                "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}"
-                )
+                PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}")
         );
 
         verify(mockListener).onEvent(argCaptor.capture());
@@ -199,9 +183,7 @@ public class ChannelImplTest {
     @Test
     public void testEventIsNotPassedOnIfThereAreNoMatchingListeners() {
         channel.bind(EVENT_NAME, mockListener);
-        channel.handleEvent(
-                PusherEvent.fromJson("{\"event\":\"DifferentEventName\",\"data\":{}}")
-        );
+        channel.handleEvent(PusherEvent.fromJson("{\"event\":\"DifferentEventName\",\"data\":{}}"));
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }
@@ -210,9 +192,7 @@ public class ChannelImplTest {
     public void testEventIsNotPassedOnIfListenerHasUnboundFromEvent() {
         channel.bind(EVENT_NAME, mockListener);
         channel.unbind(EVENT_NAME, mockListener);
-        channel.handleEvent(
-                PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{}\"}")
-        );
+        channel.handleEvent(PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{}\"}"));
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }
@@ -221,9 +201,7 @@ public class ChannelImplTest {
     public void testEventIsNotPassedOnIfListenerHasUnboundFromGlobalEvent() {
         channel.bindGlobal(mockListener);
         channel.unbindGlobal(mockListener);
-        channel.handleEvent(
-                PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{}\"}")
-        );
+        channel.handleEvent(PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{}\"}"));
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }

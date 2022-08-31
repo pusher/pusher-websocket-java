@@ -15,10 +15,7 @@ public class ConnectionStateChangeTest {
         final ConnectionState previous = ConnectionState.DISCONNECTED;
         final ConnectionState current = ConnectionState.CONNECTING;
 
-        final ConnectionStateChange change = new ConnectionStateChange(
-                previous,
-                current
-        );
+        final ConnectionStateChange change = new ConnectionStateChange(previous, current);
 
         assertSame(previous, change.getPreviousState());
         assertSame(current, change.getCurrentState());

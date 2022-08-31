@@ -10,8 +10,7 @@ public class Base64Test {
 
     @Test
     public void decodeValidChars() {
-        String validChars =
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        String validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         assertThat(Base64.decode(validChars)).isNotEmpty();
     }
 

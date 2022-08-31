@@ -50,10 +50,8 @@ public class PrivateEncryptedChannelClearsKeyTest {
 
     @Before
     public void setUp() {
-        when(mockChannelAuthorizer.authorize(eq(CHANNEL_NAME), anyString()))
-                .thenReturn(AUTH_RESPONSE);
-        when(mockSecretBoxOpenerFactory.create(any()))
-                .thenReturn(mockSecretBoxOpener);
+        when(mockChannelAuthorizer.authorize(eq(CHANNEL_NAME), anyString())).thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any())).thenReturn(mockSecretBoxOpener);
 
         subject =
                 new PrivateEncryptedChannelImpl(
@@ -80,10 +78,7 @@ public class PrivateEncryptedChannelClearsKeyTest {
                 (Answer<Void>) invocation -> {
                     ConnectionEventListener l = (ConnectionEventListener) invocation.getArguments()[1];
                     l.onConnectionStateChange(
-                            new ConnectionStateChange(
-                                    ConnectionState.DISCONNECTING,
-                                    ConnectionState.DISCONNECTED
-                            )
+                            new ConnectionStateChange(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED)
                     );
                     return null;
                 }
@@ -103,10 +98,7 @@ public class PrivateEncryptedChannelClearsKeyTest {
 
                     ConnectionEventListener l = (ConnectionEventListener) invocation.getArguments()[1];
                     l.onConnectionStateChange(
-                            new ConnectionStateChange(
-                                    ConnectionState.DISCONNECTING,
-                                    ConnectionState.DISCONNECTED
-                            )
+                            new ConnectionStateChange(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED)
                     );
 
                     return null;

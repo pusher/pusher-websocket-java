@@ -23,9 +23,7 @@ import com.pusher.client.util.internal.Base64;
 
 import java.util.Set;
 
-public class PrivateEncryptedChannelImpl
-        extends ChannelImpl
-        implements PrivateEncryptedChannel {
+public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateEncryptedChannel {
 
     private final InternalConnection connection;
     private final ChannelAuthorizer channelAuthorizer;
@@ -61,14 +59,10 @@ public class PrivateEncryptedChannelImpl
     }
 
     @Override
-    public void bind(
-            final String eventName,
-            final SubscriptionEventListener listener
-    ) {
+    public void bind(final String eventName, final SubscriptionEventListener listener) {
         if (!(listener instanceof PrivateEncryptedChannelEventListener)) {
             throw new IllegalArgumentException(
-                    "Only instances of PrivateEncryptedChannelEventListener can be bound " +
-                            "to a private encrypted channel"
+                    "Only instances of PrivateEncryptedChannelEventListener can be bound " + "to a private encrypted channel"
             );
         }
 
@@ -82,13 +76,8 @@ public class PrivateEncryptedChannelImpl
 
     private String authenticate() {
         try {
-            final AuthResponse authResponse = GSON.fromJson(
-                    getAuthorizationResponse(),
-                    AuthResponse.class
-            );
-            if (
-                    authResponse.getAuth() == null || authResponse.getSharedSecret() == null
-            ) {
+            final AuthResponse authResponse = GSON.fromJson(getAuthorizationResponse(), AuthResponse.class);
+            if (authResponse.getAuth() == null || authResponse.getSharedSecret() == null) {
                 throw new AuthorizationFailureException(
                         "Didn't receive all the fields expected " +
                                 "from the ChannelAuthorizer, expected an auth and shared_secret."
@@ -98,9 +87,7 @@ public class PrivateEncryptedChannelImpl
                 return authResponse.getAuth();
             }
         } catch (JsonSyntaxException e) {
-            throw new AuthorizationFailureException(
-                    "Unable to parse response from Authorizer"
-            );
+            throw new AuthorizationFailureException("Unable to parse response from Authorizer");
         }
     }
 
@@ -110,10 +97,7 @@ public class PrivateEncryptedChannelImpl
     }
 
     private void setListenerToDisposeSecretBoxOpenerOnDisconnected() {
-        connection.bind(
-                ConnectionState.DISCONNECTED,
-                disposeSecretBoxOpenerOnDisconnectedListener
-        );
+        connection.bind(ConnectionState.DISCONNECTED, disposeSecretBoxOpenerOnDisconnectedListener);
     }
 
     @Override
@@ -139,25 +123,16 @@ public class PrivateEncryptedChannelImpl
             } catch (AuthenticityException e2) {
                 // deliberately not destroying the secretBoxOpener so the next message
                 // has an opportunity to fetch a new key and decrypt
-                notifyListenersOfDecryptFailure(
-                        event.getEventName(),
-                        "Failed to decrypt message."
-                );
+                notifyListenersOfDecryptFailure(event.getEventName(), "Failed to decrypt message.");
             }
         }
     }
 
-    private void notifyListenersOfDecryptFailure(
-            final String event,
-            final String reason
-    ) {
+    private void notifyListenersOfDecryptFailure(final String event, final String reason) {
         Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
         if (listeners != null) {
             for (SubscriptionEventListener listener : listeners) {
-                ((PrivateEncryptedChannelEventListener) listener).onDecryptionFailure(
-                        event,
-                        reason
-                );
+                ((PrivateEncryptedChannelEventListener) listener).onDecryptionFailure(event, reason);
             }
         }
     }
@@ -165,23 +140,11 @@ public class PrivateEncryptedChannelImpl
     private PusherEvent decryptMessage(PusherEvent event) {
         String decryptedData = "{}";
         if (!event.getData().equals("{}")) {
-            final EncryptedReceivedData encryptedReceivedData = GSON.fromJson(
-                    event.getData(),
-                    EncryptedReceivedData.class
-            );
+            final EncryptedReceivedData encryptedReceivedData = GSON.fromJson(event.getData(), EncryptedReceivedData.class);
 
-            decryptedData =
-                    secretBoxOpener.open(
-                            encryptedReceivedData.getCiphertext(),
-                            encryptedReceivedData.getNonce()
-                    );
+            decryptedData = secretBoxOpener.open(encryptedReceivedData.getCiphertext(), encryptedReceivedData.getNonce());
         }
-        return new PusherEvent(
-                event.getEventName(),
-                event.getChannelName(),
-                event.getUserId(),
-                decryptedData
-        );
+        return new PusherEvent(event.getEventName(), event.getChannelName(), event.getUserId(), decryptedData);
     }
 
     private void disposeSecretBoxOpener() {
@@ -193,10 +156,7 @@ public class PrivateEncryptedChannelImpl
     }
 
     private void removeListenerToDisposeSecretBoxOpenerOnDisconnected() {
-        connection.unbind(
-                ConnectionState.DISCONNECTED,
-                disposeSecretBoxOpenerOnDisconnectedListener
-        );
+        connection.unbind(ConnectionState.DISCONNECTED, disposeSecretBoxOpenerOnDisconnectedListener);
     }
 
     private String getAuthorizationResponse() {

@@ -24,8 +24,7 @@ public class InternalUser implements User {
     private static final Gson GSON = new Gson();
     private static final Logger log = Logger.getLogger(User.class.getName());
 
-    private static class ConnectionStateChangeHandler
-            implements ConnectionEventListener {
+    private static class ConnectionStateChangeHandler implements ConnectionEventListener {
 
         private final InternalUser user;
 
@@ -61,21 +60,14 @@ public class InternalUser implements User {
     private final ServerToUserChannel serverToUserChannel;
     private String userId;
 
-    public InternalUser(
-            InternalConnection connection,
-            UserAuthenticator userAuthenticator,
-            Factory factory
-    ) {
+    public InternalUser(InternalConnection connection, UserAuthenticator userAuthenticator, Factory factory) {
         this.connection = connection;
         this.userAuthenticator = userAuthenticator;
         this.channelManager = factory.getChannelManager();
         this.signinRequested = false;
         this.serverToUserChannel = new ServerToUserChannel(this, factory);
 
-        connection.bind(
-                ConnectionState.ALL,
-                new ConnectionStateChangeHandler(this)
-        );
+        connection.bind(ConnectionState.ALL, new ConnectionStateChangeHandler(this));
     }
 
     public void signin() throws AuthenticationFailureException {
@@ -104,51 +96,31 @@ public class InternalUser implements User {
         }
 
         AuthenticationResponse authenticationResponse = getAuthenticationResponse();
-        connection.sendMessage(
-                authenticationResponseToSigninMessage(authenticationResponse)
-        );
+        connection.sendMessage(authenticationResponseToSigninMessage(authenticationResponse));
     }
 
-    private static String authenticationResponseToSigninMessage(
-            AuthenticationResponse authenticationResponse
-    ) {
-        return GSON.toJson(
-                new SigninMessage(
-                        authenticationResponse.getAuth(),
-                        authenticationResponse.getUserData()
-                )
-        );
+    private static String authenticationResponseToSigninMessage(AuthenticationResponse authenticationResponse) {
+        return GSON.toJson(new SigninMessage(authenticationResponse.getAuth(), authenticationResponse.getUserData()));
     }
 
-    private AuthenticationResponse getAuthenticationResponse()
-            throws AuthenticationFailureException {
+    private AuthenticationResponse getAuthenticationResponse() throws AuthenticationFailureException {
         String response = userAuthenticator.authenticate(connection.getSocketId());
         try {
-            AuthenticationResponse authenticationResponse = GSON.fromJson(
-                    response,
-                    AuthenticationResponse.class
-            );
-            if (
-                    authenticationResponse.getAuth() == null ||
-                            authenticationResponse.getUserData() == null
-            ) {
+            AuthenticationResponse authenticationResponse = GSON.fromJson(response, AuthenticationResponse.class);
+            if (authenticationResponse.getAuth() == null || authenticationResponse.getUserData() == null) {
                 throw new AuthenticationFailureException(
                         "Didn't receive all the fields expected from the UserAuthenticator. Expected auth and user_data"
                 );
             }
             return authenticationResponse;
         } catch (JsonSyntaxException e) {
-            throw new AuthenticationFailureException(
-                    "Unable to parse response from AuthenticationResponse"
-            );
+            throw new AuthenticationFailureException("Unable to parse response from AuthenticationResponse");
         }
     }
 
     private void onSigninSuccess(PusherEvent event) {
         try {
-            String userData = (String) GSON
-                    .fromJson(event.getData(), Map.class)
-                    .get("user_data");
+            String userData = (String) GSON.fromJson(event.getData(), Map.class).get("user_data");
             userId = (String) GSON.fromJson(userData, Map.class).get("id");
         } catch (Exception e) {
             log.severe("Failed parsing user data after signin");

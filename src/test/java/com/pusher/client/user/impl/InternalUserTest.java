@@ -34,8 +34,7 @@ public class InternalUserTest {
             "{\"event\": \"pusher:signin_success\", \"data\": \"{\\\"user_data\\\": \\\"{\\\\\\\"id\\\\\\\":\\\\\\\"1\\\\\\\"}\\\"}\"}";
     private static final String signinSuccessEventMissingId =
             "{\"event\": \"pusher:signin_success\", \"data\": \"{\\\"user_data\\\": \\\"{}\\\"}\"}";
-    private static final String signinSuccessEventMalformed =
-            "{\"event\": \"pusher:signin_success\", \"data\": \"{}\"}";
+    private static final String signinSuccessEventMalformed = "{\"event\": \"pusher:signin_success\", \"data\": \"{}\"}";
 
     private InternalUser user;
 
@@ -72,8 +71,7 @@ public class InternalUserTest {
     @Test
     public void testSigninWhenConnected() {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-        when(mockUserAuthenticator.authenticate(socketId))
-                .thenReturn(authenticationResponse);
+        when(mockUserAuthenticator.authenticate(socketId)).thenReturn(authenticationResponse);
         user.signin();
         verify(mockConnection).sendMessage(any(String.class));
     }
@@ -81,8 +79,7 @@ public class InternalUserTest {
     @Test(expected = AuthenticationFailureException.class)
     public void testSigninMalformedResponse() {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
-        when(mockUserAuthenticator.authenticate(socketId))
-                .thenReturn(authenticationResponseMalformed);
+        when(mockUserAuthenticator.authenticate(socketId)).thenReturn(authenticationResponseMalformed);
         user.signin();
     }
 
@@ -90,24 +87,21 @@ public class InternalUserTest {
     public void testHandleEventSigninSuccessEvent() {
         user.handleEvent(PusherEvent.fromJson(signinSuccessEvent));
         assertEquals(user.userId(), "1");
-        verify(mockChannelManager)
-                .subscribeTo(any(ServerToUserChannel.class), eq(null));
+        verify(mockChannelManager).subscribeTo(any(ServerToUserChannel.class), eq(null));
     }
 
     @Test
     public void testHandleEventSigninSuccessEventMissingId() {
         user.handleEvent(PusherEvent.fromJson(signinSuccessEventMissingId));
         assertNull(user.userId());
-        verify(mockChannelManager, never())
-                .subscribeTo(any(ServerToUserChannel.class), eq(null));
+        verify(mockChannelManager, never()).subscribeTo(any(ServerToUserChannel.class), eq(null));
     }
 
     @Test
     public void testHandleEventSigninSuccessEventMalformed() {
         user.handleEvent(PusherEvent.fromJson(signinSuccessEventMalformed));
         assertNull(user.userId());
-        verify(mockChannelManager, never())
-                .subscribeTo(any(ServerToUserChannel.class), eq(null));
+        verify(mockChannelManager, never()).subscribeTo(any(ServerToUserChannel.class), eq(null));
     }
 
     @Test

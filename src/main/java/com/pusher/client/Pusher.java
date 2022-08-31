@@ -90,11 +90,7 @@ public class Pusher implements Client, PusherEventHandler {
      * Creates a new Pusher instance using the provided Factory, package level
      * access for unit tests only.
      */
-    Pusher(
-            final String apiKey,
-            final PusherOptions pusherOptions,
-            final Factory factory
-    ) {
+    Pusher(final String apiKey, final PusherOptions pusherOptions, final Factory factory) {
         if (apiKey == null || apiKey.length() == 0) {
             throw new IllegalArgumentException("API Key cannot be null or empty");
         }
@@ -163,10 +159,7 @@ public class Pusher implements Client, PusherEventHandler {
      * @throws IllegalArgumentException If the {@link ConnectionEventListener} is null and at least
      *                                  one connection state has been specified.
      */
-    public void connect(
-            final ConnectionEventListener eventListener,
-            ConnectionState... connectionStates
-    ) {
+    public void connect(final ConnectionEventListener eventListener, ConnectionState... connectionStates) {
         if (eventListener != null) {
             if (connectionStates.length == 0) {
                 connectionStates = new ConnectionState[]{ConnectionState.ALL};
@@ -177,9 +170,7 @@ public class Pusher implements Client, PusherEventHandler {
             }
         } else {
             if (connectionStates.length > 0) {
-                throw new IllegalArgumentException(
-                        "Cannot bind to connection states with a null connection event listener"
-                );
+                throw new IllegalArgumentException("Cannot bind to connection states with a null connection event listener");
             }
         }
 
@@ -195,10 +186,7 @@ public class Pusher implements Client, PusherEventHandler {
      * </p>
      */
     public void disconnect() {
-        if (
-                connection.getState() != ConnectionState.DISCONNECTING &&
-                        connection.getState() != ConnectionState.DISCONNECTED
-        ) {
+        if (connection.getState() != ConnectionState.DISCONNECTING && connection.getState() != ConnectionState.DISCONNECTED) {
             connection.disconnect();
         }
     }
@@ -267,11 +255,7 @@ public class Pusher implements Client, PusherEventHandler {
      *                                  {@link ChannelEventListener} is null.</li>
      *                                  </ul>
      */
-    public Channel subscribe(
-            final String channelName,
-            final ChannelEventListener listener,
-            final String... eventNames
-    ) {
+    public Channel subscribe(final String channelName, final ChannelEventListener listener, final String... eventNames) {
         final InternalChannel channel = factory.newPublicChannel(channelName);
         channelManager.subscribeTo(channel, listener, eventNames);
 
@@ -445,9 +429,7 @@ public class Pusher implements Client, PusherEventHandler {
      * @return A private encrypted channel, or null if it could not be found
      * @throws IllegalArgumentException if you try to retrieve a public or presence channel.
      */
-    public PrivateEncryptedChannel getPrivateEncryptedChannel(
-            String channelName
-    ) {
+    public PrivateEncryptedChannel getPrivateEncryptedChannel(String channelName) {
         return channelManager.getPrivateEncryptedChannel(channelName);
     }
 

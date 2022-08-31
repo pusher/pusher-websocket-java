@@ -25,10 +25,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PrivateChannelImplTest extends ChannelImplTest {
 
-    private static final String AUTH_RESPONSE =
-            "\"auth\":\"a87fe72c6f36272aa4b1:41dce43734b18bb\"";
-    private static final String AUTH_RESPONSE_CHANNEL_DATA =
-            "\"channel_data\":\"{\\\"user_id\\\":\\\"51169fc47abac\\\"}\"";
+    private static final String AUTH_RESPONSE = "\"auth\":\"a87fe72c6f36272aa4b1:41dce43734b18bb\"";
+    private static final String AUTH_RESPONSE_CHANNEL_DATA = "\"channel_data\":\"{\\\"user_id\\\":\\\"51169fc47abac\\\"}\"";
 
     @Mock
     protected InternalConnection mockConnection;
@@ -40,8 +38,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Before
     public void setUp() {
         super.setUp();
-        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString()))
-                .thenReturn("{" + AUTH_RESPONSE + "}");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{" + AUTH_RESPONSE + "}");
     }
 
     @Test
@@ -90,11 +87,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Override
     public void testReturnsCorrectSubscribeMessage() {
         assertEquals(
-                "{\"event\":\"pusher:subscribe\",\"data\":{" +
-                        AUTH_RESPONSE +
-                        ",\"channel\":\"" +
-                        getChannelName() +
-                        "\"}}",
+                "{\"event\":\"pusher:subscribe\",\"data\":{" + AUTH_RESPONSE + ",\"channel\":\"" + getChannelName() + "\"}}",
                 channel.toSubscribeMessage()
         );
     }
@@ -120,30 +113,25 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerThrowsException() {
         when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString()))
-                .thenThrow(
-                        new AuthorizationFailureException("Unable to contact auth server")
-                );
+                .thenThrow(new AuthorizationFailureException("Unable to contact auth server"));
         channel.toSubscribeMessage();
     }
 
     @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsBasicString() {
-        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString()))
-                .thenReturn("I'm a string");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("I'm a string");
         channel.toSubscribeMessage();
     }
 
     @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsInvalidJSON() {
-        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString()))
-                .thenReturn("{\"auth\":\"");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{\"auth\":\"");
         channel.toSubscribeMessage();
     }
 
     @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsJSONWithoutAnAuthToken() {
-        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString()))
-                .thenReturn("{\"fish\":\"chips\"");
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{\"fish\":\"chips\"");
         channel.toSubscribeMessage();
     }
 
@@ -151,10 +139,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     public void testTriggerWithValidEventSendsMessage() {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channel.updateState(ChannelState.SUBSCRIBED);
-        ((PrivateChannelImpl) channel).trigger(
-                "client-myEvent",
-                "{\"fish\":\"chips\"}"
-        );
+        ((PrivateChannelImpl) channel).trigger("client-myEvent", "{\"fish\":\"chips\"}");
 
         verify(mockConnection)
                 .sendMessage(
@@ -188,21 +173,14 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         ((PrivateChannelImpl) channel).trigger("client-myEvent", "string");
 
         verify(mockConnection)
-                .sendMessage(
-                        "{\"data\":\"string\",\"channel\":\"" +
-                                channel.getName() +
-                                "\",\"event\":\"client-myEvent\"}"
-                );
+                .sendMessage("{\"data\":\"string\",\"channel\":\"" + channel.getName() + "\",\"event\":\"client-myEvent\"}");
     }
 
     @Test(expected = IllegalStateException.class)
     public void testTriggerWhenChannelIsInInitialStateThrowsException() {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
 
-        ((PrivateChannelImpl) channel).trigger(
-                "client-myEvent",
-                "{\"fish\":\"chips\"}"
-        );
+        ((PrivateChannelImpl) channel).trigger("client-myEvent", "{\"fish\":\"chips\"}");
     }
 
     @Test(expected = IllegalStateException.class)
@@ -210,10 +188,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channel.updateState(ChannelState.SUBSCRIBE_SENT);
 
-        ((PrivateChannelImpl) channel).trigger(
-                "client-myEvent",
-                "{\"fish\":\"chips\"}"
-        );
+        ((PrivateChannelImpl) channel).trigger("client-myEvent", "{\"fish\":\"chips\"}");
     }
 
     @Test(expected = IllegalStateException.class)
@@ -221,10 +196,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channel.updateState(ChannelState.UNSUBSCRIBED);
 
-        ((PrivateChannelImpl) channel).trigger(
-                "client-myEvent",
-                "{\"fish\":\"chips\"}"
-        );
+        ((PrivateChannelImpl) channel).trigger("client-myEvent", "{\"fish\":\"chips\"}");
     }
 
     @Test(expected = IllegalStateException.class)
@@ -232,10 +204,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
         channel.updateState(ChannelState.SUBSCRIBED);
 
-        ((PrivateChannelImpl) channel).trigger(
-                "client-myEvent",
-                "{\"fish\":\"chips\"}"
-        );
+        ((PrivateChannelImpl) channel).trigger("client-myEvent", "{\"fish\":\"chips\"}");
     }
 
     @Test(expected = IllegalStateException.class)
@@ -243,10 +212,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTING);
         channel.updateState(ChannelState.SUBSCRIBED);
 
-        ((PrivateChannelImpl) channel).trigger(
-                "client-myEvent",
-                "{\"fish\":\"chips\"}"
-        );
+        ((PrivateChannelImpl) channel).trigger("client-myEvent", "{\"fish\":\"chips\"}");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -259,12 +225,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
 
     @Override
     protected ChannelImpl newInstance(final String channelName) {
-        return new PrivateChannelImpl(
-                mockConnection,
-                channelName,
-                mockChannelAuthorizer,
-                factory
-        );
+        return new PrivateChannelImpl(mockConnection, channelName, mockChannelAuthorizer, factory);
     }
 
     @Override

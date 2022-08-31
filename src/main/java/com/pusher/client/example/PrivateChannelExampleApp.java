@@ -29,8 +29,7 @@ public class PrivateChannelExampleApp {
     private String channelName = "my-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
-    private final String channelAuthorizationEndpoint =
-            "http://localhost:3030/pusher/auth";
+    private final String channelAuthorizationEndpoint = "http://localhost:3030/pusher/auth";
 
     private final PrivateChannel channel;
 
@@ -52,9 +51,7 @@ public class PrivateChannelExampleApp {
         }
 
         // create a HttpChannelAuthorizer that points to your channel authorization server
-        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(
-                channelAuthorizationEndpoint
-        );
+        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(channelAuthorizationEndpoint);
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
@@ -76,12 +73,7 @@ public class PrivateChannelExampleApp {
 
             @Override
             public void onError(String message, String code, Exception e) {
-                System.out.printf(
-                        "An error was received with message [%s], code [%s], exception [%s]%n",
-                        message,
-                        code,
-                        e
-                );
+                System.out.printf("An error was received with message [%s], code [%s], exception [%s]%n", message, code, e);
             }
         };
 
@@ -102,21 +94,12 @@ public class PrivateChannelExampleApp {
 
             @Override
             public void onAuthenticationFailure(String message, Exception e) {
-                System.out.printf(
-                        "Authorization failure due to [%s], exception was [%s]%n",
-                        message,
-                        e
-                );
+                System.out.printf("Authorization failure due to [%s], exception was [%s]%n", message, e);
             }
         };
 
         // subscribe to the channel and with the event listener for the event name
-        channel =
-                pusher.subscribePrivate(
-                        channelName,
-                        privateChannelEventListener,
-                        eventName
-                );
+        channel = pusher.subscribePrivate(channelName, privateChannelEventListener, eventName);
 
         // Keep main thread asleep while we watch for events or application will terminate
         while (true) {

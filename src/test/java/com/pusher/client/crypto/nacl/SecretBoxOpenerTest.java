@@ -15,9 +15,7 @@ public class SecretBoxOpenerTest {
 
     byte[] key = Base64.decode("6071zp2l/GPnDPDXNWTJDHyIZ8pZMvQrYsa4xuTKK2c=");
 
-    byte[] cipher = Base64.decode(
-            "tvttPE2PRQp0bWDmaPyiEU8YJGztmTvTN77OoPwftTNTdDgJXwxHQPE="
-    );
+    byte[] cipher = Base64.decode("tvttPE2PRQp0bWDmaPyiEU8YJGztmTvTN77OoPwftTNTdDgJXwxHQPE=");
     byte[] nonce = Base64.decode("xsbOS0KylAV2ziTDHrP/7rSFqpCOah3p");
 
     SecretBoxOpener subject;
@@ -36,10 +34,7 @@ public class SecretBoxOpenerTest {
 
     @Test
     public void openEmptyMessage() {
-        subject =
-                new SecretBoxOpener(
-                        Base64.decode("dwXDg1sGnypM44uPh5Rts/JIP2Y7XkHR5lB/o3rBlVs=")
-                );
+        subject = new SecretBoxOpener(Base64.decode("dwXDg1sGnypM44uPh5Rts/JIP2Y7XkHR5lB/o3rBlVs="));
 
         ArrayList<String> nonces = Lists.newArrayList(
                 "p8v9RQR5r6o3G7e2KRgteRi5P90ajKVz",
@@ -66,10 +61,7 @@ public class SecretBoxOpenerTest {
         );
 
         for (int i = 0; i < ciphers.size(); i++) {
-            String decryptedMessage = subject.open(
-                    Base64.decode(ciphers.get(i)),
-                    Base64.decode(nonces.get(i))
-            );
+            String decryptedMessage = subject.open(Base64.decode(ciphers.get(i)), Base64.decode(nonces.get(i)));
             assertThat(decryptedMessage).isEqualTo("{\"message\":\"\"}");
         }
     }

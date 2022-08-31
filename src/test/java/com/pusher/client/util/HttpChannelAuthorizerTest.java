@@ -16,25 +16,19 @@ public class HttpChannelAuthorizerTest {
 
     @Test
     public void testHTTPURLIsIdentifiedAsSSL() {
-        final HttpChannelAuthorizer auth = new HttpChannelAuthorizer(
-                "http://example.com/auth"
-        );
+        final HttpChannelAuthorizer auth = new HttpChannelAuthorizer("http://example.com/auth");
         assertFalse(auth.isSSL());
     }
 
     @Test
     public void testHTTPSURLIsIdentifiedAsSSL() {
-        final HttpChannelAuthorizer auth = new HttpChannelAuthorizer(
-                "https://example.com/auth"
-        );
+        final HttpChannelAuthorizer auth = new HttpChannelAuthorizer("https://example.com/auth");
         assertTrue(auth.isSSL());
     }
 
     @Test(expected = AuthorizationFailureException.class)
     public void testNon200ResponseThrowsAuthorizationFailureException() {
-        final HttpChannelAuthorizer auth = new HttpChannelAuthorizer(
-                "https://127.0.0.1/no-way-this-is-a-valid-url"
-        );
+        final HttpChannelAuthorizer auth = new HttpChannelAuthorizer("https://127.0.0.1/no-way-this-is-a-valid-url");
         auth.authorize("private-fish", "some socket id");
     }
 }

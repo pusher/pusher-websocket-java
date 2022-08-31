@@ -23,19 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PresenceChannelImpl
-        extends PrivateChannelImpl
-        implements PresenceChannel {
+public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceChannel {
 
-    private static final String MEMBER_ADDED_EVENT =
-            "pusher_internal:member_added";
-    private static final String MEMBER_REMOVED_EVENT =
-            "pusher_internal:member_removed";
+    private static final String MEMBER_ADDED_EVENT = "pusher_internal:member_added";
+    private static final String MEMBER_REMOVED_EVENT = "pusher_internal:member_removed";
     private static final Gson GSON = new Gson();
 
-    private final Map<String, User> idToUserMap = Collections.synchronizedMap(
-            new LinkedHashMap<>()
-    );
+    private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<>());
 
     private String myUserID;
 
@@ -87,10 +81,7 @@ public class PresenceChannelImpl
     }
 
     @Override
-    public void bind(
-            final String eventName,
-            final SubscriptionEventListener listener
-    ) {
+    public void bind(final String eventName, final SubscriptionEventListener listener) {
         if (!(listener instanceof PresenceChannelEventListener)) {
             throw new IllegalArgumentException(
                     "Only instances of PresenceChannelEventListener can be bound to a presence channel"
@@ -129,9 +120,7 @@ public class PresenceChannelImpl
         if (ids != null && !ids.isEmpty()) {
             // build the collection of Users
             for (final String id : ids) {
-                final String userData = hash.get(id) != null
-                        ? GSON.toJson(hash.get(id))
-                        : null;
+                final String userData = hash.get(id) != null ? GSON.toJson(hash.get(id)) : null;
                 final User user = new User(id, userData);
                 idToUserMap.put(id, user);
             }
@@ -144,15 +133,10 @@ public class PresenceChannelImpl
     }
 
     private void handleMemberAddedEvent(final PusherEvent event) {
-        PresenceMemberData memberData = GSON.fromJson(
-                event.getData(),
-                PresenceMemberData.class
-        );
+        PresenceMemberData memberData = GSON.fromJson(event.getData(), PresenceMemberData.class);
 
         final String id = memberData.getId();
-        final String userData = memberData.getInfo() != null
-                ? GSON.toJson(memberData.getInfo())
-                : null;
+        final String userData = memberData.getInfo() != null ? GSON.toJson(memberData.getInfo()) : null;
 
         final User user = new User(id, userData);
         idToUserMap.put(id, user);
@@ -165,10 +149,7 @@ public class PresenceChannelImpl
     }
 
     private void handleMemberRemovedEvent(final PusherEvent event) {
-        final PresenceMemberData memberData = GSON.fromJson(
-                event.getData(),
-                PresenceMemberData.class
-        );
+        final PresenceMemberData memberData = GSON.fromJson(event.getData(), PresenceMemberData.class);
 
         final User user = idToUserMap.remove(memberData.getId());
 
@@ -185,22 +166,19 @@ public class PresenceChannelImpl
 
             if (data.getUserId() == null) {
                 throw new AuthorizationFailureException(
-                        "Invalid response from ChannelAuthorizer: no user_id key in channel_data object: " +
-                                channelDataString
+                        "Invalid response from ChannelAuthorizer: no user_id key in channel_data object: " + channelDataString
                 );
             }
 
             return data.getUserId();
         } catch (final JsonSyntaxException e) {
             throw new AuthorizationFailureException(
-                    "Invalid response from ChannelAuthorizer: unable to parse channel_data object: " +
-                            channelDataString,
+                    "Invalid response from ChannelAuthorizer: unable to parse channel_data object: " + channelDataString,
                     e
             );
         } catch (final NullPointerException e) {
             throw new AuthorizationFailureException(
-                    "Invalid response from ChannelAuthorizer: no user_id key in channel_data object: " +
-                            channelDataString
+                    "Invalid response from ChannelAuthorizer: no user_id key in channel_data object: " + channelDataString
             );
         }
     }

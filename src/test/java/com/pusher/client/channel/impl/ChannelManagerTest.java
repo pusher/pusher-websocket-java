@@ -43,13 +43,10 @@ public class ChannelManagerTest {
     private static final String CHANNEL_NAME = "my-channel";
     private static final String PRIVATE_CHANNEL_NAME = "private-my-channel";
     private static final String PRESENCE_CHANNEL_NAME = "presence-my-channel";
-    private static final String OUTGOING_SUBSCRIBE_MESSAGE =
-            "{\"event\":\"pusher:subscribe\"}";
-    private static final String OUTGOING_UNSUBSCRIBE_MESSAGE =
-            "{\"event\":\"pusher:unsubscribe\"}";
+    private static final String OUTGOING_SUBSCRIBE_MESSAGE = "{\"event\":\"pusher:subscribe\"}";
+    private static final String OUTGOING_UNSUBSCRIBE_MESSAGE = "{\"event\":\"pusher:unsubscribe\"}";
     private static final String SOCKET_ID = "21234.41243";
-    private static final String PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE =
-            "{\"event\":\"pusher:subscribe\", \"data\":{}}";
+    private static final String PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE = "{\"event\":\"pusher:subscribe\", \"data\":{}}";
 
     private ChannelManager channelManager;
 
@@ -100,23 +97,17 @@ public class ChannelManagerTest {
                 .when(factory)
                 .queueOnEventThread(any(Runnable.class));
         when(mockInternalChannel.getName()).thenReturn(CHANNEL_NAME);
-        when(mockInternalChannel.toSubscribeMessage())
-                .thenReturn(OUTGOING_SUBSCRIBE_MESSAGE);
-        when(mockInternalChannel.toUnsubscribeMessage())
-                .thenReturn(OUTGOING_UNSUBSCRIBE_MESSAGE);
+        when(mockInternalChannel.toSubscribeMessage()).thenReturn(OUTGOING_SUBSCRIBE_MESSAGE);
+        when(mockInternalChannel.toUnsubscribeMessage()).thenReturn(OUTGOING_UNSUBSCRIBE_MESSAGE);
         when(mockInternalChannel.getEventListener()).thenReturn(mockEventListener);
         when(mockConnection.getSocketId()).thenReturn(SOCKET_ID);
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         when(mockPrivateChannel.getName()).thenReturn(PRIVATE_CHANNEL_NAME);
-        when(mockPrivateChannel.toSubscribeMessage())
-                .thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
-        when(mockPrivateChannel.getEventListener())
-                .thenReturn(mockPrivateChannelEventListener);
+        when(mockPrivateChannel.toSubscribeMessage()).thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
+        when(mockPrivateChannel.getEventListener()).thenReturn(mockPrivateChannelEventListener);
         when(mockPresenceChannel.getName()).thenReturn(PRESENCE_CHANNEL_NAME);
-        when(mockPresenceChannel.toSubscribeMessage())
-                .thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
-        when(mockPresenceChannel.getEventListener())
-                .thenReturn(mockPresenceChannelEventListener);
+        when(mockPresenceChannel.toSubscribeMessage()).thenReturn(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
+        when(mockPresenceChannel.getEventListener()).thenReturn(mockPresenceChannelEventListener);
 
         channelManager = new ChannelManager(factory);
         channelManager.setConnection(mockConnection);
@@ -133,8 +124,7 @@ public class ChannelManagerTest {
         )
                 .when(subscriptionTestFactory)
                 .queueOnEventThread(any(Runnable.class));
-        subscriptionTestChannelManager =
-                new ChannelManager(subscriptionTestFactory);
+        subscriptionTestChannelManager = new ChannelManager(subscriptionTestFactory);
         subscriptionTestChannelManager.setConnection(subscriptionTestConnection);
     }
 
@@ -170,18 +160,12 @@ public class ChannelManagerTest {
         channelManager.subscribeTo(mockInternalChannel, mockEventListener);
 
         verify(mockConnection).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
-        verify(mockInternalChannel, never())
-                .bind(anyString(), any(ChannelEventListener.class));
+        verify(mockInternalChannel, never()).bind(anyString(), any(ChannelEventListener.class));
     }
 
     @Test
     public void testSubscribeWithAListenerAndEventsBindsTheListenerToTheEventsBeforeSubscribing() {
-        channelManager.subscribeTo(
-                mockInternalChannel,
-                mockEventListener,
-                "event1",
-                "event2"
-        );
+        channelManager.subscribeTo(mockInternalChannel, mockEventListener, "event1", "event2");
 
         verify(mockInternalChannel).bind("event1", mockEventListener);
         verify(mockInternalChannel).bind("event2", mockEventListener);
@@ -199,8 +183,7 @@ public class ChannelManagerTest {
         channelManager.subscribeTo(mockInternalChannel, null);
 
         verify(mockConnection).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
-        verify(mockInternalChannel, never())
-                .bind(anyString(), any(ChannelEventListener.class));
+        verify(mockInternalChannel, never()).bind(anyString(), any(ChannelEventListener.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -215,12 +198,8 @@ public class ChannelManagerTest {
     }
 
     @Test
-    public void testSubscribeToPrivateChannelSubscribes()
-            throws AuthorizationFailureException {
-        channelManager.subscribeTo(
-                mockPrivateChannel,
-                mockPrivateChannelEventListener
-        );
+    public void testSubscribeToPrivateChannelSubscribes() throws AuthorizationFailureException {
+        channelManager.subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener);
 
         verify(mockPrivateChannel).toSubscribeMessage();
         verify(mockConnection).sendMessage(PRIVATE_OUTGOING_SUBSCRIBE_MESSAGE);
@@ -235,37 +214,25 @@ public class ChannelManagerTest {
 
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channelManager.onConnectionStateChange(
-                new ConnectionStateChange(
-                        ConnectionState.CONNECTING,
-                        ConnectionState.CONNECTED
-                )
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED)
         );
         verify(mockConnection).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
     }
 
     @Test
     public void testDelayedSubscriptionThatFailsToAuthorizeNotifiesListenerAndDoesNotAttemptToSubscribe() {
-        final AuthorizationFailureException exception = new AuthorizationFailureException(
-                "Unable to contact auth server"
-        );
+        final AuthorizationFailureException exception = new AuthorizationFailureException("Unable to contact auth server");
         when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
         when(mockPrivateChannel.toSubscribeMessage()).thenThrow(exception);
 
-        channelManager.subscribeTo(
-                mockPrivateChannel,
-                mockPrivateChannelEventListener
-        );
+        channelManager.subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener);
         verify(mockConnection, never()).sendMessage(anyString());
 
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channelManager.onConnectionStateChange(
-                new ConnectionStateChange(
-                        ConnectionState.CONNECTING,
-                        ConnectionState.CONNECTED
-                )
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED)
         );
-        verify(mockPrivateChannelEventListener)
-                .onAuthenticationFailure("Unable to contact auth server", exception);
+        verify(mockPrivateChannelEventListener).onAuthenticationFailure("Unable to contact auth server", exception);
         verify(mockConnection, never()).sendMessage(anyString());
     }
 
@@ -282,10 +249,7 @@ public class ChannelManagerTest {
         // made
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channelManager.onConnectionStateChange(
-                new ConnectionStateChange(
-                        ConnectionState.CONNECTING,
-                        ConnectionState.CONNECTED
-                )
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED)
         );
         verify(mockConnection, times(1)).sendMessage(anyString());
 
@@ -293,18 +257,12 @@ public class ChannelManagerTest {
         // subscribed again
         when(mockConnection.getState()).thenReturn(ConnectionState.DISCONNECTED);
         channelManager.onConnectionStateChange(
-                new ConnectionStateChange(
-                        ConnectionState.CONNECTED,
-                        ConnectionState.DISCONNECTED
-                )
+                new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.DISCONNECTED)
         );
 
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channelManager.onConnectionStateChange(
-                new ConnectionStateChange(
-                        ConnectionState.DISCONNECTED,
-                        ConnectionState.CONNECTED
-                )
+                new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTED)
         );
 
         verify(mockConnection, times(2)).sendMessage(OUTGOING_SUBSCRIBE_MESSAGE);
@@ -319,25 +277,16 @@ public class ChannelManagerTest {
 
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         channelManager.onConnectionStateChange(
-                new ConnectionStateChange(
-                        ConnectionState.CONNECTING,
-                        ConnectionState.CONNECTED
-                )
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED)
         );
         verify(mockInternalChannel).updateState(ChannelState.SUBSCRIBE_SENT);
     }
 
     @Test
     public void testReceiveMessageForSubscribedChannelPassesItToChannel() {
-        channelManager.subscribeTo(
-                mockInternalChannel,
-                mockEventListener,
-                "my-event"
-        );
+        channelManager.subscribeTo(mockInternalChannel, mockEventListener, "my-event");
         PusherEvent event = PusherEvent.fromJson(
-                "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" +
-                        CHANNEL_NAME +
-                        "\"}"
+                "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + CHANNEL_NAME + "\"}"
         );
 
         channelManager.handleEvent(event);
@@ -347,16 +296,10 @@ public class ChannelManagerTest {
 
     @Test
     public void testReceiveMessageWithNoMatchingChannelIsIgnoredAndDoesNotThrowException() {
-        channelManager.subscribeTo(
-                mockInternalChannel,
-                mockEventListener,
-                "my-event"
-        );
+        channelManager.subscribeTo(mockInternalChannel, mockEventListener, "my-event");
         channelManager.handleEvent(
                 PusherEvent.fromJson(
-                        "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" +
-                                "DIFFERENT_CHANNEL_NAME" +
-                                "\"}"
+                        "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + "DIFFERENT_CHANNEL_NAME" + "\"}"
                 )
         );
 
@@ -366,9 +309,7 @@ public class ChannelManagerTest {
     @Test
     public void testReceiveMessageWithNoChannelIsIgnoredAndDoesNotThrowException() {
         channelManager.handleEvent(
-                PusherEvent.fromJson(
-                        "{\"event\":\"connection_established\",\"data\":{\"socket_id\":\"21098.967780\"}}"
-                )
+                PusherEvent.fromJson("{\"event\":\"connection_established\",\"data\":{\"socket_id\":\"21098.967780\"}}")
         );
     }
 
@@ -383,10 +324,7 @@ public class ChannelManagerTest {
 
     @Test
     public void testUnsubscribeFromSubscribedChannelUnsubscribesInEventQueue() {
-        subscriptionTestChannelManager.subscribeTo(
-                mockInternalChannel,
-                mockEventListener
-        );
+        subscriptionTestChannelManager.subscribeTo(mockInternalChannel, mockEventListener);
         subscriptionTestChannelManager.unsubscribeFrom(CHANNEL_NAME);
 
         verify(subscriptionTestFactory).queueOnEventThread(any(Runnable.class));
@@ -407,18 +345,10 @@ public class ChannelManagerTest {
 
     @Test
     public void testReceiveMessageAfterUnsubscribeDoesNotPassItToChannel() {
-        channelManager.subscribeTo(
-                mockInternalChannel,
-                mockEventListener,
-                "my-event"
-        );
+        channelManager.subscribeTo(mockInternalChannel, mockEventListener, "my-event");
         channelManager.unsubscribeFrom(CHANNEL_NAME);
         channelManager.handleEvent(
-                PusherEvent.fromJson(
-                        "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" +
-                                CHANNEL_NAME +
-                                "\"}"
-                )
+                PusherEvent.fromJson("{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + CHANNEL_NAME + "\"}")
         );
 
         verify(mockInternalChannel, never()).handleEvent(anyObject());
@@ -430,10 +360,7 @@ public class ChannelManagerTest {
 
         channelManager.subscribeTo(mockInternalChannel, mockEventListener);
         channelManager.onConnectionStateChange(
-                new ConnectionStateChange(
-                        ConnectionState.CONNECTING,
-                        ConnectionState.CONNECTED
-                )
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED)
         );
 
         verify(mockConnection, never()).sendMessage(anyString());
@@ -459,13 +386,8 @@ public class ChannelManagerTest {
 
     @Test
     public void testGetPrivateChannelFromString() {
-        channelManager.subscribeTo(
-                mockPrivateChannel,
-                mockPrivateChannelEventListener
-        );
-        PrivateChannel channel = channelManager.getPrivateChannel(
-                PRIVATE_CHANNEL_NAME
-        );
+        channelManager.subscribeTo(mockPrivateChannel, mockPrivateChannelEventListener);
+        PrivateChannel channel = channelManager.getPrivateChannel(PRIVATE_CHANNEL_NAME);
         assertEquals(channel, mockPrivateChannel);
     }
 
@@ -482,13 +404,8 @@ public class ChannelManagerTest {
 
     @Test
     public void testGetPresenceChannelFromString() {
-        channelManager.subscribeTo(
-                mockPresenceChannel,
-                mockPresenceChannelEventListener
-        );
-        PresenceChannel channel = channelManager.getPresenceChannel(
-                PRESENCE_CHANNEL_NAME
-        );
+        channelManager.subscribeTo(mockPresenceChannel, mockPresenceChannelEventListener);
+        PresenceChannel channel = channelManager.getPresenceChannel(PRESENCE_CHANNEL_NAME);
         assertEquals(channel, mockPresenceChannel);
     }
 
@@ -499,9 +416,7 @@ public class ChannelManagerTest {
 
     @Test
     public void testGetNonExistentPresenceChannel() {
-        PresenceChannel channel = channelManager.getPresenceChannel(
-                "presence-yolo"
-        );
+        PresenceChannel channel = channelManager.getPresenceChannel("presence-yolo");
         assertNull(channel);
     }
 
@@ -524,10 +439,7 @@ public class ChannelManagerTest {
         Executors.newSingleThreadExecutor().submit(removeChannels);
 
         channelManager.onConnectionStateChange(
-                new ConnectionStateChange(
-                        ConnectionState.CONNECTING,
-                        ConnectionState.CONNECTED
-                )
+                new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED)
         );
     }
 }

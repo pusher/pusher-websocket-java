@@ -36,12 +36,7 @@ public final class TweetNaclFast {
             return open(box, 0, box.length, theNonce);
         }
 
-        public byte[] open(
-                byte[] box,
-                final int boxoff,
-                final int boxlen,
-                byte[] theNonce
-        ) {
+        public byte[] open(byte[] box, final int boxoff, final int boxlen, byte[] theNonce) {
             // check message
             if (
                     !(
@@ -59,13 +54,9 @@ public final class TweetNaclFast {
             // message buffer
             byte[] m = new byte[c.length];
 
-            for (int i = 0; i < boxlen; i++)
-                c[i + boxzerobytesLength] =
-                        box[i + boxoff];
+            for (int i = 0; i < boxlen; i++) c[i + boxzerobytesLength] = box[i + boxoff];
 
-            if (
-                    0 != crypto_secretbox_open(m, c, c.length, theNonce, key)
-            ) return null;
+            if (0 != crypto_secretbox_open(m, c, c.length, theNonce, key)) return null;
 
             // wrap byte_buf_t on m offset@zerobytesLength
             ///return new byte_buf_t(m, zerobytesLength, m.length-zerobytesLength);
@@ -94,113 +85,36 @@ public final class TweetNaclFast {
         public static final int boxzerobytesLength = 16;
     }
 
-    private static int vn(
-            byte[] x,
-            final int xoff,
-            byte[] y,
-            final int yoff,
-            int n
-    ) {
+    private static int vn(byte[] x, final int xoff, byte[] y, final int yoff, int n) {
         int i, d = 0;
         for (i = 0; i < n; i++) d |= (x[i + xoff] ^ y[i + yoff]) & 0xff;
         return (1 & ((d - 1) >>> 8)) - 1;
     }
 
-    private static int crypto_verify_16(
-            byte[] x,
-            final int xoff,
-            byte[] y,
-            final int yoff
-    ) {
+    private static int crypto_verify_16(byte[] x, final int xoff, byte[] y, final int yoff) {
         return vn(x, xoff, y, yoff, 16);
     }
 
     private static void core_salsa20(byte[] o, byte[] p, byte[] k, byte[] c) {
-        int j0 =
-                c[0] &
-                        0xff |
-                        (c[1] & 0xff) << 8 |
-                        (c[2] & 0xff) << 16 |
-                        (c[3] & 0xff) << 24, j1 =
-                k[0] &
-                        0xff |
-                        (k[1] & 0xff) << 8 |
-                        (k[2] & 0xff) << 16 |
-                        (k[3] & 0xff) << 24, j2 =
-                k[4] &
-                        0xff |
-                        (k[5] & 0xff) << 8 |
-                        (k[6] & 0xff) << 16 |
-                        (k[7] & 0xff) << 24, j3 =
-                k[8] &
-                        0xff |
-                        (k[9] & 0xff) << 8 |
-                        (k[10] & 0xff) << 16 |
-                        (k[11] & 0xff) << 24, j4 =
-                k[12] &
-                        0xff |
-                        (k[13] & 0xff) << 8 |
-                        (k[14] & 0xff) << 16 |
-                        (k[15] & 0xff) << 24, j5 =
-                c[4] &
-                        0xff |
-                        (c[5] & 0xff) << 8 |
-                        (c[6] & 0xff) << 16 |
-                        (c[7] & 0xff) << 24, j6 =
-                p[0] &
-                        0xff |
-                        (p[1] & 0xff) << 8 |
-                        (p[2] & 0xff) << 16 |
-                        (p[3] & 0xff) << 24, j7 =
-                p[4] &
-                        0xff |
-                        (p[5] & 0xff) << 8 |
-                        (p[6] & 0xff) << 16 |
-                        (p[7] & 0xff) << 24, j8 =
-                p[8] &
-                        0xff |
-                        (p[9] & 0xff) << 8 |
-                        (p[10] & 0xff) << 16 |
-                        (p[11] & 0xff) << 24, j9 =
-                p[12] &
-                        0xff |
-                        (p[13] & 0xff) << 8 |
-                        (p[14] & 0xff) << 16 |
-                        (p[15] & 0xff) << 24, j10 =
-                c[8] &
-                        0xff |
-                        (c[9] & 0xff) << 8 |
-                        (c[10] & 0xff) << 16 |
-                        (c[11] & 0xff) << 24, j11 =
-                k[16] &
-                        0xff |
-                        (k[17] & 0xff) << 8 |
-                        (k[18] & 0xff) << 16 |
-                        (k[19] & 0xff) << 24, j12 =
-                k[20] &
-                        0xff |
-                        (k[21] & 0xff) << 8 |
-                        (k[22] & 0xff) << 16 |
-                        (k[23] & 0xff) << 24, j13 =
-                k[24] &
-                        0xff |
-                        (k[25] & 0xff) << 8 |
-                        (k[26] & 0xff) << 16 |
-                        (k[27] & 0xff) << 24, j14 =
-                k[28] &
-                        0xff |
-                        (k[29] & 0xff) << 8 |
-                        (k[30] & 0xff) << 16 |
-                        (k[31] & 0xff) << 24, j15 =
-                c[12] &
-                        0xff |
-                        (c[13] & 0xff) << 8 |
-                        (c[14] & 0xff) << 16 |
-                        (c[15] & 0xff) << 24;
+        int j0 = c[0] & 0xff | (c[1] & 0xff) << 8 | (c[2] & 0xff) << 16 | (c[3] & 0xff) << 24, j1 =
+                k[0] & 0xff | (k[1] & 0xff) << 8 | (k[2] & 0xff) << 16 | (k[3] & 0xff) << 24, j2 =
+                k[4] & 0xff | (k[5] & 0xff) << 8 | (k[6] & 0xff) << 16 | (k[7] & 0xff) << 24, j3 =
+                k[8] & 0xff | (k[9] & 0xff) << 8 | (k[10] & 0xff) << 16 | (k[11] & 0xff) << 24, j4 =
+                k[12] & 0xff | (k[13] & 0xff) << 8 | (k[14] & 0xff) << 16 | (k[15] & 0xff) << 24, j5 =
+                c[4] & 0xff | (c[5] & 0xff) << 8 | (c[6] & 0xff) << 16 | (c[7] & 0xff) << 24, j6 =
+                p[0] & 0xff | (p[1] & 0xff) << 8 | (p[2] & 0xff) << 16 | (p[3] & 0xff) << 24, j7 =
+                p[4] & 0xff | (p[5] & 0xff) << 8 | (p[6] & 0xff) << 16 | (p[7] & 0xff) << 24, j8 =
+                p[8] & 0xff | (p[9] & 0xff) << 8 | (p[10] & 0xff) << 16 | (p[11] & 0xff) << 24, j9 =
+                p[12] & 0xff | (p[13] & 0xff) << 8 | (p[14] & 0xff) << 16 | (p[15] & 0xff) << 24, j10 =
+                c[8] & 0xff | (c[9] & 0xff) << 8 | (c[10] & 0xff) << 16 | (c[11] & 0xff) << 24, j11 =
+                k[16] & 0xff | (k[17] & 0xff) << 8 | (k[18] & 0xff) << 16 | (k[19] & 0xff) << 24, j12 =
+                k[20] & 0xff | (k[21] & 0xff) << 8 | (k[22] & 0xff) << 16 | (k[23] & 0xff) << 24, j13 =
+                k[24] & 0xff | (k[25] & 0xff) << 8 | (k[26] & 0xff) << 16 | (k[27] & 0xff) << 24, j14 =
+                k[28] & 0xff | (k[29] & 0xff) << 8 | (k[30] & 0xff) << 16 | (k[31] & 0xff) << 24, j15 =
+                c[12] & 0xff | (c[13] & 0xff) << 8 | (c[14] & 0xff) << 16 | (c[15] & 0xff) << 24;
 
-        int x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 =
-                j7, x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 =
-                j14, x15 = j15, u;
+        int x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 = j7, x8 = j8, x9 = j9, x10 = j10, x11 =
+                j11, x12 = j12, x13 = j13, x14 = j14, x15 = j15, u;
 
         for (int i = 0; i < 20; i += 2) {
             u = x0 + x12 | 0;
@@ -371,98 +285,32 @@ public final class TweetNaclFast {
         o[61] = (byte) (x15 >>> 8 & 0xff);
         o[62] = (byte) (x15 >>> 16 & 0xff);
         o[63] = (byte) (x15 >>> 24 & 0xff);
-    /*String dbgt = "";
+        /*String dbgt = "";
 		for (int dbg = 0; dbg < o.length; dbg ++) dbgt += " "+o[dbg];
 		Log.d(TAG, "core_salsa20 -> "+dbgt);
 */
     }
 
     private static void core_hsalsa20(byte[] o, byte[] p, byte[] k, byte[] c) {
-        int j0 =
-                c[0] &
-                        0xff |
-                        (c[1] & 0xff) << 8 |
-                        (c[2] & 0xff) << 16 |
-                        (c[3] & 0xff) << 24, j1 =
-                k[0] &
-                        0xff |
-                        (k[1] & 0xff) << 8 |
-                        (k[2] & 0xff) << 16 |
-                        (k[3] & 0xff) << 24, j2 =
-                k[4] &
-                        0xff |
-                        (k[5] & 0xff) << 8 |
-                        (k[6] & 0xff) << 16 |
-                        (k[7] & 0xff) << 24, j3 =
-                k[8] &
-                        0xff |
-                        (k[9] & 0xff) << 8 |
-                        (k[10] & 0xff) << 16 |
-                        (k[11] & 0xff) << 24, j4 =
-                k[12] &
-                        0xff |
-                        (k[13] & 0xff) << 8 |
-                        (k[14] & 0xff) << 16 |
-                        (k[15] & 0xff) << 24, j5 =
-                c[4] &
-                        0xff |
-                        (c[5] & 0xff) << 8 |
-                        (c[6] & 0xff) << 16 |
-                        (c[7] & 0xff) << 24, j6 =
-                p[0] &
-                        0xff |
-                        (p[1] & 0xff) << 8 |
-                        (p[2] & 0xff) << 16 |
-                        (p[3] & 0xff) << 24, j7 =
-                p[4] &
-                        0xff |
-                        (p[5] & 0xff) << 8 |
-                        (p[6] & 0xff) << 16 |
-                        (p[7] & 0xff) << 24, j8 =
-                p[8] &
-                        0xff |
-                        (p[9] & 0xff) << 8 |
-                        (p[10] & 0xff) << 16 |
-                        (p[11] & 0xff) << 24, j9 =
-                p[12] &
-                        0xff |
-                        (p[13] & 0xff) << 8 |
-                        (p[14] & 0xff) << 16 |
-                        (p[15] & 0xff) << 24, j10 =
-                c[8] &
-                        0xff |
-                        (c[9] & 0xff) << 8 |
-                        (c[10] & 0xff) << 16 |
-                        (c[11] & 0xff) << 24, j11 =
-                k[16] &
-                        0xff |
-                        (k[17] & 0xff) << 8 |
-                        (k[18] & 0xff) << 16 |
-                        (k[19] & 0xff) << 24, j12 =
-                k[20] &
-                        0xff |
-                        (k[21] & 0xff) << 8 |
-                        (k[22] & 0xff) << 16 |
-                        (k[23] & 0xff) << 24, j13 =
-                k[24] &
-                        0xff |
-                        (k[25] & 0xff) << 8 |
-                        (k[26] & 0xff) << 16 |
-                        (k[27] & 0xff) << 24, j14 =
-                k[28] &
-                        0xff |
-                        (k[29] & 0xff) << 8 |
-                        (k[30] & 0xff) << 16 |
-                        (k[31] & 0xff) << 24, j15 =
-                c[12] &
-                        0xff |
-                        (c[13] & 0xff) << 8 |
-                        (c[14] & 0xff) << 16 |
-                        (c[15] & 0xff) << 24;
+        int j0 = c[0] & 0xff | (c[1] & 0xff) << 8 | (c[2] & 0xff) << 16 | (c[3] & 0xff) << 24, j1 =
+                k[0] & 0xff | (k[1] & 0xff) << 8 | (k[2] & 0xff) << 16 | (k[3] & 0xff) << 24, j2 =
+                k[4] & 0xff | (k[5] & 0xff) << 8 | (k[6] & 0xff) << 16 | (k[7] & 0xff) << 24, j3 =
+                k[8] & 0xff | (k[9] & 0xff) << 8 | (k[10] & 0xff) << 16 | (k[11] & 0xff) << 24, j4 =
+                k[12] & 0xff | (k[13] & 0xff) << 8 | (k[14] & 0xff) << 16 | (k[15] & 0xff) << 24, j5 =
+                c[4] & 0xff | (c[5] & 0xff) << 8 | (c[6] & 0xff) << 16 | (c[7] & 0xff) << 24, j6 =
+                p[0] & 0xff | (p[1] & 0xff) << 8 | (p[2] & 0xff) << 16 | (p[3] & 0xff) << 24, j7 =
+                p[4] & 0xff | (p[5] & 0xff) << 8 | (p[6] & 0xff) << 16 | (p[7] & 0xff) << 24, j8 =
+                p[8] & 0xff | (p[9] & 0xff) << 8 | (p[10] & 0xff) << 16 | (p[11] & 0xff) << 24, j9 =
+                p[12] & 0xff | (p[13] & 0xff) << 8 | (p[14] & 0xff) << 16 | (p[15] & 0xff) << 24, j10 =
+                c[8] & 0xff | (c[9] & 0xff) << 8 | (c[10] & 0xff) << 16 | (c[11] & 0xff) << 24, j11 =
+                k[16] & 0xff | (k[17] & 0xff) << 8 | (k[18] & 0xff) << 16 | (k[19] & 0xff) << 24, j12 =
+                k[20] & 0xff | (k[21] & 0xff) << 8 | (k[22] & 0xff) << 16 | (k[23] & 0xff) << 24, j13 =
+                k[24] & 0xff | (k[25] & 0xff) << 8 | (k[26] & 0xff) << 16 | (k[27] & 0xff) << 24, j14 =
+                k[28] & 0xff | (k[29] & 0xff) << 8 | (k[30] & 0xff) << 16 | (k[31] & 0xff) << 24, j15 =
+                c[12] & 0xff | (c[13] & 0xff) << 8 | (c[14] & 0xff) << 16 | (c[15] & 0xff) << 24;
 
-        int x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 =
-                j7, x8 = j8, x9 = j9, x10 = j10, x11 = j11, x12 = j12, x13 = j13, x14 =
-                j14, x15 = j15, u;
+        int x0 = j0, x1 = j1, x2 = j2, x3 = j3, x4 = j4, x5 = j5, x6 = j6, x7 = j7, x8 = j8, x9 = j9, x10 = j10, x11 =
+                j11, x12 = j12, x13 = j13, x14 = j14, x15 = j15, u;
 
         for (int i = 0; i < 20; i += 2) {
             u = x0 + x12 | 0;
@@ -577,18 +425,13 @@ public final class TweetNaclFast {
         o[29] = (byte) (x9 >>> 8 & 0xff);
         o[30] = (byte) (x9 >>> 16 & 0xff);
         o[31] = (byte) (x9 >>> 24 & 0xff);
-    /*String dbgt = "";
+        /*String dbgt = "";
 		for (int dbg = 0; dbg < o.length; dbg ++) dbgt += " "+o[dbg];
 		Log.d(TAG, "core_hsalsa20 -> "+dbgt);
 */
     }
 
-    public static int crypto_core_salsa20(
-            byte[] out,
-            byte[] in,
-            byte[] k,
-            byte[] c
-    ) {
+    public static int crypto_core_salsa20(byte[] out, byte[] in, byte[] k, byte[] c) {
         ///core(out,in,k,c,0);
         core_salsa20(out, in, k, c);
 
@@ -599,12 +442,7 @@ public final class TweetNaclFast {
         return 0;
     }
 
-    public static int crypto_core_hsalsa20(
-            byte[] out,
-            byte[] in,
-            byte[] k,
-            byte[] c
-    ) {
+    public static int crypto_core_hsalsa20(byte[] out, byte[] in, byte[] k, byte[] c) {
         ///core(out,in,k,c,1);
         core_hsalsa20(out, in, k, c);
 
@@ -616,26 +454,9 @@ public final class TweetNaclFast {
     }
 
     // "expand 32-byte k"
-    private static final byte[] sigma = {
-            101,
-            120,
-            112,
-            97,
-            110,
-            100,
-            32,
-            51,
-            50,
-            45,
-            98,
-            121,
-            116,
-            101,
-            32,
-            107,
-    };
+    private static final byte[] sigma = {101, 120, 112, 97, 110, 100, 32, 51, 50, 45, 98, 121, 116, 101, 32, 107};
 
-  /*static {
+    /*static {
 		try {
 			sigma = "expand 32-byte k".getBytes("utf-8");
 		} catch (UnsupportedEncodingException e) {
@@ -643,24 +464,14 @@ public final class TweetNaclFast {
 		}
 	}*/
 
-    private static int crypto_stream_salsa20_xor(
-            byte[] c,
-            int cpos,
-            byte[] m,
-            int mpos,
-            long b,
-            byte[] n,
-            byte[] k
-    ) {
+    private static int crypto_stream_salsa20_xor(byte[] c, int cpos, byte[] m, int mpos, long b, byte[] n, byte[] k) {
         byte[] z = new byte[16], x = new byte[64];
         int u, i;
         for (i = 0; i < 16; i++) z[i] = 0;
         for (i = 0; i < 8; i++) z[i] = n[i];
         while (b >= 64) {
             crypto_core_salsa20(x, z, k, sigma);
-            for (i = 0; i < 64; i++)
-                c[cpos + i] =
-                        (byte) ((m[mpos + i] ^ x[i]) & 0xff);
+            for (i = 0; i < 64; i++) c[cpos + i] = (byte) ((m[mpos + i] ^ x[i]) & 0xff);
             u = 1;
             for (i = 8; i < 16; i++) {
                 u = u + (z[i] & 0xff) | 0;
@@ -673,9 +484,7 @@ public final class TweetNaclFast {
         }
         if (b > 0) {
             crypto_core_salsa20(x, z, k, sigma);
-            for (i = 0; i < b; i++)
-                c[cpos + i] =
-                        (byte) ((m[mpos + i] ^ x[i]) & 0xff);
+            for (i = 0; i < b; i++) c[cpos + i] = (byte) ((m[mpos + i] ^ x[i]) & 0xff);
         }
 
         ///String dbgt = "";
@@ -685,13 +494,7 @@ public final class TweetNaclFast {
         return 0;
     }
 
-    public static int crypto_stream_salsa20(
-            byte[] c,
-            int cpos,
-            long b,
-            byte[] n,
-            byte[] k
-    ) {
+    public static int crypto_stream_salsa20(byte[] c, int cpos, long b, byte[] n, byte[] k) {
         byte[] z = new byte[16], x = new byte[64];
         int u, i;
         for (i = 0; i < 16; i++) z[i] = 0;
@@ -720,13 +523,7 @@ public final class TweetNaclFast {
         return 0;
     }
 
-    public static int crypto_stream(
-            byte[] c,
-            int cpos,
-            long d,
-            byte[] n,
-            byte[] k
-    ) {
+    public static int crypto_stream(byte[] c, int cpos, long d, byte[] n, byte[] k) {
         byte[] s = new byte[32];
         crypto_core_hsalsa20(s, n, k, sigma);
         byte[] sn = new byte[8];
@@ -734,18 +531,10 @@ public final class TweetNaclFast {
         return crypto_stream_salsa20(c, cpos, d, sn, s);
     }
 
-    public static int crypto_stream_xor(
-            byte[] c,
-            int cpos,
-            byte[] m,
-            int mpos,
-            long d,
-            byte[] n,
-            byte[] k
-    ) {
+    public static int crypto_stream_xor(byte[] c, int cpos, byte[] m, int mpos, long d, byte[] n, byte[] k) {
         byte[] s = new byte[32];
 
-    /*String dbgt = "";
+        /*String dbgt = "";
 		for (int dbg = 0; dbg < n.length; dbg ++) dbgt += " "+n[dbg];
 		Log.d(TAG, "crypto_stream_xor, nonce -> "+dbgt);
 
@@ -817,13 +606,11 @@ public final class TweetNaclFast {
             int t0, t1, t2, t3, t4, t5, t6, t7, c;
             int d0, d1, d2, d3, d4, d5, d6, d7, d8, d9;
 
-            int h0 = this.h[0], h1 = this.h[1], h2 = this.h[2], h3 = this.h[3], h4 =
-                    this.h[4], h5 = this.h[5], h6 = this.h[6], h7 = this.h[7], h8 =
-                    this.h[8], h9 = this.h[9];
+            int h0 = this.h[0], h1 = this.h[1], h2 = this.h[2], h3 = this.h[3], h4 = this.h[4], h5 = this.h[5], h6 =
+                    this.h[6], h7 = this.h[7], h8 = this.h[8], h9 = this.h[9];
 
-            int r0 = this.r[0], r1 = this.r[1], r2 = this.r[2], r3 = this.r[3], r4 =
-                    this.r[4], r5 = this.r[5], r6 = this.r[6], r7 = this.r[7], r8 =
-                    this.r[8], r9 = this.r[9];
+            int r0 = this.r[0], r1 = this.r[1], r2 = this.r[2], r3 = this.r[3], r4 = this.r[4], r5 = this.r[5], r6 =
+                    this.r[6], r7 = this.r[7], r8 = this.r[8], r9 = this.r[9];
 
             while (bytes >= 16) {
                 t0 = m[mpos + 0] & 0xff | (m[mpos + 1] & 0xff) << 8;
@@ -1079,7 +866,7 @@ public final class TweetNaclFast {
             g[9] -= (1 << 13);
             g[9] &= 0xffff;
 
-      /*
+            /*
                         backport from tweetnacl-fast.js https://github.com/dchest/tweetnacl-js/releases/tag/v0.14.3
                         <<<
                         "The issue was not properly detecting if st->h was >= 2^130 - 5,
@@ -1101,8 +888,7 @@ public final class TweetNaclFast {
             this.h[1] = ((this.h[1] >>> 3) | (this.h[2] << 10)) & 0xffff;
             this.h[2] = ((this.h[2] >>> 6) | (this.h[3] << 7)) & 0xffff;
             this.h[3] = ((this.h[3] >>> 9) | (this.h[4] << 4)) & 0xffff;
-            this.h[4] =
-                    ((this.h[4] >>> 12) | (this.h[5] << 1) | (this.h[6] << 14)) & 0xffff;
+            this.h[4] = ((this.h[4] >>> 12) | (this.h[5] << 1) | (this.h[6] << 14)) & 0xffff;
             this.h[5] = ((this.h[6] >>> 2) | (this.h[7] << 11)) & 0xffff;
             this.h[6] = ((this.h[7] >>> 5) | (this.h[8] << 8)) & 0xffff;
             this.h[7] = ((this.h[8] >>> 8) | (this.h[9] << 5)) & 0xffff;
@@ -1157,9 +943,7 @@ public final class TweetNaclFast {
             }
 
             if (bytes != 0) {
-                for (i = 0; i < bytes; i++)
-                    this.buffer[this.leftover + i] =
-                            m[mpos + i];
+                for (i = 0; i < bytes; i++) this.buffer[this.leftover + i] = m[mpos + i];
                 this.leftover += bytes;
             }
 
@@ -1167,19 +951,12 @@ public final class TweetNaclFast {
         }
     }
 
-    private static int crypto_onetimeauth(
-            byte[] out,
-            final int outpos,
-            byte[] m,
-            final int mpos,
-            int n,
-            byte[] k
-    ) {
+    private static int crypto_onetimeauth(byte[] out, final int outpos, byte[] m, final int mpos, int n, byte[] k) {
         poly1305 s = new poly1305(k);
         s.update(m, mpos, n);
         s.finish(out, outpos);
 
-    /*String dbgt = "";
+        /*String dbgt = "";
 		for (int dbg = 0; dbg < out.length-outpos; dbg ++) dbgt += " "+out[dbg+outpos];
 		Log.d(TAG, "crypto_onetimeauth -> "+dbgt);
 		*/
@@ -1187,26 +964,13 @@ public final class TweetNaclFast {
         return 0;
     }
 
-    private static int crypto_onetimeauth_verify(
-            byte[] h,
-            final int hoff,
-            byte[] m,
-            final int moff,
-            int /*long*/n,
-            byte[] k
-    ) {
+    private static int crypto_onetimeauth_verify(byte[] h, final int hoff, byte[] m, final int moff, int /*long*/n, byte[] k) {
         byte[] x = new byte[16];
         crypto_onetimeauth(x, 0, m, moff, n, k);
         return crypto_verify_16(h, hoff, x, 0);
     }
 
-    public static int crypto_secretbox_open(
-            byte[] m,
-            byte[] c,
-            int /*long*/d,
-            byte[] n,
-            byte[] k
-    ) {
+    public static int crypto_secretbox_open(byte[] m, byte[] c, int /*long*/d, byte[] n, byte[] k) {
         int i;
         byte[] x = new byte[32];
         if (d < 32) return -1;

@@ -45,9 +45,7 @@ public class ExampleApp {
         }
 
         // configure your Pusher connection with the options you want
-        final PusherOptions options = new PusherOptions()
-                .setUseTLS(true)
-                .setCluster(cluster);
+        final PusherOptions options = new PusherOptions().setUseTLS(true).setCluster(cluster);
         Pusher pusher = new Pusher(channelsKey, options);
 
         // set up a ConnectionEventListener to listen for connection changes to Pusher
@@ -63,12 +61,7 @@ public class ExampleApp {
 
             @Override
             public void onError(String message, String code, Exception e) {
-                System.out.printf(
-                        "An error was received with message [%s], code [%s], exception [%s]%n",
-                        message,
-                        code,
-                        e
-                );
+                System.out.printf("An error was received with message [%s], code [%s], exception [%s]%n", message, code, e);
             }
         };
 
@@ -89,11 +82,7 @@ public class ExampleApp {
         };
 
         // subscribe to the channel and with the event listener for the event name
-        Channel channel = pusher.subscribe(
-                channelName,
-                channelEventListener,
-                eventName
-        );
+        Channel channel = pusher.subscribe(channelName, channelEventListener, eventName);
 
         // Keep main thread asleep while we watch for events or application will terminate
         while (true) {

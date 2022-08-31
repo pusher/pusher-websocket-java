@@ -14,8 +14,7 @@ public class PusherOptions {
     private static final String LIB_DEV_VERSION = "0.0.0-dev";
     public static final String LIB_VERSION = readVersionFromProperties();
 
-    private static final String URI_SUFFIX =
-            "?client=java-client&protocol=5&version=" + LIB_VERSION;
+    private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
     private static final String WSS_SCHEME = "wss";
 
@@ -95,9 +94,7 @@ public class PusherOptions {
      * @param userAuthenticator The user authenticator to be used.
      * @return this, for chaining
      */
-    public PusherOptions setUserAuthenticator(
-            final UserAuthenticator userAuthenticator
-    ) {
+    public PusherOptions setUserAuthenticator(final UserAuthenticator userAuthenticator) {
         this.userAuthenticator = userAuthenticator;
         return this;
     }
@@ -119,9 +116,7 @@ public class PusherOptions {
      * @param channelAuthorizer The channel authorizer to be used.
      * @return this, for chaining
      */
-    public PusherOptions setChannelAuthorizer(
-            final ChannelAuthorizer channelAuthorizer
-    ) {
+    public PusherOptions setChannelAuthorizer(final ChannelAuthorizer channelAuthorizer) {
         this.channelAuthorizer = channelAuthorizer;
         return this;
     }
@@ -234,9 +229,7 @@ public class PusherOptions {
      */
     public PusherOptions setPongTimeout(final long pongTimeout) {
         if (pongTimeout < 1000) {
-            throw new IllegalArgumentException(
-                    "Pong timeout must be at least 1,000ms (and is recommended to be much higher)"
-            );
+            throw new IllegalArgumentException("Pong timeout must be at least 1,000ms (and is recommended to be much higher)");
         }
 
         this.pongTimeout = pongTimeout;
@@ -261,9 +254,7 @@ public class PusherOptions {
      * @param maxReconnectGapInSeconds time in seconds of the maximum gab between two reconnection attempts, default = {@link #MAX_RECONNECT_GAP_IN_SECONDS} 30s
      * @return this, for chaining
      */
-    public PusherOptions setMaxReconnectGapInSeconds(
-            int maxReconnectGapInSeconds
-    ) {
+    public PusherOptions setMaxReconnectGapInSeconds(int maxReconnectGapInSeconds) {
         this.maxReconnectGapInSeconds = maxReconnectGapInSeconds;
         return this;
     }
@@ -298,9 +289,7 @@ public class PusherOptions {
      */
     public PusherOptions setProxy(Proxy proxy) {
         if (proxy == null) {
-            throw new IllegalArgumentException(
-                    "proxy must not be null (instead use Proxy.NO_PROXY)"
-            );
+            throw new IllegalArgumentException("proxy must not be null (instead use Proxy.NO_PROXY)");
         }
         this.proxy = proxy;
         return this;

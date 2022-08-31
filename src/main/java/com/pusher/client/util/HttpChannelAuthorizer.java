@@ -21,9 +21,7 @@ import java.io.IOException;
  * documentation</a>.
  */
 
-public class HttpChannelAuthorizer
-        extends BaseHttpAuthClient
-        implements ChannelAuthorizer {
+public class HttpChannelAuthorizer extends BaseHttpAuthClient implements ChannelAuthorizer {
 
     /**
      * Creates a new channel authorizer.
@@ -40,16 +38,12 @@ public class HttpChannelAuthorizer
      * @param endPoint          The endpoint to be called when authorizing.
      * @param connectionFactory a custom connection factory to be used for building the connection
      */
-    public HttpChannelAuthorizer(
-            final String endPoint,
-            final ConnectionFactory connectionFactory
-    ) {
+    public HttpChannelAuthorizer(final String endPoint, final ConnectionFactory connectionFactory) {
         super(endPoint, connectionFactory);
     }
 
     @Override
-    public String authorize(final String channelName, final String socketId)
-            throws AuthorizationFailureException {
+    public String authorize(final String channelName, final String socketId) throws AuthorizationFailureException {
         mConnectionFactory.setChannelName(channelName);
         mConnectionFactory.setSocketId(socketId);
         return performAuthRequest();

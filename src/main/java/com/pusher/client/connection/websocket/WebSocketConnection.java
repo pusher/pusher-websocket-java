@@ -25,16 +25,12 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLException;
 
-public class WebSocketConnection
-        implements InternalConnection, WebSocketListener {
+public class WebSocketConnection implements InternalConnection, WebSocketListener {
 
-    private static final Logger log = Logger.getLogger(
-            WebSocketConnection.class.getName()
-    );
+    private static final Logger log = Logger.getLogger(WebSocketConnection.class.getName());
     private static final Gson GSON = new Gson();
 
-    private static final String PING_EVENT_SERIALIZED =
-            "{\"event\": \"pusher:ping\"}";
+    private static final String PING_EVENT_SERIALIZED = "{\"event\": \"pusher:ping\"}";
 
     private final Factory factory;
     private final ActivityTimer activityTimer;
@@ -69,12 +65,7 @@ public class WebSocketConnection
         this.eventHandler = eventHandler;
 
         for (final ConnectionState state : ConnectionState.values()) {
-            eventListeners.put(
-                    state,
-                    Collections.newSetFromMap(
-                            new ConcurrentHashMap<>()
-                    )
-            );
+            eventListeners.put(state, Collections.newSetFromMap(new ConcurrentHashMap<>()));
         }
     }
 
@@ -82,23 +73,16 @@ public class WebSocketConnection
 
     @Override
     public void connect() {
-        factory.queueOnEventThread(
-                () -> {
-                    if (canConnect()) {
-                        tryConnecting();
-                    }
-                }
-        );
+        factory.queueOnEventThread(() -> {
+            if (canConnect()) {
+                tryConnecting();
+            }
+        });
     }
 
     private void tryConnecting() {
         try {
-            underlyingConnection =
-                    factory.newWebSocketClientWrapper(
-                            webSocketUri,
-                            proxy,
-                            WebSocketConnection.this
-                    );
+            underlyingConnection = factory.newWebSocketClientWrapper(webSocketUri, proxy, WebSocketConnection.this);
             updateState(ConnectionState.CONNECTING);
             underlyingConnection.connect();
         } catch (final SSLException e) {
@@ -108,29 +92,21 @@ public class WebSocketConnection
 
     @Override
     public void disconnect() {
-        factory.queueOnEventThread(
-                () -> {
-                    if (canDisconnect()) {
-                        updateState(ConnectionState.DISCONNECTING);
-                        underlyingConnection.close();
-                    }
-                }
-        );
+        factory.queueOnEventThread(() -> {
+            if (canDisconnect()) {
+                updateState(ConnectionState.DISCONNECTING);
+                underlyingConnection.close();
+            }
+        });
     }
 
     @Override
-    public void bind(
-            final ConnectionState state,
-            final ConnectionEventListener eventListener
-    ) {
+    public void bind(final ConnectionState state, final ConnectionEventListener eventListener) {
         eventListeners.get(state).add(eventListener);
     }
 
     @Override
-    public boolean unbind(
-            final ConnectionState state,
-            final ConnectionEventListener eventListener
-    ) {
+    public boolean unbind(final ConnectionState state, final ConnectionEventListener eventListener) {
         return eventListeners.get(state).remove(eventListener);
     }
 
@@ -143,27 +119,17 @@ public class WebSocketConnection
 
     @Override
     public void sendMessage(final String message) {
-        factory.queueOnEventThread(
-                () -> {
-                    try {
-                        if (state == ConnectionState.CONNECTED) {
-                            underlyingConnection.send(message);
-                        } else {
-                            sendErrorToAllListeners(
-                                    "Cannot send a message while in " + state + " state",
-                                    null,
-                                    null
-                            );
-                        }
-                    } catch (final Exception e) {
-                        sendErrorToAllListeners(
-                                "An exception occurred while sending message [" + message + "]",
-                                null,
-                                e
-                        );
-                    }
+        factory.queueOnEventThread(() -> {
+            try {
+                if (state == ConnectionState.CONNECTED) {
+                    underlyingConnection.send(message);
+                } else {
+                    sendErrorToAllListeners("Cannot send a message while in " + state + " state", null, null);
                 }
-        );
+            } catch (final Exception e) {
+                sendErrorToAllListeners("An exception occurred while sending message [" + message + "]", null, e);
+            }
+        });
     }
 
     @Override
@@ -174,18 +140,9 @@ public class WebSocketConnection
     /* implementation detail */
 
     private void updateState(final ConnectionState newState) {
-        log.fine(
-                "State transition requested, current [" +
-                        state +
-                        "], new [" +
-                        newState +
-                        "]"
-        );
+        log.fine("State transition requested, current [" + state + "], new [" + newState + "]");
 
-        final ConnectionStateChange change = new ConnectionStateChange(
-                state,
-                newState
-        );
+        final ConnectionStateChange change = new ConnectionStateChange(state, newState);
         state = newState;
 
         final Set<ConnectionEventListener> interestedListeners = new HashSet<>();
@@ -193,9 +150,7 @@ public class WebSocketConnection
         interestedListeners.addAll(eventListeners.get(newState));
 
         for (final ConnectionEventListener listener : interestedListeners) {
-            factory.queueOnEventThread(
-                    () -> listener.onConnectionStateChange(change)
-            );
+            factory.queueOnEventThread(() -> listener.onConnectionStateChange(change));
         }
     }
 
@@ -232,20 +187,14 @@ public class WebSocketConnection
         sendErrorToAllListeners(message, code, null);
     }
 
-    private void sendErrorToAllListeners(
-            final String message,
-            final String code,
-            final Exception e
-    ) {
+    private void sendErrorToAllListeners(final String message, final String code, final Exception e) {
         final Set<ConnectionEventListener> allListeners = new HashSet<>();
         for (final Set<ConnectionEventListener> listenersForState : eventListeners.values()) {
             allListeners.addAll(listenersForState);
         }
 
         for (final ConnectionEventListener listener : allListeners) {
-            factory.queueOnEventThread(
-                    () -> listener.onError(message, code, e)
-            );
+            factory.queueOnEventThread(() -> listener.onError(message, code, e));
         }
     }
 
@@ -260,21 +209,12 @@ public class WebSocketConnection
     public void onMessage(final String message) {
         activityTimer.activity();
 
-        factory.queueOnEventThread(
-                () -> handleEvent(PusherEvent.fromJson(message))
-        );
+        factory.queueOnEventThread(() -> handleEvent(PusherEvent.fromJson(message)));
     }
 
     @Override
-    public void onClose(
-            final int code,
-            final String reason,
-            final boolean remote
-    ) {
-        if (
-                state == ConnectionState.DISCONNECTED ||
-                        state == ConnectionState.RECONNECTING
-        ) {
+    public void onClose(final int code, final String reason, final boolean remote) {
+        if (state == ConnectionState.DISCONNECTED || state == ConnectionState.RECONNECTING) {
             log.warning(
                     "Received close from underlying socket when already disconnected." +
                             "Close code [" +
@@ -293,9 +233,7 @@ public class WebSocketConnection
         }
 
         //Reconnection logic
-        if (
-                state == ConnectionState.CONNECTED || state == ConnectionState.CONNECTING
-        ) {
+        if (state == ConnectionState.CONNECTED || state == ConnectionState.CONNECTING) {
             if (reconnectAttempts < maxReconnectionAttempts) {
                 tryReconnecting();
             } else {
@@ -313,10 +251,7 @@ public class WebSocketConnection
     private void tryReconnecting() {
         reconnectAttempts++;
         updateState(ConnectionState.RECONNECTING);
-        long reconnectInterval = Math.min(
-                maxReconnectionGap,
-                reconnectAttempts * reconnectAttempts
-        );
+        long reconnectInterval = Math.min(maxReconnectionGap, reconnectAttempts * reconnectAttempts);
 
         factory
                 .getTimers()
@@ -341,47 +276,33 @@ public class WebSocketConnection
     private void cancelTimeoutsAndTransitionToDisconnected() {
         activityTimer.cancelTimeouts();
 
-        factory.queueOnEventThread(
-                () -> {
-                    if (state == ConnectionState.DISCONNECTING) {
-                        updateState(ConnectionState.DISCONNECTED);
-                        factory.shutdownThreads();
-                    }
-                }
-        );
+        factory.queueOnEventThread(() -> {
+            if (state == ConnectionState.DISCONNECTING) {
+                updateState(ConnectionState.DISCONNECTED);
+                factory.shutdownThreads();
+            }
+        });
         reconnectAttempts = 0;
     }
 
     @Override
     public void onError(final Exception ex) {
-        factory.queueOnEventThread(
-                () -> {
-                    // Do not change connection state as Java_WebSocket will also
-                    // call onClose.
-                    // See:
-                    // https://github.com/leggetter/pusher-java-client/issues/8#issuecomment-16128590
-                    // updateState(ConnectionState.DISCONNECTED);
-                    sendErrorToAllListeners(
-                            "An exception was thrown by the websocket",
-                            null,
-                            ex
-                    );
-                }
-        );
+        factory.queueOnEventThread(() -> {
+            // Do not change connection state as Java_WebSocket will also
+            // call onClose.
+            // See:
+            // https://github.com/leggetter/pusher-java-client/issues/8#issuecomment-16128590
+            // updateState(ConnectionState.DISCONNECTED);
+            sendErrorToAllListeners("An exception was thrown by the websocket", null, ex);
+        });
     }
 
     private boolean canConnect() {
-        return (
-                state == ConnectionState.DISCONNECTING ||
-                        state == ConnectionState.DISCONNECTED
-        );
+        return (state == ConnectionState.DISCONNECTING || state == ConnectionState.DISCONNECTED);
     }
 
     private boolean canDisconnect() {
-        return (
-                state != ConnectionState.DISCONNECTING &&
-                        state != ConnectionState.DISCONNECTED
-        );
+        return (state != ConnectionState.DISCONNECTING && state != ConnectionState.DISCONNECTED);
     }
 
     private class ActivityTimer {

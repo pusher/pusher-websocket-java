@@ -7,8 +7,7 @@ import java.util.Set;
  * {@link com.pusher.client.channel.PrivateChannelEventListener
  * PrivateChannelEventListener} and parent interfaces.
  */
-public interface PresenceChannelEventListener
-        extends PrivateChannelEventListener {
+public interface PresenceChannelEventListener extends PrivateChannelEventListener {
     /**
      * Called when the subscription has succeeded and an initial list of
      * subscribed users has been received from Pusher.

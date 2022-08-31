@@ -24,11 +24,8 @@ public class WebSocketClientWrapper extends WebSocketClient {
     private static final String WSS_SCHEME = "wss";
     private WebSocketListener webSocketListener;
 
-    public WebSocketClientWrapper(
-            final URI uri,
-            final Proxy proxy,
-            final WebSocketListener webSocketListener
-    ) throws SSLException {
+    public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener)
+            throws SSLException {
         super(uri);
         if (uri.getScheme().equals(WSS_SCHEME)) {
             try {
@@ -68,11 +65,7 @@ public class WebSocketClientWrapper extends WebSocketClient {
     }
 
     @Override
-    public void onClose(
-            final int code,
-            final String reason,
-            final boolean remote
-    ) {
+    public void onClose(final int code, final String reason, final boolean remote) {
         if (webSocketListener != null) {
             webSocketListener.onClose(code, reason, remote);
         }

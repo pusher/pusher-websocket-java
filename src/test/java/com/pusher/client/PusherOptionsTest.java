@@ -98,18 +98,12 @@ public class PusherOptionsTest {
 
     @Test
     public void testSetChannelAuthorizerReturnsSelf() {
-        assertSame(
-                pusherOptions,
-                pusherOptions.setChannelAuthorizer(mockChannelAuthorizer)
-        );
+        assertSame(pusherOptions, pusherOptions.setChannelAuthorizer(mockChannelAuthorizer));
     }
 
     @Test
     public void testSetUserAuthenticatorReturnsSelf() {
-        assertSame(
-                pusherOptions,
-                pusherOptions.setUserAuthenticator(mockUserAuthenticator)
-        );
+        assertSame(pusherOptions, pusherOptions.setUserAuthenticator(mockUserAuthenticator));
     }
 
     @Test
@@ -126,10 +120,7 @@ public class PusherOptionsTest {
     public void testDefaultURL() {
         assertEquals(
                 pusherOptions.buildUrl(API_KEY),
-                "wss://ws.pusherapp.com:443/app/" +
-                        API_KEY +
-                        "?client=java-client&protocol=5&version=" +
-                        PusherOptions.LIB_VERSION
+                "wss://ws.pusherapp.com:443/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION
         );
     }
 
@@ -138,10 +129,7 @@ public class PusherOptionsTest {
         pusherOptions.setUseTLS(false);
         assertEquals(
                 pusherOptions.buildUrl(API_KEY),
-                "ws://ws.pusherapp.com:80/app/" +
-                        API_KEY +
-                        "?client=java-client&protocol=5&version=" +
-                        PusherOptions.LIB_VERSION
+                "ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION
         );
     }
 
@@ -150,10 +138,7 @@ public class PusherOptionsTest {
         pusherOptions.setCluster("eu");
         assertEquals(
                 pusherOptions.buildUrl(API_KEY),
-                "wss://ws-eu.pusher.com:443/app/" +
-                        API_KEY +
-                        "?client=java-client&protocol=5&version=" +
-                        PusherOptions.LIB_VERSION
+                "wss://ws-eu.pusher.com:443/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION
         );
     }
 
@@ -162,19 +147,13 @@ public class PusherOptionsTest {
         pusherOptions.setCluster("eu").setUseTLS(false);
         assertEquals(
                 pusherOptions.buildUrl(API_KEY),
-                "ws://ws-eu.pusher.com:80/app/" +
-                        API_KEY +
-                        "?client=java-client&protocol=5&version=" +
-                        PusherOptions.LIB_VERSION
+                "ws://ws-eu.pusher.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION
         );
     }
 
     @Test
     public void testCustomHostAndPortURLIsCorrect() {
-        pusherOptions
-                .setHost("subdomain.example.com")
-                .setWsPort(8080)
-                .setWssPort(8181);
+        pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181);
         assertEquals(
                 pusherOptions.buildUrl(API_KEY),
                 "wss://subdomain.example.com:8181/app/" +
@@ -186,11 +165,7 @@ public class PusherOptionsTest {
 
     @Test
     public void testCustomHostAndPortNonSSLURLIsCorrect() {
-        pusherOptions
-                .setHost("subdomain.example.com")
-                .setWsPort(8080)
-                .setWssPort(8181)
-                .setUseTLS(false);
+        pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181).setUseTLS(false);
         assertEquals(
                 pusherOptions.buildUrl(API_KEY),
                 "ws://subdomain.example.com:8080/app/" +
@@ -202,10 +177,7 @@ public class PusherOptionsTest {
 
     @Test
     public void testSetProxy() {
-        Proxy newProxy = new Proxy(
-                Proxy.Type.HTTP,
-                new InetSocketAddress("proxyaddress", 80)
-        );
+        Proxy newProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxyaddress", 80));
         pusherOptions.setProxy(newProxy);
         assertEquals(pusherOptions.getProxy(), newProxy);
     }

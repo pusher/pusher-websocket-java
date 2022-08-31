@@ -33,8 +33,7 @@ public class PrivateEncryptedChannelExampleApp {
     private String channelName = "private-encrypted-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
-    private final String channelAuthorizationEndpoint =
-            "http://localhost:3030/pusher/auth";
+    private final String channelAuthorizationEndpoint = "http://localhost:3030/pusher/auth";
 
     public static void main(final String[] args) {
         new PrivateEncryptedChannelExampleApp(args);
@@ -54,9 +53,7 @@ public class PrivateEncryptedChannelExampleApp {
         }
 
         // create a HttpChannelAuthorizer that points to your channel authorization server
-        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(
-                channelAuthorizationEndpoint
-        );
+        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(channelAuthorizationEndpoint);
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
@@ -78,12 +75,7 @@ public class PrivateEncryptedChannelExampleApp {
 
             @Override
             public void onError(String message, String code, Exception e) {
-                System.out.printf(
-                        "An error was received with message [%s], code [%s], exception [%s]%n",
-                        message,
-                        code,
-                        e
-                );
+                System.out.printf("An error was received with message [%s], code [%s], exception [%s]%n", message, code, e);
             }
         };
 
@@ -104,28 +96,16 @@ public class PrivateEncryptedChannelExampleApp {
 
             @Override
             public void onAuthenticationFailure(String message, Exception e) {
-                System.out.printf(
-                        "Authorization failure due to [%s], exception was [%s]%n",
-                        message,
-                        e
-                );
+                System.out.printf("Authorization failure due to [%s], exception was [%s]%n", message, e);
             }
 
             @Override
             public void onDecryptionFailure(String event, String reason) {
-                System.out.printf(
-                        "An error was received decrypting message for event:[%s] - reason: [%s]%n",
-                        event,
-                        reason
-                );
+                System.out.printf("An error was received decrypting message for event:[%s] - reason: [%s]%n", event, reason);
             }
         };
 
-        pusher.subscribePrivateEncrypted(
-                channelName,
-                privateEncryptedChannelEventListener,
-                eventName
-        );
+        pusher.subscribePrivateEncrypted(channelName, privateEncryptedChannelEventListener, eventName);
 
         // Keep main thread asleep while we watch for events or application will terminate
         while (true) {

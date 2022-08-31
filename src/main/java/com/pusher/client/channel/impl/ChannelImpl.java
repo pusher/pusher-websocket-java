@@ -9,9 +9,7 @@ public class ChannelImpl extends BaseChannel {
     public ChannelImpl(final String channelName, final Factory factory) {
         super(factory);
         if (channelName == null) {
-            throw new IllegalArgumentException(
-                    "Cannot subscribe to a channel with a null name"
-            );
+            throw new IllegalArgumentException("Cannot subscribe to a channel with a null name");
         }
 
         for (final String disallowedPattern : getDisallowedNameExpressions()) {

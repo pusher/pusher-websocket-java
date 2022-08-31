@@ -18,9 +18,7 @@ import java.io.IOException;
  * href="http://pusher.com/docs/authenticating_users">Authenticating Users
  * documentation</a>.
  */
-public class HttpUserAuthenticator
-        extends BaseHttpAuthClient
-        implements UserAuthenticator {
+public class HttpUserAuthenticator extends BaseHttpAuthClient implements UserAuthenticator {
 
     /**
      * Creates a new user authenticator.
@@ -37,16 +35,12 @@ public class HttpUserAuthenticator
      * @param endPoint          The endpoint to be called when authenticating.
      * @param connectionFactory a custom connection factory to be used for building the connection
      */
-    public HttpUserAuthenticator(
-            final String endPoint,
-            final ConnectionFactory connectionFactory
-    ) {
+    public HttpUserAuthenticator(final String endPoint, final ConnectionFactory connectionFactory) {
         super(endPoint, connectionFactory);
     }
 
     @Override
-    public String authenticate(final String socketId)
-            throws AuthenticationFailureException {
+    public String authenticate(final String socketId) throws AuthenticationFailureException {
         mConnectionFactory.setSocketId(socketId);
         return performAuthRequest();
     }

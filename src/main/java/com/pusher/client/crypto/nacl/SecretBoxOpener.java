@@ -34,20 +34,14 @@ public class SecretBoxOpener {
 
     public SecretBoxOpener(byte[] key) {
         checkNotNull(key, "null key passed");
-        checkArgument(
-                key.length == 32,
-                "key length must be 32 bytes, but is " + key.length + " bytes"
-        );
+        checkArgument(key.length == 32, "key length must be 32 bytes, but is " + key.length + " bytes");
 
         this.key = key;
     }
 
     public String open(byte[] cypher, byte[] nonce) throws AuthenticityException {
         checkNotNull(key, "key has been cleared, create new instance");
-        checkArgument(
-                nonce.length == 24,
-                "nonce length must be 24 bytes, but is " + key.length + " bytes"
-        );
+        checkArgument(nonce.length == 24, "nonce length must be 24 bytes, but is " + key.length + " bytes");
         try {
             TweetNaclFast.SecretBox secretBox = new TweetNaclFast.SecretBox(key);
             byte[] result = secretBox.open(cypher, nonce);

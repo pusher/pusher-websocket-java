@@ -25,9 +25,7 @@ public class UrlEncodedConnectionFactory extends ConnectionFactory {
      *
      * @param queryStringParameters extra parameters that need to be added to query string.
      */
-    public UrlEncodedConnectionFactory(
-            final Map<String, String> queryStringParameters
-    ) {
+    public UrlEncodedConnectionFactory(final Map<String, String> queryStringParameters) {
         this.mQueryStringParameters = queryStringParameters;
     }
 
@@ -44,24 +42,15 @@ public class UrlEncodedConnectionFactory extends ConnectionFactory {
     public String getBody() {
         final StringBuilder urlParameters = new StringBuilder();
         try {
-            urlParameters
-                    .append("socket_id=")
-                    .append(URLEncoder.encode(getSocketId(), getCharset()));
+            urlParameters.append("socket_id=").append(URLEncoder.encode(getSocketId(), getCharset()));
             if (getChannelName() != null) {
-                urlParameters
-                        .append("&channel_name=")
-                        .append(URLEncoder.encode(getChannelName(), getCharset()));
+                urlParameters.append("&channel_name=").append(URLEncoder.encode(getChannelName(), getCharset()));
             }
 
             // Adding extra parameters supplied to be added to query string.
             for (final String parameterName : mQueryStringParameters.keySet()) {
                 urlParameters.append("&").append(parameterName).append("=");
-                urlParameters.append(
-                        URLEncoder.encode(
-                                mQueryStringParameters.get(parameterName),
-                                getCharset()
-                        )
-                );
+                urlParameters.append(URLEncoder.encode(mQueryStringParameters.get(parameterName), getCharset()));
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

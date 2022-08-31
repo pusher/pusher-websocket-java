@@ -31,16 +31,14 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     final String AUTH_RESPONSE =
             "{\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\",\"shared_secret\":\"iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5doo=\"}";
-    final String AUTH_RESPONSE_MISSING_AUTH =
-            "{\"shared_secret\":\"iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5doo=\"}";
+    final String AUTH_RESPONSE_MISSING_AUTH = "{\"shared_secret\":\"iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5doo=\"}";
     final String AUTH_RESPONSE_MISSING_SHARED_SECRET =
             "{\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\"}";
     final String AUTH_RESPONSE_INVALID_JSON = "potatoes";
     final String SHARED_SECRET = "iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5doo=";
     final String AUTH_RESPONSE_INCORRECT_SHARED_SECRET =
             "{\"auth\":\"636a81ba7e7b15725c00:3ee04892514e8a669dc5d30267221f16727596688894712cad305986e6fc0f3c\",\"shared_secret\":\"iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5do0=\"}";
-    final String SHARED_SECRET_INCORRECT =
-            "iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5do0=";
+    final String SHARED_SECRET_INCORRECT = "iBvNoPVYwByqSfg6anjPpEQ2j051b3rt1Vmnb+z5do0=";
 
     @Mock
     InternalConnection mockInternalConnection;
@@ -55,8 +53,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     @Before
     public void setUp() {
         super.setUp();
-        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString()))
-                .thenReturn(AUTH_RESPONSE);
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(AUTH_RESPONSE);
     }
 
     protected PrivateEncryptedChannelImpl newInstance() {
@@ -86,13 +83,10 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Test
     public void toStringIsAccurate() {
-        assertEquals(
-                "[Private Encrypted Channel: name=" + getChannelName() + "]",
-                channel.toString()
-        );
+        assertEquals("[Private Encrypted Channel: name=" + getChannelName() + "]", channel.toString());
     }
 
-  /*
+    /*
     TESTING VALID PRIVATE ENCRYPTED CHANNEL NAMES
      */
 
@@ -120,7 +114,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         newInstance("private-stuffchannel");
     }
 
-  /*
+    /*
     TESTING SUBSCRIBE MESSAGE
      */
 
@@ -138,19 +132,13 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
         );
     }
 
-  /*
+    /*
     TESTING AUTHENTICATION METHOD
      */
 
     @Test
     public void authenticationSucceedsGivenValidChannelAuthorizer() {
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
-                .thenReturn(AUTH_RESPONSE);
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString())).thenReturn(AUTH_RESPONSE);
 
         PrivateEncryptedChannelImpl channel = newInstance();
 
@@ -163,12 +151,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Test(expected = AuthorizationFailureException.class)
     public void authenticationThrowsExceptionIfNoAuthKey() {
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_MISSING_AUTH);
 
         PrivateEncryptedChannelImpl channel = newInstance();
@@ -178,12 +161,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Test(expected = AuthorizationFailureException.class)
     public void authenticationThrowsExceptionIfNoSharedSecret() {
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_MISSING_SHARED_SECRET);
 
         PrivateEncryptedChannelImpl channel = newInstance();
@@ -193,12 +171,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
     @Test(expected = AuthorizationFailureException.class)
     public void authenticationThrowsExceptionIfMalformedJson() {
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INVALID_JSON);
 
         PrivateEncryptedChannelImpl channel = newInstance();
@@ -219,21 +192,12 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 mockSecretBoxOpenerFactory
         );
 
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
-                .thenReturn(AUTH_RESPONSE);
-        when(mockSecretBoxOpenerFactory.create(any()))
-                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString())).thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any())).thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
 
         channel.toSubscribeMessage();
 
-        PrivateEncryptedChannelEventListener mockListener = mock(
-                PrivateEncryptedChannelEventListener.class
-        );
+        PrivateEncryptedChannelEventListener mockListener = mock(PrivateEncryptedChannelEventListener.class);
 
         channel.bind("event1", mockListener);
         channel.handleEvent(
@@ -247,10 +211,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         verify(mockListener, times(1)).onEvent(argCaptor.capture());
         assertEquals("event1", argCaptor.getValue().getEventName());
-        assertEquals(
-                "{\"message\":\"hello world\"}",
-                argCaptor.getValue().getData()
-        );
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
     }
 
     @Test
@@ -263,21 +224,12 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 mockSecretBoxOpenerFactory
         );
 
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
-                .thenReturn(AUTH_RESPONSE);
-        when(mockSecretBoxOpenerFactory.create(any()))
-                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString())).thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any())).thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
 
         channel.toSubscribeMessage();
 
-        PrivateEncryptedChannelEventListener mockListener = mock(
-                PrivateEncryptedChannelEventListener.class
-        );
+        PrivateEncryptedChannelEventListener mockListener = mock(PrivateEncryptedChannelEventListener.class);
 
         channel.bindGlobal(mockListener);
 
@@ -292,10 +244,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         verify(mockListener, times(1)).onEvent(argCaptor.capture());
         assertEquals("event1", argCaptor.getValue().getEventName());
-        assertEquals(
-                "{\"message\":\"hello world\"}",
-                argCaptor.getValue().getData()
-        );
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
     }
 
     @Test
@@ -308,24 +257,13 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 mockSecretBoxOpenerFactory
         );
 
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
-                .thenReturn(AUTH_RESPONSE);
-        when(mockSecretBoxOpenerFactory.create(any()))
-                .thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString())).thenReturn(AUTH_RESPONSE);
+        when(mockSecretBoxOpenerFactory.create(any())).thenReturn(new SecretBoxOpener(Base64.decode(SHARED_SECRET)));
 
         channel.toSubscribeMessage();
 
-        PrivateEncryptedChannelEventListener mockListener1 = mock(
-                PrivateEncryptedChannelEventListener.class
-        );
-        PrivateEncryptedChannelEventListener mockListener2 = mock(
-                PrivateEncryptedChannelEventListener.class
-        );
+        PrivateEncryptedChannelEventListener mockListener1 = mock(PrivateEncryptedChannelEventListener.class);
+        PrivateEncryptedChannelEventListener mockListener2 = mock(PrivateEncryptedChannelEventListener.class);
 
         channel.bind("event1", mockListener1);
         channel.bind("event1", mockListener2);
@@ -340,17 +278,11 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         verify(mockListener1).onEvent(argCaptor.capture());
         assertEquals("event1", argCaptor.getValue().getEventName());
-        assertEquals(
-                "{\"message\":\"hello world\"}",
-                argCaptor.getValue().getData()
-        );
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
 
         verify(mockListener2).onEvent(argCaptor.capture());
         assertEquals("event1", argCaptor.getValue().getEventName());
-        assertEquals(
-                "{\"message\":\"hello world\"}",
-                argCaptor.getValue().getData()
-        );
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
     }
 
     @Test
@@ -363,12 +295,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 mockSecretBoxOpenerFactory
         );
 
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET);
         when(mockSecretBoxOpenerFactory.create(any()))
@@ -377,9 +304,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         channel.toSubscribeMessage();
 
-        PrivateEncryptedChannelEventListener mockListener1 = mock(
-                PrivateEncryptedChannelEventListener.class
-        );
+        PrivateEncryptedChannelEventListener mockListener1 = mock(PrivateEncryptedChannelEventListener.class);
         channel.bind("event1", mockListener1);
         channel.handleEvent(
                 PusherEvent.fromJson(
@@ -403,12 +328,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 mockSecretBoxOpenerFactory
         );
 
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE);
         when(mockSecretBoxOpenerFactory.create(any()))
@@ -417,9 +337,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         channel.toSubscribeMessage();
 
-        PrivateEncryptedChannelEventListener mockListener1 = mock(
-                PrivateEncryptedChannelEventListener.class
-        );
+        PrivateEncryptedChannelEventListener mockListener1 = mock(PrivateEncryptedChannelEventListener.class);
         channel.bind("event1", mockListener1);
         channel.handleEvent(
                 PusherEvent.fromJson(
@@ -432,10 +350,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         verify(mockListener1).onEvent(argCaptor.capture());
         assertEquals("event1", argCaptor.getValue().getEventName());
-        assertEquals(
-                "{\"message\":\"hello world\"}",
-                argCaptor.getValue().getData()
-        );
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
     }
 
     @Test
@@ -448,12 +363,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 mockSecretBoxOpenerFactory
         );
 
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE);
@@ -464,9 +374,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         channel.toSubscribeMessage();
 
-        PrivateEncryptedChannelEventListener mockListener1 = mock(
-                PrivateEncryptedChannelEventListener.class
-        );
+        PrivateEncryptedChannelEventListener mockListener1 = mock(PrivateEncryptedChannelEventListener.class);
         channel.bind("event1", mockListener1);
         channel.handleEvent(
                 PusherEvent.fromJson(
@@ -477,8 +385,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 )
         );
 
-        verify(mockListener1)
-                .onDecryptionFailure("event1", "Failed to decrypt message.");
+        verify(mockListener1).onDecryptionFailure("event1", "Failed to decrypt message.");
 
         // send a second message
         channel.handleEvent(
@@ -492,10 +399,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         verify(mockListener1).onEvent(argCaptor.capture());
         assertEquals("event1", argCaptor.getValue().getEventName());
-        assertEquals(
-                "{\"message\":\"hello world\"}",
-                argCaptor.getValue().getData()
-        );
+        assertEquals("{\"message\":\"hello world\"}", argCaptor.getValue().getData());
     }
 
     @Test
@@ -508,12 +412,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 mockSecretBoxOpenerFactory
         );
 
-        when(
-                mockChannelAuthorizer.authorize(
-                        Matchers.anyString(),
-                        Matchers.anyString()
-                )
-        )
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET)
                 .thenReturn(AUTH_RESPONSE_INCORRECT_SHARED_SECRET);
@@ -524,9 +423,7 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
 
         channel.toSubscribeMessage();
 
-        PrivateEncryptedChannelEventListener mockListener1 = mock(
-                PrivateEncryptedChannelEventListener.class
-        );
+        PrivateEncryptedChannelEventListener mockListener1 = mock(PrivateEncryptedChannelEventListener.class);
         channel.bind("event1", mockListener1);
         channel.handleEvent(
                 PusherEvent.fromJson(
@@ -546,7 +443,6 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
                 )
         );
 
-        verify(mockListener1, times(2))
-                .onDecryptionFailure("event1", "Failed to decrypt message.");
+        verify(mockListener1, times(2)).onDecryptionFailure("event1", "Failed to decrypt message.");
     }
 }

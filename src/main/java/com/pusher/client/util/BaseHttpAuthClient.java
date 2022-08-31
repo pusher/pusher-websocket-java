@@ -33,10 +33,7 @@ abstract class BaseHttpAuthClient {
             this.endPoint = new URL(endPoint);
             this.mConnectionFactory = new UrlEncodedConnectionFactory();
         } catch (final MalformedURLException e) {
-            throw new IllegalArgumentException(
-                    "Could not parse channel authorization end point into a valid URL",
-                    e
-            );
+            throw new IllegalArgumentException("Could not parse channel authorization end point into a valid URL", e);
         }
     }
 
@@ -46,18 +43,12 @@ abstract class BaseHttpAuthClient {
      * @param endPoint          The endpoint to be called when authorizing or authenticating.
      * @param connectionFactory a custom connection factory to be used for building the connection
      */
-    public BaseHttpAuthClient(
-            final String endPoint,
-            final ConnectionFactory connectionFactory
-    ) {
+    public BaseHttpAuthClient(final String endPoint, final ConnectionFactory connectionFactory) {
         try {
             this.endPoint = new URL(endPoint);
             this.mConnectionFactory = connectionFactory;
         } catch (final MalformedURLException e) {
-            throw new IllegalArgumentException(
-                    "Could not parse channel authorization end point into a valid URL",
-                    e
-            );
+            throw new IllegalArgumentException("Could not parse channel authorization end point into a valid URL", e);
         }
     }
 
@@ -122,9 +113,7 @@ abstract class BaseHttpAuthClient {
             connection.setUseCaches(false);
 
             // Send request
-            final DataOutputStream wr = new DataOutputStream(
-                    connection.getOutputStream()
-            );
+            final DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
             wr.writeBytes(body);
             wr.flush();
             wr.close();

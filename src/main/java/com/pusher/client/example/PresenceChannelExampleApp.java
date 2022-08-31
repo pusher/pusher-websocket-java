@@ -32,8 +32,7 @@ public class PresenceChannelExampleApp {
     private String channelName = "my-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
-    private final String channelAuthorizationEndpoint =
-            "http://localhost:3030/pusher/auth";
+    private final String channelAuthorizationEndpoint = "http://localhost:3030/pusher/auth";
 
     private final PresenceChannel channel;
 
@@ -55,9 +54,7 @@ public class PresenceChannelExampleApp {
         }
 
         // create a HttpChannelAuthorizer that points to your channel authorization server
-        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(
-                channelAuthorizationEndpoint
-        );
+        final HttpChannelAuthorizer channelAuthorizer = new HttpChannelAuthorizer(channelAuthorizationEndpoint);
 
         // configure your Pusher connection with the options you want
         final PusherOptions options = new PusherOptions()
@@ -79,12 +76,7 @@ public class PresenceChannelExampleApp {
 
             @Override
             public void onError(String message, String code, Exception e) {
-                System.out.printf(
-                        "An error was received with message [%s], code [%s], exception [%s]%n",
-                        message,
-                        code,
-                        e
-                );
+                System.out.printf("An error was received with message [%s], code [%s], exception [%s]%n", message, code, e);
             }
         };
 
@@ -105,29 +97,18 @@ public class PresenceChannelExampleApp {
 
             @Override
             public void onAuthenticationFailure(String message, Exception e) {
-                System.out.printf(
-                        "Authorization failure due to [%s], exception was [%s]%n",
-                        message,
-                        e
-                );
+                System.out.printf("Authorization failure due to [%s], exception was [%s]%n", message, e);
             }
 
             @Override
-            public void onUsersInformationReceived(
-                    String channelName,
-                    Set<User> users
-            ) {
+            public void onUsersInformationReceived(String channelName, Set<User> users) {
                 System.out.println("Received user information");
                 printCurrentlySubscribedUsers();
             }
 
             @Override
             public void userSubscribed(String channelName, User user) {
-                System.out.printf(
-                        "A new user has joined channel [%s]: %s%n",
-                        channelName,
-                        user.toString()
-                );
+                System.out.printf("A new user has joined channel [%s]: %s%n", channelName, user.toString());
                 printCurrentlySubscribedUsers();
             }
 
@@ -139,12 +120,7 @@ public class PresenceChannelExampleApp {
         };
 
         // subscribe to the channel and with the event listener for the event name
-        channel =
-                pusher.subscribePresence(
-                        channelName,
-                        presenceChannelEventListener,
-                        eventName
-                );
+        channel = pusher.subscribePresence(channelName, presenceChannelEventListener, eventName);
 
         // Keep main thread asleep while we watch for events or application will terminate
         while (true) {
@@ -157,9 +133,7 @@ public class PresenceChannelExampleApp {
     }
 
     private void printCurrentlySubscribedUsers() {
-        final StringBuilder sb = new StringBuilder(
-                "Users now subscribed to the channel:"
-        );
+        final StringBuilder sb = new StringBuilder("Users now subscribed to the channel:");
         for (final User user : channel.getUsers()) {
             sb.append("\n\t");
             sb.append(user.toString());
