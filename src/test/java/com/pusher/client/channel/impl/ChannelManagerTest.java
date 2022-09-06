@@ -35,7 +35,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChannelManagerTest {
@@ -421,7 +423,10 @@ public class ChannelManagerTest {
     }
 
     @Test
-    public void testConcurrentModificationExceptionDoesNotHappenWhenConnectionIsEstablished() {
+    public void testConcurrentModificationExceptionDoesNotHappenWhenConnectionIsEstablished() throws InterruptedException {
+
+        System.err.println("IM HERE!");
+
         for (int i = 0; i < 1000; i++) {
             channelManager.subscribeTo(new ChannelImpl("channel" + i, factory), null);
         }
@@ -436,10 +441,13 @@ public class ChannelManagerTest {
                 System.out.println("end unsubscribe");
             }
         };
-        Executors.newSingleThreadExecutor().submit(removeChannels);
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.submit(removeChannels);
 
         channelManager.onConnectionStateChange(
                 new ConnectionStateChange(ConnectionState.CONNECTING, ConnectionState.CONNECTED)
         );
+        service.shutdown();
+        service.awaitTermination(1, TimeUnit.MINUTES);
     }
 }
