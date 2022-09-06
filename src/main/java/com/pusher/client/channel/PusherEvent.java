@@ -11,10 +11,38 @@ public class PusherEvent {
 
     @SerializedName("user_id")
     private final String userId;
-
     private final String data;
     private final String channel;
     private final String event;
+
+    /**
+     * getProperty returns the value associated with the key, or null.
+     * It is recommended that you use the specialized getters in this class instead.
+     *
+     * @param key The key you wish to get.
+     * @return
+     *      The object can be casted as follows:
+     *      - JSON strings - java.lang.String
+     *      - JSON number - java.lang.Double
+     *      - JSON boolean - java.lang.Boolean
+     *      - JSON array - java.util.ArrayList
+     *      - JSON object - java.util.Map
+     *      - JSON null - null
+     */
+    public Object getProperty(String key) {
+        switch(key) {
+            case "user_id":
+                return getUserId();
+            case "channel":
+                return getChannelName();
+            case "data":
+                return getData();
+            case "event":
+                return getEventName();
+            default:
+                return null;
+        }
+    }
 
     public String getUserId() {
         return userId;
