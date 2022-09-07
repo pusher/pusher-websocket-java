@@ -183,7 +183,7 @@ public class ChannelImplTest {
     @Test
     public void testEventIsNotPassedOnIfThereAreNoMatchingListeners() {
         channel.bind(EVENT_NAME, mockListener);
-        channel.handleEvent(PusherEvent.fromJson("{\"event\":\"DifferentEventName\",\"data\":{}}"));
+        channel.handleEvent(PusherEvent.fromJson("{\"event\":\"DifferentEventName\",\"data\":\"{}\"}"));
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }

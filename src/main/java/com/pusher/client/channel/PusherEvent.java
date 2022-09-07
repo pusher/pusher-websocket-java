@@ -80,27 +80,12 @@ public class PusherEvent {
     }
 
     public static PusherEvent fromJson(String json) {
-        Gson gson = new Gson();
-        JsonObject o = gson.fromJson(json, JsonObject.class);
-
-        String dataJson = "{}";
-        JsonElement data = o.has("data") ? o.get("data") : null;
-        if (data != null) {
-            // It's possible that the data member was already correct JSON,
-            // So the Gson parser made it a JsonObject.
-            // We need the data member to be a JSON string.
-            if (data.isJsonPrimitive()) {
-                dataJson = data.getAsString();
-            } else {
-                dataJson = gson.toJson(data);
-            }
-        }
-
+        JsonObject o = new Gson().fromJson(json, JsonObject.class);
         return new PusherEvent(
                 o.has("event") ? o.get("event").getAsString() : "",
                 o.has("channel") ? o.get("channel").getAsString() : "",
                 o.has("user_id") ? o.get("user_id").getAsString() : "",
-                dataJson
+                o.has("data") ? o.get("data").getAsString() : ""
         );
     }
 }

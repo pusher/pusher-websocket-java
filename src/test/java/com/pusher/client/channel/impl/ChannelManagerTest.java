@@ -288,7 +288,7 @@ public class ChannelManagerTest {
     public void testReceiveMessageForSubscribedChannelPassesItToChannel() {
         channelManager.subscribeTo(mockInternalChannel, mockEventListener, "my-event");
         PusherEvent event = PusherEvent.fromJson(
-                "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + CHANNEL_NAME + "\"}"
+                "{\"channel\": \"" + CHANNEL_NAME + "\", \"event\":\"my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}"
         );
 
         channelManager.handleEvent(event);
@@ -300,9 +300,9 @@ public class ChannelManagerTest {
     public void testReceiveMessageWithNoMatchingChannelIsIgnoredAndDoesNotThrowException() {
         channelManager.subscribeTo(mockInternalChannel, mockEventListener, "my-event");
         channelManager.handleEvent(
-                PusherEvent.fromJson(
-                        "{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + "DIFFERENT_CHANNEL_NAME" + "\"}"
-                )
+            PusherEvent.fromJson(
+                    "{\"channel\": \"" + "DIFFERENT_CHANNEL_NAME"  + "\", \"event\":\"my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}"
+            )
         );
 
         verify(mockInternalChannel, never()).handleEvent(anyObject());
@@ -311,7 +311,7 @@ public class ChannelManagerTest {
     @Test
     public void testReceiveMessageWithNoChannelIsIgnoredAndDoesNotThrowException() {
         channelManager.handleEvent(
-                PusherEvent.fromJson("{\"event\":\"connection_established\",\"data\":{\"socket_id\":\"21098.967780\"}}")
+                PusherEvent.fromJson("{\"event\":\"connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21098.967780\\\"}\"}")
         );
     }
 
@@ -350,7 +350,7 @@ public class ChannelManagerTest {
         channelManager.subscribeTo(mockInternalChannel, mockEventListener, "my-event");
         channelManager.unsubscribeFrom(CHANNEL_NAME);
         channelManager.handleEvent(
-                PusherEvent.fromJson("{\"event\":\"my-event\",\"data\":{\"fish\":\"chips\"},\"channel\":\"" + CHANNEL_NAME + "\"}")
+                PusherEvent.fromJson("{\"event\":\"my-event\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"},\\\"channel\\\":\\\"" + CHANNEL_NAME + "\\\"}\"}")
         );
 
         verify(mockInternalChannel, never()).handleEvent(anyObject());
@@ -424,9 +424,6 @@ public class ChannelManagerTest {
 
     @Test
     public void testConcurrentModificationExceptionDoesNotHappenWhenConnectionIsEstablished() throws InterruptedException {
-
-        System.err.println("IM HERE!");
-
         for (int i = 0; i < 1000; i++) {
             channelManager.subscribeTo(new ChannelImpl("channel" + i, factory), null);
         }
@@ -434,11 +431,9 @@ public class ChannelManagerTest {
         Runnable removeChannels = new Runnable() {
             @Override
             public void run() {
-                System.out.println("Start unsubscribe");
                 for (int i = 900; i < 1000; i++) {
                     channelManager.unsubscribeFrom("channel" + i);
                 }
-                System.out.println("end unsubscribe");
             }
         };
         ExecutorService service = Executors.newSingleThreadExecutor();

@@ -51,7 +51,7 @@ public class WebSocketConnectionTest {
     private static final String CONN_ESTABLISHED_EVENT =
             "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"21112.816204\\\"}\"}";
     private static final String INCOMING_MESSAGE =
-            "{\"event\":\"" + EVENT_NAME + "\",\"channel\":\"my-channel\",\"data\":{\"fish\":\"chips\"}}";
+            "{\"event\":\"" + EVENT_NAME + "\",\"channel\":\"my-channel\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}";
     private static final Proxy PROXY = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxyaddress", 80));
 
     @Mock
@@ -227,7 +227,7 @@ public class WebSocketConnectionTest {
                 .onConnectionStateChange(new ConnectionStateChange(ConnectionState.DISCONNECTED, ConnectionState.CONNECTING));
 
         connection.onMessage(
-                "{\"event\":\"pusher:error\",\"data\":{\"code\":4001,\"message\":\"Could not find app by key 12345\"}}"
+                "{\"event\":\"pusher:error\",\"data\":\"{\\\"code\\\":4001,\\\"message\\\":\\\"Could not find app by key 12345\\\"}\"}"
         );
         verify(mockEventListener).onError("Could not find app by key 12345", "4001", null);
     }
