@@ -3,6 +3,7 @@ package com.pusher.client.util;
 import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.PusherOptions;
 import com.pusher.client.UserAuthenticator;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.impl.ChannelImpl;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.channel.impl.PresenceChannelImpl;
@@ -22,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 
 import javax.net.ssl.SSLException;
 
@@ -53,7 +55,7 @@ public class Factory {
     public synchronized InternalConnection getConnection(
             final String apiKey,
             final PusherOptions options,
-            final PusherEventHandler eventHandler
+            final Consumer<PusherEvent> eventHandler
     ) {
         if (connection == null) {
             try {

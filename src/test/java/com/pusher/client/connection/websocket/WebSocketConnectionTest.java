@@ -14,12 +14,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.PusherEventHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +36,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.net.ssl.SSLException;
 
@@ -58,7 +59,7 @@ public class WebSocketConnectionTest {
     private WebSocketClientWrapper mockUnderlyingConnection;
 
     @Mock
-    private PusherEventHandler mockEventHandler;
+    private Consumer<PusherEvent> mockEventHandler;
 
     @Mock
     private ConnectionEventListener mockEventListener;

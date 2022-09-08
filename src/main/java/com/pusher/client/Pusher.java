@@ -22,7 +22,6 @@ import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.user.User;
 import com.pusher.client.user.impl.InternalUser;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.PusherEventHandler;
 
 /**
  * This class is the main entry point for accessing Pusher.
@@ -40,7 +39,7 @@ import com.pusher.client.util.PusherEventHandler;
  * {@link Pusher#subscribePresence(String)} or one of the overloads.
  * </p>
  */
-public class Pusher implements Client, PusherEventHandler {
+public class Pusher implements Client {
 
     private final PusherOptions pusherOptions;
     private final InternalConnection connection;
@@ -101,13 +100,13 @@ public class Pusher implements Client, PusherEventHandler {
 
         this.pusherOptions = pusherOptions;
         this.factory = factory;
-        connection = factory.getConnection(apiKey, this.pusherOptions, this);
+        connection = factory.getConnection(apiKey, this.pusherOptions, this::handleEvent);
         channelManager = factory.getChannelManager();
         user = factory.newUser(connection, pusherOptions.getUserAuthenticator());
         channelManager.setConnection(connection);
     }
 
-    public void handleEvent(PusherEvent event) {
+    private void handleEvent(PusherEvent event) {
         user.handleEvent(event);
         channelManager.handleEvent(event);
     }

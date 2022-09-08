@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
@@ -19,7 +20,6 @@ import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
 import com.pusher.client.util.DoNothingExecutor;
 import com.pusher.client.util.Factory;
-import com.pusher.client.util.PusherEventHandler;
 
 import org.java_websocket.handshake.ServerHandshake;
 import org.junit.After;
@@ -33,6 +33,7 @@ import org.mockito.stubbing.Answer;
 
 import java.net.Proxy;
 import java.net.URI;
+import java.util.function.Consumer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndToEndTest {
@@ -56,7 +57,7 @@ public class EndToEndTest {
     private ChannelAuthorizer mockChannelAuthorizer;
 
     @Mock
-    private PusherEventHandler mockEventHandler;
+    private Consumer<PusherEvent> mockEventHandler;
 
     @Mock
     private ConnectionEventListener mockConnectionEventListener;
@@ -116,7 +117,7 @@ public class EndToEndTest {
                         }
                 );
 
-        when(factory.getConnection(eq(API_KEY), eq(pusherOptions), any(PusherEventHandler.class))).thenReturn(connection);
+        when(factory.getConnection(eq(API_KEY), eq(pusherOptions), any(Consumer.class))).thenReturn(connection);
 
         when(factory.getChannelManager())
                 .thenAnswer(

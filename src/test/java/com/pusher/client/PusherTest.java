@@ -24,7 +24,6 @@ import com.pusher.client.user.impl.InternalUser;
 import com.pusher.client.util.Factory;
 import com.pusher.client.util.HttpChannelAuthorizer;
 import com.pusher.client.util.HttpUserAuthenticator;
-import com.pusher.client.util.PusherEventHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +32,8 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+
+import java.util.function.Consumer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PusherTest {
@@ -54,9 +55,6 @@ public class PusherTest {
 
     @Mock
     private ChannelManager mockChannelManager;
-
-    @Mock
-    private PusherEventHandler mockEventHandler;
 
     @Mock
     private ConnectionEventListener mockConnectionEventListener;
@@ -90,7 +88,7 @@ public class PusherTest {
                         .setChannelAuthorizer(channelAuthorizer)
                         .setUserAuthenticator(new HttpUserAuthenticator("http://user-auth.com"));
 
-        when(factory.getConnection(eq(API_KEY), any(PusherOptions.class), any(PusherEventHandler.class)))
+        when(factory.getConnection(eq(API_KEY), any(PusherOptions.class), any(Consumer.class)))
                 .thenReturn(mockConnection);
         when(factory.getChannelManager()).thenReturn(mockChannelManager);
         when(factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
