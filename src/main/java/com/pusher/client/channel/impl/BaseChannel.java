@@ -123,10 +123,9 @@ public abstract class BaseChannel implements InternalChannel {
     public void handleEvent(PusherEvent event) {
         if (event.getEventName().equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
+        } else if (event.getEventName().equals(SUBSCRIPTION_COUNT_EVENT)) {
+            handleSubscriptionCountEvent(event);
         } else {
-            if (event.getEventName().equals(SUBSCRIPTION_COUNT_EVENT)) {
-                handleSubscriptionCountEvent(event);
-            }
             emit(event);
         }
     }
