@@ -1,7 +1,7 @@
 # pusher-websocket-java changelog
 
-### Version 2.4.1 - 31th Aug 2022
-* Refactoring of event handling in the SDK
+### Version 2.4.1 - 13th Sep 2022
+* Refactoring and code cleanup of event handling in the SDK
 * Fixes subscription_count events
 
 ### Version 2.4.0 - 15th July 2022
