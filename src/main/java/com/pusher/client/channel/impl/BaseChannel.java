@@ -1,27 +1,29 @@
 package com.pusher.client.channel.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.gson.Gson;
-
-import com.google.gson.GsonBuilder;
-import com.pusher.client.channel.*;
+import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
+import com.pusher.client.channel.PusherEvent;
+import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.impl.message.SubscribeMessage;
 import com.pusher.client.channel.impl.message.SubscriptionCountData;
 import com.pusher.client.channel.impl.message.UnsubscribeMessage;
 import com.pusher.client.util.Factory;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public abstract class BaseChannel implements InternalChannel {
-    protected final Gson GSON;
+
+    protected final Gson GSON = new Gson();
     private static final String INTERNAL_EVENT_PREFIX = "pusher_internal:";
     protected static final String SUBSCRIPTION_SUCCESS_EVENT = "pusher_internal:subscription_succeeded";
     protected static final String SUBSCRIPTION_COUNT_EVENT = "pusher_internal:subscription_count";
     protected static final String PUBLIC_SUBSCRIPTION_COUNT_EVENT = "pusher:subscription_count";
-    private Set<SubscriptionEventListener> globalListeners = new HashSet<SubscriptionEventListener>();
-    private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<String, Set<SubscriptionEventListener>>();
+    private final Set<SubscriptionEventListener> globalListeners = new HashSet<>();
+    private final Map<String, Set<SubscriptionEventListener>> eventNameToListenerMap = new HashMap<>();
     protected volatile ChannelState state = ChannelState.INITIAL;
     private ChannelEventListener eventListener;
     private final Factory factory;
@@ -29,16 +31,13 @@ public abstract class BaseChannel implements InternalChannel {
     private Integer subscriptionCount;
 
     public BaseChannel(final Factory factory) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(PusherEvent.class, new PusherEventDeserializer());
-        GSON = gsonBuilder.create();
         this.factory = factory;
     }
 
     /* Channel implementation */
 
     @Override
-    abstract public String getName();
+    public abstract String getName();
 
     @Override
     public Integer getCount() {
@@ -52,7 +51,7 @@ public abstract class BaseChannel implements InternalChannel {
         synchronized (lock) {
             Set<SubscriptionEventListener> listeners = eventNameToListenerMap.get(eventName);
             if (listeners == null) {
-                listeners = new HashSet<SubscriptionEventListener>();
+                listeners = new HashSet<>();
                 eventNameToListenerMap.put(eventName, listeners);
             }
             listeners.add(listener);
@@ -63,7 +62,7 @@ public abstract class BaseChannel implements InternalChannel {
     public void bindGlobal(SubscriptionEventListener listener) {
         validateArguments("", listener);
 
-        synchronized(lock) {
+        synchronized (lock) {
             globalListeners.add(listener);
         }
     }
@@ -87,7 +86,7 @@ public abstract class BaseChannel implements InternalChannel {
     public void unbindGlobal(SubscriptionEventListener listener) {
         validateArguments("", listener);
 
-        synchronized(lock) {
+        synchronized (lock) {
             if (globalListeners != null) {
                 globalListeners.remove(listener);
             }
@@ -111,32 +110,23 @@ public abstract class BaseChannel implements InternalChannel {
         return GSON.toJson(new UnsubscribeMessage(getName()));
     }
 
-    @Override
-    public PusherEvent prepareEvent(String event, String message) {
-        return GSON.fromJson(message, PusherEvent.class);
+    public void emit(PusherEvent pusherEvent) {
+        final Set<SubscriptionEventListener> listeners = getInterestedListeners(pusherEvent.getEventName());
+        if (listeners != null) {
+            for (final SubscriptionEventListener listener : listeners) {
+                factory.queueOnEventThread(() -> listener.onEvent(pusherEvent));
+            }
+        }
     }
 
     @Override
-    public void onMessage(String event, String message) {
-        if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
+    public void handleEvent(PusherEvent event) {
+        if (event.getEventName().equals(SUBSCRIPTION_SUCCESS_EVENT)) {
             updateState(ChannelState.SUBSCRIBED);
-        }else if (event.equals(SUBSCRIPTION_COUNT_EVENT)) {
-            handleSubscriptionCountEvent(message);
+        } else if (event.getEventName().equals(SUBSCRIPTION_COUNT_EVENT)) {
+            handleSubscriptionCountEvent(event);
         } else {
-            final Set<SubscriptionEventListener> listeners = getInterestedListeners(event);
-            if (listeners != null) {
-                final PusherEvent pusherEvent = prepareEvent(event, message);
-                if (pusherEvent != null) {
-                    for (final SubscriptionEventListener listener : listeners) {
-                        factory.queueOnEventThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    listener.onEvent(pusherEvent);
-                                }
-                            });
-                    }
-                }
-            }
+            emit(event);
         }
     }
 
@@ -145,12 +135,7 @@ public abstract class BaseChannel implements InternalChannel {
         this.state = state;
 
         if (state == ChannelState.SUBSCRIBED && eventListener != null) {
-            factory.queueOnEventThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        eventListener.onSubscriptionSucceeded(getName());
-                    }
-                });
+            factory.queueOnEventThread(() -> eventListener.onSubscriptionSucceeded(getName()));
         }
     }
 
@@ -178,8 +163,7 @@ public abstract class BaseChannel implements InternalChannel {
         return String.format("[Channel: name=%s]", getName());
     }
 
-     private void validateArguments(final String eventName, final SubscriptionEventListener listener) {
-
+    private void validateArguments(final String eventName, final SubscriptionEventListener listener) {
         if (eventName == null) {
             throw new IllegalArgumentException("Cannot bind or unbind to channel " + getName() + " with a null event name");
         }
@@ -189,32 +173,38 @@ public abstract class BaseChannel implements InternalChannel {
         }
 
         if (eventName.startsWith(INTERNAL_EVENT_PREFIX)) {
-            throw new IllegalArgumentException("Cannot bind or unbind channel " + getName()
-                    + " with an internal event name such as " + eventName);
+            throw new IllegalArgumentException(
+                    "Cannot bind or unbind channel " + getName() + " with an internal event name such as " + eventName
+            );
         }
     }
 
-    private void handleSubscriptionCountEvent(final String message) {
-        final SubscriptionCountData subscriptionCountMessage = GSON.fromJson(message, SubscriptionCountData.class);
+    private void handleSubscriptionCountEvent(final PusherEvent event) {
+        final SubscriptionCountData subscriptionCountMessage = GSON.fromJson(event.getData(), SubscriptionCountData.class);
         subscriptionCount = subscriptionCountMessage.getCount();
-        onMessage(PUBLIC_SUBSCRIPTION_COUNT_EVENT, message);
+        final PusherEvent publicEvent = new PusherEvent(
+                PUBLIC_SUBSCRIPTION_COUNT_EVENT,
+                event.getChannelName(),
+                event.getUserId(),
+                event.getData()
+        );
+        emit(publicEvent);
     }
 
     protected Set<SubscriptionEventListener> getInterestedListeners(String event) {
         synchronized (lock) {
-            Set<SubscriptionEventListener> listeners = new HashSet<SubscriptionEventListener>();
+            Set<SubscriptionEventListener> listeners = new HashSet<>();
 
-            final Set<SubscriptionEventListener> sharedListeners =
-                    eventNameToListenerMap.get(event);
+            final Set<SubscriptionEventListener> sharedListeners = eventNameToListenerMap.get(event);
 
-            if (sharedListeners != null ) {
+            if (sharedListeners != null) {
                 listeners.addAll(sharedListeners);
             }
             if (!globalListeners.isEmpty()) {
                 listeners.addAll(globalListeners);
             }
 
-            if (listeners.isEmpty()){
+            if (listeners.isEmpty()) {
                 return null;
             }
 

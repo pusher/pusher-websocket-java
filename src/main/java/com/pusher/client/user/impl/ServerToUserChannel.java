@@ -5,11 +5,11 @@ import com.pusher.client.user.User;
 import com.pusher.client.util.Factory;
 
 class ServerToUserChannel extends BaseChannel {
-    private User user;
+
+    private final User user;
 
     public ServerToUserChannel(User user, Factory factory) {
         super(factory);
-
         this.user = user;
     }
 
@@ -19,6 +19,6 @@ class ServerToUserChannel extends BaseChannel {
         if (userId == null) {
             throw new IllegalStateException("User id is null in ServerToUserChannel");
         }
-            return "#server-to-user-" + user.userId();
+        return "#server-to-user-" + user.userId();
     }
 }

@@ -3,6 +3,7 @@ package com.pusher.client.channel.impl.message;
 import com.pusher.client.util.internal.Base64;
 
 public class EncryptedReceivedData {
+
     private String nonce;
     private String ciphertext;
 
@@ -14,4 +15,3 @@ public class EncryptedReceivedData {
         return Base64.decode(ciphertext);
     }
 }
-

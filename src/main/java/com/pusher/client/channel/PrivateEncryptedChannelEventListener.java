@@ -7,6 +7,5 @@ package com.pusher.client.channel;
  * PrivateChannelEventListener
  */
 public interface PrivateEncryptedChannelEventListener extends PrivateChannelEventListener {
-
     void onDecryptionFailure(String event, String reason);
 }

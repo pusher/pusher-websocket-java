@@ -5,6 +5,7 @@ import static java.util.Arrays.copyOf;
 
 import com.google.common.collect.Lists;
 import com.pusher.client.util.internal.Base64;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,9 +34,7 @@ public class SecretBoxOpenerTest {
 
     @Test
     public void openEmptyMessage() {
-        subject = new SecretBoxOpener(
-                Base64.decode("dwXDg1sGnypM44uPh5Rts/JIP2Y7XkHR5lB/o3rBlVs=")
-        );
+        subject = new SecretBoxOpener(Base64.decode("dwXDg1sGnypM44uPh5Rts/JIP2Y7XkHR5lB/o3rBlVs="));
 
         ArrayList<String> nonces = Lists.newArrayList(
                 "p8v9RQR5r6o3G7e2KRgteRi5P90ajKVz",
@@ -62,12 +61,9 @@ public class SecretBoxOpenerTest {
         );
 
         for (int i = 0; i < ciphers.size(); i++) {
-            String decryptedMessage = subject.open(
-                    Base64.decode(ciphers.get(i)),
-                    Base64.decode(nonces.get(i)));
+            String decryptedMessage = subject.open(Base64.decode(ciphers.get(i)), Base64.decode(nonces.get(i)));
             assertThat(decryptedMessage).isEqualTo("{\"message\":\"\"}");
         }
-
     }
 
     @Test(expected = AuthenticityException.class)

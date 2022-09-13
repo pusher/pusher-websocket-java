@@ -3,9 +3,18 @@ package com.pusher.client.channel.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import com.pusher.client.channel.ChannelEventListener;
+import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PusherEvent;
+import com.pusher.client.util.Factory;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,31 +25,35 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.pusher.client.channel.ChannelEventListener;
-import com.pusher.client.channel.ChannelState;
-import com.pusher.client.util.Factory;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ChannelImplTest {
 
     private static final String EVENT_NAME = "my-event";
     protected ChannelImpl channel;
-    protected @Mock Factory factory;
-    private @Mock ChannelEventListener mockListener;
+
+    @Mock
+    protected Factory factory;
+
+    @Mock
+    protected ChannelEventListener mockListener;
 
     @Captor
     ArgumentCaptor<PusherEvent> argCaptor;
 
     @Before
     public void setUp() {
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) {
-                final Runnable r = (Runnable) invocation.getArguments()[0];
-                r.run();
-                return null;
-            }
-        }).when(factory).queueOnEventThread(any(Runnable.class));
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) {
+                        final Runnable r = (Runnable) invocation.getArguments()[0];
+                        r.run();
+                        return null;
+                    }
+                }
+        )
+                .when(factory)
+                .queueOnEventThread(any(Runnable.class));
 
         mockListener = getEventListener();
         channel = newInstance(getChannelName());
@@ -79,96 +92,116 @@ public class ChannelImplTest {
 
     @Test
     public void testReturnsCorrectSubscribeMessage() {
-        assertEquals("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}",
-                channel.toSubscribeMessage());
+        assertEquals(
+                "{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}",
+                channel.toSubscribeMessage()
+        );
     }
 
     @Test
     public void testReturnsCorrectUnsubscribeMessage() {
-        assertEquals("{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}",
-                channel.toUnsubscribeMessage());
+        assertEquals(
+                "{\"event\":\"pusher:unsubscribe\",\"data\":{\"channel\":\"" + getChannelName() + "\"}}",
+                channel.toUnsubscribeMessage()
+        );
     }
 
     @Test
     public void testInternalSubscriptionSucceededMessageIsTranslatedToASubscriptionSuccessfulCallback() {
         channel.bind(EVENT_NAME, mockListener);
-        channel.onMessage("pusher_internal:subscription_succeeded",
-                "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\""
-                        + getChannelName() + "\"}");
+        channel.handleEvent(
+                PusherEvent.fromJson(
+                        "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"" +
+                                getChannelName() +
+                                "\"}"
+                )
+        );
 
         verify(mockListener).onSubscriptionSucceeded(getChannelName());
     }
 
     @Test
-    public void testIsSubscribedMethod(){
+    public void testIsSubscribedMethod() {
         assertFalse(channel.isSubscribed());
         channel.bind(EVENT_NAME, mockListener);
-        channel.onMessage("pusher_internal:subscription_succeeded",
-                "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\""
-                        + getChannelName() + "\"}");
+        channel.handleEvent(
+                PusherEvent.fromJson(
+                        "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"" +
+                                getChannelName() +
+                                "\"}"
+                )
+        );
         assertTrue(channel.isSubscribed());
     }
 
     @Test
     public void testDataIsExtractedFromMessageAndPassedToSingleListener() {
         // {"event":"my-event","data":"{\"some\":\"data\"}","channel":"my-channel"}
+
         channel.bind(EVENT_NAME, mockListener);
-        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.handleEvent(
+                PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}")
+        );
 
         verify(mockListener, times(1)).onEvent(argCaptor.capture());
-        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals(EVENT_NAME, argCaptor.getValue().getEventName());
         assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
+
     @Test
     public void testDataIsExtractedFromMessageAndPassedToSingleListenerGlobalEvent() {
         channel.bindGlobal(mockListener);
-        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.handleEvent(
+                PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}")
+        );
 
         verify(mockListener, times(1)).onEvent(argCaptor.capture());
-        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals(EVENT_NAME, argCaptor.getValue().getEventName());
         assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
+
     @Test
     public void testDataIsExtractedFromMessageAndPassedToMultipleListeners() {
         final ChannelEventListener mockListener2 = getEventListener();
 
         channel.bind(EVENT_NAME, mockListener);
         channel.bind(EVENT_NAME, mockListener2);
-        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+
+        channel.handleEvent(
+                PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}")
+        );
 
         verify(mockListener).onEvent(argCaptor.capture());
-        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals(EVENT_NAME, argCaptor.getValue().getEventName());
         assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
 
         verify(mockListener2).onEvent(argCaptor.capture());
-        assertEquals("event1", argCaptor.getValue().getEventName());
+        assertEquals(EVENT_NAME, argCaptor.getValue().getEventName());
         assertEquals("{\"fish\":\"chips\"}", argCaptor.getValue().getData());
     }
 
     @Test
     public void testEventIsNotPassedOnIfThereAreNoMatchingListeners() {
-
         channel.bind(EVENT_NAME, mockListener);
-        channel.onMessage("DifferentEventName", "{\"event\":\"event1\",\"data\":{\"fish\":\"chips\"}}");
+        channel.handleEvent(PusherEvent.fromJson("{\"event\":\"DifferentEventName\",\"data\":\"{}\"}"));
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }
 
     @Test
     public void testEventIsNotPassedOnIfListenerHasUnboundFromEvent() {
-
         channel.bind(EVENT_NAME, mockListener);
         channel.unbind(EVENT_NAME, mockListener);
-        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.handleEvent(PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{}\"}"));
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }
+
     @Test
     public void testEventIsNotPassedOnIfListenerHasUnboundFromGlobalEvent() {
-
         channel.bindGlobal(mockListener);
         channel.unbindGlobal(mockListener);
-        channel.onMessage(EVENT_NAME, "{\"event\":\"event1\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}");
+        channel.handleEvent(PusherEvent.fromJson("{\"event\":\"" + EVENT_NAME + "\",\"data\":\"{}\"}"));
 
         verify(mockListener, never()).onEvent(any(PusherEvent.class));
     }
@@ -213,7 +246,6 @@ public class ChannelImplTest {
 
         verify(mockListener, never()).onSubscriptionSucceeded(getChannelName());
     }
-
 
     @Test
     public void testUpdateStateToSubscribedNotifiesListenerThatSubscriptionSucceeded() {

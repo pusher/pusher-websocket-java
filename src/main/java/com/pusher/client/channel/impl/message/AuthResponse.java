@@ -3,6 +3,7 @@ package com.pusher.client.channel.impl.message;
 import com.google.gson.annotations.SerializedName;
 
 public class AuthResponse {
+
     private String auth;
 
     // we want to keep this as a String until needed because we send this back on requests
@@ -23,5 +24,4 @@ public class AuthResponse {
     public String getSharedSecret() {
         return sharedSecret;
     }
-
 }

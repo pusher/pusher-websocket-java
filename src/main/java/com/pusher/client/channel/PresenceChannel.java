@@ -10,7 +10,6 @@ import java.util.Set;
  * .
  */
 public interface PresenceChannel extends PrivateChannel {
-
     /**
      * Gets a set of users currently subscribed to the channel.
      *

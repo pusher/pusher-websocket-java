@@ -2,6 +2,7 @@ package com.pusher.client.util;
 
 import com.pusher.client.AuthorizationFailureException;
 import com.pusher.client.ChannelAuthorizer;
+
 import java.io.IOException;
 
 /**
@@ -25,8 +26,7 @@ public class HttpChannelAuthorizer extends BaseHttpAuthClient implements Channel
     /**
      * Creates a new channel authorizer.
      *
-     * @param endPoint
-     *            The endpoint to be called when authorizing.
+     * @param endPoint The endpoint to be called when authorizing.
      */
     public HttpChannelAuthorizer(final String endPoint) {
         super(endPoint);
@@ -35,7 +35,7 @@ public class HttpChannelAuthorizer extends BaseHttpAuthClient implements Channel
     /**
      * Creates a new channel authorizer.
      *
-     * @param endPoint The endpoint to be called when authorizing.
+     * @param endPoint          The endpoint to be called when authorizing.
      * @param connectionFactory a custom connection factory to be used for building the connection
      */
     public HttpChannelAuthorizer(final String endPoint, final ConnectionFactory connectionFactory) {

@@ -13,7 +13,7 @@ package com.pusher.client.channel;
  * <li>Call {@link Channel#bind(String, SubscriptionEventListener)} to bind your
  * listener to a specified event.</li>
  * </ul>
- * 
+ *
  * <p>
  * Or, call
  * {@link com.pusher.client.Pusher#subscribe(String, ChannelEventListener, String...)}
@@ -22,7 +22,6 @@ package com.pusher.client.channel;
  * </p>
  */
 public interface ChannelEventListener extends SubscriptionEventListener {
-
     /**
      * <p>
      * Callback that is fired when a subscription success acknowledgement
@@ -36,8 +35,7 @@ public interface ChannelEventListener extends SubscriptionEventListener {
      * successfully authenticated.
      * </p>
      *
-     * @param channelName
-     *            The name of the channel that was successfully subscribed.
+     * @param channelName The name of the channel that was successfully subscribed.
      */
     void onSubscriptionSucceeded(String channelName);
 }

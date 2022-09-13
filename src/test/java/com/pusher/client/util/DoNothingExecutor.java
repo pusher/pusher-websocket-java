@@ -23,14 +23,16 @@ public class DoNothingExecutor implements ScheduledExecutorService {
     }
 
     @Override
-    public <T> List<Future<T>> invokeAll(final Collection<? extends Callable<T>> tasks, final long timeout,
-            final TimeUnit unit) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(
+            final Collection<? extends Callable<T>> tasks,
+            final long timeout,
+            final TimeUnit unit
+    ) throws InterruptedException {
         return null;
     }
 
     @Override
-    public <T> T invokeAny(final Collection<? extends Callable<T>> tasks) throws InterruptedException,
-            ExecutionException {
+    public <T> T invokeAny(final Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
         return null;
     }
 
@@ -89,15 +91,22 @@ public class DoNothingExecutor implements ScheduledExecutorService {
     }
 
     @Override
-    public ScheduledFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period,
-            final TimeUnit unit) {
+    public ScheduledFuture<?> scheduleAtFixedRate(
+            final Runnable command,
+            final long initialDelay,
+            final long period,
+            final TimeUnit unit
+    ) {
         return null;
     }
 
     @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay,
-            final TimeUnit unit) {
+    public ScheduledFuture<?> scheduleWithFixedDelay(
+            final Runnable command,
+            final long initialDelay,
+            final long delay,
+            final TimeUnit unit
+    ) {
         return null;
     }
-
 }

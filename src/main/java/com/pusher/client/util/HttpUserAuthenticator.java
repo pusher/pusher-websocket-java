@@ -2,6 +2,7 @@ package com.pusher.client.util;
 
 import com.pusher.client.AuthenticationFailureException;
 import com.pusher.client.UserAuthenticator;
+
 import java.io.IOException;
 
 /**
@@ -22,8 +23,7 @@ public class HttpUserAuthenticator extends BaseHttpAuthClient implements UserAut
     /**
      * Creates a new user authenticator.
      *
-     * @param endPoint
-     *            The endpoint to be called when authenticating.
+     * @param endPoint The endpoint to be called when authenticating.
      */
     public HttpUserAuthenticator(final String endPoint) {
         super(endPoint);
@@ -32,7 +32,7 @@ public class HttpUserAuthenticator extends BaseHttpAuthClient implements UserAut
     /**
      * Creates a new user authenticator.
      *
-     * @param endPoint The endpoint to be called when authenticating.
+     * @param endPoint          The endpoint to be called when authenticating.
      * @param connectionFactory a custom connection factory to be used for building the connection
      */
     public HttpUserAuthenticator(final String endPoint, final ConnectionFactory connectionFactory) {

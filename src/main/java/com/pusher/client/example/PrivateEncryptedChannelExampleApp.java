@@ -2,7 +2,6 @@ package com.pusher.client.example;
 
 import com.pusher.client.Pusher;
 import com.pusher.client.PusherOptions;
-import com.pusher.client.channel.PrivateEncryptedChannel;
 import com.pusher.client.channel.PrivateEncryptedChannelEventListener;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -34,22 +33,23 @@ public class PrivateEncryptedChannelExampleApp {
     private String channelName = "private-encrypted-channel";
     private String eventName = "my-event";
     private String cluster = "eu";
-    private String channelAuthorizationEndpoint = "http://localhost:3030/pusher/auth";
-
-    private PrivateEncryptedChannel channel;
+    private final String channelAuthorizationEndpoint = "http://localhost:3030/pusher/auth";
 
     public static void main(final String[] args) {
         new PrivateEncryptedChannelExampleApp(args);
     }
 
     private PrivateEncryptedChannelExampleApp(final String[] args) {
-
         // if using from the command line, these variables need to be passed
         switch (args.length) {
-            case 4: cluster = args[3];
-            case 3: eventName = args[2];
-            case 2: channelName = args[1];
-            case 1: channelsKey = args[0];
+            case 4:
+                cluster = args[3];
+            case 3:
+                eventName = args[2];
+            case 2:
+                channelName = args[1];
+            case 1:
+                channelsKey = args[0];
         }
 
         // create a HttpChannelAuthorizer that points to your channel authorization server
@@ -66,14 +66,16 @@ public class PrivateEncryptedChannelExampleApp {
         ConnectionEventListener connectionEventListener = new ConnectionEventListener() {
             @Override
             public void onConnectionStateChange(ConnectionStateChange change) {
-                System.out.println(String.format("Connection state changed from [%s] to [%s]",
-                        change.getPreviousState(), change.getCurrentState()));
+                System.out.printf(
+                        "Connection state changed from [%s] to [%s]%n",
+                        change.getPreviousState(),
+                        change.getCurrentState()
+                );
             }
 
             @Override
             public void onError(String message, String code, Exception e) {
-                System.out.println(String.format("An error was received with message [%s], code [%s], exception [%s]",
-                        message, code, e));
+                System.out.printf("An error was received with message [%s], code [%s], exception [%s]%n", message, code, e);
             }
         };
 
@@ -81,42 +83,35 @@ public class PrivateEncryptedChannelExampleApp {
         pusher.connect(connectionEventListener);
 
         // set up a PrivateEncryptedChannelEventListener to listen for messages to the channel and event we are interested in
-        PrivateEncryptedChannelEventListener privateEncryptedChannelEventListener =
-                new PrivateEncryptedChannelEventListener() {
+        PrivateEncryptedChannelEventListener privateEncryptedChannelEventListener = new PrivateEncryptedChannelEventListener() {
             @Override
             public void onSubscriptionSucceeded(String channelName) {
-                System.out.println(String.format(
-                        "Subscription to channel [%s] succeeded", channelName));
+                System.out.printf("Subscription to channel [%s] succeeded%n", channelName);
             }
 
             @Override
             public void onEvent(PusherEvent event) {
-                System.out.println(String.format(
-                        "Received event [%s]", event.toString()));
+                System.out.printf("Received event [%s]%n", event.toString());
             }
 
             @Override
             public void onAuthenticationFailure(String message, Exception e) {
-                System.out.println(String.format(
-                        "Authorization failure due to [%s], exception was [%s]", message, e));
+                System.out.printf("Authorization failure due to [%s], exception was [%s]%n", message, e);
             }
 
             @Override
             public void onDecryptionFailure(String event, String reason) {
-                System.out.println(String.format(
-                        "An error was received decrypting message for event:[%s] - reason: [%s]", event, reason));
+                System.out.printf("An error was received decrypting message for event:[%s] - reason: [%s]%n", event, reason);
             }
         };
 
-        // subscribe to the channel and with the event listener for the event name
-        channel = pusher.subscribePrivateEncrypted(channelName, privateEncryptedChannelEventListener, eventName);
+        pusher.subscribePrivateEncrypted(channelName, privateEncryptedChannelEventListener, eventName);
 
         // Keep main thread asleep while we watch for events or application will terminate
         while (true) {
             try {
                 Thread.sleep(1000);
-            }
-            catch (final InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
         }

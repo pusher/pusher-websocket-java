@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SubscribeMessage {
-    private String event = "pusher:subscribe";
-    private Map<String, String> data = new HashMap<>();
+
+    private final String event = "pusher:subscribe";
+    private final Map<String, String> data = new HashMap<>();
 
     // You can call this subscribe message for channels that do not require authentication
     // e.g. public channels.

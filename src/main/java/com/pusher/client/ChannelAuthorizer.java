@@ -12,19 +12,15 @@ package com.pusher.client;
  * </p>
  */
 public interface ChannelAuthorizer {
-
     /**
      * Called when a channel subscription is to be authorized.
      *
-     * @param channelName
-     *            The name of the channel to be authorized.
-     * @param socketId
-     *            A unique socket connection ID to be used with the
-     *            authorization. This uniquely identifies the connection that
-     *            the subscription is being authorized for.
+     * @param channelName The name of the channel to be authorized.
+     * @param socketId    A unique socket connection ID to be used with the
+     *                    authorization. This uniquely identifies the connection that
+     *                    the subscription is being authorized for.
      * @return A channel authorization token.
-     * @throws AuthorizationFailureException
-     *             if the authorization fails.
+     * @throws AuthorizationFailureException if the authorization fails.
      */
     String authorize(String channelName, String socketId) throws AuthorizationFailureException;
 }

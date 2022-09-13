@@ -45,8 +45,7 @@ public class PusherOptions {
     private int maxReconnectGapInSeconds = MAX_RECONNECT_GAP_IN_SECONDS;
 
     /**
-     * @deprecated
-     * Please use isUseTLS
+     * @deprecated Please use isUseTLS
      */
     @Deprecated
     public boolean isEncrypted() {
@@ -54,8 +53,7 @@ public class PusherOptions {
     }
 
     /**
-     * @deprecated
-     * Please use setUseTLS
+     * @deprecated Please use setUseTLS
      */
     @Deprecated
     public PusherOptions setEncrypted(final boolean encrypted) {
@@ -64,7 +62,6 @@ public class PusherOptions {
     }
 
     /**
-     *
      * @return whether the connection to Pusher should use TLS
      */
     public boolean isUseTLS() {
@@ -73,6 +70,7 @@ public class PusherOptions {
 
     /**
      * Sets whether the connection to Pusher should be use TLS.
+     *
      * @param useTLS whether the connection should use TLS, by default this is true
      * @return this, for chaining
      */
@@ -93,8 +91,7 @@ public class PusherOptions {
     /**
      * Sets the user authenticator to be used when signing in.
      *
-     * @param userAuthenticator
-     *            The user authenticator to be used.
+     * @param userAuthenticator The user authenticator to be used.
      * @return this, for chaining
      */
     public PusherOptions setUserAuthenticator(final UserAuthenticator userAuthenticator) {
@@ -116,8 +113,7 @@ public class PusherOptions {
      * Sets the channel authorizer to be used when authorizing private and presence
      * channels.
      *
-     * @param channelAuthorizer
-     *            The channel authorizer to be used.
+     * @param channelAuthorizer The channel authorizer to be used.
      * @return this, for chaining
      */
     public PusherOptions setChannelAuthorizer(final ChannelAuthorizer channelAuthorizer) {
@@ -126,8 +122,7 @@ public class PusherOptions {
     }
 
     /**
-     * @deprecated
-     * Please use getChannelauthorizer
+     * @deprecated Please use getChannelauthorizer
      */
     @Deprecated
     public Authorizer getAuthorizer() {
@@ -135,8 +130,7 @@ public class PusherOptions {
     }
 
     /**
-     * @deprecated
-     * Please use setChannelauthorizer
+     * @deprecated Please use setChannelauthorizer
      */
     @Deprecated
     public PusherOptions setAuthorizer(final Authorizer authorizer) {
@@ -146,7 +140,7 @@ public class PusherOptions {
 
     /**
      * The host to which connections will be made.
-     *
+     * <p>
      * Note that if you wish to connect to a standard Pusher cluster, the
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
@@ -161,7 +155,7 @@ public class PusherOptions {
 
     /**
      * The port to which non TLS connections will be made.
-     *
+     * <p>
      * Note that if you wish to connect to a standard Pusher cluster, the
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
@@ -176,7 +170,7 @@ public class PusherOptions {
 
     /**
      * The port to which encrypted connections will be made.
-     *
+     * <p>
      * Note that if you wish to connect to a standard Pusher cluster, the
      * convenience method setCluster will set the host and ports correctly from
      * a single argument.
@@ -199,20 +193,20 @@ public class PusherOptions {
     /**
      * The number of milliseconds of inactivity at which a "ping" will be
      * triggered to check the connection.
-     *
+     * <p>
      * The default value is 120,000 (2 minutes). On some connections, where
      * intermediate hops between the application and Pusher are aggressively
      * culling connections they consider to be idle, a lower value may help
      * preserve the connection.
      *
-     * @param activityTimeout
-     *            time to consider connection idle, in milliseconds
+     * @param activityTimeout time to consider connection idle, in milliseconds
      * @return this, for chaining
      */
     public PusherOptions setActivityTimeout(final long activityTimeout) {
         if (activityTimeout < 1000) {
             throw new IllegalArgumentException(
-                    "Activity timeout must be at least 1,000ms (and is recommended to be much higher)");
+                    "Activity timeout must be at least 1,000ms (and is recommended to be much higher)"
+            );
         }
 
         this.activityTimeout = activityTimeout;
@@ -227,17 +221,15 @@ public class PusherOptions {
      * The number of milliseconds after a "ping" is sent that the client will
      * wait to receive a "pong" response from the server before considering the
      * connection broken and triggering a transition to the disconnected state.
-     *
+     * <p>
      * The default value is 30,000.
      *
-     * @param pongTimeout
-     *            time to wait for pong response, in milliseconds
+     * @param pongTimeout time to wait for pong response, in milliseconds
      * @return this, for chaining
      */
     public PusherOptions setPongTimeout(final long pongTimeout) {
         if (pongTimeout < 1000) {
-            throw new IllegalArgumentException(
-                    "Pong timeout must be at least 1,000ms (and is recommended to be much higher)");
+            throw new IllegalArgumentException("Pong timeout must be at least 1,000ms (and is recommended to be much higher)");
         }
 
         this.pongTimeout = pongTimeout;
@@ -246,8 +238,8 @@ public class PusherOptions {
 
     /**
      * Number of reconnect attempts when websocket connection failed
-     * @param maxReconnectionAttempts
-     *                 number of max reconnection attempts, default = {@link #MAX_RECONNECTION_ATTEMPTS} 6
+     *
+     * @param maxReconnectionAttempts number of max reconnection attempts, default = {@link #MAX_RECONNECTION_ATTEMPTS} 6
      * @return this, for chaining
      */
     public PusherOptions setMaxReconnectionAttempts(int maxReconnectionAttempts) {
@@ -258,8 +250,8 @@ public class PusherOptions {
     /**
      * The delay in two reconnection extends exponentially (1, 2, 4, .. seconds) This property sets the maximum in between two
      * reconnection attempts.
-     * @param maxReconnectGapInSeconds
-     *                 time in seconds of the maximum gab between two reconnection attempts, default = {@link #MAX_RECONNECT_GAP_IN_SECONDS} 30s
+     *
+     * @param maxReconnectGapInSeconds time in seconds of the maximum gab between two reconnection attempts, default = {@link #MAX_RECONNECT_GAP_IN_SECONDS} 30s
      * @return this, for chaining
      */
     public PusherOptions setMaxReconnectGapInSeconds(int maxReconnectGapInSeconds) {
@@ -279,21 +271,25 @@ public class PusherOptions {
      * @return the WebSocket URL
      */
     public String buildUrl(final String apiKey) {
-        return String.format("%s://%s:%s/app/%s%s", useTLS ? WSS_SCHEME : WS_SCHEME, host, useTLS ? wssPort
-                : wsPort, apiKey, URI_SUFFIX);
+        return String.format(
+                "%s://%s:%s/app/%s%s",
+                useTLS ? WSS_SCHEME : WS_SCHEME,
+                host,
+                useTLS ? wssPort : wsPort,
+                apiKey,
+                URI_SUFFIX
+        );
     }
 
     /**
-     *
      * The default value is Proxy.NO_PROXY.
      *
-     * @param proxy
-     *            Specify a proxy, e.g. <code>options.setProxy( new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) ) )</code>;
+     * @param proxy Specify a proxy, e.g. <code>options.setProxy( new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) ) )</code>;
      * @return this, for chaining
      */
-    public PusherOptions setProxy(Proxy proxy){
+    public PusherOptions setProxy(Proxy proxy) {
         if (proxy == null) {
-          throw new IllegalArgumentException("proxy must not be null (instead use Proxy.NO_PROXY)");
+            throw new IllegalArgumentException("proxy must not be null (instead use Proxy.NO_PROXY)");
         }
         this.proxy = proxy;
         return this;
@@ -326,29 +322,26 @@ public class PusherOptions {
             final Properties p = new Properties();
             inStream = PusherOptions.class.getResourceAsStream("/pusher.properties");
             p.load(inStream);
-            String version = (String)p.get("version");
+            String version = (String) p.get("version");
 
             // If the properties file contents indicates the version is being run
             // from source then replace with a dev indicator. Otherwise the Pusher
             // Socket API will reject the connection.
-            if(version.equals(SRC_LIB_DEV_VERSION)) {
+            if (version.equals(SRC_LIB_DEV_VERSION)) {
                 version = LIB_DEV_VERSION;
             }
 
             if (version != null && version.length() > 0) {
                 return version;
             }
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             // Fall back to fixed value
-        }
-        finally {
+        } finally {
             try {
                 if (inStream != null) {
                     inStream.close();
                 }
-            }
-            catch (final IOException e) {
+            } catch (final IOException e) {
                 // Ignore problem closing stream
             }
         }
