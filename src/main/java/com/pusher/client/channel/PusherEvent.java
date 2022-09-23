@@ -80,12 +80,23 @@ public class PusherEvent {
     }
 
     public static PusherEvent fromJson(String json) {
-        JsonObject o = new Gson().fromJson(json, JsonObject.class);
+        final Gson gson = new Gson();
+        JsonObject o = gson.fromJson(json, JsonObject.class);
+        String data = "";
+        if (o.has("data")) {
+            JsonElement d = o.get("data");
+            if (d.isJsonPrimitive()) {
+                data = d.getAsString();
+            } else {
+                data = gson.toJson(d);
+            }
+        }
+
         return new PusherEvent(
-                o.has("event") ? o.get("event").getAsString() : "",
-                o.has("channel") ? o.get("channel").getAsString() : "",
-                o.has("user_id") ? o.get("user_id").getAsString() : "",
-                o.has("data") ? o.get("data").getAsString() : ""
+            o.has("event") ? o.get("event").getAsString() : "",
+            o.has("channel") ? o.get("channel").getAsString() : "",
+            o.has("user_id") ? o.get("user_id").getAsString() : "",
+            data
         );
     }
 }
