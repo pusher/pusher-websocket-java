@@ -1,8 +1,10 @@
 package com.pusher.client.channel;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Map;
@@ -80,7 +82,7 @@ public class PusherEvent {
     }
 
     public static PusherEvent fromJson(String json) {
-        final Gson gson = new Gson();
+        final Gson gson = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
         JsonObject o = gson.fromJson(json, JsonObject.class);
         String data = "";
         if (o.has("data")) {
