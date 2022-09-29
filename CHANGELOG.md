@@ -1,5 +1,10 @@
 # pusher-websocket-java changelog
 
+### Version 2.4.2 - 23th Sep 2022
+* Fixes a crash when an event comes in without and escaped data json member.
+* update to com.google.code.gson:gson:2.9.1
+* update to org.java-websocket:Java-WebSocket:1.5.3
+
 ### Version 2.4.1 - 13th Sep 2022
 * Refactoring and code cleanup of event handling in the SDK
 * Fixes subscription_count events

@@ -1,19 +1,17 @@
 package com.pusher.client.channel;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Map;
 
 public class PusherEvent {
 
-    @SerializedName("user_id")
-    private final String userId;
-    private final String data;
-    private final String channel;
-    private final String event;
+    private JsonObject jsonObject = new JsonObject();
 
     /**
      * getProperty returns the value associated with the key, or null.
@@ -36,7 +34,7 @@ public class PusherEvent {
             case "channel":
                 return getChannelName();
             case "data":
-                return getData();
+                return jsonObject.get("data");
             case "event":
                 return getEventName();
             default:
@@ -45,47 +43,52 @@ public class PusherEvent {
     }
 
     public String getUserId() {
-        return userId;
+        return jsonObject.has("user_id") ? jsonObject.get("user_id").getAsString() : null;
     }
 
     public String getChannelName() {
-        return channel;
+        return jsonObject.has("channel") ? jsonObject.get("channel").getAsString() : null;
     }
 
     public String getEventName() {
-        return event;
+        return jsonObject.has("event") ? jsonObject.get("event").getAsString() : null;
     }
 
     public String getData() {
-        return data;
+        JsonElement data = jsonObject.get("data");
+        if (data.isJsonPrimitive()) {
+            return data.getAsString();
+        }
+        final Gson gson = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
+        return gson.toJson(data);
     }
 
     public String toString() {
-        return new Gson().toJson(this);
+        return this.toJson();
     }
 
     public PusherEvent(String event, String channel, String userId, String data) {
-        this.event = event;
-        this.channel = channel;
-        this.userId = userId;
-        this.data = data;
+        jsonObject.addProperty("event", event);
+        jsonObject.addProperty("channel", channel);
+        jsonObject.addProperty("userId", userId);
+        jsonObject.addProperty("data", data);
     }
 
     public PusherEvent(String event, String channel, String userId, Map<String, Object> data) {
         this(event, channel, userId, new Gson().toJson(data));
     }
 
+    public PusherEvent(JsonObject jsonObject) {
+        this.jsonObject = jsonObject;
+    }
+
     public String toJson() {
-        return new Gson().toJson(this);
+        final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        return gson.toJson(jsonObject);
     }
 
     public static PusherEvent fromJson(String json) {
-        JsonObject o = new Gson().fromJson(json, JsonObject.class);
-        return new PusherEvent(
-                o.has("event") ? o.get("event").getAsString() : "",
-                o.has("channel") ? o.get("channel").getAsString() : "",
-                o.has("user_id") ? o.get("user_id").getAsString() : "",
-                o.has("data") ? o.get("data").getAsString() : ""
-        );
+        final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        return new PusherEvent(gson.fromJson(json, JsonObject.class));
     }
 }

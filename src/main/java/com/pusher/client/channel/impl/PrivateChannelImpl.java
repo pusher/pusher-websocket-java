@@ -61,7 +61,8 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
             );
         }
 
-        connection.sendMessage(new PusherEvent(eventName, name, null, data).toJson());
+        String json = new PusherEvent(eventName, name, null, data).toJson();
+        connection.sendMessage(json);
     }
 
     /* Base class overrides */

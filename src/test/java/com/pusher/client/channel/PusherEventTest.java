@@ -45,4 +45,11 @@ public class PusherEventTest {
         );
         assertEquals("my-user-id", e.getUserId());
     }
+    @Test
+    public void testErrorData() {
+        final PusherEvent e = PusherEvent.fromJson(
+                "{\"event\":\"pusher:error\",\"data\":{\"code\":null,\"message\":\"Invalid key in subscription auth data: '<YOUR PUSHER KEY>'\"}}"
+        );
+        assertEquals("{\"code\":null,\"message\":\"Invalid key in subscription auth data: '<YOUR PUSHER KEY>'\"}", e.getData());
+    }
 }
