@@ -43,7 +43,7 @@ public class PusherEvent {
     }
 
     public String getUserId() {
-        return jsonObject.has("user_id") ? jsonObject.get("user_id").getAsString() : "";
+        return jsonObject.has("user_id") ? jsonObject.get("user_id").getAsString() : null;
     }
 
     public String getChannelName() {
@@ -88,7 +88,7 @@ public class PusherEvent {
     }
 
     public static PusherEvent fromJson(String json) {
-        final Gson gson = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
+        final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         return new PusherEvent(gson.fromJson(json, JsonObject.class));
     }
 }
