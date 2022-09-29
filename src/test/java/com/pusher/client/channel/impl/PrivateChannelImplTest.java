@@ -143,9 +143,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
 
         verify(mockConnection)
                 .sendMessage(
-                        "{\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\",\"channel\":\"" +
-                                getChannelName() +
-                                "\",\"event\":\"client-myEvent\"}"
+                        "{\"event\":\"client-myEvent\",\"channel\":\"" + getChannelName() + "\",\"data\":\"{\\\"fish\\\":\\\"chips\\\"}\"}"
                 );
     }
 
@@ -173,7 +171,7 @@ public class PrivateChannelImplTest extends ChannelImplTest {
         ((PrivateChannelImpl) channel).trigger("client-myEvent", "string");
 
         verify(mockConnection)
-                .sendMessage("{\"data\":\"string\",\"channel\":\"" + channel.getName() + "\",\"event\":\"client-myEvent\"}");
+                .sendMessage("{\"event\":\"client-myEvent\",\"channel\":\"" + channel.getName() + "\",\"data\":\"string\"}");
     }
 
     @Test(expected = IllegalStateException.class)
