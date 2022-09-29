@@ -47,11 +47,11 @@ public class PusherEvent {
     }
 
     public String getChannelName() {
-        return jsonObject.has("channel") ? jsonObject.get("channel").getAsString() : "";
+        return jsonObject.has("channel") ? jsonObject.get("channel").getAsString() : null;
     }
 
     public String getEventName() {
-        return jsonObject.has("event") ? jsonObject.get("event").getAsString() : "";
+        return jsonObject.has("event") ? jsonObject.get("event").getAsString() : null;
     }
 
     public String getData() {

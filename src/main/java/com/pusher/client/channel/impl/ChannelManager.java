@@ -100,10 +100,12 @@ public class ChannelManager implements ConnectionEventListener {
     }
 
     public void handleEvent(final PusherEvent event) {
-        final InternalChannel channel = channelNameToChannelMap.get(event.getChannelName());
-
-        if (channel != null) {
-            channel.handleEvent(event);
+        String channelName = event.getChannelName();
+        if (channelName != null) {
+            final InternalChannel channel = channelNameToChannelMap.get(channelName);
+            if (channel != null) {
+                channel.handleEvent(event);
+            }
         }
     }
 
