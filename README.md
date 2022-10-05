@@ -83,7 +83,7 @@ The pusher-java-client is available in Maven Central.
 
 ```groovy
 dependencies {
-  compile 'com.pusher:pusher-java-client:2.4.2'
+  implementation 'com.pusher:pusher-java-client:2.4.2'
 }
 ```
 
@@ -618,7 +618,7 @@ project(':pusher-websocket-java').projectDir = new File('<PATH_TO_THIS_PROJECT>/
 
 ```
 dependencies {
-    compile project(':pusher-websocket-java')
+    implementation project(':pusher-websocket-java')
 }
 ```
 
