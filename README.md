@@ -8,10 +8,10 @@ Pusher Channels client library for Java targeting **Android** and general Java.
 
 ## Supported platforms
 
-* Java SE - supports versions 8, 9, 10 and 11.
+* Java SE - supports versions 8, 11 and 17
 * Oracle JDK
 * OpenJDK
-* Android
+* Android 7 and above. 5 and 6 will require [desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring).
 
 ## TOC
 
