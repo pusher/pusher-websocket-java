@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.3
+
+- [FIXED] Fix issue with json serialization when using proguard
+
 ## Version 2.4.2 - 23th Sep 2022
 * Fixes a crash when an event comes in without and escaped data json member.
 * update to com.google.code.gson:gson:2.9.1
