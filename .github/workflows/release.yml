@@ -67,18 +67,18 @@ jobs:
       - name: Create gradle.properties
         shell: bash
         run: |
-          mkdir -p ~/.gradle/
-          echo "GRADLE_USER_HOME=${HOME}/.gradle" >> $GITHUB_ENV
-          cat <<FILE > ~/.gradle/gradle.properties
+          mkdir -p _gradle_user_home
+          echo "GRADLE_USER_HOME=_gradle_user_home" >> $GITHUB_ENV
+          cat <<FILE > _gradle_user_home/gradle.properties
           github.username=${{ secrets.PUSHER_CI_GITHUB_PRIVATE_TOKEN }}
           github.password=""
           maven.username=${{ secrets.MAVEN_USERNAME }}
           maven.password=${{ secrets.MAVEN_PASSWORD }}
           signing.keyId=${{ secrets.SIGNING_KEY_ID }}
           signing.password=${{ secrets.SIGNING_PASSWORD }}
-          signing.secretKeyRingFile=~/.gradle/pusher-maven-gpg-signing-key.gpg
+          signing.secretKeyRingFile=_gradle_user_home/pusher-maven-gpg-signing-key.gpg
           FILE
-          echo "${{ secrets.PUSHER_MAVEN_GPG_SIGNING_KEY }}" | base64 --decode > ~/.gradle/pusher-maven-gpg-signing-key.gpg
+          echo "${{ secrets.PUSHER_MAVEN_GPG_SIGNING_KEY }}" | base64 --decode > _gradle_user_home/pusher-maven-gpg-signing-key.gpg
       - name: Publish
         run: |
           ./gradlew publish
