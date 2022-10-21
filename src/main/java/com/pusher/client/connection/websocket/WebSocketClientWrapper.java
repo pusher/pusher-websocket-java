@@ -53,6 +53,8 @@ public class WebSocketClientWrapper extends WebSocketClient {
             }
             catch (final IOException e) {
                 throw new SSLException(e);
+            } catch (final NoSuchAlgorithmException e) {
+                throw new SSLException(e);
             } catch (final KeyManagementException e) {
                 throw new SSLException(e);
             }
