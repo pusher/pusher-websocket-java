@@ -82,3 +82,18 @@ jobs:
       - name: Publish
         run: |
           ./gradlew publish
+
+   finish-release:
+     runs-on: ubuntu-latest
+     needs: publish
+     steps:
+      - id: get_staging_repository_id
+        name: Get staging repository id
+        run: |
+          echo "staging_repository_id=$(python3 .github/get_staging_repository_id.py)" >> $GITHUB_OUTPUT
+      - name: Release
+        uses: nexus-actions/release-nexus-staging-repo@main
+        with:
+          username: ${{ secrets.MAVEN_USERNAME }}
+          password: ${{ secrets.MAVEN_PASSWORD }}
+          staging_repository_id: ${{ steps.get_staging_repository_id.outputs.staging_repository_id }}
