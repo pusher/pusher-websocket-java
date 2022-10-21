@@ -1,1 +1,2 @@
--keep class com.pusher.client.** { *; }
+-keep class com.pusher.client.channel.impl.message.** { *; }
+-keep class com.pusher.client.user.impl.message.** { *; }
