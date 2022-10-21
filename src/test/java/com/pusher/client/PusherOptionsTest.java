@@ -1,5 +1,10 @@
 package com.pusher.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,17 +14,21 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-
 @RunWith(MockitoJUnitRunner.class)
 public class PusherOptionsTest {
 
     private static final String API_KEY = "4PI_K3Y";
 
     private PusherOptions pusherOptions;
-    private @Mock Authorizer mockAuthorizer;
+
+    @Mock
+    private Authorizer mockAuthorizer;
+
+    @Mock
+    private ChannelAuthorizer mockChannelAuthorizer;
+
+    @Mock
+    private UserAuthenticator mockUserAuthenticator;
 
     @Before
     public void setUp() {
@@ -28,7 +37,7 @@ public class PusherOptionsTest {
 
     @Test
     public void testEncryptedInitializedAsTrue() {
-        assert pusherOptions.isEncrypted();
+        assert pusherOptions.isUseTLS();
     }
 
     @Test
@@ -45,18 +54,41 @@ public class PusherOptionsTest {
     public void testAuthorizerCanBeSet() {
         pusherOptions.setAuthorizer(mockAuthorizer);
         assertSame(mockAuthorizer, pusherOptions.getAuthorizer());
+        assertSame(mockAuthorizer, pusherOptions.getChannelAuthorizer());
+    }
+
+    @Test
+    public void testChannelAuthorizerIsInitiallyNull() {
+        assertNull(pusherOptions.getChannelAuthorizer());
+    }
+
+    @Test
+    public void testChannelAuthorizerCanBeSet() {
+        pusherOptions.setChannelAuthorizer(mockChannelAuthorizer);
+        assertSame(mockChannelAuthorizer, pusherOptions.getChannelAuthorizer());
+    }
+
+    @Test
+    public void testUserAuthenticatorIsInitiallyNull() {
+        assertNull(pusherOptions.getUserAuthenticator());
+    }
+
+    @Test
+    public void testUserAuthenticatorBeSet() {
+        pusherOptions.setUserAuthenticator(mockUserAuthenticator);
+        assertSame(mockUserAuthenticator, pusherOptions.getUserAuthenticator());
     }
 
     @Test
     public void testEncryptedCanBeSetToTrue() {
-        pusherOptions.setEncrypted(true);
-        assertSame(true, pusherOptions.isEncrypted());
+        pusherOptions.setUseTLS(true);
+        assertTrue(pusherOptions.isUseTLS());
     }
 
     @Test
     public void testUseTLSCanBeSetToTrue() {
         pusherOptions.setUseTLS(true);
-        assertSame(true, pusherOptions.isUseTLS());
+        assertTrue(pusherOptions.isUseTLS());
     }
 
     @Test
@@ -65,8 +97,18 @@ public class PusherOptionsTest {
     }
 
     @Test
+    public void testSetChannelAuthorizerReturnsSelf() {
+        assertSame(pusherOptions, pusherOptions.setChannelAuthorizer(mockChannelAuthorizer));
+    }
+
+    @Test
+    public void testSetUserAuthenticatorReturnsSelf() {
+        assertSame(pusherOptions, pusherOptions.setUserAuthenticator(mockUserAuthenticator));
+    }
+
+    @Test
     public void testSetEncryptedReturnsSelf() {
-        assertSame(pusherOptions, pusherOptions.setEncrypted(true));
+        assertSame(pusherOptions, pusherOptions.setUseTLS(true));
     }
 
     @Test
@@ -76,55 +118,72 @@ public class PusherOptionsTest {
 
     @Test
     public void testDefaultURL() {
-        assertEquals(pusherOptions.buildUrl(API_KEY), "wss://ws.pusherapp.com:443/app/" + API_KEY
-                + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
+        assertEquals(
+                pusherOptions.buildUrl(API_KEY),
+                "wss://ws.pusherapp.com:443/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION
+        );
     }
 
     @Test
     public void testNonSSLURLIsCorrect() {
         pusherOptions.setUseTLS(false);
-        assertEquals(pusherOptions.buildUrl(API_KEY), "ws://ws.pusherapp.com:80/app/" + API_KEY
-                + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
+        assertEquals(
+                pusherOptions.buildUrl(API_KEY),
+                "ws://ws.pusherapp.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION
+        );
     }
 
     @Test
     public void testClusterSetURLIsCorrect() {
         pusherOptions.setCluster("eu");
-        assertEquals(pusherOptions.buildUrl(API_KEY), "wss://ws-eu.pusher.com:443/app/" + API_KEY
-                + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
+        assertEquals(
+                pusherOptions.buildUrl(API_KEY),
+                "wss://ws-eu.pusher.com:443/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION
+        );
     }
 
     @Test
     public void testClusterSetNonSSLURLIsCorrect() {
         pusherOptions.setCluster("eu").setUseTLS(false);
-        assertEquals(pusherOptions.buildUrl(API_KEY), "ws://ws-eu.pusher.com:80/app/" + API_KEY
-                + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
+        assertEquals(
+                pusherOptions.buildUrl(API_KEY),
+                "ws://ws-eu.pusher.com:80/app/" + API_KEY + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION
+        );
     }
 
     @Test
     public void testCustomHostAndPortURLIsCorrect() {
         pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181);
-        assertEquals(pusherOptions.buildUrl(API_KEY), "wss://subdomain.example.com:8181/app/" + API_KEY
-                + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
+        assertEquals(
+                pusherOptions.buildUrl(API_KEY),
+                "wss://subdomain.example.com:8181/app/" +
+                        API_KEY +
+                        "?client=java-client&protocol=5&version=" +
+                        PusherOptions.LIB_VERSION
+        );
     }
 
     @Test
     public void testCustomHostAndPortNonSSLURLIsCorrect() {
         pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181).setUseTLS(false);
-        assertEquals(pusherOptions.buildUrl(API_KEY), "ws://subdomain.example.com:8080/app/" + API_KEY
-                + "?client=java-client&protocol=5&version=" + PusherOptions.LIB_VERSION);
+        assertEquals(
+                pusherOptions.buildUrl(API_KEY),
+                "ws://subdomain.example.com:8080/app/" +
+                        API_KEY +
+                        "?client=java-client&protocol=5&version=" +
+                        PusherOptions.LIB_VERSION
+        );
     }
 
     @Test
-    public void testSetProxy(){
-        Proxy newProxy = new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) );
+    public void testSetProxy() {
+        Proxy newProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxyaddress", 80));
         pusherOptions.setProxy(newProxy);
         assertEquals(pusherOptions.getProxy(), newProxy);
     }
 
     @Test
-    public void testGetProxyReturnDefaultProxy(){
+    public void testGetProxyReturnDefaultProxy() {
         assertEquals(pusherOptions.getProxy(), Proxy.NO_PROXY);
     }
-
 }

@@ -1,6 +1,51 @@
-# pusher-websocket-java changelog
+# Changelog
 
-### Version 2.2.1 - 22nd April 2020
+## 2.4.3
+
+- [FIXED] Fix issue with json serialization when using proguard
+
+## Version 2.4.2 - 23th Sep 2022
+* Fixes a crash when an event comes in without and escaped data json member.
+* update to com.google.code.gson:gson:2.9.1
+* update to org.java-websocket:Java-WebSocket:1.5.3
+
+## Version 2.4.1 - 13th Sep 2022
+* Refactoring and code cleanup of event handling in the SDK
+* Fixes subscription_count events
+
+## Version 2.4.0 - 15th July 2022
+* Add support for Subscription count events
+
+## Version 2.3.0 - 4th July 2022
+* Added support for user sign in and server to user messages
+* Fixed issue with calling disconnect while the client is attempting reconnection
+* Fixed issue with calling connect while the client is disconnecting
+
+## Version 2.2.8 - 30th November 2021
+* Add global [event listner](https://github.com/pusher/pusher-websocket-java/issues/305)
+
+## Version 2.2.7 - 11th November 2021
+* Fixed an [issue Vulnerability with legacy Gson dependency](https://github.com/pusher/pusher-websocket-java/issues/305)
+
+## Version 2.2.6 - 17th March 2021
+* Fixed an [issue causing a NullPointerException if event data on a Presence channel was malformed or missing](https://github.com/pusher/pusher-websocket-java/pull/290)
+
+## Version 2.2.5 - 11th August 2020
+* Fixed an [issue with the Java-WebSocket library with android pre-sdk24 devices causing a NoSuchMethod exception](https://github.com/pusher/pusher-websocket-java/pull/284)
+
+## Version 2.2.4 - 3rd August 2020
+* Removed unnecessary code in the TweetNaClFast implementation
+* Updated the Java-WebSocket library to 1.5.1 as the [current version 1.4.0 has a known critical vulnerability.](https://github.com/pusher/pusher-websocket-java/issues/279)
+
+## Version 2.2.3 - 8th July 2020
+
+* Fixed LazySodium causing a crash on Android devices by swapping it out for [TweetNaCl](https://github.com/InstantWebP2P/tweetnacl-java)
+
+## Version 2.2.2 - 6th July 2020
+
+* Fixed an issue where some private encrypted messages were not decrypted accurately by swapping our implementation of SecretBoxOpener for one provided by [Lazy Sodium](https://github.com/terl/lazysodium-java)
+
+## Version 2.2.1 - 22nd April 2020
 
 * Changed PusherOptions `setForceTLS` and `isForceTLS` to `setUseTLS` and `isUseTLS` to align with the other client SDKs.
 

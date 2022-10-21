@@ -2,14 +2,17 @@ package com.pusher.client.channel.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.annotations.SerializedName;
 import com.pusher.client.AuthorizationFailureException;
-import com.pusher.client.Authorizer;
+import com.pusher.client.ChannelAuthorizer;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannel;
 import com.pusher.client.channel.PresenceChannelEventListener;
+import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.User;
+import com.pusher.client.channel.impl.message.ChannelData;
+import com.pusher.client.channel.impl.message.PresenceMemberData;
+import com.pusher.client.channel.impl.message.PresenceSubscriptionData;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
@@ -26,20 +29,24 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     private static final String MEMBER_REMOVED_EVENT = "pusher_internal:member_removed";
     private static final Gson GSON = new Gson();
 
-    private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<String, User>());
+    private final Map<String, User> idToUserMap = Collections.synchronizedMap(new LinkedHashMap<>());
 
     private String myUserID;
 
-    public PresenceChannelImpl(final InternalConnection connection, final String channelName,
-            final Authorizer authorizer, final Factory factory) {
-        super(connection, channelName, authorizer, factory);
+    public PresenceChannelImpl(
+            final InternalConnection connection,
+            final String channelName,
+            final ChannelAuthorizer channelAuthorizer,
+            final Factory factory
+    ) {
+        super(connection, channelName, channelAuthorizer, factory);
     }
 
     /* PresenceChannel implementation */
 
     @Override
     public Set<User> getUsers() {
-        return new LinkedHashSet<User>(idToUserMap.values());
+        return new LinkedHashSet<>(idToUserMap.values());
     }
 
     @Override
@@ -50,18 +57,19 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
     /* Base class overrides */
 
     @Override
-    public void onMessage(final String event, final String message) {
+    public void handleEvent(final PusherEvent event) {
+        super.handleEvent(event);
 
-        super.onMessage(event, message);
-
-        if (event.equals(SUBSCRIPTION_SUCCESS_EVENT)) {
-            handleSubscriptionSuccessfulMessage(message);
-        }
-        else if (event.equals(MEMBER_ADDED_EVENT)) {
-            handleMemberAddedEvent(message);
-        }
-        else if (event.equals(MEMBER_REMOVED_EVENT)) {
-            handleMemberRemovedEvent(message);
+        switch (event.getEventName()) {
+            case SUBSCRIPTION_SUCCESS_EVENT:
+                handleSubscriptionSuccessfulMessage(event);
+                break;
+            case MEMBER_ADDED_EVENT:
+                handleMemberAddedEvent(event);
+                break;
+            case MEMBER_REMOVED_EVENT:
+                handleMemberRemovedEvent(event);
+                break;
         }
     }
 
@@ -74,10 +82,10 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     @Override
     public void bind(final String eventName, final SubscriptionEventListener listener) {
-
-        if (listener instanceof PresenceChannelEventListener == false) {
+        if (!(listener instanceof PresenceChannelEventListener)) {
             throw new IllegalArgumentException(
-                    "Only instances of PresenceChannelEventListener can be bound to a presence channel");
+                    "Only instances of PresenceChannelEventListener can be bound to a presence channel"
+            );
         }
 
         super.bind(eventName, listener);
@@ -85,7 +93,7 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
 
     @Override
     protected String[] getDisallowedNameExpressions() {
-        return new String[] { "^(?!presence-).*" };
+        return new String[]{"^(?!presence-).*"};
     }
 
     @Override
@@ -93,13 +101,21 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         return String.format("[Presence Channel: name=%s]", name);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void handleSubscriptionSuccessfulMessage(final String message) {
+    private void handleSubscriptionSuccessfulMessage(final PusherEvent event) {
+        final ChannelEventListener listener = getEventListener();
+        final PresenceSubscriptionData presenceSubscriptionData = GSON.fromJson(
+                event.getData(),
+                PresenceSubscriptionData.class
+        );
 
-        // extract data from the JSON message
-        final PresenceData presenceData = extractPresenceDataFrom(message);
-        final List<String> ids = presenceData.ids;
-        final Map<String, Object> hash = presenceData.hash;
+        if (presenceSubscriptionData.presence == null) {
+            if (listener != null) {
+                listener.onError("Subscription failed: Presence data not found", null);
+            }
+            return;
+        }
+        final List<String> ids = presenceSubscriptionData.getIds();
+        final Map<String, Object> hash = presenceSubscriptionData.getHash();
 
         if (ids != null && !ids.isEmpty()) {
             // build the collection of Users
@@ -109,99 +125,61 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
                 idToUserMap.put(id, user);
             }
         }
-        final ChannelEventListener listener = getEventListener();
+
         if (listener != null) {
-            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener) listener;
             presenceListener.onUsersInformationReceived(getName(), getUsers());
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    private void handleMemberAddedEvent(final String message) {
-        final String dataString = extractDataStringFrom(message);
-        MemberData memberData = GSON.fromJson(dataString, MemberData.class);
+    private void handleMemberAddedEvent(final PusherEvent event) {
+        PresenceMemberData memberData = GSON.fromJson(event.getData(), PresenceMemberData.class);
 
-
-        final String id = memberData.userId;
-        final String userData = memberData.userInfo!= null ? GSON.toJson(memberData.userInfo) : null;
+        final String id = memberData.getId();
+        final String userData = memberData.getInfo() != null ? GSON.toJson(memberData.getInfo()) : null;
 
         final User user = new User(id, userData);
         idToUserMap.put(id, user);
 
         final ChannelEventListener listener = getEventListener();
         if (listener != null) {
-            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener) listener;
             presenceListener.userSubscribed(getName(), user);
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    private void handleMemberRemovedEvent(final String message) {
+    private void handleMemberRemovedEvent(final PusherEvent event) {
+        final PresenceMemberData memberData = GSON.fromJson(event.getData(), PresenceMemberData.class);
 
-        final String dataString = extractDataStringFrom(message);
-        final MemberData memberData = GSON.fromJson(dataString, MemberData.class);
-
-        final User user = idToUserMap.remove(memberData.userId);
+        final User user = idToUserMap.remove(memberData.getId());
 
         final ChannelEventListener listener = getEventListener();
         if (listener != null) {
-            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener)listener;
+            final PresenceChannelEventListener presenceListener = (PresenceChannelEventListener) listener;
             presenceListener.userUnsubscribed(getName(), user);
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    private static String extractDataStringFrom(final String message) {
-        final Map jsonObject = GSON.fromJson(message, Map.class);
-        return  (String) jsonObject.get("data");
-    }
-
-    @SuppressWarnings("rawtypes")
-    private static PresenceData extractPresenceDataFrom(final String message) {
-        final String dataString = extractDataStringFrom(message);
-        return GSON.fromJson(dataString, Presence.class).presence;
-    }
-
-    @SuppressWarnings("rawtypes")
-    private String extractUserIdFromChannelData(final String channelData) {
-        final Map channelDataMap;
+    public String extractUserIdFromChannelData(final String channelDataString) {
         try {
-            channelDataMap = GSON.fromJson((String)channelData, Map.class);
+            ChannelData data = GSON.fromJson(channelDataString, ChannelData.class);
+
+            if (data.getUserId() == null) {
+                throw new AuthorizationFailureException(
+                        "Invalid response from ChannelAuthorizer: no user_id key in channel_data object: " + channelDataString
+                );
+            }
+
+            return data.getUserId();
         } catch (final JsonSyntaxException e) {
-            throw new AuthorizationFailureException("Invalid response from Authorizer: unable to parse channel_data object: " + channelData, e);
-        }
-        Object maybeUserId;
-        try {
-            maybeUserId = channelDataMap.get("user_id");
+            throw new AuthorizationFailureException(
+                    "Invalid response from ChannelAuthorizer: unable to parse channel_data object: " + channelDataString,
+                    e
+            );
         } catch (final NullPointerException e) {
-            throw new AuthorizationFailureException("Invalid response from Authorizer: no user_id key in channel_data object: " + channelData);
+            throw new AuthorizationFailureException(
+                    "Invalid response from ChannelAuthorizer: no user_id key in channel_data object: " + channelDataString
+            );
         }
-        if (maybeUserId == null) {
-            throw new AuthorizationFailureException("Invalid response from Authorizer: no user_id key in channel_data object: " + channelData);
-        }
-        // user_id can be a string or an integer in the Channels websocket protocol
-        return String.valueOf(maybeUserId);
     }
-
-    private class MemberData {
-        @SerializedName("user_id")
-        public String userId;
-        @SerializedName("user_info")
-        public Object userInfo;
-    }
-
-    private class PresenceData {
-        @SerializedName("count")
-        public Integer count;
-        @SerializedName("ids")
-        public List<String> ids;
-        @SerializedName("hash")
-        public Map<String, Object> hash;
-    }
-
-    private class Presence {
-        @SerializedName("presence")
-        public PresenceData presence;
-    }
-
 }

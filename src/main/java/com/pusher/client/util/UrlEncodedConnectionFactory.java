@@ -7,12 +7,12 @@ import java.util.Map;
 
 /**
  * Form URL-Encoded Connection Factory
- *
- * Allows HttpAuthorizer to write URL parameters to the connection
+ * <p>
+ * Allows HttpChannelAuthorizer to write URL parameters to the connection
  */
 public class UrlEncodedConnectionFactory extends ConnectionFactory {
 
-    private Map<String, String> mQueryStringParameters = new HashMap<String, String>();
+    private Map<String, String> mQueryStringParameters = new HashMap<>();
 
     /**
      * Create a Form URL-encoded factory
@@ -40,10 +40,12 @@ public class UrlEncodedConnectionFactory extends ConnectionFactory {
     }
 
     public String getBody() {
-        final StringBuffer urlParameters = new StringBuffer();
+        final StringBuilder urlParameters = new StringBuilder();
         try {
-            urlParameters.append("channel_name=").append(URLEncoder.encode(getChannelName(), getCharset()));
-            urlParameters.append("&socket_id=").append(URLEncoder.encode(getSocketId(), getCharset()));
+            urlParameters.append("socket_id=").append(URLEncoder.encode(getSocketId(), getCharset()));
+            if (getChannelName() != null) {
+                urlParameters.append("&channel_name=").append(URLEncoder.encode(getChannelName(), getCharset()));
+            }
 
             // Adding extra parameters supplied to be added to query string.
             for (final String parameterName : mQueryStringParameters.keySet()) {

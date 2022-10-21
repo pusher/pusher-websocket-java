@@ -1,0 +1,26 @@
+name: pusher-websocket-java CI
+
+on:
+  pull_request:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version: [ 8, 9, 10, 11, 17, 18 ]
+
+    steps:
+      - uses: actions/checkout@v2.3.1
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v2.3.1
+        with:
+          java-version: "${{ matrix.java-version }}"
+          distribution: "adopt-openj9"
+      - name: Build & Test
+        run: ./gradlew jacocoTestReport test
+      - name: Code coverage
+        run: bash <(curl -s https://codecov.io/bash)

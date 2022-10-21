@@ -1,11 +1,7 @@
-### Description of the pull request
+## What does this PR do?
 
-...
+[Description here]
 
-#### Why is the change necessary?
+## CHANGELOG
 
-...
-
-----
-
-CC @pusher/mobile 
+- [CHANGED] Describe your change here. Look at CHANGELOG.md to see the format.

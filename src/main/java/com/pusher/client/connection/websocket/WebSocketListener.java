@@ -3,8 +3,7 @@ package com.pusher.client.connection.websocket;
 import org.java_websocket.handshake.ServerHandshake;
 
 public interface WebSocketListener {
-
-    void onOpen(ServerHandshake handshakedata);
+    void onOpen(ServerHandshake handshakeData);
 
     void onMessage(String message);
 

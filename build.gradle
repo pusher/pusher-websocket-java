@@ -1,204 +1,209 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'org.ajoberstar:gradle-git:1.1.0'
-	}
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git:1.1.0'
+    }
+}
+
+plugins {
+    id "eclipse"
+    id "jacoco"
+    id "java-library"
+    id "maven-publish"
+    id "org.ajoberstar.github-pages" version "1.7.2"
+    id "signing"
 }
 
 def getProperty = { property ->
-	if (!project.hasProperty(property)) {
-		throw new GradleException("${property} property must be set")
-	}
-	return project.property(property)
+    if (!project.hasProperty(property)) {
+        throw new GradleException("${property} property must be set")
+    }
+    return project.property(property)
 }
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'eclipse'
-apply plugin: 'org.ajoberstar.github-pages'
-apply plugin: 'signing'
-apply plugin: 'jacoco'
-
 group = "com.pusher"
-version = "2.2.1"
+version = "2.4.3"
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 ext.sharedManifest = manifest {
-	attributes(
-		"Created-By"			: 'Pusher',
-		'Implementation-Vendor'	: 'Pusher',
-		'Implementation-Title'	: 'Pusher Java Websocket API Example',
-		'Implementation-Version': version,
-		'Package'				: 'com.pusher.client.example',
-		'Main-Class'			: 'com.pusher.client.example.ExampleApp'
-	)
+    attributes(
+            'Created-By': 'Pusher',
+            'Implementation-Vendor': 'Pusher',
+            'Implementation-Title': 'Pusher Java Websocket API Example',
+            'Implementation-Version': version,
+            'Package': 'com.pusher.client.example',
+            'Main-Class': 'com.pusher.client.example.ExampleApp'
+    )
 }
 
-
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	compile "com.google.code.gson:gson:2.2.2"
-	compile "org.java-websocket:Java-WebSocket:1.4.0"
+    implementation "com.google.code.gson:gson:2.9.1"
+    implementation "org.java-websocket:Java-WebSocket:1.5.3"
 
-	testCompile "org.mockito:mockito-all:1.8.5"
-	testCompile "org.powermock:powermock-module-junit4:1.4.11"
-	testCompile "org.powermock:powermock-api-mockito:1.4.11"
-
-	testImplementation "com.google.truth:truth:1.0.1"
+    testImplementation "org.mockito:mockito-all:1.8.5"
+    testImplementation "org.powermock:powermock-module-junit4:1.4.11"
+    testImplementation "org.powermock:powermock-api-mockito:1.4.11"
+    testImplementation "com.google.truth:truth:1.0.1"
 }
 
 
 processResources {
-	filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-		version: project.version
-	] )
+    filter(ReplaceTokens, tokens: [
+            version: project.version
+    ])
 }
 
 
 javadoc {
-	/* info for JavaDoc options http://docs.oracle.com/javase/6/docs/technotes/tools/windows/javadoc.html#overviewcomment */
-	title "Pusher Java Websocket API"
-	options.overview = file("src/main/javadoc/overview.html")
-	// uncomment this to use the custom javadoc styles
-	//options.stylesheetFile = file("src/main/javadoc/css/styles.css")
-	exclude "com/pusher/client/channel/impl/*"
-	exclude "com/pusher/client/connection/impl/*"
-	exclude "com/pusher/client/connection/websocket/*"
-	exclude "com/pusher/client/crypto/nacl/*"
-	exclude "com/pusher/client/util/internal/*"
-	exclude "org/java_websocket/*"
-	exclude "com/pusher/client/example/*"
-	options.linkSource = true
+    /* info for JavaDoc options http://docs.oracle.com/javase/6/docs/technotes/tools/windows/javadoc.html#overviewcomment */
+    title "Pusher Java Websocket API"
+    options.overview = file("src/main/javadoc/overview.html")
+    // uncomment this to use the custom javadoc styles
+    //options.stylesheetFile = file("src/main/javadoc/css/styles.css")
+    exclude "com/pusher/client/channel/impl/*"
+    exclude "com/pusher/client/connection/impl/*"
+    exclude "com/pusher/client/connection/websocket/*"
+    exclude "com/pusher/client/crypto/nacl/*"
+    exclude "com/pusher/client/util/internal/*"
+    exclude "org/java_websocket/*"
+    exclude "com/pusher/client/example/*"
+    options.linkSource = true
 }
 
 
 jar {
-	manifest = project.manifest {
-		from sharedManifest
-	}
+    manifest = project.manifest {
+        from sharedManifest
+    }
 }
 
-
-task fatJar(type: Jar, dependsOn:configurations.runtime) {
-	manifest = project.manifest {
-		from sharedManifest
-	}
-	baseName = project.name + '-with-dependencies'
-	from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
-	with jar
-	classifier = 'jar-with-dependencies'
+task fatJar(type: Jar, dependsOn: configurations.runtimeClasspath) {
+    manifest = project.manifest {
+        from sharedManifest
+    }
+    archiveBaseName.set(project.name + '-with-dependencies')
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+    archiveClassifier.set('jar-with-dependencies')
 }
 assemble.dependsOn fatJar
 
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = 'sources'
-	from sourceSets.main.allSource
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
 }
 assemble.dependsOn sourcesJar
 
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-	classifier = 'javadoc'
-	from javadoc.destinationDir
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
 }
 assemble.dependsOn javadocJar
 
-
 githubPages {
-	repoUri = 'https://github.com/pusher/pusher-websocket-java.git'
-	pages {
-		from javadoc.outputs.files
-	}
-	commitMessage = "JavaDoc gh-pages for ${version}"
-	credentials {
-		username = { getProperty("github.username") }
-		password = { getProperty("github.password") }
-	}
-}
-
-
-signing {
-	required { gradle.taskGraph.hasTask("uploadArchives") }
-	sign configurations.archives
+    repoUri = 'https://github.com/pusher/pusher-websocket-java.git'
+    pages {
+        from javadoc.outputs.files
+    }
+    commitMessage = "JavaDoc gh-pages for ${version}"
+    credentials {
+        username = { getProperty("github.username") }
+        password = { getProperty("github.password") }
+    }
 }
 
 artifacts {
-	archives jar, fatJar, sourcesJar, javadocJar
+    archives jar, fatJar, sourcesJar, javadocJar
 }
 
-task createPublishTarget {
-	doLast {
-		uploadArchives { repositories { mavenDeployer {
-			beforeDeployment {
-				MavenDeployment deployment -> signing.signPom(deployment)
-			}
-			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-				authentication(
-					userName: getProperty("maven.username"),
-					password: getProperty("maven.password")
-				)
-			}
-			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-				authentication(
-					userName: getProperty("maven.username"),
-					password: getProperty("maven.password")
-				)
-			}
-			pom.project {
-				name 'Pusher Java Client Library'
-				packaging 'jar'
-				artifactId 'pusher-java-client'
-				description 'This is a Java client library for Pusher, targeted at core Java and Android.'
-				url 'http://github.com/pusher/pusher-websocket-java'
-				scm {
-					connection 'scm:git:git@github.com:pusher/pusher-websocket-java'
-					developerConnection 'scm:git:git@github.com:pusher/pusher-websocket-java'
-					url 'http://github.com/pusher/pusher-websocket-java'
-				}
-				licenses {
-					license {
-						name 'MIT'
-						url 'https://raw.github.com/pusher/pusher-websocket-java/master/LICENCE.txt'
-						distribution 'https://raw.github.com/pusher/pusher-websocket-java/mvn-repo/'
-					}
-				}
-				organization {
-					name 'Pusher'
-					url 'http://pusher.com'
-				}
-				issueManagement {
-					system 'GitHub'
-					url 'https://github.com/pusher/pusher-websocket-java/issues'
-				}
-				developers {
-					developer {
-						id 'mike'
-						name 'Mike Pye'
-						email 'mike@pusher.com'
-					}
-				}
-			}
-		}}}
-	}
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
-wrapper {
-	gradleVersion = '5.5.1'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'pusher-java-client'
+
+            from components.java
+            pom {
+                name = 'Pusher Java Client Library'
+                packaging = 'jar'
+                artifactId = 'pusher-java-client'
+                description = 'This is a Java client library for Pusher, targeted at core Java and Android.'
+                url = 'http://github.com/pusher/pusher-websocket-java'
+                scm {
+                    connection = 'scm:git:git@github.com:pusher/pusher-websocket-java'
+                    developerConnection = 'scm:git:git@github.com:pusher/pusher-websocket-java'
+                    url = 'http://github.com/pusher/pusher-websocket-java'
+                }
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://raw.github.com/pusher/pusher-websocket-java/master/LICENCE.txt'
+                        distribution = 'https://raw.github.com/pusher/pusher-websocket-java/mvn-repo/'
+                    }
+                }
+                organization {
+                    name = 'Pusher'
+                    url = 'http://pusher.com'
+                }
+                issueManagement {
+                    system = 'GitHub'
+                    url = 'https://github.com/pusher/pusher-websocket-java/issues'
+                }
+                developers {
+                    developer {
+                        id = 'mike'
+                        name = 'Mike Pye'
+                        email = 'mike@pusher.com'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releaseRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith("SNAPSHOT") ? snapshotRepositoryUrl : releaseRepositoryUrl
+            credentials {
+                username = findProperty("maven.username") ?: ""
+                password = findProperty("maven.password") ?: ""
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
 
 jacoco {
-	toolVersion = "0.8.4"
+    toolVersion = "0.8.8"
 }
 
 jacocoTestReport {
-	reports.xml.enabled = true
-	reports.html.enabled = false
-	reports.csv.enabled = false
+    reports.xml.required = true
+    reports.html.required = false
+    reports.csv.required = false
+}
+
+// Test Logging - https://stackoverflow.com/a/42425815/2623314
+test {
+    testLogging {
+        showStandardStreams = true
+    }
 }

@@ -1,5 +1,11 @@
 package com.pusher.client.connection.websocket;
 
+
+import org.java_websocket.WebSocket;
+import org.java_websocket.WebSocketImpl;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -10,12 +16,8 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
-
-import org.java_websocket.WebSocket;
-import org.java_websocket.WebSocketImpl;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 
 /**
  * A thin wrapper around the WebSocketClient class from the Java-WebSocket
@@ -28,20 +30,18 @@ public class WebSocketClientWrapper extends WebSocketClient {
     private static final String WSS_SCHEME = "wss";
     private WebSocketListener webSocketListener;
 
-    public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener) throws SSLException {
+    public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener)
+            throws SSLException {
         super(uri);
-
         if (uri.getScheme().equals(WSS_SCHEME)) {
             try {
                 SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, null, null); // will use java's default
-                                                   // key and trust store which
-                                                   // is sufficient unless you
-                                                   // deal with self-signed
-                                                   // certificates
-
+                // key and trust store which
+                // is sufficient unless you
+                // deal with self-signed
+                // certificates
                 final SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory)
-                                                    // SSLSocketFactory.getDefault();
 
                 int port = uri.getPort();
                 if( port == -1 ) {
@@ -53,11 +53,7 @@ public class WebSocketClientWrapper extends WebSocketClient {
             }
             catch (final IOException e) {
                 throw new SSLException(e);
-            }
-            catch (final NoSuchAlgorithmException e) {
-                throw new SSLException(e);
-            }
-            catch (final KeyManagementException e) {
+            } catch (final KeyManagementException e) {
                 throw new SSLException(e);
             }
         }
@@ -66,9 +62,9 @@ public class WebSocketClientWrapper extends WebSocketClient {
     }
 
     @Override
-    public void onOpen(final ServerHandshake handshakedata) {
+    public void onOpen(final ServerHandshake handshakeData) {
         if (webSocketListener != null) {
-            webSocketListener.onOpen(handshakedata);
+            webSocketListener.onOpen(handshakeData);
         }
     }
 
@@ -98,5 +94,15 @@ public class WebSocketClientWrapper extends WebSocketClient {
      */
     public void removeWebSocketListener() {
         webSocketListener = null;
+    }
+
+    @Override
+    protected void onSetSSLParameters(SSLParameters sslParameters) {
+        // https://github.com/TooTallNate/Java-WebSocket/wiki/No-such-method-error-setEndpointIdentificationAlgorithm
+        try {
+            super.onSetSSLParameters(sslParameters);
+        } catch (NoSuchMethodError error) {
+            // if this is being called on an android device pre-24 this api isn't available
+        }
     }
 }
