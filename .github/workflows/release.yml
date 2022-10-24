@@ -93,7 +93,7 @@ jobs:
       - id: get_staging_repository_id
         name: Get staging repository id
         run: |
-          echo "staging_repository_id=$(python3 .github/get_staging_repository_id.py)" >> $GITHUB_OUTPUT
+          echo "staging_repository_id=$(python3 scripts/get_staging_repository_id.py)" >> $GITHUB_OUTPUT
       - name: Release
         uses: nexus-actions/release-nexus-staging-repo@main
         with:
