@@ -90,6 +90,7 @@ jobs:
       NEXUS_USERNAME: ${{ secrets.MAVEN_USERNAME }}
       NEXUS_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
     steps:
+      - uses: actions/checkout@v2
       - id: get_staging_repository_id
         name: Get staging repository id
         run: |
