@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.4
+
+- [CHANGED] pusher.pro narrower proguard rules.
+
 ## 2.4.3
 
 - [FIXED] Fix issue with json serialization when using proguard
