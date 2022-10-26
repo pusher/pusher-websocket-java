@@ -1,9 +1,15 @@
 package com.pusher.client.connection.websocket;
 
+
+import org.java_websocket.WebSocket;
+import org.java_websocket.WebSocketImpl;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.Socket;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -35,11 +41,18 @@ public class WebSocketClientWrapper extends WebSocketClient {
                 // is sufficient unless you
                 // deal with self-signed
                 // certificates
+                final SSLSocketFactory factory = sslContext.getSocketFactory();// (SSLSocketFactory)
 
-                final SSLSocketFactory factory = sslContext.getSocketFactory(); // (SSLSocketFactory)
-                // SSLSocketFactory.getDefault();
-
-                setSocketFactory(factory);
+                int port = uri.getPort();
+                if( port == -1 ) {
+                    port = WebSocketImpl.DEFAULT_WSS_PORT;
+                }
+                Socket socket = new Socket(proxy);
+                socket.connect(new InetSocketAddress(uri.getHost(), port));
+                setSocket(factory.createSocket(socket, uri.getHost(), port, true));
+            }
+            catch (final IOException e) {
+                throw new SSLException(e);
             } catch (final NoSuchAlgorithmException e) {
                 throw new SSLException(e);
             } catch (final KeyManagementException e) {
