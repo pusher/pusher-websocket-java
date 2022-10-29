@@ -1,18 +1,15 @@
 package com.pusher.client;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.pusher.pusher_websocket_java.BuildConfig;
+
 import java.net.Proxy;
-import java.util.Properties;
 
 /**
  * Configuration for a {@link com.pusher.client.Pusher} instance.
  */
 public class PusherOptions {
 
-    private static final String SRC_LIB_DEV_VERSION = "@version@";
-    private static final String LIB_DEV_VERSION = "0.0.0-dev";
-    public static final String LIB_VERSION = readVersionFromProperties();
+    public static final String LIB_VERSION = BuildConfig.APP_VERSION;
 
     private static final String URI_SUFFIX = "?client=java-client&protocol=5&version=" + LIB_VERSION;
     private static final String WS_SCHEME = "ws";
@@ -314,37 +311,5 @@ public class PusherOptions {
      */
     public int getMaxReconnectGapInSeconds() {
         return maxReconnectGapInSeconds;
-    }
-
-    private static String readVersionFromProperties() {
-        InputStream inStream = null;
-        try {
-            final Properties p = new Properties();
-            inStream = PusherOptions.class.getResourceAsStream("/pusher.properties");
-            p.load(inStream);
-            String version = (String) p.get("version");
-
-            // If the properties file contents indicates the version is being run
-            // from source then replace with a dev indicator. Otherwise the Pusher
-            // Socket API will reject the connection.
-            if (version.equals(SRC_LIB_DEV_VERSION)) {
-                version = LIB_DEV_VERSION;
-            }
-
-            if (version != null && version.length() > 0) {
-                return version;
-            }
-        } catch (final Exception e) {
-            // Fall back to fixed value
-        } finally {
-            try {
-                if (inStream != null) {
-                    inStream.close();
-                }
-            } catch (final IOException e) {
-                // Ignore problem closing stream
-            }
-        }
-        return "0.0.0";
     }
 }
