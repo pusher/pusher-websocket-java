@@ -6,6 +6,8 @@
 
 Pusher Channels client library for Java targeting **Android** and general Java.
 
+For reporting issues, bugs, and feature requests, please feel free to open a pull request or open an issue. If you do not receive a timely response, feel free to check our [support portal](https://docs.bird.com/pusher).
+
 ## Supported platforms
 
 * Java SE - supports versions 8, 11 and 17
