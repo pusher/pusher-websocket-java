@@ -34,6 +34,7 @@ public class PusherOptions {
     private String host = "ws.pusherapp.com";
     private int wsPort = WS_PORT;
     private int wssPort = WSS_PORT;
+    private String path = "";
     private boolean useTLS = true;
     private long activityTimeout = DEFAULT_ACTIVITY_TIMEOUT;
     private long pongTimeout = DEFAULT_PONG_TIMEOUT;
@@ -183,10 +184,26 @@ public class PusherOptions {
         return this;
     }
 
+    /**
+     * The path to which connections will be made.
+     * <p>
+     * Note that if you wish to connect to a standard Pusher cluster, the
+     * convenience method setCluster will set the host and ports correctly from
+     * a single argument.
+     *
+     * @param path The path
+     * @return this, for chaining
+     */
+    public PusherOptions setPath(final String path) {
+        this.path = path;
+        return this;
+    }
+
     public PusherOptions setCluster(final String cluster) {
         host = "ws-" + cluster + "." + PUSHER_DOMAIN;
         wsPort = WS_PORT;
         wssPort = WSS_PORT;
+        path = "";
         return this;
     }
 
@@ -272,10 +289,11 @@ public class PusherOptions {
      */
     public String buildUrl(final String apiKey) {
         return String.format(
-                "%s://%s:%s/app/%s%s",
+                "%s://%s:%s%s/app/%s%s",
                 useTLS ? WSS_SCHEME : WS_SCHEME,
                 host,
                 useTLS ? wssPort : wsPort,
+                path,
                 apiKey,
                 URI_SUFFIX
         );
