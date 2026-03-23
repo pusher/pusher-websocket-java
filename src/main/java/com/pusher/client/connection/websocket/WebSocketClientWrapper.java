@@ -24,12 +24,12 @@ public class WebSocketClientWrapper extends WebSocketClient {
     private static final String WSS_SCHEME = "wss";
     private WebSocketListener webSocketListener;
 
-    public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener)
+    public WebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener, String tlsVersion)
             throws SSLException {
         super(uri);
         if (uri.getScheme().equals(WSS_SCHEME)) {
             try {
-                SSLContext sslContext = SSLContext.getInstance("TLS");
+                SSLContext sslContext = SSLContext.getInstance(tlsVersion);
                 sslContext.init(null, null, null); // will use java's default
                 // key and trust store which
                 // is sufficient unless you

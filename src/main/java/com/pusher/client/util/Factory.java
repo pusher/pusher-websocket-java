@@ -51,6 +51,7 @@ public class Factory {
     private ExecutorService eventQueue;
     private ScheduledExecutorService timers;
     private static final Object eventLock = new Object();
+    private String tlsVersion = "TLS";
 
     public synchronized InternalConnection getConnection(
             final String apiKey,
@@ -58,6 +59,7 @@ public class Factory {
             final Consumer<PusherEvent> eventHandler
     ) {
         if (connection == null) {
+            tlsVersion = options.getTlsVersion(); // ← add this line
             try {
                 connection =
                         new WebSocketConnection(
@@ -82,7 +84,7 @@ public class Factory {
             final Proxy proxy,
             final WebSocketListener webSocketListener
     ) throws SSLException {
-        return new WebSocketClientWrapper(uri, proxy, webSocketListener);
+        return new WebSocketClientWrapper(uri, proxy, webSocketListener, tlsVersion); // ← use field
     }
 
     public synchronized ScheduledExecutorService getTimers() {

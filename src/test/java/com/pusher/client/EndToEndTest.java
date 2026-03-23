@@ -111,7 +111,7 @@ public class EndToEndTest {
                                 final URI uri = (URI) invocation.getArguments()[0];
                                 final Proxy proxy = (Proxy) invocation.getArguments()[1];
                                 final WebSocketListener webSocketListener = (WebSocketListener) invocation.getArguments()[2];
-                                testWebsocket = new TestWebSocketClientWrapper(uri, proxy, webSocketListener);
+                                testWebsocket = new TestWebSocketClientWrapper(uri, proxy, webSocketListener, "TLSv1.3");
                                 return testWebsocket;
                             }
                         }

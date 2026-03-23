@@ -17,12 +17,12 @@ import javax.net.ssl.SSLException;
 
 public class TestWebSocketClientWrapper extends WebSocketClientWrapper {
 
-    private final List<String> messagesSent = new ArrayList<String>();
+    private final List<String> messagesSent = new ArrayList<>();
     private boolean connectCalled = false;
 
-    public TestWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener)
+    public TestWebSocketClientWrapper(final URI uri, final Proxy proxy, final WebSocketListener webSocketListener, String tlsVersion)
             throws SSLException {
-        super(uri, proxy, webSocketListener);
+        super(uri, proxy, webSocketListener, tlsVersion);
     }
 
     void assertConnectCalled() {

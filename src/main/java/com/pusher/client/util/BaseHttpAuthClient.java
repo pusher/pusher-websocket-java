@@ -1,5 +1,6 @@
 package com.pusher.client.util;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -22,6 +23,7 @@ abstract class BaseHttpAuthClient {
     private final URL endPoint;
     private Map<String, String> mHeaders = new HashMap<>();
     protected ConnectionFactory mConnectionFactory;
+    protected SSLSocketFactory mSslSocketFactory = null;
 
     /**
      * Creates a new auth client.
@@ -62,6 +64,15 @@ abstract class BaseHttpAuthClient {
     }
 
     /**
+     * Set the SSL socket factory that is used for the connection. This allows to
+     * configure custom certificate handling (self-signed certificates, mutual TLS, ...)
+     * @param sslSocketFactory The SSL socket factory to use
+     */
+    public void setSslSocketFactory(final SSLSocketFactory sslSocketFactory) {
+        mSslSocketFactory = sslSocketFactory;
+    }
+
+    /**
      * Identifies if the HTTP request will be sent over HTTPS.
      *
      * @return true if the endpoint protocol is 'https'
@@ -92,6 +103,10 @@ abstract class BaseHttpAuthClient {
             HttpURLConnection connection;
             if (isSSL()) {
                 connection = (HttpsURLConnection) endPoint.openConnection();
+                if(mSslSocketFactory != null) {
+                    ((HttpsURLConnection) connection)
+                            .setSSLSocketFactory(mSslSocketFactory);
+                }
             } else {
                 connection = (HttpURLConnection) endPoint.openConnection();
             }

@@ -31,7 +31,7 @@ public class WebSocketClientWrapperTest {
 
     @Before
     public void setUp() throws URISyntaxException, SSLException {
-        wrapper = new WebSocketClientWrapper(new URI("http://www.test.com"), mockProxy, mockListener);
+        wrapper = new WebSocketClientWrapper(new URI("http://www.test.com"), mockProxy, mockListener,"TLSV13");
     }
 
     @Test

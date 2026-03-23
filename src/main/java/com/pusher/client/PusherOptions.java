@@ -10,6 +10,7 @@ import java.util.Properties;
  */
 public class PusherOptions {
 
+    private String tlsVersion = "TLS";
     private static final String SRC_LIB_DEV_VERSION = "@version@";
     private static final String LIB_DEV_VERSION = "0.0.0-dev";
     public static final String LIB_VERSION = readVersionFromProperties();
@@ -43,6 +44,15 @@ public class PusherOptions {
     private Proxy proxy = Proxy.NO_PROXY;
     private int maxReconnectionAttempts = MAX_RECONNECTION_ATTEMPTS;
     private int maxReconnectGapInSeconds = MAX_RECONNECT_GAP_IN_SECONDS;
+
+    public PusherOptions setTlsVersion(String tlsVersion) {
+        this.tlsVersion = tlsVersion;
+        return this;
+    }
+
+    public String getTlsVersion() {
+        return tlsVersion;
+    }
 
     /**
      * @deprecated Please use isUseTLS
