@@ -70,7 +70,9 @@ public class PusherEvent {
     public PusherEvent(String event, String channel, String userId, String data) {
         jsonObject.addProperty("event", event);
         jsonObject.addProperty("channel", channel);
-        jsonObject.addProperty("user_id", userId);
+        if (userId != null) {
+            jsonObject.addProperty("user_id", userId);
+        }
         jsonObject.addProperty("data", data);
     }
 
