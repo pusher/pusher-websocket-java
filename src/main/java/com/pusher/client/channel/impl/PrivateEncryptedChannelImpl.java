@@ -77,7 +77,8 @@ public class PrivateEncryptedChannelImpl extends ChannelImpl implements PrivateE
     private String authenticate() {
         try {
             final AuthResponse authResponse = GSON.fromJson(getAuthorizationResponse(), AuthResponse.class);
-            if (authResponse.getAuth() == null || authResponse.getSharedSecret() == null) {
+            // Gson returns null for a null or empty response
+            if (authResponse == null || authResponse.getAuth() == null || authResponse.getSharedSecret() == null) {
                 throw new AuthorizationFailureException(
                         "Didn't receive all the fields expected " +
                                 "from the ChannelAuthorizer, expected an auth and shared_secret."

@@ -10,16 +10,20 @@ import static org.mockito.Mockito.when;
 
 import com.pusher.client.AuthenticationFailureException;
 import com.pusher.client.UserAuthenticator;
+import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.impl.ChannelManager;
+import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
+import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
 import com.pusher.client.util.Factory;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -81,6 +85,35 @@ public class InternalUserTest {
         when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
         when(mockUserAuthenticator.authenticate(socketId)).thenReturn(authenticationResponseMalformed);
         user.signin();
+    }
+
+    @Test(expected = AuthenticationFailureException.class)
+    public void testSigninNullResponse() {
+        when(mockConnection.getState()).thenReturn(ConnectionState.CONNECTED);
+        when(mockUserAuthenticator.authenticate(socketId)).thenReturn(null);
+        user.signin();
+    }
+
+    @Test
+    public void testRepeatedReconnectsAfterSigninDoNotThrow() {
+        final ArgumentCaptor<ConnectionEventListener> connectionListener =
+                ArgumentCaptor.forClass(ConnectionEventListener.class);
+        verify(mockConnection).bind(eq(ConnectionState.ALL), connectionListener.capture());
+
+        user.handleEvent(PusherEvent.fromJson(signinSuccessEvent));
+        final ArgumentCaptor<ServerToUserChannel> serverToUserChannel =
+                ArgumentCaptor.forClass(ServerToUserChannel.class);
+        verify(mockChannelManager).subscribeTo(serverToUserChannel.capture(), eq(null));
+        serverToUserChannel.getValue().updateState(ChannelState.SUBSCRIBED);
+
+        // Each reconnect attempt moves the connection through CONNECTING again
+        connectionListener.getValue()
+                .onConnectionStateChange(new ConnectionStateChange(ConnectionState.RECONNECTING, ConnectionState.CONNECTING));
+        connectionListener.getValue()
+                .onConnectionStateChange(new ConnectionStateChange(ConnectionState.RECONNECTING, ConnectionState.CONNECTING));
+
+        verify(mockChannelManager).unsubscribeFrom("#server-to-user-1");
+        assertNull(user.userId());
     }
 
     @Test
