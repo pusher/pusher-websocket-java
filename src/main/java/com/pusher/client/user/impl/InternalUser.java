@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.pusher.client.AuthenticationFailureException;
 import com.pusher.client.UserAuthenticator;
+import com.pusher.client.channel.ChannelState;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.SubscriptionEventListener;
 import com.pusher.client.channel.impl.ChannelManager;
@@ -107,7 +108,10 @@ public class InternalUser implements User {
         String response = userAuthenticator.authenticate(connection.getSocketId());
         try {
             AuthenticationResponse authenticationResponse = GSON.fromJson(response, AuthenticationResponse.class);
-            if (authenticationResponse.getAuth() == null || authenticationResponse.getUserData() == null) {
+            // Gson returns null for a null or empty response
+            if (authenticationResponse == null
+                    || authenticationResponse.getAuth() == null
+                    || authenticationResponse.getUserData() == null) {
                 throw new AuthenticationFailureException(
                         "Didn't receive all the fields expected from the UserAuthenticator. Expected auth and user_data"
                 );
@@ -135,8 +139,11 @@ public class InternalUser implements User {
     }
 
     private void disconnect() {
-        if (serverToUserChannel.isSubscribed()) {
+        // disconnect() runs on every CONNECTING and DISCONNECTED state change, so it
+        // can run again after userId has been cleared. getName() needs the userId.
+        if (userId != null && serverToUserChannel.isSubscribed()) {
             channelManager.unsubscribeFrom(serverToUserChannel.getName());
+            serverToUserChannel.updateState(ChannelState.UNSUBSCRIBED);
         }
         userId = null;
     }
