@@ -1,28 +1,12 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.ajoberstar:gradle-git:1.1.0'
-    }
-}
-
 plugins {
     id "eclipse"
     id "jacoco"
     id "java-library"
     id "maven-publish"
-    id "org.ajoberstar.github-pages" version "1.7.2"
     id "signing"
-}
-
-def getProperty = { property ->
-    if (!project.hasProperty(property)) {
-        throw new GradleException("${property} property must be set")
-    }
-    return project.property(property)
+    id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
 }
 
 group = "com.pusher"
@@ -111,18 +95,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 assemble.dependsOn javadocJar
 
-githubPages {
-    repoUri = 'https://github.com/pusher/pusher-websocket-java.git'
-    pages {
-        from javadoc.outputs.files
-    }
-    commitMessage = "JavaDoc gh-pages for ${version}"
-    credentials {
-        username = { getProperty("github.username") }
-        password = { getProperty("github.password") }
-    }
-}
-
 artifacts {
     archives jar, fatJar, sourcesJar, javadocJar
 }
@@ -174,15 +146,15 @@ publishing {
             }
         }
     }
+}
+
+nexusPublishing {
     repositories {
-        maven {
-            def releaseRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            url = version.endsWith("SNAPSHOT") ? snapshotRepositoryUrl : releaseRepositoryUrl
-            credentials {
-                username = findProperty("maven.username") ?: ""
-                password = findProperty("maven.password") ?: ""
-            }
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+            username = findProperty("sonatypeUsername") ?: ""
+            password = findProperty("sonatypePassword") ?: ""
         }
     }
 }

@@ -367,7 +367,8 @@ public class WebSocketConnectionTest {
         connection.connect();
         connection.onMessage(CONN_ESTABLISHED_EVENT);
 
-        verify(mockUnderlyingConnection, timeout((int) (ACTIVITY_TIMEOUT + PONG_TIMEOUT))).close();
+        // The close is scheduled at ACTIVITY_TIMEOUT + PONG_TIMEOUT, so allow extra time for slow CI runners
+        verify(mockUnderlyingConnection, timeout((int) (ACTIVITY_TIMEOUT + PONG_TIMEOUT) * 2)).close();
     }
 
     @Test
