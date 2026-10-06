@@ -97,6 +97,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             if (state == ConnectionState.RECONNECTING) {
                 // The previous socket has already closed and won't call onClose,
                 // so finish disconnecting here instead of waiting for it.
+                underlyingConnection.removeWebSocketListener();
                 updateState(ConnectionState.DISCONNECTING);
                 cancelTimeoutsAndTransitionToDisconnected();
             } else if (canDisconnect()) {
@@ -262,12 +263,13 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         reconnectTimer = factory
                 .getTimers()
                 .schedule(
-                        () -> {
+                        // Check the state on the event thread so it can't race with disconnect()
+                        () -> factory.queueOnEventThread(() -> {
                             if (state == ConnectionState.RECONNECTING) {
                                 underlyingConnection.removeWebSocketListener();
                                 tryConnecting();
                             }
-                        },
+                        }),
                         reconnectInterval,
                         TimeUnit.SECONDS
                 );

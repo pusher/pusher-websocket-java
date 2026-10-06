@@ -25,6 +25,7 @@ import com.pusher.client.util.Factory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -500,6 +501,23 @@ public class WebSocketConnectionTest {
         connection.disconnect();
 
         verify(reconnectFuture).cancel(false);
+    }
+
+    @Test
+    public void testReconnectThatRunsAfterDisconnectDoesNotReconnect() throws SSLException {
+        final ArgumentCaptor<Runnable> reconnect = ArgumentCaptor.forClass(Runnable.class);
+        when(factory.getTimers()).thenReturn(scheduledExecutorService);
+
+        connection.connect();
+        connection.onClose(500, "reason", true);
+        verify(scheduledExecutorService).schedule(reconnect.capture(), any(Long.class), any(TimeUnit.class));
+
+        connection.disconnect();
+        // Simulate the reconnect task already running when disconnect() cancelled it
+        reconnect.getValue().run();
+
+        verify(factory, times(1)).newWebSocketClientWrapper(any(URI.class), any(Proxy.class), any(WebSocketConnection.class));
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
     }
 
     /* end of tests */
