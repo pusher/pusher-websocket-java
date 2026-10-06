@@ -6,6 +6,7 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,6 +25,7 @@ import com.pusher.client.util.Factory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -34,6 +36,7 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -463,6 +466,57 @@ public class WebSocketConnectionTest {
 
         // It should give up on the second attempt
         connection.onClose(500, "reason", true);
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
+    }
+
+    @Test
+    public void testDisconnectInReconnectingStateTransitionsToDisconnected() {
+        connect();
+        connection.onClose(3999, "reason", true);
+        assertEquals(ConnectionState.RECONNECTING, connection.getState());
+
+        connection.disconnect();
+
+        assertEquals(ConnectionState.DISCONNECTED, connection.getState());
+        verify(mockEventListener)
+                .onConnectionStateChange(new ConnectionStateChange(ConnectionState.RECONNECTING, ConnectionState.DISCONNECTING));
+        verify(mockEventListener)
+                .onConnectionStateChange(new ConnectionStateChange(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED));
+        verify(mockUnderlyingConnection, never()).close();
+        verify(factory).shutdownThreads();
+    }
+
+    @Test
+    public void testDisconnectInReconnectingStateCancelsPendingReconnect() {
+        final ScheduledFuture<?> reconnectFuture = mock(ScheduledFuture.class);
+        when(factory.getTimers()).thenReturn(scheduledExecutorService);
+        doReturn(reconnectFuture)
+                .when(scheduledExecutorService)
+                .schedule(any(Runnable.class), any(Long.class), any(TimeUnit.class));
+
+        connection.connect();
+        connection.onClose(500, "reason", true);
+        assertEquals(ConnectionState.RECONNECTING, connection.getState());
+
+        connection.disconnect();
+
+        verify(reconnectFuture).cancel(false);
+    }
+
+    @Test
+    public void testReconnectThatRunsAfterDisconnectDoesNotReconnect() throws SSLException {
+        final ArgumentCaptor<Runnable> reconnect = ArgumentCaptor.forClass(Runnable.class);
+        when(factory.getTimers()).thenReturn(scheduledExecutorService);
+
+        connection.connect();
+        connection.onClose(500, "reason", true);
+        verify(scheduledExecutorService).schedule(reconnect.capture(), any(Long.class), any(TimeUnit.class));
+
+        connection.disconnect();
+        // Simulate the reconnect task already running when disconnect() cancelled it
+        reconnect.getValue().run();
+
+        verify(factory, times(1)).newWebSocketClientWrapper(any(URI.class), any(Proxy.class), any(WebSocketConnection.class));
         assertEquals(ConnectionState.DISCONNECTED, connection.getState());
     }
 
