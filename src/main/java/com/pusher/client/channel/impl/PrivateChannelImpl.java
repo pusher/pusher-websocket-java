@@ -81,14 +81,14 @@ public class PrivateChannelImpl extends ChannelImpl implements PrivateChannel {
     private String authorize() {
         try {
             final AuthResponse authResponse = GSON.fromJson(getAuthorizationResponse(), AuthResponse.class);
-            channelData = authResponse.getChannelData();
-
-            if (authResponse.getAuth() == null) {
+            // Gson returns null for a null or empty response
+            if (authResponse == null || authResponse.getAuth() == null) {
                 throw new AuthorizationFailureException(
                         "Didn't receive all the fields expected " +
                                 "from the ChannelAuthorizer, expected an auth and shared_secret."
                 );
             } else {
+                channelData = authResponse.getChannelData();
                 return authResponse.getAuth();
             }
         } catch (JsonSyntaxException e) {

@@ -124,6 +124,18 @@ public class PrivateChannelImplTest extends ChannelImplTest {
     }
 
     @Test(expected = AuthorizationFailureException.class)
+    public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsNull() {
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn(null);
+        channel.toSubscribeMessage();
+    }
+
+    @Test(expected = AuthorizationFailureException.class)
+    public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsEmptyString() {
+        when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("");
+        channel.toSubscribeMessage();
+    }
+
+    @Test(expected = AuthorizationFailureException.class)
     public void testThrowsAuthorizationFailureExceptionIfAuthorizerReturnsInvalidJSON() {
         when(mockChannelAuthorizer.authorize(eq(getChannelName()), anyString())).thenReturn("{\"auth\":\"");
         channel.toSubscribeMessage();

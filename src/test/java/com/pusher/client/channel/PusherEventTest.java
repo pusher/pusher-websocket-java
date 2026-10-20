@@ -1,6 +1,7 @@
 package com.pusher.client.channel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,19 @@ public class PusherEventTest {
         );
         assertEquals("my-user-id", e.getUserId());
     }
+
+    @Test
+    public void testUserIdIsSetByConstructor() {
+        final PusherEvent e = new PusherEvent("my-event", "my-channel", "my-user-id", "{}");
+        assertEquals("my-user-id", e.getUserId());
+    }
+
+    @Test
+    public void testNullUserIdFromConstructorIsNull() {
+        final PusherEvent e = new PusherEvent("my-event", "my-channel", null, "{}");
+        assertNull(e.getUserId());
+    }
+
     @Test
     public void testErrorData() {
         final PusherEvent e = PusherEvent.fromJson(

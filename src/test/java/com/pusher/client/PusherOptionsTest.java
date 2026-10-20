@@ -186,4 +186,17 @@ public class PusherOptionsTest {
     public void testGetProxyReturnDefaultProxy() {
         assertEquals(pusherOptions.getProxy(), Proxy.NO_PROXY);
     }
+
+    @Test
+    public void testCustomHostPortAnPathURLIsCorrect() {
+        pusherOptions.setHost("subdomain.example.com").setWsPort(8080).setWssPort(8181).setPath("/custom/path");
+        assertEquals(
+                pusherOptions.buildUrl(API_KEY),
+                "wss://subdomain.example.com:8181/custom/path/app/" +
+                        API_KEY +
+                        "?client=java-client&protocol=5&version=" +
+                        PusherOptions.LIB_VERSION
+        );
+    }
+
 }

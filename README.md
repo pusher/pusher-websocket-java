@@ -6,6 +6,8 @@
 
 Pusher Channels client library for Java targeting **Android** and general Java.
 
+For reporting issues, bugs, and feature requests, please feel free to open a pull request or open an issue. If you do not receive a timely response, feel free to check our [support portal](https://docs.bird.com/pusher).
+
 ## Supported platforms
 
 * Java SE - supports versions 8, 11 and 17
@@ -74,7 +76,7 @@ The pusher-java-client is available in Maven Central.
     <dependency>
       <groupId>com.pusher</groupId>
       <artifactId>pusher-java-client</artifactId>
-      <version>2.4.4</version>
+      <version>2.4.5</version>
     </dependency>
 </dependencies>
 ```
@@ -83,7 +85,7 @@ The pusher-java-client is available in Maven Central.
 
 ```groovy
 dependencies {
-  implementation 'com.pusher:pusher-java-client:2.4.4'
+  implementation 'com.pusher:pusher-java-client:2.4.5'
 }
 ```
 
