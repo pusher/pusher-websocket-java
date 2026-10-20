@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.4.5
+
+- [FIXED] Calling disconnect() while reconnecting now moves to DISCONNECTED immediately instead of waiting for the pong timeout (#376).
+- [FIXED] A ChannelAuthorizer that returns null or an empty string now causes an AuthorizationFailureException instead of a crash (#372).
+- [FIXED] Repeated reconnect attempts after user sign-in no longer crash with an IllegalStateException (#367).
+- [FIXED] The PusherEvent constructor now stores the user ID under user_id, so getUserId() returns it (#350).
+- [ADDED] PusherOptions.setPath for connecting to a custom URL path (#371).
+- [ADDED] setSslSocketFactory on HttpChannelAuthorizer and HttpUserAuthenticator, for custom TLS setups such as mutual TLS (#359).
+
 ## 2.4.4
 
 - [CHANGED] pusher.pro narrower proguard rules.
