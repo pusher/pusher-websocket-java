@@ -141,7 +141,9 @@ public class InternalUser implements User {
     private void disconnect() {
         // disconnect() runs on every CONNECTING and DISCONNECTED state change, so it
         // can run again after userId has been cleared. getName() needs the userId.
-        if (userId != null && serverToUserChannel.isSubscribed()) {
+        // Don't check isSubscribed(): the channel is in the ChannelManager as soon as
+        // the subscribe is sent, before subscription_succeeded arrives.
+        if (userId != null) {
             channelManager.unsubscribeFrom(serverToUserChannel.getName());
             serverToUserChannel.updateState(ChannelState.UNSUBSCRIBED);
         }

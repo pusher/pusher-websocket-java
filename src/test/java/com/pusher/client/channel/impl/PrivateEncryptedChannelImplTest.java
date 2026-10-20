@@ -180,6 +180,16 @@ public class PrivateEncryptedChannelImplTest extends ChannelImplTest {
     }
 
     @Test(expected = AuthorizationFailureException.class)
+    public void authenticationThrowsExceptionIfAuthorizerReturnsEmptyString() {
+        when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
+                .thenReturn("");
+
+        PrivateEncryptedChannelImpl channel = newInstance();
+
+        channel.toSubscribeMessage();
+    }
+
+    @Test(expected = AuthorizationFailureException.class)
     public void authenticationThrowsExceptionIfMalformedJson() {
         when(mockChannelAuthorizer.authorize(Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(AUTH_RESPONSE_INVALID_JSON);

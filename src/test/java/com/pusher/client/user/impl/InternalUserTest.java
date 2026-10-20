@@ -117,6 +117,28 @@ public class InternalUserTest {
     }
 
     @Test
+    public void testReconnectBeforeServerToUserSubscriptionSucceededUnsubscribes() {
+        final ArgumentCaptor<ConnectionEventListener> connectionListener =
+                ArgumentCaptor.forClass(ConnectionEventListener.class);
+        verify(mockConnection).bind(eq(ConnectionState.ALL), connectionListener.capture());
+
+        user.handleEvent(PusherEvent.fromJson(signinSuccessEvent));
+        final ArgumentCaptor<ServerToUserChannel> serverToUserChannel =
+                ArgumentCaptor.forClass(ServerToUserChannel.class);
+        verify(mockChannelManager).subscribeTo(serverToUserChannel.capture(), eq(null));
+        // The subscribe was sent, but the connection drops before subscription_succeeded
+        serverToUserChannel.getValue().updateState(ChannelState.SUBSCRIBE_SENT);
+
+        connectionListener.getValue()
+                .onConnectionStateChange(new ConnectionStateChange(ConnectionState.CONNECTED, ConnectionState.CONNECTING));
+        connectionListener.getValue()
+                .onConnectionStateChange(new ConnectionStateChange(ConnectionState.RECONNECTING, ConnectionState.CONNECTING));
+
+        verify(mockChannelManager).unsubscribeFrom("#server-to-user-1");
+        assertNull(user.userId());
+    }
+
+    @Test
     public void testHandleEventSigninSuccessEvent() {
         user.handleEvent(PusherEvent.fromJson(signinSuccessEvent));
         assertEquals(user.userId(), "1");
