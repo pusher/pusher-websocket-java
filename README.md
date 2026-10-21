@@ -1,8 +1,8 @@
 # Pusher Channels Java Client
 
-[![Build Status](https://travis-ci.org/pusher/pusher-websocket-java.svg?branch=master)](https://travis-ci.org/pusher/pusher-websocket-java)
+[![Build Status](https://github.com/pusher/pusher-websocket-java/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/pusher/pusher-websocket-java/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/pusher/pusher-websocket-java/branch/master/graph/badge.svg)](https://codecov.io/gh/pusher/pusher-websocket-java)
-[![Maven Central](https://img.shields.io/maven-central/v/com.pusher/pusher-java-client.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.pusher%22%20AND%20a:%22pusher-java-client%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.pusher/pusher-java-client.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/com.pusher/pusher-java-client)
 
 Pusher Channels client library for Java targeting **Android** and general Java.
 
