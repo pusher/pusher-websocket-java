@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.pusher.client.connection.impl.PusherEventHandler;
 import com.pusher.client.channel.PusherEvent;
 import com.pusher.client.channel.impl.ChannelManager;
 import com.pusher.client.connection.ConnectionEventListener;
@@ -33,7 +34,6 @@ import org.mockito.stubbing.Answer;
 
 import java.net.Proxy;
 import java.net.URI;
-import java.util.function.Consumer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndToEndTest {
@@ -57,7 +57,7 @@ public class EndToEndTest {
     private ChannelAuthorizer mockChannelAuthorizer;
 
     @Mock
-    private Consumer<PusherEvent> mockEventHandler;
+    private PusherEventHandler mockEventHandler;
 
     @Mock
     private ConnectionEventListener mockConnectionEventListener;
@@ -117,7 +117,7 @@ public class EndToEndTest {
                         }
                 );
 
-        when(factory.getConnection(eq(API_KEY), eq(pusherOptions), any(Consumer.class))).thenReturn(connection);
+        when(factory.getConnection(eq(API_KEY), eq(pusherOptions), any(PusherEventHandler.class))).thenReturn(connection);
 
         when(factory.getChannelManager())
                 .thenAnswer(
