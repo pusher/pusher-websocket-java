@@ -602,7 +602,7 @@ If you'd like to tweak this library there are ways to use your local code rather
 
 ### Prerequisites
 
-* A JDK, version 8 to 17. The project's Gradle Wrapper doesn't run on newer JDKs.
+* A JDK (8 to 17).
 * Gradle, the build system used for the project, is downloaded by the Gradle Wrapper (`gradlew`) which is included in the repo.
 * On Windows `gradlew.bat` should be used, on Linux and macOS `./gradlew`.
 
