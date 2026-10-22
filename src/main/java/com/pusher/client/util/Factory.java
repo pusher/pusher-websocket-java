@@ -10,6 +10,7 @@ import com.pusher.client.channel.impl.PresenceChannelImpl;
 import com.pusher.client.channel.impl.PrivateChannelImpl;
 import com.pusher.client.channel.impl.PrivateEncryptedChannelImpl;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.connection.impl.PusherEventHandler;
 import com.pusher.client.connection.websocket.WebSocketClientWrapper;
 import com.pusher.client.connection.websocket.WebSocketConnection;
 import com.pusher.client.connection.websocket.WebSocketListener;
@@ -23,7 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
 
 import javax.net.ssl.SSLException;
 
@@ -55,7 +55,7 @@ public class Factory {
     public synchronized InternalConnection getConnection(
             final String apiKey,
             final PusherOptions options,
-            final Consumer<PusherEvent> eventHandler
+            final PusherEventHandler eventHandler
     ) {
         if (connection == null) {
             try {
