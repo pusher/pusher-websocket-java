@@ -1,11 +1,21 @@
 package com.pusher.client.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.pusher.client.AuthorizationFailureException;
 
+import com.sun.net.httpserver.HttpServer;
+
 import org.junit.Test;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class HttpChannelAuthorizerTest {
 
@@ -30,5 +40,27 @@ public class HttpChannelAuthorizerTest {
     public void testNon200ResponseThrowsAuthorizationFailureException() {
         final HttpChannelAuthorizer auth = new HttpChannelAuthorizer("https://127.0.0.1/no-way-this-is-a-valid-url");
         auth.authorize("private-fish", "some socket id");
+    }
+
+    @Test
+    public void testErrorResponseBodyIsUsedAsAuthorizationFailureMessage() throws IOException {
+        final byte[] errorBody = "{\"error\":\"forbidden\"}".getBytes(StandardCharsets.UTF_8);
+        final HttpServer server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+        server.createContext("/auth", exchange -> {
+            exchange.sendResponseHeaders(403, errorBody.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(errorBody);
+            }
+        });
+        server.start();
+        try {
+            final HttpChannelAuthorizer auth = new HttpChannelAuthorizer("http://127.0.0.1:" + server.getAddress().getPort() + "/auth");
+            auth.authorize("private-fish", "some socket id");
+            fail("Expected AuthorizationFailureException");
+        } catch (final AuthorizationFailureException e) {
+            assertEquals("{\"error\":\"forbidden\"}", e.getMessage());
+        } finally {
+            server.stop(0);
+        }
     }
 }
