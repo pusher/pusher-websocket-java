@@ -134,18 +134,26 @@ abstract class BaseHttpAuthClient {
             wr.flush();
             wr.close();
 
-            // Read response
-            final InputStream is = connection.getInputStream();
-            final BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-            String line;
-            final StringBuilder response = new StringBuilder();
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
-            }
-            rd.close();
-
+            // Read response. For error statuses, getInputStream() throws, so the
+            // body the server sent is read from the error stream instead.
             final int responseHttpStatus = connection.getResponseCode();
+            final InputStream is = responseHttpStatus >= HttpURLConnection.HTTP_BAD_REQUEST
+                    ? connection.getErrorStream()
+                    : connection.getInputStream();
+            final StringBuilder response = new StringBuilder();
+            if (is != null) {
+                final BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    response.append(line);
+                }
+                rd.close();
+            }
+
             if (responseHttpStatus != 200 && responseHttpStatus != 201) {
+                if (response.length() == 0) {
+                    throw authFailureException("Server returned HTTP response code: " + responseHttpStatus);
+                }
                 throw authFailureException(response.toString());
             }
 
