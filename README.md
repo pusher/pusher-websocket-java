@@ -1,8 +1,8 @@
 # Pusher Channels Java Client
 
-[![Build Status](https://travis-ci.org/pusher/pusher-websocket-java.svg?branch=master)](https://travis-ci.org/pusher/pusher-websocket-java)
+[![Build Status](https://github.com/pusher/pusher-websocket-java/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/pusher/pusher-websocket-java/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/pusher/pusher-websocket-java/branch/master/graph/badge.svg)](https://codecov.io/gh/pusher/pusher-websocket-java)
-[![Maven Central](https://img.shields.io/maven-central/v/com.pusher/pusher-java-client.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.pusher%22%20AND%20a:%22pusher-java-client%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.pusher/pusher-java-client.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/com.pusher/pusher-java-client)
 
 Pusher Channels client library for Java targeting **Android** and general Java.
 
@@ -177,19 +177,21 @@ Most of the functionality of this library is configured through the PusherOption
 methods with parameters on the object before passing it to the Pusher object. Below is a table containing all of the
 methods you can call.
 
-| Method                      | Parameter         | Description                                                                                                                                   |
-|-----------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| setEncrypted                | Boolean           | Sets whether the connection should be made with TLS or not.                                                                                   |
-| setChannelAuthorizer        | ChannelAuthorizer | Sets the channel authorizer to be used when authorizing private and presence channels.                                                        |
-| setHost                     | String            | The host to which connections will be made.                                                                                                   |
-| setWsPort                   | int               | The port to which unencrypted connections will be made. Automatically set correctly.                                                          |
-| setWssPort                  | int               | The port to which encrypted connections will be made. Automatically set correctly.                                                            |
-| setCluster                  | String            | Sets the cluster the client will connect to, thereby setting the Host and Port correctly.                                                     |
-| setActivityTimeout          | long              | The number of milliseconds of inactivity at which a "ping" will be triggered to check the connection. The default value is 120,000.           |
-| setPongTimeout              | long              | The number of milliseconds the client waits to receive a "pong" response from the server before disconnecting. The default value is 30,000.   |
-| setMaxReconnectionAttempts  | int               | Number of reconnection attempts that will be made when pusher.connect() is called, after which the client will give up.                       |
-| setMaxReconnectGapInSeconds | int               | The delay in two reconnection extends exponentially (1, 2, 4, .. seconds) This property sets the maximum inbetween two reconnection attempts. |
-| setProxy                    | Proxy             | Specify a proxy, e.g. ```options.setProxy( new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) ) )```                     |
+| Method                      | Parameter         | Description                                                                                                                                                            |
+|-----------------------------|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| setUseTLS                   | Boolean           | Sets whether the connection should be made with TLS or not. The default value is true.                                                                                 |
+| setChannelAuthorizer        | ChannelAuthorizer | Sets the channel authorizer to be used when authorizing private and presence channels.                                                                                 |
+| setUserAuthenticator        | UserAuthenticator | Sets the user authenticator to be used when calling `pusher.signin()`.                                                                                                 |
+| setHost                     | String            | The host to which connections will be made.                                                                                                                            |
+| setWsPort                   | int               | The port to which unencrypted connections will be made. Automatically set correctly.                                                                                   |
+| setWssPort                  | int               | The port to which encrypted connections will be made. Automatically set correctly.                                                                                     |
+| setPath                     | String            | The path to which connections will be made. `setCluster` resets it, so call `setPath` after `setCluster`.                                                              |
+| setCluster                  | String            | Sets the cluster the client will connect to, thereby setting the Host and Port correctly.                                                                              |
+| setActivityTimeout          | long              | The number of milliseconds of inactivity at which a "ping" will be triggered to check the connection. The default value is 120,000.                                    |
+| setPongTimeout              | long              | The number of milliseconds the client waits to receive a "pong" response from the server before disconnecting. The default value is 30,000.                            |
+| setMaxReconnectionAttempts  | int               | Number of reconnection attempts that will be made when pusher.connect() is called, after which the client will give up. The default value is 6.                        |
+| setMaxReconnectGapInSeconds | int               | The maximum delay in seconds between two reconnection attempts. The delay grows with each attempt (1, 4, 9, 16, 25 seconds) up to this value. The default value is 30. |
+| setProxy                    | Proxy             | Specify a proxy, e.g. ```options.setProxy( new Proxy( Proxy.Type.HTTP, new InetSocketAddress( "proxyaddress", 80 ) ) )```                                              |
 
 ## Reconnecting
 
@@ -593,16 +595,16 @@ channel.isSubscribed(); // => `true`/`false`
 
 ## JavaDocs
 
-The JavaDocs can be found here: <http://pusher.github.com/pusher-websocket-java/>
+The JavaDocs can be found here: <https://javadoc.io/doc/com.pusher/pusher-java-client>
 
 ## Library Development Environment
 If you'd like to tweak this library there are ways to use your local code rather than the official. This is a rough guide on how to do so.
 
 ### Prerequisites
 
-* A Java Virtual Machine.
+* A JDK (8 to 17).
 * Gradle, the build system used for the project, is downloaded by the Gradle Wrapper (`gradlew`) which is included in the repo.
-* On Windows `./gradlew.bat` should be used, on Linux `./gradle`.
+* On Windows `gradlew.bat` should be used, on Linux and macOS `./gradlew`.
 
 ### Cloning the project
 
