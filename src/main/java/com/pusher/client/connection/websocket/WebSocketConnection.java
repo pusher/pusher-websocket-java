@@ -6,6 +6,7 @@ import com.pusher.client.connection.ConnectionEventListener;
 import com.pusher.client.connection.ConnectionState;
 import com.pusher.client.connection.ConnectionStateChange;
 import com.pusher.client.connection.impl.InternalConnection;
+import com.pusher.client.connection.impl.PusherEventHandler;
 import com.pusher.client.util.Factory;
 
 import org.java_websocket.handshake.ServerHandshake;
@@ -20,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLException;
@@ -42,7 +42,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
 
     private volatile ConnectionState state = ConnectionState.DISCONNECTED;
     private WebSocketClientWrapper underlyingConnection;
-    private final Consumer<PusherEvent> eventHandler;
+    private final PusherEventHandler eventHandler;
     private String socketId;
     private int reconnectAttempts = 0;
     private volatile Future<?> reconnectTimer;
@@ -54,7 +54,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
             int maxReconnectionAttempts,
             int maxReconnectionGap,
             final Proxy proxy,
-            final Consumer<PusherEvent> eventHandler,
+            final PusherEventHandler eventHandler,
             final Factory factory
     ) throws URISyntaxException {
         webSocketUri = new URI(url);
@@ -167,7 +167,7 @@ public class WebSocketConnection implements InternalConnection, WebSocketListene
         } else if (event.getEventName().equals("pusher:error")) {
             handleError(event);
         }
-        eventHandler.accept(event);
+        eventHandler.handle(event);
     }
 
     @SuppressWarnings("rawtypes")
