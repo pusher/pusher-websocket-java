@@ -53,12 +53,33 @@ public class HttpChannelAuthorizerTest {
             }
         });
         server.start();
+        final String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/auth";
         try {
-            final HttpChannelAuthorizer auth = new HttpChannelAuthorizer("http://127.0.0.1:" + server.getAddress().getPort() + "/auth");
+            final HttpChannelAuthorizer auth = new HttpChannelAuthorizer(url);
             auth.authorize("private-fish", "some socket id");
             fail("Expected AuthorizationFailureException");
         } catch (final AuthorizationFailureException e) {
-            assertEquals("{\"error\":\"forbidden\"}", e.getMessage());
+            assertEquals("Server returned HTTP response code: 403 for URL: " + url + ": {\"error\":\"forbidden\"}", e.getMessage());
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testEmptyErrorResponseKeepsStatusAndUrlInAuthorizationFailureMessage() throws IOException {
+        final HttpServer server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+        server.createContext("/auth", exchange -> {
+            exchange.sendResponseHeaders(403, -1);
+            exchange.close();
+        });
+        server.start();
+        final String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/auth";
+        try {
+            final HttpChannelAuthorizer auth = new HttpChannelAuthorizer(url);
+            auth.authorize("private-fish", "some socket id");
+            fail("Expected AuthorizationFailureException");
+        } catch (final AuthorizationFailureException e) {
+            assertEquals("Server returned HTTP response code: 403 for URL: " + url, e.getMessage());
         } finally {
             server.stop(0);
         }

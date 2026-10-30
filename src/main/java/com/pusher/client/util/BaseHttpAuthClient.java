@@ -151,10 +151,11 @@ abstract class BaseHttpAuthClient {
             }
 
             if (responseHttpStatus != 200 && responseHttpStatus != 201) {
+                final String message = "Server returned HTTP response code: " + responseHttpStatus + " for URL: " + endPoint;
                 if (response.length() == 0) {
-                    throw authFailureException("Server returned HTTP response code: " + responseHttpStatus);
+                    throw authFailureException(message);
                 }
-                throw authFailureException(response.toString());
+                throw authFailureException(message + ": " + response);
             }
 
             return response.toString();
