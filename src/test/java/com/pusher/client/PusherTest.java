@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.pusher.client.connection.impl.PusherEventHandler;
 import com.pusher.client.channel.ChannelEventListener;
 import com.pusher.client.channel.PresenceChannelEventListener;
 import com.pusher.client.channel.PrivateChannelEventListener;
@@ -33,7 +34,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import java.util.function.Consumer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PusherTest {
@@ -88,7 +88,7 @@ public class PusherTest {
                         .setChannelAuthorizer(channelAuthorizer)
                         .setUserAuthenticator(new HttpUserAuthenticator("http://user-auth.com"));
 
-        when(factory.getConnection(eq(API_KEY), any(PusherOptions.class), any(Consumer.class)))
+        when(factory.getConnection(eq(API_KEY), any(PusherOptions.class), any(PusherEventHandler.class)))
                 .thenReturn(mockConnection);
         when(factory.getChannelManager()).thenReturn(mockChannelManager);
         when(factory.newPublicChannel(PUBLIC_CHANNEL_NAME)).thenReturn(mockPublicChannel);
