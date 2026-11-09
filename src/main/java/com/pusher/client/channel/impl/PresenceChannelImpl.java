@@ -117,6 +117,8 @@ public class PresenceChannelImpl extends PrivateChannelImpl implements PresenceC
         final List<String> ids = presenceSubscriptionData.getIds();
         final Map<String, Object> hash = presenceSubscriptionData.getHash();
 
+        idToUserMap.clear();
+
         if (ids != null && !ids.isEmpty()) {
             // build the collection of Users
             for (final String id : ids) {

@@ -160,6 +160,43 @@ public class PresenceChannelImplTest extends PrivateChannelImplTest {
     }
 
     @Test
+    public void testResubscriptionReplacesUsersWithLatestSnapshot() {
+        assertResubscriptionUsers(new String[]{USER_ID});
+    }
+
+    @Test
+    public void testResubscriptionWithEmptySnapshotClearsUsers() {
+        assertResubscriptionUsers(new String[]{});
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void assertResubscriptionUsers(final String[] latestIds) {
+        final Map<String, Object> presence = new LinkedHashMap<String, Object>();
+        presence.put("ids", new String[]{USER_ID, "departed-user"});
+        presence.put("hash", new LinkedHashMap<String, Object>());
+        final Map<String, Object> data = new LinkedHashMap<String, Object>();
+        data.put("presence", presence);
+        final String eventName = "pusher_internal:subscription_succeeded";
+
+        channel.handleEvent(new PusherEvent(eventName, getChannelName(), null, data));
+        assertEquals(2, ((PresenceChannelImpl) channel).getUsers().size());
+        channel.updateState(ChannelState.SUBSCRIBE_SENT);
+        presence.put("ids", latestIds);
+        channel.handleEvent(new PusherEvent(eventName, getChannelName(), null, data));
+
+        final Set<User> users = ((PresenceChannelImpl) channel).getUsers();
+        assertEquals(latestIds.length, users.size());
+        if (latestIds.length > 0) {
+            assertEquals(USER_ID, users.iterator().next().getId());
+        }
+        final ArgumentCaptor<Set> argument = ArgumentCaptor.forClass(Set.class);
+        final InOrder inOrder = inOrder(mockEventListener);
+        inOrder.verify(mockEventListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
+        inOrder.verify(mockEventListener).onUsersInformationReceived(eq(getChannelName()), argument.capture());
+        assertEquals(users, argument.getValue());
+    }
+
+    @Test
     public void testThatUserIdsPassedAsIntegersGetStoredAsStringIntegersAndNotDoubles() {
         final Map<String, String> userInfo = new LinkedHashMap<String, String>();
         userInfo.put("name", "Phil Leggetter");
